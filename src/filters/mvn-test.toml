@@ -40,7 +40,8 @@ keep_lines_matching = [
   "Expected",
   "Total time:",
 ]
-max_lines = 50
+tail_lines = 25
+max_lines = 25
 on_empty = "mvn test: ok (all tests passed)"
 
 [[tests.mvn-test]]
