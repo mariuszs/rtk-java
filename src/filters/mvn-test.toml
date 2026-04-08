@@ -6,7 +6,7 @@ strip_ansi = true
 match_output = [
   { pattern = "Tests run: (\\d+), Failures: 0, Errors: 0", message = "mvn test: ok (all tests passed)", unless = "<<< FAILURE|\\[ERROR\\]" },
 ]
-# Stage 2: blank out Maven surefire boilerplate before keep filter
+# Stage 2: blank out Maven surefire boilerplate and framework stack frames
 replace = [
   { pattern = "^\\[ERROR\\]\\s*$", replacement = "" },
   { pattern = "^\\[ERROR\\] -> \\[Help.*", replacement = "" },
@@ -16,6 +16,12 @@ replace = [
   { pattern = "^\\[ERROR\\] To see the full stack trace.*", replacement = "" },
   { pattern = "^\\[ERROR\\] Re-run Maven.*", replacement = "" },
   { pattern = "^\\[ERROR\\] For more information about.*", replacement = "" },
+  # Strip framework stack frames (Maven, JUnit platform, Surefire, classworlds, JDK internals)
+  { pattern = "^\\[ERROR\\]\\s+at org\\.apache\\.maven\\..*", replacement = "" },
+  { pattern = "^\\[ERROR\\]\\s+at org\\.junit\\.platform\\..*", replacement = "" },
+  { pattern = "^\\[ERROR\\]\\s+at org\\.codehaus\\.plexus\\..*", replacement = "" },
+  { pattern = "^\\[ERROR\\]\\s+at java\\.base/.*", replacement = "" },
+  { pattern = "^\\[ERROR\\]\\s+\\.\\.\\. \\d+ more$", replacement = "" },
 ]
 keep_lines_matching = [
   "\\[ERROR\\]",
