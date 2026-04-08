@@ -486,9 +486,9 @@ pub const RULES: &[RtkRule] = &[
         subcmd_status: &[],
     },
     RtkRule {
-        pattern: r"^mvn\s+(compile|package|clean|install)\b",
+        pattern: r"^(\./)?mvnw?\s+(compile|package|clean|install|test)\b",
         rtk_cmd: "rtk mvn",
-        rewrite_prefixes: &["mvn"],
+        rewrite_prefixes: &["./mvnw", "mvnw", "mvn"],
         category: "Build",
         savings_pct: 70.0,
         subcmd_savings: &[],
