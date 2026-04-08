@@ -2,6 +2,10 @@
 description = "Compact Maven test output — failures only, strip surefire boilerplate"
 match_command = "^(\\.?\\/?)mvnw?\\s+test\\b"
 strip_ansi = true
+# Stage 3: short-circuit on full success (no errors/failures anywhere)
+match_output = [
+  { pattern = "Tests run: (\\d+), Failures: 0, Errors: 0", message = "mvn test: ok (all tests passed)", unless = "<<< FAILURE|\\[ERROR\\]" },
+]
 # Stage 2: blank out Maven surefire boilerplate before keep filter
 replace = [
   { pattern = "^\\[ERROR\\]\\s*$", replacement = "" },
@@ -45,6 +49,20 @@ input = """
 [INFO] Total time:  3.456 s
 """
 expected = "[INFO] BUILD SUCCESS\n[INFO] Total time:  3.456 s"
+
+[[tests.mvn-test]]
+name = "954 tests pass returns short summary"
+input = """
+[INFO] Scanning for projects...
+[INFO] Building auth 1.3-SNAPSHOT
+[INFO] --- maven-surefire-plugin:3.5.4:test (default-test) ---
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in com.example.PermissionHelperTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in com.example.SampleTest
+[INFO] Tests run: 954, Failures: 0, Errors: 0, Skipped: 9
+[INFO] BUILD SUCCESS
+[INFO] Total time:  01:46 min
+"""
+expected = "mvn test: ok (all tests passed)"
 
 [[tests.mvn-test]]
 name = "test failure preserves error details and strips boilerplate"
