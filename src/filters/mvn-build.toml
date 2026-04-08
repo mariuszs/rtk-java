@@ -1,6 +1,6 @@
 [filters.mvn-build]
 description = "Compact Maven build output"
-match_command = "^(\\.?\\/?)mvnw?\\s+(compile|package|clean|install|test)\\b"
+match_command = "^(\\.?\\/?)mvnw?\\s+(compile|package|clean|install)\\b"
 strip_ansi = true
 strip_lines_matching = [
   "^\\[INFO\\] ---",
@@ -47,20 +47,6 @@ input = """
 [INFO] Finished at: 2024-01-15T10:30:00Z
 """
 expected = "[INFO] BUILD SUCCESS\n[INFO] Total time: 4.123 s\n[INFO] Finished at: 2024-01-15T10:30:00Z"
-
-[[tests.mvn-build]]
-name = "mvn test failure preserves error and summary"
-input = """
-[INFO] ---
-[INFO] Building myapp 1.0-SNAPSHOT
-[INFO] Downloading org.apache.maven.plugins:maven-surefire-plugin:3.2.5
-[INFO] Downloaded org.apache.maven.plugins:maven-surefire-plugin:3.2.5
-[INFO]
-[ERROR] Tests run: 5, Failures: 1, Errors: 0, Skipped: 0
-[INFO] BUILD FAILURE
-[INFO] Total time: 3.456 s
-"""
-expected = "[ERROR] Tests run: 5, Failures: 1, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE\n[INFO] Total time: 3.456 s"
 
 [[tests.mvn-build]]
 name = "clean success strips all noise"
