@@ -1,0 +1,142 @@
+[INFO] Loaded 22524 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
+[INFO] Scanning for projects...
+[WARNING] Could not transfer metadata /.meta/prefixes.txt from/to repo-releases (https://repo.example.com/releases/): Checksum validation failed
+[INFO] Loaded 22524 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[WARNING]
+[WARNING] 1 problem was encountered while building the effective model for 'com.example.demo:webapp:jar:2.0-SNAPSHOT' (use -e to see details)
+[WARNING]
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING]
+[INFO]
+[INFO] -------------------------------------------------< com.example.demo:webapp >--------------------------------------------------
+[INFO] Building webapp 2.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] ---------------------------------------------------------[ jar ]----------------------------------------------------------
+[WARNING] 130 problems were encountered while building the effective model for 'org.redisson:redisson-spring-boot-starter:jar:4.0.0' during dependency collection step for project (use -X to see details)
+[WARNING] 76 problems were encountered while building the effective model for 'com.playtika.testcontainers:embedded-redis:jar:3.1.11' during dependency collection step for project (use -X to see details)
+[INFO]
+[INFO] --- dependency:3.9.0:tree (default-cli) @ webapp ---
+[INFO] com.example.demo:webapp:jar:2.0-SNAPSHOT
+[INFO] +- org.springframework.boot:spring-boot-starter-actuator:jar:4.0.5:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter:jar:4.0.5:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot-starter-logging:jar:4.0.5:compile
+[INFO] |  |  |  +- ch.qos.logback:logback-classic:jar:1.5.32:compile
+[INFO] |  |  |  |  \- ch.qos.logback:logback-core:jar:1.5.32:compile
+[INFO] |  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.3:compile
+[INFO] |  |  |  |  \- org.apache.logging.log4j:log4j-api:jar:2.25.3:compile
+[INFO] |  |  |  \- org.slf4j:jul-to-slf4j:jar:2.0.17:compile
+[INFO] |  |  \- org.springframework.boot:spring-boot-autoconfigure:jar:4.0.5:compile
+[INFO] |  +- org.springframework.boot:spring-boot-actuator-autoconfigure:jar:4.0.5:compile
+[INFO] |  |  \- org.springframework.boot:spring-boot-actuator:jar:4.0.5:compile
+[INFO] |  +- io.micrometer:micrometer-observation:jar:1.16.4:compile
+[INFO] |  |  \- io.micrometer:micrometer-commons:jar:1.16.4:compile
+[INFO] |  \- io.micrometer:micrometer-jakarta9:jar:1.16.4:compile
+[INFO] +- org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j:jar:5.0.1:compile
+[INFO] |  +- org.springframework.cloud:spring-cloud-starter:jar:5.0.1:compile
+[INFO] |  |  \- org.springframework.cloud:spring-cloud-context:jar:5.0.1:compile
+[INFO] |  +- org.springframework.cloud:spring-cloud-circuitbreaker-resilience4j:jar:5.0.1:compile
+[INFO] |  |  +- com.fasterxml.jackson.core:jackson-core:jar:2.21.2:compile
+[INFO] |  |  \- io.github.resilience4j:resilience4j-spring-boot3:jar:2.3.0:compile
+[INFO] |  |     +- io.github.resilience4j:resilience4j-spring6:jar:2.3.0:compile
+[INFO] |  |     |  +- io.github.resilience4j:resilience4j-annotations:jar:2.3.0:compile
+[INFO] |  |     |  +- io.github.resilience4j:resilience4j-consumer:jar:2.3.0:compile
+[INFO] |  |     |  |  \- io.github.resilience4j:resilience4j-circularbuffer:jar:2.3.0:runtime
+[INFO] |  |     |  \- io.github.resilience4j:resilience4j-framework-common:jar:2.3.0:compile
+[INFO] |  |     \- io.github.resilience4j:resilience4j-micrometer:jar:2.3.0:compile
+[INFO] |  +- io.github.resilience4j:resilience4j-circuitbreaker:jar:2.3.0:compile
+[INFO] |  |  \- io.github.resilience4j:resilience4j-core:jar:2.3.0:compile
+[INFO] |  \- io.github.resilience4j:resilience4j-timelimiter:jar:2.3.0:compile
+[INFO] +- org.springframework.boot:spring-boot-starter-web:jar:4.0.5:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter-jackson:jar:4.0.5:compile
+[INFO] |  |  \- org.springframework.boot:spring-boot-jackson:jar:4.0.5:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter-tomcat:jar:4.0.5:compile
+[INFO] |  |  +- org.apache.tomcat.embed:tomcat-embed-core:jar:11.0.20:compile
+[INFO] |  |  \- org.apache.tomcat.embed:tomcat-embed-websocket:jar:11.0.20:compile
+[INFO] |  +- org.springframework.boot:spring-boot-http-converter:jar:4.0.5:compile
+[INFO] |  \- org.springframework.boot:spring-boot-webmvc:jar:4.0.5:compile
+[INFO] |     \- org.springframework.boot:spring-boot-servlet:jar:4.0.5:compile
+[INFO] +- org.springframework.boot:spring-boot-starter-security:jar:4.0.5:compile
+[INFO] |  +- org.springframework.boot:spring-boot-security:jar:4.0.5:compile
+[INFO] |  |  \- org.springframework.security:spring-security-config:jar:7.0.4:compile
+[INFO] |  \- org.springframework:spring-aop:jar:7.0.6:compile
+[INFO] +- org.springframework.boot:spring-boot-starter-jdbc:jar:4.0.5:compile
+[INFO] |  \- com.zaxxer:HikariCP:jar:7.0.2:compile
+[INFO] +- org.springframework.retry:spring-retry:jar:2.0.12:compile
+[INFO] +- org.springframework.cloud:spring-cloud-stream:jar:5.0.1:compile
+[INFO] |  +- org.springframework:spring-messaging:jar:7.0.6:compile
+[INFO] |  +- org.springframework.integration:spring-integration-core:jar:7.0.4:compile
+[INFO] |  |  +- org.springframework:spring-context:jar:7.0.6:compile
+[INFO] |  |  +- org.springframework:spring-tx:jar:7.0.6:compile
+[INFO] |  |  \- io.projectreactor:reactor-core:jar:3.8.4:compile
+[INFO] |  +- org.springframework.cloud:spring-cloud-function-context:jar:5.0.1:compile
+[INFO] |  |  +- org.springframework.boot:spring-boot-restclient:jar:4.0.5:compile
+[INFO] |  |  |  \- org.springframework.boot:spring-boot-http-client:jar:4.0.5:compile
+[INFO] |  |  +- org.springframework.cloud:spring-cloud-function-core:jar:5.0.1:compile
+[INFO] |  |  \- org.springframework.boot:spring-boot-web-server:jar:4.0.5:compile
+[INFO] |  +- org.springframework.cloud:spring-cloud-function-grpc:jar:5.0.1:compile
+[INFO] |  |  \- io.grpc:grpc-netty-shaded:jar:1.71.0:compile
+[INFO] |  \- org.springframework.integration:spring-integration-jmx:jar:7.0.4:compile
+[INFO] +- io.micrometer:micrometer-registry-statsd:jar:1.16.4:compile
+[INFO] |  +- io.micrometer:micrometer-core:jar:1.16.4:compile
+[INFO] |  |  \- org.latencyutils:LatencyUtils:jar:2.0.3:runtime
+[INFO] |  \- io.netty:netty-transport-native-epoll:jar:4.2.1.Final:compile (version managed from 4.1.100.Final)
+[INFO] |     +- io.netty:netty-common:jar:4.2.1.Final:compile
+[INFO] |     +- io.netty:netty-buffer:jar:4.2.1.Final:compile
+[INFO] |     +- io.netty:netty-transport:jar:4.2.1.Final:compile
+[INFO] |     \- io.netty:netty-transport-native-unix-common:jar:4.2.1.Final:compile
+[INFO] +- org.projectlombok:lombok:jar:1.18.44:compile (optional)
+[INFO] +- org.jspecify:jspecify:jar:1.0.0:compile
+[INFO] +- org.postgresql:postgresql:jar:42.7.10:runtime
+[INFO] +- org.apache.commons:commons-lang3:jar:3.19.0:compile
+[INFO] +- com.google.guava:guava:jar:33.4.8-jre:compile
+[INFO] +- org.springframework.boot:spring-boot-starter-data-jpa:jar:4.0.5:compile
+[INFO] |  +- org.springframework.boot:spring-boot-starter-aop:jar:4.0.5:compile
+[INFO] |  +- org.springframework.boot:spring-boot-data-jpa:jar:4.0.5:compile
+[INFO] |  |  +- org.hibernate.orm:hibernate-core:jar:7.2.7.Final:compile
+[INFO] |  |  |  +- jakarta.persistence:jakarta.persistence-api:jar:3.2.0:compile
+[INFO] |  |  |  +- jakarta.transaction:jakarta.transaction-api:jar:2.0.1:compile
+[INFO] |  |  |  \- org.jboss.logging:jboss-logging:jar:3.6.1.Final:compile
+[INFO] |  |  \- org.springframework.data:spring-data-jpa:jar:4.0.4:compile
+[INFO] |  |     \- org.springframework.data:spring-data-commons:jar:4.0.4:compile
+[INFO] |  \- org.springframework:spring-aspects:jar:7.0.6:compile
+[INFO] +- com.example.demo:common-utils:jar:2.0-42:compile
+[INFO] |  +- com.example.demo:common-model:jar:2.0-42:compile
+[INFO] |  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.21.2:compile
+[INFO] |  |  \- com.fasterxml.jackson.core:jackson-databind:jar:2.21.2:compile
+[INFO] |  \- com.example.demo:common-config:jar:2.0-42:compile
+[INFO] +- net.logstash.logback:logstash-logback-encoder:jar:8.0:compile
+[INFO] +- org.springframework.boot:spring-boot-starter-test:jar:4.0.5:test
+[INFO] |  +- org.springframework.boot:spring-boot-test:jar:4.0.5:test
+[INFO] |  +- org.springframework.boot:spring-boot-test-autoconfigure:jar:4.0.5:test
+[INFO] |  +- com.jayway.jsonpath:json-path:jar:2.9.0:test
+[INFO] |  +- org.assertj:assertj-core:jar:3.27.3:test
+[INFO] |  +- org.hamcrest:hamcrest:jar:3.0:test
+[INFO] |  +- org.junit.jupiter:junit-jupiter:jar:5.12.2:test
+[INFO] |  |  +- org.junit.jupiter:junit-jupiter-api:jar:5.12.2:test
+[INFO] |  |  +- org.junit.jupiter:junit-jupiter-params:jar:5.12.2:test
+[INFO] |  |  \- org.junit.jupiter:junit-jupiter-engine:jar:5.12.2:test
+[INFO] |  +- org.mockito:mockito-core:jar:5.18.0:test
+[INFO] |  +- org.mockito:mockito-junit-jupiter:jar:5.18.0:test
+[INFO] |  \- org.skyscreamer:jsonassert:jar:2.0-rc1:test
+[INFO] +- org.testcontainers:testcontainers:jar:2.0.4:test
+[INFO] |  +- com.github.docker-java:docker-java-api:jar:4.0.0:test
+[INFO] |  \- com.github.docker-java:docker-java-transport-zerodep:jar:4.0.0:test
+[INFO] +- org.testcontainers:testcontainers-junit-jupiter:jar:2.0.4:test
+[INFO] +- org.testcontainers:testcontainers-postgresql:jar:2.0.4:test (omitted for duplicate)
+[INFO] +- org.springframework.security:spring-security-test:jar:7.0.4:test
+[INFO] +- org.liquibase:liquibase-core:jar:5.0.2:test
+[INFO] +- org.hibernate.orm:hibernate-processor:jar:7.2.7.Final:provided (optional)
+[INFO] |  +- io.smallrye:jandex:jar:3.3.2:provided (optional)
+[INFO] |  +- jakarta.validation:jakarta.validation-api:jar:3.1.1:compile
+[INFO] |  +- org.antlr:antlr4-runtime:jar:4.13.2:compile
+[INFO] |  \- net.bytebuddy:byte-buddy:jar:1.17.8:compile
+[INFO] \- io.rest-assured:spring-mock-mvc:jar:6.0.0:test
+[INFO]    +- io.rest-assured:spring-commons:jar:6.0.0:test
+[INFO]    \- org.springframework:spring-webmvc:jar:7.0.6:compile
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] Total time:  4.406 s
+[INFO] Finished at: 2026-04-10T17:56:14+02:00
+[INFO] --------------------------------------------------------------------------------------------------------------------------

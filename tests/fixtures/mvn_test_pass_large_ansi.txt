@@ -1,0 +1,53 @@
+[[34;1mINFO[0m] Loaded 22505 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[[34;1mINFO[0m] Scanning for projects...
+[[33;1mWARNING[0m] Could not transfer metadata /.meta/prefixes.txt from/to shibboleth-releases-5d99c0486312ae43e4bc39d107c6522d62203c00 (https://build.shibboleth.net/nexus/content/repositories/releases/): Checksum validation failed, no checksums available
+[[34;1mINFO[0m] [1m-------------------------------------------------< [36;22mcom.example:auth[39;1m >--------------------------------------------------[0m
+[[34;1mINFO[0m] [1mBuilding auth 1.3-SNAPSHOT[0m
+[[34;1mINFO[0m]   from pom.xml
+[[34;1mINFO[0m] [1m---------------------------------------------------------[ jar ]----------------------------------------------------------[0m
+[[34;1mINFO[0m] Loaded 22505 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[[34;1mINFO[0m] Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+[[34;1mINFO[0m] Found Docker environment with local Unix socket (unix:///var/run/docker.sock)
+[[34;1mINFO[0m] Docker host IP address is localhost
+[[34;1mINFO[0m] Creating container for image: testcontainers/ryuk:0.14.0
+[[34;1mINFO[0m] Container testcontainers/ryuk:0.14.0 started in PT0.44146219S
+[[34;1mINFO[0m] ✔︎ Docker server version should be at least 1.6.0
+[[34;1mINFO[0m] Container postgres:17 started in PT5.716666928S
+[[33;1mWARNING[0m] [stderr] Apr 08, 2026 9:25:10 PM liquibase.database
+[[33;1mWARNING[0m] [stderr] Apr 08, 2026 9:25:10 PM liquibase.changelog
+[[33;1mWARNING[0m] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1719408042.sql
+[[33;1mWARNING[0m] [stderr] Apr 08, 2026 9:25:10 PM liquibase.changelog
+[[34;1mINFO[0m] -------------------------------------------------------
+[[34;1mINFO[0m]  T E S T S
+[[34;1mINFO[0m] -------------------------------------------------------
+[[34;1mINFO[0m] Running com.example.webapp.user.[1mPermissionCompareTest[m
+[[34;1mINFO[0m] Running com.example.webapp.user.[1mModifyTeamTest[m
+[[34;1mINFO[0m] [1;32mTests run: [0;1;32m4[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in com.example.webapp.user.[1mPermissionCompareTest[m
+[[34;1mINFO[0m] [1;32mTests run: [0;1;32m8[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.065 s -- in com.example.webapp.user.[1mPermissionGrouperTest[m
+[[34;1mINFO[0m] Running com.example.webapp.user.[1mPermissionProcessorTest[m
+[[34;1mINFO[0m] [1;32mTests run: [0;1;32m2[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.example.webapp.user.[1mPermissionProcessorTest[m
+[[34;1mINFO[0m] Running com.example.webapp.user.[1mProductHelperTest[m
+[[34;1mINFO[0m] [1;32mTests run: [0;1;32m3[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in com.example.webapp.user.[1mProductHelperTest[m
+[[34;1mINFO[0m] Running com.example.webapp.user.[1mRelayStateUtilTest[m
+[[34;1mINFO[0m] [1;32mTests run: [0;1;32m5[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in com.example.webapp.user.[1mRelayStateUtilTest[m
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1719408042.sql::dev2:1719408042-1::dev2
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1719478245.yaml::1719478245-1::dev1
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1719571809.yaml::1719571809-1::dev1
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1721123826.yaml::1721123826-1::dev1
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1726125249.yaml::1726125249-1::dev1
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1726133977.yaml::1726133977-1::dev2
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1726647573.yaml::1726647573-1::dev1
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1727864000.sql::1727864000-1::dev3
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1727939482.yaml::1727939482-1::dev1
+[[34;1mINFO[0m] [stdout] Running Changeset: db/changelog/2024/db.changelog.2024-1728049660.yaml::1728049660-1::dev1
+[[34;1mINFO[0m] [1;32mTests run: [0;1;32m61[m, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.44 s -- in com.example.webapp.scim.[1mScimUserControllerIntegrationTest[m
+[[34;1mINFO[0m] Results:
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] Tests run: 959, Failures: 0, Errors: 0, Skipped: 9
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
+[[34;1mINFO[0m] [32;1mBUILD SUCCESS[0m
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
+[[34;1mINFO[0m] Total time:  01:32 min
+[[34;1mINFO[0m] Finished at: 2026-04-08T21:26:30+02:00
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m

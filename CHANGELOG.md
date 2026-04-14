@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Features
+
+* **mvn:** add Maven (Java) filter module — test, compile, checkstyle:check, dependency:tree ([#1089](https://github.com/rtk-ai/rtk/pull/1089))
+
 ### Bug Fixes
 
 * **git:** remove `-u` short alias from `--ultra-compact` to fix `git push -u` upstream tracking ([#1086](https://github.com/rtk-ai/rtk/issues/1086))

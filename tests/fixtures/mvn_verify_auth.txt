@@ -1,0 +1,50 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ app ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.app.AlphaTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.051 s -- in com.example.app.AlphaTest
+[INFO] Running com.example.app.BetaTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in com.example.app.BetaTest
+[INFO] Running com.example.app.GammaTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.595 s -- in com.example.app.GammaTest
+[WARNING] Tests run: 8, Failures: 0, Errors: 0, Skipped: 8, Time elapsed: 0 s -- in com.example.app.SkippedSuiteTest
+[INFO] Running com.example.app.DeltaTest
+[INFO] Tests run: 656, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.221 s -- in com.example.app.DeltaTest
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 688, Failures: 0, Errors: 0, Skipped: 8
+[INFO]
+[INFO] --- spring-boot:4.0.5:repackage (repackage) @ app ---
+[INFO] Replacing main artifact /build/app.jar with repackaged archive
+[INFO]
+[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.app.AuthenticationTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.19 s -- in com.example.app.AuthenticationTest
+[INFO] Running com.example.app.ProvisioningTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.23 s -- in com.example.app.ProvisioningTest
+[INFO] Running com.example.app.ScimTest
+[WARNING] Tests run: 1, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0 s -- in com.example.app.ScimTest
+[INFO] Running com.example.app.E2EFlowTest
+[INFO] Tests run: 239, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 31.44 s -- in com.example.app.E2EFlowTest
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 262, Failures: 0, Errors: 0, Skipped: 1
+[INFO]
+[INFO] --- failsafe:3.5.5:verify (default) @ app ---
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] Total time:  02:11 min
+[INFO] Finished at: 2026-04-14T18:32:59+02:00
+[INFO] --------------------------------------------------------------------------------------------------------------------------
