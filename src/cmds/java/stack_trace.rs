@@ -70,6 +70,48 @@ pub(crate) fn truncate_header(header: &str) -> String {
     format!("{truncated}...")
 }
 
+/// A stack frame belongs to the application if, after stripping whitespace and
+/// the leading `"at "` marker, the remainder starts with `app_package`.
+///
+/// When `app_package` is `None` or empty, every frame is considered an app frame
+/// (framework collapsing disabled). Summary lines like `"\t... 42 more"` are
+/// always framework artifacts.
+#[allow(dead_code)]
+pub(crate) fn is_application_frame(frame: &str, app_package: Option<&str>) -> bool {
+    let Some(pkg) = app_package.filter(|p| !p.is_empty()) else {
+        return true;
+    };
+    let trimmed = frame.trim_start();
+    let Some(after_at) = trimmed.strip_prefix("at ") else {
+        return false;
+    };
+    after_at.starts_with(pkg)
+}
+
+/// Structural lines must always be preserved even while collapsing framework
+/// frames: Suppressed block headers and **indented** Caused-by lines (which
+/// appear inside Suppressed blocks; top-level Caused-by is already a segment
+/// boundary, not a frame).
+#[allow(dead_code)]
+pub(crate) fn is_structural_line(line: &str) -> bool {
+    if line.is_empty() {
+        return false;
+    }
+    let trimmed = line.trim_start();
+    if trimmed.starts_with("Suppressed:") {
+        return true;
+    }
+    if trimmed.starts_with("Caused by:") {
+        // Only structural when indented (nested in suppressed). Top-level
+        // Caused by: is handled by parse_segments, not here.
+        return line
+            .chars()
+            .next()
+            .is_some_and(char::is_whitespace);
+    }
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -155,5 +197,57 @@ mod tests {
         let out = truncate_header(&s);
         assert_eq!(out.chars().count(), 203);
         assert!(out.ends_with("..."));
+    }
+
+    #[test]
+    fn is_app_frame_no_filter_accepts_everything() {
+        assert!(is_application_frame("\tat com.example.A.foo(A.java:1)", None));
+        assert!(is_application_frame("\tat org.springframework.boot.Run(Run.java:1)", None));
+        assert!(is_application_frame("\t... 42 more", None));
+    }
+
+    #[test]
+    fn is_app_frame_with_package_accepts_matching() {
+        assert!(is_application_frame(
+            "\tat com.example.A.foo(A.java:1)",
+            Some("com.example"),
+        ));
+        assert!(!is_application_frame(
+            "\tat org.springframework.boot.Run(Run.java:1)",
+            Some("com.example"),
+        ));
+    }
+
+    #[test]
+    fn is_app_frame_rejects_summary_dots() {
+        // "\t... 42 more" is a framework artifact, never app
+        assert!(!is_application_frame("\t... 42 more", Some("com.example")));
+    }
+
+    #[test]
+    fn is_app_frame_rejects_empty_or_whitespace() {
+        assert!(!is_application_frame("", Some("com.example")));
+        assert!(!is_application_frame("   ", Some("com.example")));
+    }
+
+    #[test]
+    fn is_structural_suppressed_top_level() {
+        assert!(is_structural_line("\tSuppressed: java.io.IOException"));
+        assert!(is_structural_line("Suppressed: foo"));
+    }
+
+    #[test]
+    fn is_structural_indented_caused_by_only() {
+        // Top-level "Caused by:" is a segment boundary, not structural
+        assert!(!is_structural_line("Caused by: java.io.IOException"));
+        // Indented "Caused by:" inside suppressed is structural
+        assert!(is_structural_line("\tCaused by: java.io.IOException"));
+        assert!(is_structural_line("  Caused by: nested"));
+    }
+
+    #[test]
+    fn is_structural_regular_frame_no() {
+        assert!(!is_structural_line("\tat com.example.A.foo(A.java:1)"));
+        assert!(!is_structural_line(""));
     }
 }
