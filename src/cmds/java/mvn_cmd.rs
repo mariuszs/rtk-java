@@ -2200,4 +2200,52 @@ mod tests {
         );
         insta::assert_snapshot!(out);
     }
+
+    #[test]
+    fn savings_happy_path_unchanged_by_enrichment() {
+        // Happy path short-circuits without I/O; savings must match pre-enrichment.
+        let text = "mvn test: 859 passed, 4 skipped (02:11 min)";
+        let tmp = tempfile::tempdir().unwrap();
+        let out = super::enrich_with_reports(
+            text,
+            tmp.path(),
+            std::time::SystemTime::now(),
+            Some("com.example"),
+        );
+        assert_eq!(out, text, "happy path must not allocate or append");
+    }
+
+    #[test]
+    fn savings_enriched_failures_stays_under_15_percent() {
+        // Simulate a ~2000-line build log whose text filter produced a short
+        // summary, plus one big failsafe XML with system-err and a 3-segment
+        // Caused-by chain. Total enriched output must be ≥85% smaller than raw.
+        let raw_log: String = std::iter::repeat_n(
+            "[INFO] Running com.example.some.Heavy.Test — lots of noisy build output\n",
+            2000,
+        )
+        .collect::<String>();
+
+        let tmp = tempfile::tempdir().unwrap();
+        let fs = tmp.path().join("target/failsafe-reports");
+        std::fs::create_dir_all(&fs).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/failsafe-reports/TEST-com.example.DbIntegrationIT.xml",
+            fs.join("TEST-com.example.DbIntegrationIT.xml"),
+        )
+        .unwrap();
+
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let text_summary = "mvn verify: 4 run, 1 failed (01:23 min)\nBUILD FAILURE";
+        let enriched = super::enrich_with_reports(text_summary, tmp.path(), since, Some("com.example"));
+
+        let raw_tokens = count_tokens(&raw_log);
+        let enriched_tokens = count_tokens(&enriched);
+        let savings = 100.0 - (enriched_tokens as f64 / raw_tokens as f64 * 100.0);
+        assert!(
+            savings >= 85.0,
+            "expected ≥85% savings on enriched failure path, got {savings:.1}% \
+             (raw={raw_tokens}, enriched={enriched_tokens})"
+        );
+    }
 }
