@@ -4,6 +4,8 @@
 //! chains), classifies frames as application or framework by package prefix,
 //! collapses framework noise, and preserves root-cause frames.
 
+const MAX_HEADER_LENGTH: usize = 200;
+
 #[derive(Debug, PartialEq)]
 #[allow(dead_code)]
 pub(crate) struct Segment {
@@ -54,6 +56,18 @@ pub(crate) fn parse_segments(trace: &str) -> Vec<Segment> {
     }
 
     segments
+}
+
+/// Truncate a header to `MAX_HEADER_LENGTH` **Unicode characters** (not bytes),
+/// appending "..." if truncated.
+#[allow(dead_code)]
+pub(crate) fn truncate_header(header: &str) -> String {
+    let char_count = header.chars().count();
+    if char_count <= MAX_HEADER_LENGTH {
+        return header.to_string();
+    }
+    let truncated: String = header.chars().take(MAX_HEADER_LENGTH).collect();
+    format!("{truncated}...")
 }
 
 #[cfg(test)]
@@ -111,5 +125,35 @@ mod tests {
         assert_eq!(segs.len(), 2, "indented Caused by must not split segments");
         assert_eq!(segs[0].frames.len(), 3, "Suppressed block stays in outer");
         assert_eq!(segs[1].header, "Caused by: java.io.IOException: real cause");
+    }
+
+    #[test]
+    fn truncate_header_short_passes_through() {
+        assert_eq!(truncate_header("short"), "short");
+    }
+
+    #[test]
+    fn truncate_header_exact_200_chars_passes() {
+        let s = "a".repeat(200);
+        assert_eq!(truncate_header(&s), s);
+    }
+
+    #[test]
+    fn truncate_header_over_200_chars_truncates_with_ellipsis() {
+        let s = "a".repeat(250);
+        let out = truncate_header(&s);
+        assert_eq!(out.chars().count(), 203); // 200 + "..."
+        assert!(out.ends_with("..."));
+    }
+
+    #[test]
+    fn truncate_header_utf8_multibyte_safe() {
+        // 100 4-byte chars = 400 bytes but 100 chars — must not panic
+        let s = "日".repeat(100);
+        assert_eq!(truncate_header(&s), s);
+        let s = "日".repeat(250);
+        let out = truncate_header(&s);
+        assert_eq!(out.chars().count(), 203);
+        assert!(out.ends_with("..."));
     }
 }
