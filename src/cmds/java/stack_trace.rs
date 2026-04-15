@@ -668,4 +668,14 @@ mod tests {
         let out = process(trace, Some("com.example"), 6).unwrap();
         assert_eq!(out.lines().count(), 6);
     }
+
+    #[test]
+    fn process_real_world_spring_fixture() {
+        let trace = include_str!("../../../tests/fixtures/java/stack-traces/multi-caused-by.txt");
+        let out = process(trace, Some("com.example"), 50).unwrap();
+        assert!(out.contains("Caused by: org.springframework.beans.factory.BeanCreationException"));
+        assert!(out.contains("Caused by: org.hibernate.HibernateException"));
+        assert!(out.contains("com.example.DbIntegrationIT.shouldConnect"));
+        assert!(out.contains("framework frames omitted"));
+    }
 }
