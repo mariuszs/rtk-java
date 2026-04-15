@@ -2137,4 +2137,67 @@ mod tests {
         );
         assert_eq!(out, text, "10 passed must short-circuit without enrichment");
     }
+
+    #[test]
+    fn snapshot_enriched_surefire_only() {
+        let tmp = tempfile::tempdir().unwrap();
+        let reports = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&reports).unwrap();
+        for name in [
+            "TEST-com.example.FailingTest.xml",
+            "TEST-com.example.PassingTest.xml",
+        ] {
+            std::fs::copy(
+                format!("tests/fixtures/java/surefire-reports/{name}"),
+                reports.join(name),
+            )
+            .unwrap();
+        }
+
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let text = "mvn test: 7 run, 2 failed (00:10 min)\nBUILD FAILURE";
+        let out = super::enrich_with_reports(text, tmp.path(), since, Some("com.example"));
+        insta::assert_snapshot!(out);
+    }
+
+    #[test]
+    fn snapshot_enriched_surefire_and_failsafe() {
+        let tmp = tempfile::tempdir().unwrap();
+        let sf = tmp.path().join("target/surefire-reports");
+        let fs = tmp.path().join("target/failsafe-reports");
+        std::fs::create_dir_all(&sf).unwrap();
+        std::fs::create_dir_all(&fs).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/surefire-reports/TEST-com.example.FailingTest.xml",
+            sf.join("TEST-com.example.FailingTest.xml"),
+        )
+        .unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/failsafe-reports/TEST-com.example.DbIntegrationIT.xml",
+            fs.join("TEST-com.example.DbIntegrationIT.xml"),
+        )
+        .unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/failsafe-reports/TEST-com.example.PortConflictIT.xml",
+            fs.join("TEST-com.example.PortConflictIT.xml"),
+        )
+        .unwrap();
+
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let text = "mvn verify: 12 run, 4 failed (05:42 min)\nBUILD FAILURE";
+        let out = super::enrich_with_reports(text, tmp.path(), since, Some("com.example"));
+        insta::assert_snapshot!(out);
+    }
+
+    #[test]
+    fn snapshot_red_flag_no_tests() {
+        let tmp = tempfile::tempdir().unwrap();
+        let out = super::enrich_with_reports(
+            "mvn test: no tests run",
+            tmp.path(),
+            std::time::SystemTime::now(),
+            Some("com.example"),
+        );
+        insta::assert_snapshot!(out);
+    }
 }
