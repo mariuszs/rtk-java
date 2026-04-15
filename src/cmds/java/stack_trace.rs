@@ -112,6 +112,47 @@ pub(crate) fn is_structural_line(line: &str) -> bool {
     false
 }
 
+/// Push frames to `output`, collapsing runs of consecutive framework frames
+/// into a single `"\t... N framework frames omitted"` marker.
+///
+/// When `app_package` is `None`, all frames are considered app frames and no
+/// collapsing occurs — pass-through mode.
+#[allow(dead_code)]
+pub(crate) fn add_collapsed_frames(
+    output: &mut Vec<String>,
+    frames: &[String],
+    app_package: Option<&str>,
+) {
+    let filter = app_package.is_some_and(|p| !p.is_empty());
+    if !filter {
+        for frame in frames {
+            output.push(frame.clone());
+        }
+        return;
+    }
+
+    let mut framework_count: usize = 0;
+    for frame in frames {
+        let structural = is_structural_line(frame);
+        if structural || is_application_frame(frame, app_package) {
+            if framework_count > 0 {
+                output.push(format!("\t... {framework_count} framework frames omitted"));
+                framework_count = 0;
+            }
+            if structural {
+                output.push(truncate_header(frame));
+            } else {
+                output.push(frame.clone());
+            }
+        } else {
+            framework_count += 1;
+        }
+    }
+    if framework_count > 0 {
+        output.push(format!("\t... {framework_count} framework frames omitted"));
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -249,5 +290,75 @@ mod tests {
     fn is_structural_regular_frame_no() {
         assert!(!is_structural_line("\tat com.example.A.foo(A.java:1)"));
         assert!(!is_structural_line(""));
+    }
+
+    fn collect_collapsed(frames: &[&str], app_package: Option<&str>) -> Vec<String> {
+        let frames: Vec<String> = frames.iter().map(|s| s.to_string()).collect();
+        let mut out = Vec::new();
+        add_collapsed_frames(&mut out, &frames, app_package);
+        out
+    }
+
+    #[test]
+    fn collapse_no_filter_keeps_everything() {
+        let frames = [
+            "\tat org.framework.Foo(Foo.java:1)",
+            "\tat com.example.A.foo(A.java:1)",
+            "\tat org.framework.Bar(Bar.java:2)",
+        ];
+        let out = collect_collapsed(&frames, None);
+        assert_eq!(out.len(), 3);
+    }
+
+    #[test]
+    fn collapse_all_framework_yields_single_summary() {
+        let frames = [
+            "\tat org.framework.Foo(Foo.java:1)",
+            "\tat org.framework.Bar(Bar.java:2)",
+            "\tat org.framework.Baz(Baz.java:3)",
+        ];
+        let out = collect_collapsed(&frames, Some("com.example"));
+        assert_eq!(out, vec!["\t... 3 framework frames omitted"]);
+    }
+
+    #[test]
+    fn collapse_alternating_produces_multiple_summaries() {
+        let frames = [
+            "\tat org.framework.Foo(Foo.java:1)",
+            "\tat com.example.A.one(A.java:10)",
+            "\tat org.framework.Bar(Bar.java:2)",
+            "\tat org.framework.Baz(Baz.java:3)",
+            "\tat com.example.B.two(B.java:20)",
+        ];
+        let out = collect_collapsed(&frames, Some("com.example"));
+        assert_eq!(
+            out,
+            vec![
+                "\t... 1 framework frames omitted",
+                "\tat com.example.A.one(A.java:10)",
+                "\t... 2 framework frames omitted",
+                "\tat com.example.B.two(B.java:20)",
+            ]
+        );
+    }
+
+    #[test]
+    fn collapse_preserves_structural_inline() {
+        let frames = [
+            "\tat org.framework.Foo(Foo.java:1)",
+            "\tSuppressed: java.io.IOException",
+            "\t\tat org.framework.Bar(Bar.java:2)",
+            "\t\tCaused by: java.lang.Error: nested",
+        ];
+        let out = collect_collapsed(&frames, Some("com.example"));
+        assert_eq!(
+            out,
+            vec![
+                "\t... 1 framework frames omitted",
+                "\tSuppressed: java.io.IOException",
+                "\t... 1 framework frames omitted",
+                "\t\tCaused by: java.lang.Error: nested",
+            ]
+        );
     }
 }
