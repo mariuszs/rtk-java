@@ -6,6 +6,8 @@
 use crate::cmds::java::stack_trace;
 use quick_xml::events::{BytesStart, Event};
 use quick_xml::Reader;
+use std::path::Path;
+use std::time::SystemTime;
 
 pub const DEFAULT_STACK_TRACE_LINES: usize = 50;
 pub const DEFAULT_PER_TEST_OUTPUT_LIMIT: usize = 2000;
@@ -262,9 +264,209 @@ fn truncate_test_output(output: &str, max_chars: usize) -> String {
     format!("... ({skip} chars truncated)\n{tail}")
 }
 
+/// Scan a directory for `TEST-*.xml` files and merge their parsed results.
+///
+/// - Files whose `mtime < since` are skipped and counted in `files_skipped_stale`.
+/// - Files that parse to `None` (malformed) count in `files_malformed`.
+/// - Returns `None` only if the directory does not exist or is empty.
+#[allow(dead_code)]
+pub fn parse_dir(
+    dir: &Path,
+    since: Option<SystemTime>,
+    app_package: Option<&str>,
+) -> Option<SurefireResult> {
+    parse_dir_with_limits(
+        dir,
+        since,
+        app_package,
+        DEFAULT_PER_TEST_OUTPUT_LIMIT,
+        DEFAULT_TOTAL_OUTPUT_LIMIT,
+        DEFAULT_STACK_TRACE_LINES,
+    )
+}
+
+#[allow(dead_code)]
+pub fn parse_dir_with_limits(
+    dir: &Path,
+    since: Option<SystemTime>,
+    app_package: Option<&str>,
+    _per_test_output_limit: usize,
+    total_output_limit: usize,
+    _stack_trace_lines: usize,
+) -> Option<SurefireResult> {
+    if !dir.exists() || !dir.is_dir() {
+        return None;
+    }
+
+    let entries = std::fs::read_dir(dir).ok()?;
+    let mut aggregate = SurefireResult::default();
+    let mut any_candidate = false;
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let Some(name) = path.file_name().and_then(|s| s.to_str()) else {
+            continue;
+        };
+        if !name.starts_with("TEST-") || !name.ends_with(".xml") {
+            continue;
+        }
+        any_candidate = true;
+
+        if let Some(since) = since {
+            let modified = entry.metadata().ok().and_then(|m| m.modified().ok());
+            match modified {
+                Some(m) if m >= since => {}
+                Some(_) => {
+                    aggregate.files_skipped_stale += 1;
+                    continue;
+                }
+                None => {
+                    aggregate.files_skipped_stale += 1;
+                    continue;
+                }
+            }
+        }
+
+        let Ok(content) = std::fs::read_to_string(&path) else {
+            aggregate.files_malformed += 1;
+            eprintln!("rtk mvn: skipping unreadable {}", name);
+            continue;
+        };
+
+        match parse_content(&content, app_package) {
+            Some(file_result) => {
+                aggregate.files_read += 1;
+                aggregate.summary.add(&file_result.summary);
+                aggregate.failures.extend(file_result.failures);
+            }
+            None => {
+                aggregate.files_malformed += 1;
+                eprintln!("rtk mvn: skipping malformed {}", name);
+            }
+        }
+    }
+
+    if !any_candidate {
+        return None;
+    }
+
+    apply_total_output_limit(&mut aggregate.failures, total_output_limit);
+    Some(aggregate)
+}
+
+#[allow(dead_code)]
+fn apply_total_output_limit(failures: &mut [TestFailure], total_limit: usize) {
+    let mut budget = total_limit;
+    let mut exhausted = false;
+    for failure in failures.iter_mut() {
+        if exhausted {
+            failure.test_output = None;
+            continue;
+        }
+        if let Some(out) = &failure.test_output {
+            let len = out.chars().count();
+            if len > budget {
+                failure.test_output = None;
+                exhausted = true;
+            } else {
+                budget -= len;
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::{Duration, SystemTime};
+
+    fn copy_fixture(
+        tmp: &tempfile::TempDir,
+        fixture_name: &str,
+        mtime: Option<SystemTime>,
+    ) -> std::path::PathBuf {
+        let src = std::path::Path::new("tests/fixtures/java/surefire-reports").join(fixture_name);
+        let dst = tmp.path().join(fixture_name);
+        std::fs::copy(&src, &dst).expect("copy fixture");
+        if let Some(mtime) = mtime {
+            filetime::set_file_mtime(&dst, filetime::FileTime::from_system_time(mtime))
+                .expect("set mtime");
+        }
+        dst
+    }
+
+    #[test]
+    fn parse_dir_missing_returns_none() {
+        assert!(super::parse_dir(
+            std::path::Path::new("/definitely/does/not/exist/rtk-test"),
+            None,
+            None
+        )
+        .is_none());
+    }
+
+    #[test]
+    fn parse_dir_empty_returns_none() {
+        let tmp = tempfile::tempdir().unwrap();
+        assert!(super::parse_dir(tmp.path(), None, None).is_none());
+    }
+
+    #[test]
+    fn parse_dir_ignores_non_test_prefix_files() {
+        let tmp = tempfile::tempdir().unwrap();
+        copy_fixture(&tmp, "TEST-com.example.PassingTest.xml", None);
+        std::fs::write(tmp.path().join("summary.xml"), "<x/>").unwrap();
+        std::fs::write(tmp.path().join("other.txt"), "hi").unwrap();
+
+        let result = super::parse_dir(tmp.path(), None, None).expect("parses");
+        assert_eq!(result.files_read, 1);
+    }
+
+    #[test]
+    fn parse_dir_aggregates_multi_file_counts() {
+        let tmp = tempfile::tempdir().unwrap();
+        copy_fixture(&tmp, "TEST-com.example.PassingTest.xml", None);
+        copy_fixture(&tmp, "TEST-com.example.FailingTest.xml", None);
+        copy_fixture(&tmp, "TEST-com.example.SkippedTest.xml", None);
+
+        let result = super::parse_dir(tmp.path(), None, None).expect("parses");
+        assert_eq!(result.files_read, 3);
+        assert!(result.summary.run >= 3);
+        assert!(result.summary.failures >= 2);
+        assert!(result.summary.skipped >= 1);
+    }
+
+    #[test]
+    fn parse_dir_time_gate_skips_stale_files() {
+        let tmp = tempfile::tempdir().unwrap();
+        let now = SystemTime::now();
+        let stale = now - Duration::from_secs(60 * 60); // 1h ago
+        let fresh = now + Duration::from_millis(50);
+
+        copy_fixture(&tmp, "TEST-com.example.PassingTest.xml", Some(stale));
+        copy_fixture(&tmp, "TEST-com.example.FailingTest.xml", Some(fresh));
+
+        let since = now;
+        let result = super::parse_dir(tmp.path(), Some(since), None).expect("parses");
+        assert_eq!(result.files_read, 1, "only the fresh file counts");
+        assert_eq!(result.files_skipped_stale, 1);
+        assert_eq!(result.summary.failures, 2, "from FailingTest only");
+    }
+
+    #[test]
+    fn parse_dir_malformed_counts_but_continues() {
+        let tmp = tempfile::tempdir().unwrap();
+        copy_fixture(&tmp, "TEST-com.example.PassingTest.xml", None);
+        std::fs::write(
+            tmp.path().join("TEST-com.example.Broken.xml"),
+            "<not-xml>>>>",
+        )
+        .unwrap();
+
+        let result = super::parse_dir(tmp.path(), None, None).expect("parses");
+        assert_eq!(result.files_read, 1);
+        assert_eq!(result.files_malformed, 1);
+    }
 
     #[test]
     fn parse_content_single_passing() {
