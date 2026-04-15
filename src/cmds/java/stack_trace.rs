@@ -195,6 +195,56 @@ pub(crate) fn add_root_cause_frames(
     }
 }
 
+/// Process a Java stack trace:
+///   - Top-level header preserved (truncated to 200 chars).
+///   - Non-root segments: header + `add_collapsed_frames`.
+///   - Root (last) segment: header + `add_root_cause_frames`.
+///   - If `max_lines > 0` and output exceeds the cap, apply hard-cap truncation
+///     (implemented in a later task — currently returns full output).
+///
+/// Returns `None` iff `raw` is empty or whitespace-only.
+#[allow(dead_code)]
+pub fn process(raw: &str, app_package: Option<&str>, max_lines: usize) -> Option<String> {
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    let segments = parse_segments(trimmed);
+    if segments.is_empty() {
+        return Some(trimmed.to_string());
+    }
+
+    let mut out: Vec<String> = Vec::new();
+    out.push(truncate_header(&segments[0].header));
+
+    if segments.len() == 1 {
+        add_collapsed_frames(&mut out, &segments[0].frames, app_package);
+    } else {
+        add_collapsed_frames(&mut out, &segments[0].frames, app_package);
+        for seg in &segments[1..segments.len() - 1] {
+            out.push(truncate_header(&seg.header));
+            add_collapsed_frames(&mut out, &seg.frames, app_package);
+        }
+        let root = segments.last().unwrap();
+        out.push(truncate_header(&root.header));
+        add_root_cause_frames(&mut out, &root.frames, app_package);
+    }
+
+    if max_lines > 0 && out.len() > max_lines {
+        out = apply_hard_cap(out, &segments, max_lines);
+    }
+
+    Some(out.join("\n"))
+}
+
+// Temporary stub; real implementation in Task 7.
+fn apply_hard_cap(out: Vec<String>, _segments: &[Segment], max_lines: usize) -> Vec<String> {
+    let mut out = out;
+    out.truncate(max_lines);
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -396,6 +446,50 @@ mod tests {
                 "\tat com.example.B.bar(B.java:2)",
             ]
         );
+    }
+
+    #[test]
+    fn process_empty_returns_none() {
+        assert!(process("", Some("com.example"), 0).is_none());
+        assert!(process("   \n  ", Some("com.example"), 0).is_none());
+    }
+
+    #[test]
+    fn process_single_segment_no_filter_returns_verbatim() {
+        let trace = "java.lang.RuntimeException: boom\n\tat com.example.A.foo(A.java:1)";
+        let out = process(trace, None, 0).unwrap();
+        assert_eq!(out, trace);
+    }
+
+    #[test]
+    fn process_single_segment_collapses_framework() {
+        let trace = "java.lang.AssertionError: fail\n\
+                     \tat com.example.Test.t(Test.java:5)\n\
+                     \tat org.junit.runner.Run(Run.java:1)\n\
+                     \tat org.junit.runner.Run(Run.java:2)";
+        let out = process(trace, Some("com.example"), 0).unwrap();
+        assert_eq!(
+            out,
+            "java.lang.AssertionError: fail\n\
+             \tat com.example.Test.t(Test.java:5)\n\
+             \t... 2 framework frames omitted"
+        );
+    }
+
+    #[test]
+    fn process_multi_segment_preserves_root_cause() {
+        let trace = "java.lang.RuntimeException: outer\n\
+                     \tat org.spring.Foo(Foo.java:1)\n\
+                     Caused by: java.io.IOException: middle\n\
+                     \tat org.hibernate.Bar(Bar.java:2)\n\
+                     Caused by: java.net.ConnectException: inner\n\
+                     \tat com.example.DbService.connect(DbService.java:42)";
+        let out = process(trace, Some("com.example"), 0).unwrap();
+        assert!(out.contains("java.lang.RuntimeException: outer"));
+        assert!(out.contains("Caused by: java.io.IOException: middle"));
+        assert!(out.contains("Caused by: java.net.ConnectException: inner"));
+        assert!(out.contains("\tat com.example.DbService.connect(DbService.java:42)"));
+        assert!(out.contains("framework frames omitted"));
     }
 
     fn collect_collapsed(frames: &[&str], app_package: Option<&str>) -> Vec<String> {
