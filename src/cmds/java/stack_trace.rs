@@ -5,6 +5,7 @@
 //! collapses framework noise, and preserves root-cause frames.
 
 const MAX_HEADER_LENGTH: usize = 200;
+const DEFAULT_ROOT_CAUSE_APP_FRAMES: usize = 10;
 
 #[derive(Debug, PartialEq)]
 #[allow(dead_code)]
@@ -153,6 +154,47 @@ pub(crate) fn add_collapsed_frames(
     }
 }
 
+/// Like `add_collapsed_frames`, but caps the number of non-structural
+/// application frames at `DEFAULT_ROOT_CAUSE_APP_FRAMES`. Structural lines
+/// (Suppressed, nested Caused by) bypass the cap.
+#[allow(dead_code)]
+pub(crate) fn add_root_cause_frames(
+    output: &mut Vec<String>,
+    frames: &[String],
+    app_package: Option<&str>,
+) {
+    let filter = app_package.is_some_and(|p| !p.is_empty());
+    if !filter {
+        for frame in frames {
+            output.push(frame.clone());
+        }
+        return;
+    }
+
+    let mut app_count: usize = 0;
+    let mut framework_count: usize = 0;
+    for frame in frames {
+        let structural = is_structural_line(frame);
+        if structural || is_application_frame(frame, app_package) {
+            if framework_count > 0 {
+                output.push(format!("\t... {framework_count} framework frames omitted"));
+                framework_count = 0;
+            }
+            if structural {
+                output.push(truncate_header(frame));
+            } else if app_count < DEFAULT_ROOT_CAUSE_APP_FRAMES {
+                output.push(frame.clone());
+                app_count += 1;
+            }
+        } else {
+            framework_count += 1;
+        }
+    }
+    if framework_count > 0 {
+        output.push(format!("\t... {framework_count} framework frames omitted"));
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -290,6 +332,70 @@ mod tests {
     fn is_structural_regular_frame_no() {
         assert!(!is_structural_line("\tat com.example.A.foo(A.java:1)"));
         assert!(!is_structural_line(""));
+    }
+
+    fn collect_root_cause(frames: &[&str], app_package: Option<&str>) -> Vec<String> {
+        let frames: Vec<String> = frames.iter().map(|s| s.to_string()).collect();
+        let mut out = Vec::new();
+        add_root_cause_frames(&mut out, &frames, app_package);
+        out
+    }
+
+    #[test]
+    fn root_cause_caps_app_frames_at_ten() {
+        let mut frames = Vec::new();
+        for i in 0..15 {
+            frames.push(format!("\tat com.example.A.m{i}(A.java:{i})"));
+        }
+        let frame_refs: Vec<&str> = frames.iter().map(|s| s.as_str()).collect();
+        let out = collect_root_cause(&frame_refs, Some("com.example"));
+        // 10 kept, 5 dropped silently (no "framework" marker because these are app frames)
+        assert_eq!(out.len(), 10);
+    }
+
+    #[test]
+    fn root_cause_no_filter_keeps_all_frames() {
+        let mut frames = Vec::new();
+        for i in 0..15 {
+            frames.push(format!("\tat com.example.A.m{i}(A.java:{i})"));
+        }
+        let frame_refs: Vec<&str> = frames.iter().map(|s| s.as_str()).collect();
+        let out = collect_root_cause(&frame_refs, None);
+        assert_eq!(out.len(), 15);
+    }
+
+    #[test]
+    fn root_cause_structural_bypasses_cap() {
+        // Structural lines are always preserved, even if we already hit the 10-app cap.
+        let mut frames = Vec::new();
+        for i in 0..10 {
+            frames.push(format!("\tat com.example.A.m{i}(A.java:{i})"));
+        }
+        frames.push("\tSuppressed: x".to_string());
+        frames.push("\tat com.example.Z.zzz(Z.java:99)".to_string()); // 11th app — dropped
+        let frame_refs: Vec<&str> = frames.iter().map(|s| s.as_str()).collect();
+        let out = collect_root_cause(&frame_refs, Some("com.example"));
+        assert_eq!(out.len(), 11, "10 app frames + 1 structural, 11th app dropped");
+        assert!(out.contains(&"\tSuppressed: x".to_string()));
+    }
+
+    #[test]
+    fn root_cause_collapses_framework_as_before() {
+        let frames = [
+            "\tat com.example.A.foo(A.java:1)",
+            "\tat org.framework.X(X.java:1)",
+            "\tat org.framework.Y(Y.java:2)",
+            "\tat com.example.B.bar(B.java:2)",
+        ];
+        let out = collect_root_cause(&frames, Some("com.example"));
+        assert_eq!(
+            out,
+            vec![
+                "\tat com.example.A.foo(A.java:1)",
+                "\t... 2 framework frames omitted",
+                "\tat com.example.B.bar(B.java:2)",
+            ]
+        );
     }
 
     fn collect_collapsed(frames: &[&str], app_package: Option<&str>) -> Vec<String> {
