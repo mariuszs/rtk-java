@@ -292,4 +292,63 @@ mod tests {
         assert!(first.stack_trace.is_some());
         assert_eq!(first.kind, FailureKind::Failure);
     }
+
+    #[test]
+    fn parse_content_captures_system_out_err_only_for_failed_tests() {
+        let xml = include_str!(
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.example.FailingTestWithLogs.xml"
+        );
+        let result = parse_content(xml, None).expect("parses");
+        assert_eq!(result.failures.len(), 2);
+        let with_both_streams = result
+            .failures
+            .iter()
+            .find(|f| f.test_method == "shouldConnectToDb")
+            .expect("shouldConnectToDb present");
+        let output = with_both_streams
+            .test_output
+            .as_deref()
+            .expect("test_output captured");
+        assert!(output.contains("Initializing connection pool"));
+        assert!(output.contains("[STDERR]"));
+        assert!(output.contains("Connection refused"));
+
+        let with_stdout_only = result
+            .failures
+            .iter()
+            .find(|f| f.test_method == "shouldProcessData")
+            .expect("shouldProcessData present");
+        let output = with_stdout_only.test_output.as_deref().unwrap_or("");
+        assert!(output.contains("Processing batch"));
+        assert!(!output.contains("[STDERR]"));
+
+        // Passing test's <system-out> must NOT be captured
+        let passing_system_out_text = "This output belongs to a passing test";
+        for failure in &result.failures {
+            if let Some(out) = &failure.test_output {
+                assert!(
+                    !out.contains(passing_system_out_text),
+                    "passing-test stdout must not leak into a failure's test_output"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn parse_content_error_testsuite_marks_failure_kind_error() {
+        let xml = include_str!(
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.example.ErrorTest.xml"
+        );
+        let result = parse_content(xml, None).expect("parses");
+        assert!(result.failures.iter().any(|f| f.kind == FailureKind::Error));
+    }
+
+    #[test]
+    fn parse_content_skipped_testsuite_counts_skipped() {
+        let xml = include_str!(
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.example.SkippedTest.xml"
+        );
+        let result = parse_content(xml, None).expect("parses");
+        assert!(result.summary.skipped > 0);
+    }
 }
