@@ -553,4 +553,44 @@ mod tests {
         let result = parse_content(xml, None).expect("parses");
         assert!(result.summary.skipped > 0);
     }
+
+    #[test]
+    fn apply_total_output_limit_nulls_out_excess() {
+        let mut failures = vec![
+            TestFailure {
+                test_class: "A".into(),
+                test_method: "m1".into(),
+                kind: FailureKind::Failure,
+                message: None,
+                failure_type: None,
+                stack_trace: None,
+                test_output: Some("a".repeat(4000)),
+            },
+            TestFailure {
+                test_class: "A".into(),
+                test_method: "m2".into(),
+                kind: FailureKind::Failure,
+                message: None,
+                failure_type: None,
+                stack_trace: None,
+                test_output: Some("b".repeat(4000)),
+            },
+            TestFailure {
+                test_class: "A".into(),
+                test_method: "m3".into(),
+                kind: FailureKind::Failure,
+                message: None,
+                failure_type: None,
+                stack_trace: None,
+                test_output: Some("c".repeat(4000)),
+            },
+        ];
+        super::apply_total_output_limit(&mut failures, 10_000);
+        assert!(failures[0].test_output.is_some());
+        assert!(failures[1].test_output.is_some());
+        assert!(
+            failures[2].test_output.is_none(),
+            "third should exceed 10k cumulative"
+        );
+    }
 }
