@@ -4,6 +4,7 @@
 //! Preamble -> Testing -> Summary -> Done.
 //! Strips thousands of noise lines to compact failure reports (99%+ savings).
 
+use crate::cmds::java::surefire_reports::{self, FailureKind, SurefireResult, TestFailure};
 use crate::core::runner;
 use crate::core::tracking;
 use crate::core::utils::{exit_code_from_status, resolved_command, strip_ansi, truncate};
@@ -17,6 +18,8 @@ use std::path::Path;
 const INFO_TAG: &str = "[INFO]";
 const ERROR_TAG: &str = "[ERROR]";
 const WARNING_TAG: &str = "[WARNING]";
+
+const MAX_FAILURES_PER_SOURCE: usize = 10;
 
 lazy_static! {
     static ref TESTS_RUN_RE: Regex =
@@ -368,18 +371,166 @@ fn parse_counts(caps: &regex::Captures) -> TestCounts {
     }
 }
 
-/// Identity placeholder for Surefire XML enrichment (Task 16).
-///
-/// Receives the already-filtered test output and will eventually append failure
-/// details parsed from Surefire XML reports found under `cwd`. The `since`
-/// timestamp selects only report files written after the test run started.
-fn enrich_with_reports(
-    text: &str,
-    _cwd: &std::path::Path,
-    _since: std::time::SystemTime,
-    _app_package: Option<&str>,
+/// Wrap the text-filter summary with structured failure details sourced from
+/// `target/surefire-reports/` and `target/failsafe-reports/` XML files.
+pub(crate) fn enrich_with_reports(
+    text_summary: &str,
+    cwd: &std::path::Path,
+    since: std::time::SystemTime,
+    app_package: Option<&str>,
 ) -> String {
-    text.to_string()
+    if !text_summary.starts_with("mvn ") {
+        return text_summary.to_string();
+    }
+
+    let zero_tests = text_summary == "mvn test: no tests run"
+        || text_summary.contains("0 passed");
+    let has_failures =
+        text_summary.contains("failed") || text_summary.contains("BUILD FAILURE");
+    let looks_clean = text_summary.contains("passed (")
+        && !text_summary.contains("failed")
+        && !text_summary.contains("BUILD FAILURE");
+
+    if looks_clean && !zero_tests {
+        return text_summary.to_string();
+    }
+
+    let sf = surefire_reports::parse_dir(
+        &cwd.join("target/surefire-reports"),
+        Some(since),
+        app_package,
+    );
+    let fs = surefire_reports::parse_dir(
+        &cwd.join("target/failsafe-reports"),
+        Some(since),
+        app_package,
+    );
+
+    match (zero_tests, has_failures, &sf, &fs) {
+        (true, _, None, None) => {
+            "mvn test: 0 tests executed — surefire nie wykrył testów. \
+             Sprawdź pom.xml (plugin surefire configuration) lub uruchom: \
+             rtk proxy mvn test"
+                .to_string()
+        }
+        (_, true, None, None) => format!(
+            "{text_summary}\n(no XML reports found — check target/surefire-reports/ \
+             or run: rtk proxy mvn test)"
+        ),
+        _ => render_enriched(text_summary, sf.as_ref(), fs.as_ref()),
+    }
+}
+
+fn render_enriched(
+    text_summary: &str,
+    surefire: Option<&SurefireResult>,
+    failsafe: Option<&SurefireResult>,
+) -> String {
+    let mut out = String::from(text_summary);
+
+    if let Some(sf) = surefire {
+        if !sf.failures.is_empty() {
+            out.push_str("\n\nFailures (from surefire-reports/):\n");
+            render_failure_block(&mut out, &sf.failures);
+        }
+    }
+
+    if let Some(fs) = failsafe {
+        if !fs.failures.is_empty() {
+            out.push_str("\n\nIntegration failures (from failsafe-reports/):\n");
+            render_failure_block(&mut out, &fs.failures);
+        }
+    }
+
+    let footer = render_footer(surefire, failsafe);
+    if !footer.is_empty() {
+        out.push_str("\n\n");
+        out.push_str(&footer);
+    }
+
+    out
+}
+
+fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
+    let shown = failures.iter().take(MAX_FAILURES_PER_SOURCE);
+    for (i, f) in shown.enumerate() {
+        writeln!(out, "{}. {}.{}", i + 1, f.test_class, f.test_method).ok();
+        if let Some(kind_label) = failure_kind_label(f) {
+            writeln!(out, "   {kind_label}").ok();
+        }
+        if let Some(trace) = &f.stack_trace {
+            for line in trace.lines() {
+                writeln!(out, "     {line}").ok();
+            }
+        }
+        if let Some(output) = f.test_output.as_deref().filter(|s| !s.is_empty()) {
+            writeln!(out, "  captured output:").ok();
+            for line in output.lines() {
+                writeln!(out, "    {line}").ok();
+            }
+        }
+        out.push('\n');
+    }
+    if failures.len() > MAX_FAILURES_PER_SOURCE {
+        writeln!(
+            out,
+            "... +{} more failures",
+            failures.len() - MAX_FAILURES_PER_SOURCE
+        )
+        .ok();
+    }
+}
+
+fn failure_kind_label(f: &TestFailure) -> Option<String> {
+    let msg = f.message.as_deref().unwrap_or("").trim();
+    let ty = f
+        .failure_type
+        .as_deref()
+        .and_then(|t| t.rsplit('.').next())
+        .unwrap_or("");
+    match (ty.is_empty(), msg.is_empty()) {
+        (true, true) => None,
+        (true, false) => Some(msg.to_string()),
+        (false, true) => Some(ty.to_string()),
+        (false, false) => Some(format!("{ty}: {msg}")),
+    }
+    .map(|s| match f.kind {
+        FailureKind::Error => format!("[error] {s}"),
+        FailureKind::Failure => s,
+    })
+}
+
+fn render_footer(
+    surefire: Option<&SurefireResult>,
+    failsafe: Option<&SurefireResult>,
+) -> String {
+    let mut parts: Vec<String> = Vec::new();
+    let (sf_read, sf_stale, sf_bad) = counts(surefire);
+    let (fs_read, fs_stale, fs_bad) = counts(failsafe);
+
+    if sf_read > 0 {
+        parts.push(format!("{sf_read} surefire"));
+    }
+    if fs_read > 0 {
+        parts.push(format!("{fs_read} failsafe"));
+    }
+    let stale = sf_stale + fs_stale;
+    if stale > 0 {
+        parts.push(format!("{stale} stale files skipped"));
+    }
+    let malformed = sf_bad + fs_bad;
+    if malformed > 0 {
+        parts.push(format!("{malformed} malformed"));
+    }
+    if parts.is_empty() {
+        return String::new();
+    }
+    format!("(reports: {})", parts.join(", "))
+}
+
+fn counts(r: Option<&SurefireResult>) -> (usize, usize, usize) {
+    r.map(|x| (x.files_read, x.files_skipped_stale, x.files_malformed))
+        .unwrap_or((0, 0, 0))
 }
 
 /// Filter `mvn test` output using a state machine parser.
@@ -1883,5 +2034,93 @@ mod tests {
             input_tokens,
             output_tokens,
         );
+    }
+
+    #[test]
+    fn enrich_happy_path_passes_through_without_io() {
+        let tmp = tempfile::tempdir().unwrap();
+        // No target/ directory exists under tmp — ensures no I/O fallback would succeed.
+        let text = "mvn test: 42 passed (1.234 s)";
+        let out = super::enrich_with_reports(
+            text,
+            tmp.path(),
+            std::time::SystemTime::now(),
+            Some("com.example"),
+        );
+        assert_eq!(out, text);
+    }
+
+    #[test]
+    fn enrich_no_tests_with_no_reports_emits_red_flag() {
+        let tmp = tempfile::tempdir().unwrap();
+        let text = "mvn test: no tests run";
+        let out = super::enrich_with_reports(
+            text,
+            tmp.path(),
+            std::time::SystemTime::now(),
+            Some("com.example"),
+        );
+        assert!(out.contains("0 tests executed"));
+        assert!(out.contains("rtk proxy mvn test") || out.contains("surefire"));
+    }
+
+    #[test]
+    fn enrich_with_surefire_fixture_appends_failures_section() {
+        let tmp = tempfile::tempdir().unwrap();
+        let reports_dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&reports_dir).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/surefire-reports/TEST-com.example.FailingTest.xml",
+            reports_dir.join("TEST-com.example.FailingTest.xml"),
+        )
+        .unwrap();
+
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let text = "mvn test: 4 run, 2 failed (01:02 min)\nBUILD FAILURE";
+        let out = super::enrich_with_reports(text, tmp.path(), since, Some("com.example"));
+
+        assert!(out.contains("Failures (from surefire-reports/)"));
+        assert!(out.contains("com.example.FailingTest.shouldReturnUser"));
+        assert!(out.contains("reports:"));
+    }
+
+    #[test]
+    fn enrich_with_both_report_dirs_appends_both_sections() {
+        let tmp = tempfile::tempdir().unwrap();
+        let sf = tmp.path().join("target/surefire-reports");
+        let fs = tmp.path().join("target/failsafe-reports");
+        std::fs::create_dir_all(&sf).unwrap();
+        std::fs::create_dir_all(&fs).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/surefire-reports/TEST-com.example.FailingTest.xml",
+            sf.join("TEST-com.example.FailingTest.xml"),
+        )
+        .unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/failsafe-reports/TEST-com.example.DbIntegrationIT.xml",
+            fs.join("TEST-com.example.DbIntegrationIT.xml"),
+        )
+        .unwrap();
+
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let text = "mvn verify: 10 run, 3 failed (03:30 min)\nBUILD FAILURE";
+        let out = super::enrich_with_reports(text, tmp.path(), since, Some("com.example"));
+        assert!(out.contains("Failures (from surefire-reports/)"));
+        assert!(out.contains("Integration failures (from failsafe-reports/)"));
+        assert!(out.contains("Caused by: org.hibernate.HibernateException"));
+    }
+
+    #[test]
+    fn enrich_failures_without_xml_appends_hint() {
+        let tmp = tempfile::tempdir().unwrap();
+        let text = "mvn test: 5 run, 2 failed (0.500 s)\nBUILD FAILURE";
+        let out = super::enrich_with_reports(
+            text,
+            tmp.path(),
+            std::time::SystemTime::now(),
+            Some("com.example"),
+        );
+        assert!(out.contains("no XML reports"));
+        assert!(out.contains("rtk proxy mvn test"));
     }
 }
