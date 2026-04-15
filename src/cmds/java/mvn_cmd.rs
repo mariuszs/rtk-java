@@ -384,7 +384,7 @@ pub(crate) fn enrich_with_reports(
     }
 
     let zero_tests = text_summary == "mvn test: no tests run"
-        || text_summary.contains("0 passed");
+        || text_summary.contains(": 0 passed");
     let has_failures =
         text_summary.contains("failed") || text_summary.contains("BUILD FAILURE");
     let looks_clean = text_summary.contains("passed (")
@@ -408,8 +408,8 @@ pub(crate) fn enrich_with_reports(
 
     match (zero_tests, has_failures, &sf, &fs) {
         (true, _, None, None) => {
-            "mvn test: 0 tests executed — surefire nie wykrył testów. \
-             Sprawdź pom.xml (plugin surefire configuration) lub uruchom: \
+            "mvn test: 0 tests executed — surefire detected no tests. \
+             Check pom.xml (surefire plugin configuration) or run: \
              rtk proxy mvn test"
                 .to_string()
         }
@@ -2122,5 +2122,19 @@ mod tests {
         );
         assert!(out.contains("no XML reports"));
         assert!(out.contains("rtk proxy mvn test"));
+    }
+
+    #[test]
+    fn enrich_happy_path_with_10_passed_is_short_circuited() {
+        // Regression: "10 passed" must not trigger zero_tests via substring of "0 passed".
+        let tmp = tempfile::tempdir().unwrap();
+        let text = "mvn test: 10 passed (0.500 s)";
+        let out = super::enrich_with_reports(
+            text,
+            tmp.path(),
+            std::time::SystemTime::now(),
+            Some("com.example"),
+        );
+        assert_eq!(out, text, "10 passed must short-circuit without enrichment");
     }
 }
