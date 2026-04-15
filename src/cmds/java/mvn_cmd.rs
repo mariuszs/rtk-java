@@ -114,11 +114,26 @@ pub fn run_test(args: &[String], verbose: u8) -> Result<i32> {
         eprintln!("Running: mvn test {}", args.join(" "));
     }
 
+    let started_at = std::time::SystemTime::now();
+    let cwd = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
+    let app_pkg = crate::cmds::java::pom_groupid::detect(&cwd);
+
+    let cwd_for_filter = cwd.clone();
+    let app_pkg_for_filter = app_pkg.clone();
+
     runner::run_filtered(
         cmd,
         "mvn test",
         &args.join(" "),
-        filter_mvn_test,
+        move |raw: &str| {
+            let filtered = filter_mvn_test(raw);
+            enrich_with_reports(
+                &filtered,
+                &cwd_for_filter,
+                started_at,
+                app_pkg_for_filter.as_deref(),
+            )
+        },
         runner::RunOptions::with_tee("mvn_test"),
     )
 }
@@ -351,6 +366,20 @@ fn parse_counts(caps: &regex::Captures) -> TestCounts {
         errors: caps.get(3).map_or(0, |m| m.as_str().parse().unwrap_or(0)),
         skipped: caps.get(4).map_or(0, |m| m.as_str().parse().unwrap_or(0)),
     }
+}
+
+/// Identity placeholder for Surefire XML enrichment (Task 16).
+///
+/// Receives the already-filtered test output and will eventually append failure
+/// details parsed from Surefire XML reports found under `cwd`. The `since`
+/// timestamp selects only report files written after the test run started.
+fn enrich_with_reports(
+    text: &str,
+    _cwd: &std::path::Path,
+    _since: std::time::SystemTime,
+    _app_package: Option<&str>,
+) -> String {
+    text.to_string()
 }
 
 /// Filter `mvn test` output using a state machine parser.
