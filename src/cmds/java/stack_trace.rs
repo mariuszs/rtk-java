@@ -199,8 +199,8 @@ pub(crate) fn add_root_cause_frames(
 ///   - Top-level header preserved (truncated to 200 chars).
 ///   - Non-root segments: header + `add_collapsed_frames`.
 ///   - Root (last) segment: header + `add_root_cause_frames`.
-///   - If `max_lines > 0` and output exceeds the cap, apply hard-cap truncation
-///     (implemented in a later task — currently returns full output).
+///   - If `max_lines > 0` and the collapsed output exceeds the cap,
+///     `apply_hard_cap` is called to truncate while preserving the root cause.
 ///
 /// Returns `None` iff `raw` is empty or whitespace-only.
 #[allow(dead_code)]
@@ -238,11 +238,58 @@ pub fn process(raw: &str, app_package: Option<&str>, max_lines: usize) -> Option
     Some(out.join("\n"))
 }
 
-// Temporary stub; real implementation in Task 7.
-fn apply_hard_cap(out: Vec<String>, _segments: &[Segment], max_lines: usize) -> Vec<String> {
-    let mut out = out;
-    out.truncate(max_lines);
-    out
+/// Apply a hard cap while preserving the root cause.
+///
+/// - For a single segment: straight truncate to `max_lines`.
+/// - For multiple segments:
+///   - If the root-cause header's index in `out` is already beyond the cap,
+///     build a synthetic output: `[top_header, "... (intermediate frames
+///     truncated)", root_header, root frames until cap]`.
+///   - Otherwise (root-cause header within the cap): straight truncate.
+fn apply_hard_cap(out: Vec<String>, segments: &[Segment], max_lines: usize) -> Vec<String> {
+    if segments.len() <= 1 {
+        let mut out = out;
+        out.truncate(max_lines);
+        return out;
+    }
+
+    let root = segments.last().unwrap();
+    let truncated_root_header = truncate_header(&root.header);
+    let root_idx = out
+        .iter()
+        .rposition(|line| line == &truncated_root_header);
+
+    let Some(idx) = root_idx else {
+        let mut out = out;
+        out.truncate(max_lines);
+        return out;
+    };
+
+    if idx < max_lines.saturating_sub(1) {
+        let mut out = out;
+        out.truncate(max_lines);
+        return out;
+    }
+
+    // Root cause beyond the cap — build synthetic layout.
+    let mut result: Vec<String> = Vec::with_capacity(max_lines);
+    if let Some(top) = out.first() {
+        result.push(top.clone());
+    }
+    if max_lines >= 3 {
+        result.push("\t... (intermediate frames truncated)".to_string());
+    }
+    result.push(truncated_root_header.clone());
+
+    let mut remaining = max_lines.saturating_sub(result.len());
+    for line in &out[(idx + 1)..] {
+        if remaining == 0 {
+            break;
+        }
+        result.push(line.clone());
+        remaining -= 1;
+    }
+    result
 }
 
 #[cfg(test)]
@@ -560,5 +607,65 @@ mod tests {
                 "\t\tCaused by: java.lang.Error: nested",
             ]
         );
+    }
+
+    #[test]
+    fn hard_cap_single_segment_simple_truncate() {
+        // Non-app frames collapse to one marker, so a 21-line input produces
+        // a 2-line out. Verify cap-not-triggered behavior first.
+        let mut trace = String::from("java.lang.RuntimeException: boom");
+        for i in 0..20 {
+            trace.push_str(&format!("\n\tat com.example.A.m{i}(A.java:{i})"));
+        }
+        // With app_package=Some("com.example"), all frames are app frames.
+        // out = [header, 20 app frames]. With cap=5, out.len()=21 > 5 →
+        // straight-truncate to 5.
+        let out = process(&trace, Some("com.example"), 5).unwrap();
+        assert_eq!(out.lines().count(), 5);
+    }
+
+    #[test]
+    fn hard_cap_multi_segment_preserves_root_cause() {
+        // Two segments, each with enough app frames that even after
+        // framework-frame collapsing, the total pushed lines exceeds the cap
+        // AND the root-cause header sits at/beyond (max_lines - 1), forcing
+        // the synthetic "... (intermediate frames truncated)" layout.
+        let trace = "java.lang.RuntimeException: outer\n\
+                     \tat com.example.A.foo(A.java:1)\n\
+                     \tat com.example.A.bar(A.java:2)\n\
+                     \tat com.example.A.baz(A.java:3)\n\
+                     \tat com.example.A.qux(A.java:4)\n\
+                     Caused by: java.io.IOException: real cause\n\
+                     \tat com.example.DbService.connect(Db.java:88)\n\
+                     \tat com.example.DbService.prepare(Db.java:91)\n\
+                     \tat com.example.DbService.execute(Db.java:94)";
+        // out from process(): [top_header, 4 app frames, root_header, 3 app frames]
+        // out.len() = 9. With max_lines = 5, root_idx = 5, 5 >= 5-1=4 → synthetic.
+        let out = process(trace, Some("com.example"), 5).unwrap();
+        let lines: Vec<&str> = out.lines().collect();
+        assert_eq!(lines.len(), 5, "must fit exactly in max_lines=5, got: {out}");
+        assert_eq!(lines[0], "java.lang.RuntimeException: outer");
+        assert_eq!(lines[1], "\t... (intermediate frames truncated)");
+        assert_eq!(lines[2], "Caused by: java.io.IOException: real cause");
+        assert!(
+            lines[3].contains("com.example.DbService"),
+            "first root frame must survive; got line 3: {:?}",
+            lines[3]
+        );
+    }
+
+    #[test]
+    fn hard_cap_multi_segment_root_within_limit_straight_truncate() {
+        // Root cause header at line 3 of output, cap at 10 → straight truncate.
+        let trace = "java.lang.RuntimeException: outer\n\
+                     \tat com.example.A.foo(A.java:1)\n\
+                     Caused by: java.io.IOException: inner\n\
+                     \tat com.example.B.bar(B.java:1)\n\
+                     \tat com.example.B.baz(B.java:2)\n\
+                     \tat com.example.B.qux(B.java:3)\n\
+                     \tat com.example.B.quux(B.java:4)\n\
+                     \tat com.example.B.corge(B.java:5)";
+        let out = process(trace, Some("com.example"), 6).unwrap();
+        assert_eq!(out.lines().count(), 6);
     }
 }
