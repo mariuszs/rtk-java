@@ -1,0 +1,95 @@
+[INFO] Scanning for projects...
+[WARNING] Could not transfer metadata from/to central: Checksum validation failed
+[WARNING]
+[WARNING] 1 problem was encountered while building the effective model for 'com.example:webapp:jar:1.0-SNAPSHOT'
+[WARNING]
+[WARNING] Total model problems reported: 1
+[WARNING]
+[INFO]
+[INFO] -------------------------------------------------< com.example:webapp >--------------------------------------------------
+[INFO] Building webapp 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] ---------------------------------------------------------[ jar ]----------------------------------------------------------
+[WARNING] 176 problems were encountered while building the effective model for 'com.example:dep:jar:3.2.0' during n/a
+[WARNING] 130 problems were encountered while building the effective model for 'org.redisson:redisson-spring-boot-starter:jar:4.0.0'
+[WARNING] 76 problems were encountered while building the effective model for 'com.playtika.testcontainers:embedded-redis:jar:3.1.11'
+[INFO]
+[INFO] --- clean:3.5.0:clean (default-clean) @ webapp ---
+[INFO] Deleting /home/user/project/target
+[INFO]
+[INFO] --- jacoco:0.8.14:prepare-agent (prepare-agent) @ webapp ---
+[INFO] argLine set to -javaagent:/home/user/.m2/repository/org/jacoco/org.jacoco.agent/0.8.14/org.jacoco.agent-0.8.14-runtime.jar
+[INFO]
+[INFO] --- testcontainers-jooq-codegen:0.0.4:generate (generate-jooq-sources) @ webapp ---
+[WARNING] Could not transfer metadata from/to flyway-repo: Connection refused
+[INFO] Image pull policy will be performed by: DefaultPullPolicy()
+[WARNING] [stderr] Apr 08, 2026 5:45:45 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2025/db.changelog-main.yaml
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2025/db.changelog-001.yaml
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2025/db.changelog-002.yaml
+[INFO]
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ webapp ---
+[INFO] Compiling 42 source files with javac [debug target 25] to target/classes
+[INFO]
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ webapp ---
+[INFO] Compiling 18 source files with javac [debug target 25] to target/test-classes
+[WARNING] /home/user/project/src/test/java/com/example/TestFactory.java:[44,27] deprecated
+[WARNING] /home/user/project/src/test/java/com/example/TestFactory.java:[48,45] deprecated
+[WARNING] /home/user/project/src/test/java/com/example/SpecificationsTest.java:[60,44] deprecated
+[INFO] /home/user/project/src/test/java/com/example/ProcessorTest.java: uses unchecked or unsafe operations.
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ webapp ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[WARNING] The system property java.util.logging.config.file is configured twice!
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.score.ScoreTypeTest
+[INFO] Running com.example.company.EmailParserTest
+[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.050 s <<< FAILURE! -- in com.example.company.EmailParserTest
+[ERROR] Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.058 s <<< FAILURE! -- in com.example.score.ScoreTypeTest
+[ERROR] com.example.company.EmailParserTest.should_extract_domain_from_email -- Time elapsed: 0.009 s <<< FAILURE!
+org.opentest4j.AssertionFailedError:
+
+expected: "broken.example.com"
+ but was: "user.example.com"
+	at com.example.company.EmailParserTest.should_extract_domain_from_email(EmailParserTest.java:14)
+
+[ERROR] com.example.score.ScoreTypeTest.shouldMapToRole -- Time elapsed: 0.008 s <<< FAILURE!
+org.opentest4j.AssertionFailedError:
+
+expected: "app:BROKEN"
+ but was: "app:all"
+	at com.example.score.ScoreTypeTest.shouldMapToRole(ScoreTypeTest.java:24)
+
+[INFO]
+[INFO] Results:
+[INFO]
+[ERROR] Failures:
+[ERROR]   EmailParserTest.should_extract_domain_from_email:14
+expected: "broken.example.com"
+ but was: "user.example.com"
+[ERROR]   ScoreTypeTest.shouldMapToRole:24
+expected: "app:BROKEN"
+ but was: "app:all"
+[INFO]
+[ERROR] Tests run: 5, Failures: 2, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] Total time:  23.819 s
+[INFO] Finished at: 2026-04-08T17:45:57+02:00
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.5:test (default-test) on project webapp: There are test failures.
+[ERROR]
+[ERROR] See /home/user/project/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the '-e' switch
+[ERROR] Re-run Maven using the '-X' switch to enable verbose output
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

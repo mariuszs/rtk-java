@@ -1,0 +1,118 @@
+[INFO] Scanning for projects...
+[INFO] Building parent 1.0-SNAPSHOT
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO]
+[INFO] --- maven-surefire-plugin:3.1.2:test (default-test) @ common ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.common.PathUtilsTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in com.example.common.PathUtilsTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --- maven-surefire-plugin:3.1.2:test (default-test) @ data ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.data.RepositoryTest
+[INFO] Tests run: 34, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.036 s -- in com.example.data.RepositoryTest
+[INFO] Running com.example.data.ModelTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.370 s -- in com.example.data.ModelTest
+[INFO] Tests run: 194, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 194, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --- maven-surefire-plugin:3.1.2:test (default-test) @ ml ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.ml.BenchmarkTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.632 s -- in com.example.ml.BenchmarkTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --- maven-surefire-plugin:3.1.2:test (default-test) @ services ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.services.FileHasherTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in com.example.services.FileHasherTest
+[INFO] Running com.example.services.GitDiffReaderTest
+[ERROR] Tests run: 4, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 3.167 s <<< FAILURE! -- in com.example.services.GitDiffReaderTest
+[ERROR] com.example.services.GitDiffReaderTest.shouldBuildDiffWithFiltering -- Time elapsed: 3.109 s <<< ERROR!
+org.eclipse.jgit.api.errors.ServiceUnavailableException: Signing service is not available
+	at org.eclipse.jgit.api.CommitCommand.sign(CommitCommand.java:328)
+	at org.eclipse.jgit.api.CommitCommand.call(CommitCommand.java:283)
+	at com.example.services.GitDiffReaderTest.shouldBuildDiffWithFiltering(GitDiffReaderTest.java:116)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+
+[ERROR] com.example.services.GitDiffReaderTest.shouldReturnEmptyDiff -- Time elapsed: 0.013 s <<< ERROR!
+org.eclipse.jgit.api.errors.ServiceUnavailableException: Signing service is not available
+	at org.eclipse.jgit.api.CommitCommand.sign(CommitCommand.java:328)
+	at org.eclipse.jgit.api.CommitCommand.call(CommitCommand.java:283)
+	at com.example.services.GitDiffReaderTest.shouldReturnEmptyDiff(GitDiffReaderTest.java:67)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+
+[ERROR] com.example.services.GitDiffReaderTest.shouldBuildDiff -- Time elapsed: 0.012 s <<< ERROR!
+org.eclipse.jgit.api.errors.ServiceUnavailableException: Signing service is not available
+	at org.eclipse.jgit.api.CommitCommand.sign(CommitCommand.java:328)
+	at com.example.services.GitDiffReaderTest.shouldBuildDiff(GitDiffReaderTest.java:35)
+
+[ERROR] com.example.services.GitDiffReaderTest.shouldBuildDiffForDevops -- Time elapsed: 0.011 s <<< ERROR!
+org.eclipse.jgit.api.errors.ServiceUnavailableException: Signing service is not available
+	at org.eclipse.jgit.api.CommitCommand.sign(CommitCommand.java:328)
+	at com.example.services.GitDiffReaderTest.shouldBuildDiffForDevops(GitDiffReaderTest.java:88)
+
+[INFO] Running com.example.services.IoHelperTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in com.example.services.IoHelperTest
+[INFO] Tests run: 651, Failures: 0, Errors: 4, Skipped: 4
+[INFO]
+[INFO] Results:
+[INFO]
+[ERROR] Errors:
+[ERROR]   GitDiffReaderTest.shouldBuildDiff:35 >> ServiceUnavailable Signing service is not available
+[ERROR]   GitDiffReaderTest.shouldBuildDiffForDevops:88 >> ServiceUnavailable Signing service is not available
+[ERROR]   GitDiffReaderTest.shouldBuildDiffWithFiltering:116 >> ServiceUnavailable Signing service is not available
+[ERROR]   GitDiffReaderTest.shouldReturnEmptyDiff:67 >> ServiceUnavailable Signing service is not available
+[INFO]
+[ERROR] Tests run: 860, Failures: 0, Errors: 4, Skipped: 4
+[INFO]
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] Reactor Summary for parent 1.0-SNAPSHOT:
+[INFO]
+[INFO] parent ............................................................................................... SUCCESS [  0.189 s]
+[INFO] common ............................................................................................... SUCCESS [  0.959 s]
+[INFO] data ................................................................................................. SUCCESS [ 28.127 s]
+[INFO] ml ................................................................................................... SUCCESS [  2.214 s]
+[INFO] services ............................................................................................. FAILURE [ 58.575 s]
+[INFO] integrations ......................................................................................... SKIPPED
+[INFO] webapp ............................................................................................... SKIPPED
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] Total time:  01:31 min
+[INFO] Finished at: 2026-04-08T20:45:10+02:00
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.1.2:test (default-test) on project services: There are test failures.
+[ERROR]
+[ERROR] See /home/user/project/services/target/surefire-reports for the individual test results.
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the '-e' switch
+[ERROR] Re-run Maven using the '-X' switch to enable verbose output
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

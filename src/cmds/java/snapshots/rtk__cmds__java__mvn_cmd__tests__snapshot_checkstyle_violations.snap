@@ -1,0 +1,11 @@
+---
+source: src/cmds/java/mvn_cmd.rs
+expression: output
+---
+There are 4 errors reported by Checkstyle 13.3.0 with checkstyle.xml ruleset.
+  src/main/java/com/example/auth/app/ExternalAppId.java:3:8 [UnusedImports] Unused import - java.util.List.
+  src/main/java/com/example/auth/app/ExternalAppId.java:9:19 [MethodName] Name 'BadMethodName' must match pattern '^[a-z][a-zA-Z0-9]*$'.
+  src/main/java/com/example/auth/app/ExternalAppId.java:10 [LineLength] Line is longer than 200 characters (found 241).
+  src/main/java/com/example/auth/app/ExternalAppId.java:10:16 [LocalVariableName] Name 'BadVariable' must match pattern '^([a-z][a-zA-Z0-9]*|_)$'.
+BUILD FAILURE
+Total time:  0.907 s

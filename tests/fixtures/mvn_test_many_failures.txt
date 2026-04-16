@@ -1,0 +1,115 @@
+[INFO] Scanning for projects...
+[WARNING] The requested profile "unit-tests" could not be activated because it does not exist.
+[INFO]
+[INFO] -----------------------< com.example:myapp >------------------------
+[INFO] Building myapp 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ myapp ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ myapp ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.controller.ItemControllerTest
+[ERROR] Tests run: 4, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 8.737 s <<< FAILURE! -- in com.example.controller.ItemControllerTest
+[ERROR] com.example.controller.ItemControllerTest.shouldReturn404ForNonExistent -- Time elapsed: 0.003 s <<< ERROR!
+java.lang.IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@7b05dab testClass = com.example.controller.ItemControllerTest, locations = [], classes = [com.example.MyApplication], contextInitializerClasses = [], activeProfiles = [], propertySourceDescriptors = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"]]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.lambda$loadContext$0(DefaultCacheAwareContextLoaderDelegate.java:195)
+	at org.springframework.test.context.cache.DefaultContextCache.put(DefaultContextCache.java:214)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+
+[ERROR] com.example.controller.ItemControllerTest.shouldCreate -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.ItemControllerTest.shouldUpdate -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.ItemControllerTest.shouldDelete -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[INFO] Running com.example.controller.OrderControllerTest
+[ERROR] Tests run: 7, Failures: 0, Errors: 7, Skipped: 0, Time elapsed: 0.012 s <<< FAILURE! -- in com.example.controller.OrderControllerTest
+[ERROR] com.example.controller.OrderControllerTest.shouldReturn404 -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.OrderControllerTest.shouldUpdate -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.OrderControllerTest.shouldCreate -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.OrderControllerTest.shouldDelete -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.OrderControllerTest.shouldList -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.OrderControllerTest.shouldRejectDuplicate -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.OrderControllerTest.shouldGetById -- Time elapsed: 0.001 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[INFO] Running com.example.controller.LeaseControllerTest
+[ERROR] Tests run: 14, Failures: 0, Errors: 14, Skipped: 0, Time elapsed: 0.019 s <<< FAILURE! -- in com.example.controller.LeaseControllerTest
+[ERROR] com.example.controller.LeaseControllerTest.shouldReturn400 -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.LeaseControllerTest.shouldList -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.controller.LeaseControllerTest.shouldGetById -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[INFO]
+[INFO] Results:
+[INFO]
+[ERROR] Errors:
+[ERROR]   ItemControllerTest.shouldReturn404ForNonExistent >> IllegalState Failed to load ApplicationContext
+[ERROR]   ItemControllerTest.shouldCreate >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ItemControllerTest.shouldUpdate >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ItemControllerTest.shouldDelete >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   OrderControllerTest.shouldReturn404 >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   OrderControllerTest.shouldUpdate >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   OrderControllerTest.shouldCreate >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   OrderControllerTest.shouldDelete >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   OrderControllerTest.shouldList >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   OrderControllerTest.shouldRejectDuplicate >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   OrderControllerTest.shouldGetById >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   LeaseControllerTest.shouldReturn400 >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   LeaseControllerTest.shouldList >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   LeaseControllerTest.shouldGetById >> IllegalState ApplicationContext failure threshold (1) exceeded
+[INFO]
+[ERROR] Tests run: 28, Failures: 0, Errors: 28, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  22.379 s
+[INFO] Finished at: 2026-04-08T20:58:01+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.5:test (default-test) on project myapp: There are test failures.
+[ERROR]
+[ERROR] See /home/user/project/target/surefire-reports for the individual test results.
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] Re-run Maven using the '-X' switch to enable full debug logging.
+[ERROR]
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
