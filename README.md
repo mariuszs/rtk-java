@@ -47,6 +47,7 @@ rtk filters and compresses command outputs before they reach your LLM context. S
 | `git log` | 5x | 2,500 | 500 | -80% |
 | `git add/commit/push` | 8x | 1,600 | 120 | -92% |
 | `cargo test` / `npm test` | 5x | 25,000 | 2,500 | -90% |
+| `mvn test` | 3x | 30,000 | 300 | -99% |
 | `ruff check` | 3x | 3,000 | 600 | -80% |
 | `pytest` | 4x | 8,000 | 800 | -90% |
 | `go test` | 3x | 6,000 | 600 | -90% |
@@ -171,15 +172,17 @@ rtk gh run list                 # Workflow run status
 
 ### Test Runners
 ```bash
-rtk test cargo test             # Show failures only (-90%)
-rtk err npm run build           # Errors/warnings only
-rtk vitest run                  # Vitest compact (failures only)
+rtk jest                        # Jest compact (failures only)
+rtk vitest                      # Vitest compact (failures only)
 rtk playwright test             # E2E results (failures only)
 rtk pytest                      # Python tests (-90%)
 rtk go test                     # Go tests (NDJSON, -90%)
 rtk cargo test                  # Cargo tests (-90%)
 rtk rake test                   # Ruby minitest (-90%)
 rtk rspec                       # RSpec tests (JSON, -60%+)
+rtk mvn test                    # Maven tests (-99%)
+rtk err <cmd>                   # Filter errors only from any command
+rtk test <cmd>                  # Generic test wrapper - failures only (-90%)
 ```
 
 ### Build & Lint
@@ -194,6 +197,8 @@ rtk cargo clippy                # Cargo clippy (-80%)
 rtk ruff check                  # Python linting (JSON, -80%)
 rtk golangci-lint run           # Go linting (JSON, -85%)
 rtk rubocop                     # Ruby linting (JSON, -60%+)
+rtk mvn build                   # Maven build (-90%)
+rtk mvn dependency:tree         # Maven dependency tree (-60%+)
 ```
 
 ### Package Managers

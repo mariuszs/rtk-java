@@ -33,6 +33,7 @@ flate2 = "1.0"
 quick-xml = "0.37"
 which = "8"
 automod = "1"
+libc = "0.2"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
@@ -41,6 +42,8 @@ libc = "0.2"
 toml = "0.8"
 
 [dev-dependencies]
+filetime = "0.2"
+insta = "1"
 
 [profile.release]
 opt-level = 3

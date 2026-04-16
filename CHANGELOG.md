@@ -97,6 +97,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Features
+
+* **mvn:** add Maven (Java) filter module — test, compile, checkstyle:check, dependency:tree ([#1089](https://github.com/rtk-ai/rtk/pull/1089))
+* **mvn:** enrich `mvn test` / `verify` / `integration-test` output with structured failure details read from `target/surefire-reports/TEST-*.xml` and `target/failsafe-reports/*.xml`. Stack traces are segmented on `Caused by:` with framework frames collapsed; the root-cause segment is always preserved.
+* **mvn:** autodetect application package from `pom.xml` `<groupId>` (with `<parent>/<groupId>` fallback) for framework-frame classification. Override via `RTK_MVN_APP_PACKAGE`.
+* **mvn:** red-flag heuristic — `no tests run` with no fresh XML reports emits a diagnostic pointing at surefire misconfiguration.
+
 ### Bug Fixes
 
 * **git:** remove `-u` short alias from `--ultra-compact` to fix `git push -u` upstream tracking ([#1086](https://github.com/rtk-ai/rtk/issues/1086))
