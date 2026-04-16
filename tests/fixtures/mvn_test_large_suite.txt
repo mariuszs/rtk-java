@@ -1,0 +1,204 @@
+[INFO] Scanning for projects...
+[WARNING] Could not transfer metadata from/to central: Checksum validation failed
+[INFO]
+[INFO] -----------------------< com.example:platform >------------------------
+[INFO] Building platform 2.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] 42 problems were encountered while building the effective model
+[INFO]
+[INFO] --- maven-compiler-plugin:3.14.0:compile (default-compile) @ platform ---
+[INFO] Compiling 120 source files with javac
+[INFO]
+[INFO] --- maven-compiler-plugin:3.14.0:testCompile (default-testCompile) @ platform ---
+[INFO] Compiling 85 source files with javac
+[WARNING] /home/user/project/src/test/java/com/example/DeprecatedTest.java:[10,5] deprecated
+[WARNING] /home/user/project/src/test/java/com/example/OtherTest.java:[20,8] deprecated
+[INFO]
+[INFO] --- surefire:3.5.4:test (default-test) @ platform ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.registry.SearchModelTest
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.123 s -- in com.example.registry.SearchModelTest
+[INFO] Running com.example.registry.IndexServiceTest
+[INFO] Tests run: 30, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.456 s -- in com.example.registry.IndexServiceTest
+[INFO] Running com.example.organization.OrgServiceTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.234 s -- in com.example.organization.OrgServiceTest
+[INFO] Running com.example.organization.PatchableFieldTest
+[ERROR] Tests run: 6, Failures: 0, Errors: 6, Skipped: 0, Time elapsed: 0.010 s <<< FAILURE! -- in com.example.organization.PatchableFieldTest
+[ERROR] com.example.organization.PatchableFieldTest.fromStrings_returns_empty -- Time elapsed: 0 s <<< ERROR!
+java.lang.Error:
+Unresolved compilation problem:
+	log cannot be resolved
+
+	at com.example.organization.PatchableFieldTest.fromStrings_returns_empty(PatchableFieldTest.java:12)
+
+[ERROR] com.example.organization.PatchableFieldTest.fromStrings_converts_names -- Time elapsed: 0 s <<< ERROR!
+java.lang.Error:
+Unresolved compilation problem:
+	log cannot be resolved
+
+	at com.example.organization.PatchableFieldTest.fromStrings_converts_names(PatchableFieldTest.java:20)
+
+[ERROR] com.example.organization.PatchableFieldTest.shouldUpdate_false_when_empty -- Time elapsed: 0 s <<< ERROR!
+java.lang.ClassCastException: class com.example.organization.PatchableField not an enum
+	at com.example.organization.PatchableFieldTest.shouldUpdate_false_when_empty(PatchableFieldTest.java:36)
+
+[ERROR] com.example.organization.PatchableFieldTest.shouldUpdate_true_when_null -- Time elapsed: 0 s <<< ERROR!
+java.lang.Error:
+Unresolved compilation problem:
+
+	at com.example.organization.PatchableField.shouldUpdate(PatchableField.java:29)
+
+[ERROR] com.example.organization.PatchableFieldTest.shouldUpdateAny_true -- Time elapsed: 0 s <<< ERROR!
+java.lang.NullPointerException: Cannot invoke "java.lang.Enum.getDeclaringClass()" because "e1" is null
+	at com.example.organization.PatchableFieldTest.shouldUpdateAny_true(PatchableFieldTest.java:49)
+
+[ERROR] com.example.organization.PatchableFieldTest.fromStrings_ignores_unknown -- Time elapsed: 0 s <<< ERROR!
+java.lang.Error:
+Unresolved compilation problem:
+	log cannot be resolved
+
+	at com.example.organization.PatchableFieldTest.fromStrings_ignores_unknown(PatchableFieldTest.java:55)
+
+[INFO] Running com.example.search.SearchReadModelTest
+[ERROR] Tests run: 3, Failures: 3, Errors: 0, Skipped: 0, Time elapsed: 4.567 s <<< FAILURE! -- in com.example.search.SearchReadModelTest
+[ERROR] com.example.search.SearchReadModelTest.should_get_person_ratings -- Time elapsed: 1.234 s <<< FAILURE!
+java.lang.AssertionError:
+Expecting actual:
+  [("Group1", {SELF=50, SUPERVISOR=35}, 40, null, 3),
+   ("Group2", {SELF=80}, 80, null, 1)]
+to have size:
+  <1>
+but had size:
+  <2>
+
+	at com.example.search.SearchReadModelTest.should_get_person_ratings(SearchReadModelTest.java:85)
+
+[ERROR] com.example.search.SearchReadModelTest.should_get_company_ratings -- Time elapsed: 0.987 s <<< FAILURE!
+org.assertj.core.error.AssertJMultipleFailuresError:
+[List check single element] (1 failure)
+-- failure 1 --
+expected: 42
+ but was: 38
+
+	at com.example.search.SearchReadModelTest.should_get_company_ratings(SearchReadModelTest.java:120)
+
+[ERROR] com.example.search.SearchReadModelTest.should_not_include_unknown_skills -- Time elapsed: 0.456 s <<< FAILURE!
+org.assertj.core.error.AssertJMultipleFailuresError:
+[List check single element] (1 failure)
+-- failure 1 --
+expected size: 0 but was: 1
+
+	at com.example.search.SearchReadModelTest.should_not_include_unknown_skills(SearchReadModelTest.java:150)
+
+[INFO] Running com.example.payment.PaymentServiceTest
+[INFO] Tests run: 100, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.901 s -- in com.example.payment.PaymentServiceTest
+[INFO] Running com.example.report.ReportGeneratorTest
+[INFO] Tests run: 45, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.210 s -- in com.example.report.ReportGeneratorTest
+[INFO] Running com.example.integration.ApiIntegrationTest
+[ERROR] Tests run: 14, Failures: 0, Errors: 14, Skipped: 0, Time elapsed: 0.015 s <<< FAILURE! -- in com.example.integration.ApiIntegrationTest
+[ERROR] com.example.integration.ApiIntegrationTest.shouldCreateUser -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldDeleteUser -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldUpdateUser -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldListUsers -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldGetUser -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldSearchUsers -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldPaginateUsers -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldFilterUsers -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldSortUsers -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldExportUsers -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldImportUsers -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldValidateInput -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldHandleConcurrency -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[ERROR] com.example.integration.ApiIntegrationTest.shouldRetryOnFailure -- Time elapsed: 0 s <<< ERROR!
+java.lang.IllegalStateException: ApplicationContext failure threshold (1) exceeded
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:157)
+
+[INFO]
+[INFO] Results:
+[INFO]
+[ERROR] Failures:
+[ERROR]   SearchReadModelTest.should_get_person_ratings:85 expected size: 1 but was: 2
+[ERROR]   SearchReadModelTest.should_get_company_ratings:120 expected: 42 but was: 38
+[ERROR]   SearchReadModelTest.should_not_include_unknown_skills:150 expected size: 0 but was: 1
+[ERROR] Errors:
+[ERROR]   PatchableFieldTest.fromStrings_returns_empty >> Error Unresolved compilation problem: log cannot be resolved
+[ERROR]   PatchableFieldTest.fromStrings_converts_names >> Error Unresolved compilation problem: log cannot be resolved
+[ERROR]   PatchableFieldTest.shouldUpdate_false_when_empty >> ClassCast not an enum
+[ERROR]   PatchableFieldTest.shouldUpdate_true_when_null >> Error Unresolved compilation problem
+[ERROR]   PatchableFieldTest.shouldUpdateAny_true >> NullPointer Cannot invoke "java.lang.Enum.getDeclaringClass()"
+[ERROR]   PatchableFieldTest.fromStrings_ignores_unknown >> Error Unresolved compilation problem: log cannot be resolved
+[ERROR]   ApiIntegrationTest.shouldCreateUser >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldDeleteUser >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldUpdateUser >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldListUsers >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldGetUser >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldSearchUsers >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldPaginateUsers >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldFilterUsers >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldSortUsers >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldExportUsers >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldImportUsers >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldValidateInput >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldHandleConcurrency >> IllegalState ApplicationContext failure threshold (1) exceeded
+[ERROR]   ApiIntegrationTest.shouldRetryOnFailure >> IllegalState ApplicationContext failure threshold (1) exceeded
+[INFO]
+[ERROR] Tests run: 3262, Failures: 3, Errors: 20, Skipped: 4
+[INFO]
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[INFO] Total time:  03:25 min
+[INFO] Finished at: 2026-04-08T21:07:54+02:00
+[INFO] --------------------------------------------------------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.4:test (default-test) on project platform: There are test failures.
+[ERROR]
+[ERROR] See /home/user/project/target/surefire-reports for the individual test results.
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] Re-run Maven using the '-X' switch to enable full debug logging.
+[ERROR]
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
