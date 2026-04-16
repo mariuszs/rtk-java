@@ -1,0 +1,10 @@
+java.lang.IllegalStateException: Failed to load ApplicationContext
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180)
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSource'
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:628)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:542)
+Caused by: org.hibernate.HibernateException: Unable to acquire JDBC Connection
+	at org.hibernate.internal.SessionFactoryImpl.createEntityManagerFactory(SessionFactoryImpl.java:512)
+	at com.example.DbIntegrationIT.shouldConnect(DbIntegrationIT.java:88)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.DbIntegrationIT" time="3.210" tests="2" errors="1" skipped="0" failures="0">
+  <testcase name="shouldUseDefaults" classname="com.example.DbIntegrationIT" time="0.100"/>
+  <testcase name="shouldConnect" classname="com.example.DbIntegrationIT" time="3.100">
+    <error message="Failed to load ApplicationContext" type="java.lang.IllegalStateException">java.lang.IllegalStateException: Failed to load ApplicationContext
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180)
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
+	at org.springframework.test.context.support.DependencyInjectionTestExecutionListener.injectDependencies(DependencyInjectionTestExecutionListener.java:118)
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSource'
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:628)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:542)
+	at org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration.dataSource(DataSourceAutoConfiguration.java:114)
+Caused by: org.hibernate.HibernateException: Unable to acquire JDBC Connection; nested exception is java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
+	at org.hibernate.internal.SessionFactoryImpl.createEntityManagerFactory(SessionFactoryImpl.java:512)
+	at com.example.DbIntegrationIT.shouldConnect(DbIntegrationIT.java:88)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)</error>
+    <system-err>2026-04-15 10:42:17 ERROR HikariDataSource - HikariPool-1 - Connection is not available
+Connection refused (Connection refused)</system-err>
+  </testcase>
+</testsuite>
