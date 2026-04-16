@@ -11,6 +11,7 @@ use cmds::cloud::{aws_cmd, container, curl_cmd, psql_cmd, wget_cmd};
 use cmds::dotnet::{binlog, dotnet_cmd, dotnet_format_report, dotnet_trx};
 use cmds::git::{diff_cmd, gh_cmd, git, gt_cmd};
 use cmds::go::{go_cmd, golangci_cmd};
+use cmds::java::mvn_cmd;
 use cmds::js::{
     lint_cmd, next_cmd, npm_cmd, playwright_cmd, pnpm_cmd, prettier_cmd, prisma_cmd, tsc_cmd,
     vitest_cmd,
@@ -685,6 +686,12 @@ enum Commands {
         command: GoCommands,
     },
 
+    /// Maven commands with compact output
+    Mvn {
+        #[command(subcommand)]
+        command: MvnCommands,
+    },
+
     /// Graphite (gt) stacked PR commands with compact output
     Gt {
         #[command(subcommand)]
@@ -1069,6 +1076,35 @@ enum GoCommands {
         args: Vec<String>,
     },
     /// Passthrough: runs any unsupported go subcommand directly
+    #[command(external_subcommand)]
+    Other(Vec<OsString>),
+}
+
+#[derive(Debug, Subcommand)]
+enum MvnCommands {
+    /// Run tests with compact output (state machine parser, 99%+ token reduction)
+    Test {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
+    /// Compile with compact output (strip [INFO] noise, keep errors and summary)
+    Compile {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
+    /// Run `mvn checkstyle:check` with grouped violations and stripped boilerplate
+    #[command(name = "checkstyle:check", alias = "checkstyle")]
+    Checkstyle {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
+    /// Dependency tree with compact output (strip duplicates and boilerplate)
+    #[command(name = "dependency:tree")]
+    DepTree {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
+    /// Passthrough: runs any unsupported mvn subcommand directly
     #[command(external_subcommand)]
     Other(Vec<OsString>),
 }
@@ -2041,6 +2077,14 @@ fn run_cli() -> Result<i32> {
             GoCommands::Other(args) => go_cmd::run_other(&args, cli.verbose)?,
         },
 
+        Commands::Mvn { command } => match command {
+            MvnCommands::Test { args } => mvn_cmd::run_test(&args, cli.verbose)?,
+            MvnCommands::Compile { args } => mvn_cmd::run_compile(&args, cli.verbose)?,
+            MvnCommands::Checkstyle { args } => mvn_cmd::run_checkstyle(&args, cli.verbose)?,
+            MvnCommands::DepTree { args } => mvn_cmd::run_dep_tree(&args, cli.verbose)?,
+            MvnCommands::Other(args) => mvn_cmd::run_other(&args, cli.verbose)?,
+        },
+
         Commands::Gt { command } => match command {
             GtCommands::Log { args } => gt_cmd::run_log(&args, cli.verbose)?,
             GtCommands::Submit { args } => gt_cmd::run_submit(&args, cli.verbose)?,
@@ -2383,6 +2427,7 @@ fn is_operational_command(cmd: &Commands) -> bool {
             | Commands::Rspec { .. }
             | Commands::Pip { .. }
             | Commands::Go { .. }
+            | Commands::Mvn { .. }
             | Commands::GolangciLint { .. }
             | Commands::Gt { .. }
     )

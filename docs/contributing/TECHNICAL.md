@@ -299,7 +299,7 @@ Start here, then drill down into each README for file-level details.
 | [`core/`](../src/core/README.md) | Shared infrastructure | Tracking DB schema, config system, tee recovery, TOML filter engine, utility functions |
 | [`hooks/`](../src/hooks/README.md) | Hook system | Installation flow (`rtk init`), integrity verification, rewrite command, trust model |
 | [`analytics/`](../src/analytics/README.md) | Token savings analytics | `rtk gain` dashboard, Claude Code economics, ccusage parsing |
-| [`cmds/`](../src/cmds/README.md) | **Command filters (9 ecosystems)** | Common filter pattern, cross-command routing, token savings table, **links to each ecosystem** |
+| [`cmds/`](../src/cmds/README.md) | **Command filters (10 ecosystems)** | Common filter pattern, cross-command routing, token savings table, **links to each ecosystem** |
 | [`discover/`](../src/discover/README.md) | History analysis + rewrite registry | Rewrite patterns, session providers, compound command splitting |
 | [`learn/`](../src/learn/README.md) | CLI correction detection | Error classification, correction pair detection, rule generation |
 | [`parser/`](../src/parser/README.md) | Parser infrastructure | Canonical types (TestResult, LintResult, etc.), 3-tier format modes, migration guide |

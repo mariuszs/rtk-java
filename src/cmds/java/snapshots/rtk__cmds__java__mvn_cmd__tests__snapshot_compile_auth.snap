@@ -1,0 +1,12 @@
+---
+source: src/cmds/java/mvn_cmd.rs
+expression: output
+---
+[INFO] annotations
+[INFO] comments
+[INFO] sources
+[INFO]   interfaces (immutable) : false
+[INFO]   table-valued functions : true
+[INFO] other
+[INFO] BUILD SUCCESS
+[INFO] Total time:  36.332 s
