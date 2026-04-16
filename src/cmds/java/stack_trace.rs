@@ -8,10 +8,9 @@ const MAX_HEADER_LENGTH: usize = 200;
 const DEFAULT_ROOT_CAUSE_APP_FRAMES: usize = 10;
 
 #[derive(Debug, PartialEq)]
-#[allow(dead_code)]
-pub(crate) struct Segment {
-    pub(crate) header: String,
-    pub(crate) frames: Vec<String>,
+struct Segment {
+    header: String,
+    frames: Vec<String>,
 }
 
 /// Split a stack trace into segments.
@@ -24,8 +23,7 @@ pub(crate) struct Segment {
 /// Indented `"\tCaused by:"` inside Suppressed blocks stays as a frame and
 /// does NOT split segments — `is_structural_line` preserves it during frame
 /// collapsing.
-#[allow(dead_code)]
-pub(crate) fn parse_segments(trace: &str) -> Vec<Segment> {
+fn parse_segments(trace: &str) -> Vec<Segment> {
     let trace = trace.trim();
     if trace.is_empty() {
         return Vec::new();
@@ -61,7 +59,6 @@ pub(crate) fn parse_segments(trace: &str) -> Vec<Segment> {
 
 /// Truncate a header to `MAX_HEADER_LENGTH` **Unicode characters** (not bytes),
 /// appending "..." if truncated.
-#[allow(dead_code)]
 pub(crate) fn truncate_header(header: &str) -> String {
     let char_count = header.chars().count();
     if char_count <= MAX_HEADER_LENGTH {
@@ -77,8 +74,7 @@ pub(crate) fn truncate_header(header: &str) -> String {
 /// When `app_package` is `None` or empty, every frame is considered an app frame
 /// (framework collapsing disabled). Summary lines like `"\t... 42 more"` are
 /// always framework artifacts.
-#[allow(dead_code)]
-pub(crate) fn is_application_frame(frame: &str, app_package: Option<&str>) -> bool {
+fn is_application_frame(frame: &str, app_package: Option<&str>) -> bool {
     let Some(pkg) = app_package.filter(|p| !p.is_empty()) else {
         return true;
     };
@@ -93,8 +89,7 @@ pub(crate) fn is_application_frame(frame: &str, app_package: Option<&str>) -> bo
 /// frames: Suppressed block headers and **indented** Caused-by lines (which
 /// appear inside Suppressed blocks; top-level Caused-by is already a segment
 /// boundary, not a frame).
-#[allow(dead_code)]
-pub(crate) fn is_structural_line(line: &str) -> bool {
+fn is_structural_line(line: &str) -> bool {
     if line.is_empty() {
         return false;
     }
@@ -118,50 +113,14 @@ pub(crate) fn is_structural_line(line: &str) -> bool {
 ///
 /// When `app_package` is `None`, all frames are considered app frames and no
 /// collapsing occurs — pass-through mode.
-#[allow(dead_code)]
-pub(crate) fn add_collapsed_frames(
+///
+/// When `max_app_frames` is `Some(n)`, at most `n` non-structural application
+/// frames are kept (root-cause mode). Structural lines bypass the cap.
+fn add_frames(
     output: &mut Vec<String>,
     frames: &[String],
     app_package: Option<&str>,
-) {
-    let filter = app_package.is_some_and(|p| !p.is_empty());
-    if !filter {
-        for frame in frames {
-            output.push(frame.clone());
-        }
-        return;
-    }
-
-    let mut framework_count: usize = 0;
-    for frame in frames {
-        let structural = is_structural_line(frame);
-        if structural || is_application_frame(frame, app_package) {
-            if framework_count > 0 {
-                output.push(format!("\t... {framework_count} framework frames omitted"));
-                framework_count = 0;
-            }
-            if structural {
-                output.push(truncate_header(frame));
-            } else {
-                output.push(frame.clone());
-            }
-        } else {
-            framework_count += 1;
-        }
-    }
-    if framework_count > 0 {
-        output.push(format!("\t... {framework_count} framework frames omitted"));
-    }
-}
-
-/// Like `add_collapsed_frames`, but caps the number of non-structural
-/// application frames at `DEFAULT_ROOT_CAUSE_APP_FRAMES`. Structural lines
-/// (Suppressed, nested Caused by) bypass the cap.
-#[allow(dead_code)]
-pub(crate) fn add_root_cause_frames(
-    output: &mut Vec<String>,
-    frames: &[String],
-    app_package: Option<&str>,
+    max_app_frames: Option<usize>,
 ) {
     let filter = app_package.is_some_and(|p| !p.is_empty());
     if !filter {
@@ -182,7 +141,7 @@ pub(crate) fn add_root_cause_frames(
             }
             if structural {
                 output.push(truncate_header(frame));
-            } else if app_count < DEFAULT_ROOT_CAUSE_APP_FRAMES {
+            } else if max_app_frames.is_none_or(|cap| app_count < cap) {
                 output.push(frame.clone());
                 app_count += 1;
             }
@@ -197,14 +156,13 @@ pub(crate) fn add_root_cause_frames(
 
 /// Process a Java stack trace:
 ///   - Top-level header preserved (truncated to 200 chars).
-///   - Non-root segments: header + `add_collapsed_frames`.
-///   - Root (last) segment: header + `add_root_cause_frames`.
+///   - Non-root segments: header + collapsed frames.
+///   - Root (last) segment: header + capped root-cause frames.
 ///   - If `max_lines > 0` and the collapsed output exceeds the cap,
 ///     `apply_hard_cap` is called to truncate while preserving the root cause.
 ///
 /// Returns `None` iff `raw` is empty or whitespace-only.
-#[allow(dead_code)]
-pub fn process(raw: &str, app_package: Option<&str>, max_lines: usize) -> Option<String> {
+pub(crate) fn process(raw: &str, app_package: Option<&str>, max_lines: usize) -> Option<String> {
     let trimmed = raw.trim();
     if trimmed.is_empty() {
         return None;
@@ -219,16 +177,21 @@ pub fn process(raw: &str, app_package: Option<&str>, max_lines: usize) -> Option
     out.push(truncate_header(&segments[0].header));
 
     if segments.len() == 1 {
-        add_collapsed_frames(&mut out, &segments[0].frames, app_package);
+        add_frames(&mut out, &segments[0].frames, app_package, None);
     } else {
-        add_collapsed_frames(&mut out, &segments[0].frames, app_package);
+        add_frames(&mut out, &segments[0].frames, app_package, None);
         for seg in &segments[1..segments.len() - 1] {
             out.push(truncate_header(&seg.header));
-            add_collapsed_frames(&mut out, &seg.frames, app_package);
+            add_frames(&mut out, &seg.frames, app_package, None);
         }
         let root = segments.last().unwrap();
         out.push(truncate_header(&root.header));
-        add_root_cause_frames(&mut out, &root.frames, app_package);
+        add_frames(
+            &mut out,
+            &root.frames,
+            app_package,
+            Some(DEFAULT_ROOT_CAUSE_APP_FRAMES),
+        );
     }
 
     if max_lines > 0 && out.len() > max_lines {
@@ -434,7 +397,12 @@ mod tests {
     fn collect_root_cause(frames: &[&str], app_package: Option<&str>) -> Vec<String> {
         let frames: Vec<String> = frames.iter().map(|s| s.to_string()).collect();
         let mut out = Vec::new();
-        add_root_cause_frames(&mut out, &frames, app_package);
+        add_frames(
+            &mut out,
+            &frames,
+            app_package,
+            Some(DEFAULT_ROOT_CAUSE_APP_FRAMES),
+        );
         out
     }
 
@@ -542,7 +510,7 @@ mod tests {
     fn collect_collapsed(frames: &[&str], app_package: Option<&str>) -> Vec<String> {
         let frames: Vec<String> = frames.iter().map(|s| s.to_string()).collect();
         let mut out = Vec::new();
-        add_collapsed_frames(&mut out, &frames, app_package);
+        add_frames(&mut out, &frames, app_package, None);
         out
     }
 

@@ -37,7 +37,7 @@ pub(crate) fn extract_groupid(xml: &str) -> Option<String> {
     let mut stack: Vec<String> = Vec::new();
     let mut top_level_groupid: Option<String> = None;
     let mut parent_groupid: Option<String> = None;
-    let mut capture: Option<String> = None;
+    let mut capturing = false;
 
     loop {
         match reader.read_event_into(&mut buf) {
@@ -47,14 +47,14 @@ pub(crate) fn extract_groupid(xml: &str) -> Option<String> {
                     .and_then(|s| s.rsplit(':').next())
                     .unwrap_or("")
                     .to_string();
-                stack.push(name.clone());
+                stack.push(name);
 
                 if is_top_level_groupid(&stack) || is_parent_groupid(&stack) {
-                    capture = Some(name);
+                    capturing = true;
                 }
             }
             Ok(Event::Text(t)) => {
-                if capture.is_some() {
+                if capturing {
                     if let Ok(text) = t.unescape() {
                         let text = text.trim();
                         if !text.is_empty() {
@@ -69,7 +69,7 @@ pub(crate) fn extract_groupid(xml: &str) -> Option<String> {
             }
             Ok(Event::End(_)) => {
                 stack.pop();
-                capture = None;
+                capturing = false;
                 if top_level_groupid.is_some() {
                     break;
                 }

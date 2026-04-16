@@ -11,8 +11,7 @@ use std::time::SystemTime;
 
 pub const DEFAULT_STACK_TRACE_LINES: usize = 50;
 pub const DEFAULT_PER_TEST_OUTPUT_LIMIT: usize = 2000;
-#[allow(dead_code)]
-pub const DEFAULT_TOTAL_OUTPUT_LIMIT: usize = 10_000;
+const DEFAULT_TOTAL_OUTPUT_LIMIT: usize = 10_000;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct TestSummary {
@@ -23,7 +22,7 @@ pub struct TestSummary {
 }
 
 impl TestSummary {
-    fn add(&mut self, other: &Self) {
+    pub(crate) fn add(&mut self, other: &Self) {
         self.run += other.run;
         self.failures += other.failures;
         self.errors += other.errors;
@@ -88,7 +87,6 @@ fn parse_u32_attr(reader: &Reader<&[u8]>, start: &BytesStart<'_>, key: &[u8]) ->
 ///
 /// Returns `None` only if the XML is completely malformed; otherwise a
 /// best-effort result is returned.
-#[allow(dead_code)]
 pub(crate) fn parse_content(xml: &str, app_package: Option<&str>) -> Option<SurefireResult> {
     #[derive(Clone, Copy, PartialEq)]
     enum CaptureField {
@@ -269,30 +267,10 @@ fn truncate_test_output(output: &str, max_chars: usize) -> String {
 /// - Files whose `mtime < since` are skipped and counted in `files_skipped_stale`.
 /// - Files that parse to `None` (malformed) count in `files_malformed`.
 /// - Returns `None` only if the directory does not exist or is empty.
-#[allow(dead_code)]
 pub fn parse_dir(
     dir: &Path,
     since: Option<SystemTime>,
     app_package: Option<&str>,
-) -> Option<SurefireResult> {
-    parse_dir_with_limits(
-        dir,
-        since,
-        app_package,
-        DEFAULT_PER_TEST_OUTPUT_LIMIT,
-        DEFAULT_TOTAL_OUTPUT_LIMIT,
-        DEFAULT_STACK_TRACE_LINES,
-    )
-}
-
-#[allow(dead_code)]
-pub fn parse_dir_with_limits(
-    dir: &Path,
-    since: Option<SystemTime>,
-    app_package: Option<&str>,
-    _per_test_output_limit: usize,
-    total_output_limit: usize,
-    _stack_trace_lines: usize,
 ) -> Option<SurefireResult> {
     if !dir.exists() || !dir.is_dir() {
         return None;
@@ -350,11 +328,10 @@ pub fn parse_dir_with_limits(
         return None;
     }
 
-    apply_total_output_limit(&mut aggregate.failures, total_output_limit);
+    apply_total_output_limit(&mut aggregate.failures, DEFAULT_TOTAL_OUTPUT_LIMIT);
     Some(aggregate)
 }
 
-#[allow(dead_code)]
 fn apply_total_output_limit(failures: &mut [TestFailure], total_limit: usize) {
     let mut budget = total_limit;
     let mut exhausted = false;

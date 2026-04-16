@@ -4,7 +4,7 @@
 //! Preamble -> Testing -> Summary -> Done.
 //! Strips thousands of noise lines to compact failure reports (99%+ savings).
 
-use crate::cmds::java::surefire_reports::{self, FailureKind, SurefireResult, TestFailure};
+use crate::cmds::java::surefire_reports::{self, FailureKind, SurefireResult, TestFailure, TestSummary};
 use crate::core::runner;
 use crate::core::tracking;
 use crate::core::utils::{exit_code_from_status, resolved_command, strip_ansi, truncate};
@@ -338,22 +338,6 @@ enum TestParseState {
     Done,
 }
 
-#[derive(Default)]
-struct TestCounts {
-    run: u32,
-    failures: u32,
-    errors: u32,
-    skipped: u32,
-}
-
-impl TestCounts {
-    fn add(&mut self, other: &Self) {
-        self.run += other.run;
-        self.failures += other.failures;
-        self.errors += other.errors;
-        self.skipped += other.skipped;
-    }
-}
 
 struct FailureEntry {
     name: String,
@@ -362,8 +346,8 @@ struct FailureEntry {
 
 /// Parse the four count fields from a `TESTS_RUN_RE` captures. The regex
 /// guarantees four numeric groups so defaulting to 0 is only a safety net.
-fn parse_counts(caps: &regex::Captures) -> TestCounts {
-    TestCounts {
+fn parse_counts(caps: &regex::Captures) -> TestSummary {
+    TestSummary {
         run: caps.get(1).map_or(0, |m| m.as_str().parse().unwrap_or(0)),
         failures: caps.get(2).map_or(0, |m| m.as_str().parse().unwrap_or(0)),
         errors: caps.get(3).map_or(0, |m| m.as_str().parse().unwrap_or(0)),
@@ -547,8 +531,8 @@ fn filter_mvn_test(output: &str) -> String {
     let mut failures: Vec<FailureEntry> = Vec::with_capacity(MAX_FAILURES_SHOWN);
     let mut current_failure: Option<FailureEntry> = None;
 
-    let mut cumulative = TestCounts::default();
-    let mut section: Option<TestCounts> = None;
+    let mut cumulative = TestSummary::default();
+    let mut section: Option<TestSummary> = None;
     let mut total_time: Option<String> = None;
     let mut total_failures_seen: usize = 0;
 
@@ -887,17 +871,14 @@ fn should_keep_compile_line(line: &str) -> bool {
 
     let stripped = strip_maven_prefix(line);
 
-    // Keep error lines
     if line.starts_with(ERROR_TAG) {
         return !is_maven_boilerplate(line);
     }
 
-    // Keep BUILD SUCCESS/FAILURE
     if stripped.contains("BUILD SUCCESS") || stripped.contains("BUILD FAILURE") {
         return true;
     }
 
-    // Keep Total time
     if TOTAL_TIME_RE.is_match(stripped) {
         return true;
     }
@@ -935,7 +916,6 @@ fn should_keep_compile_line(line: &str) -> bool {
         return true;
     }
 
-    // Strip [WARNING] lines for build filter
     if line.starts_with(WARNING_TAG) {
         return false;
     }
@@ -1182,13 +1162,13 @@ mod tests {
 
     #[test]
     fn test_test_counts_add() {
-        let mut a = TestCounts {
+        let mut a = TestSummary {
             run: 10,
             failures: 1,
             errors: 2,
             skipped: 3,
         };
-        let b = TestCounts {
+        let b = TestSummary {
             run: 100,
             failures: 20,
             errors: 30,
