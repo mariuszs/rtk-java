@@ -1,0 +1,16 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] --- dependency:3.7.0:tree (default-cli) @ my-app ---
+[INFO] com.example:my-app:jar:1.0.0
+[INFO] +- com.example:lib-a:jar:1.0.0:compile
+[INFO] |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.18.3:compile
+[INFO] |  |  +- com.fasterxml.jackson.core:jackson-core:jar:2.18.3:compile
+[INFO] |  |  \- com.fasterxml.jackson.core:jackson-annotations:jar:2.18.3:compile
+[INFO] |  \- org.slf4j:slf4j-api:jar:2.0.9:compile
+[INFO] +- com.example:lib-b:jar:2.0.0:compile
+[INFO] |  +- (com.fasterxml.jackson.core:jackson-databind:jar:2.17.0:compile - omitted for conflict with 2.18.3)
+[INFO] |  \- (org.slf4j:slf4j-api:jar:2.0.7:compile - omitted for conflict with 2.0.9)
+[INFO] \- com.example:lib-c:jar:3.0.0:compile
+[INFO]    \- (com.fasterxml.jackson.core:jackson-databind:jar:2.19.0:compile - omitted for conflict with 2.18.3)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS

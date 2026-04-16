@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.FailingTestWithLogs" time="2.345" tests="4" errors="0" skipped="0" failures="2">
+  <testcase name="shouldPass" classname="com.example.FailingTestWithLogs" time="0.100"/>
+  <testcase name="shouldConnectToDb" classname="com.example.FailingTestWithLogs" time="0.800">
+    <failure message="expected connection" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: expected connection
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at com.example.FailingTestWithLogs.shouldConnectToDb(FailingTestWithLogs.java:25)</failure>
+    <system-out>DEBUG: Initializing connection pool
+INFO: Attempting connection to localhost:5432
+WARN: Connection timeout after 5000ms
+ERROR: Failed to establish connection</system-out>
+    <system-err>SLF4J: Failed to load class org.slf4j.impl.StaticLoggerBinder
+STDERR: Connection refused</system-err>
+  </testcase>
+  <testcase name="shouldProcessData" classname="com.example.FailingTestWithLogs" time="0.500">
+    <failure message="data mismatch" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: data mismatch
+	at com.example.FailingTestWithLogs.shouldProcessData(FailingTestWithLogs.java:42)</failure>
+    <system-out>INFO: Processing batch of 100 records
+DEBUG: Record 50 processed successfully</system-out>
+  </testcase>
+  <testcase name="shouldAlsoPass" classname="com.example.FailingTestWithLogs" time="0.200">
+    <system-out>This output belongs to a passing test and should NOT be extracted</system-out>
+  </testcase>
+</testsuite>

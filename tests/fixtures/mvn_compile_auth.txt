@@ -1,0 +1,132 @@
+[INFO] argLine set to -javaagent:/home/user/.m2/repository/org/jacoco/org.jacoco.agent/0.8.14/org.jacoco.agent-0.8.14-runtime.jar=destfile=/home/user/project/target/jacoco.exec
+Server Version: 28.1.1
+API Version: 1.49
+Operating System: Fedora Linux 43 (Workstation Edition)
+Total Memory: 61869 MB
+[INFO] [stdout]
+[INFO] [stdout] UPDATE SUMMARY
+[INFO] [stdout] Run:                        352
+[INFO] [stdout] Previously run:               0
+[INFO] [stdout] Filtered out:                 0
+[INFO] [stdout] Total change sets:          352
+[INFO] [stdout]
+[INFO] [stdout] Liquibase: Update has been successful.
+[INFO] Migration completed
+[INFO] Database                 : Inferring driver org.postgresql.Driver from URL jdbc:postgresql://localhost:32811/test?loggerLevel=OFF
+[INFO] Database                 : Inferring database org.jooq.meta.postgres.PostgresDatabase from URL jdbc:postgresql://localhost:32811/test?loggerLevel=OFF
+[INFO] No <inputCatalog/> was provided. Generating ALL available catalogs instead.
+[INFO] License parameters
+[INFO]   Thank you for using jOOQ and jOOQ's code generator
+[INFO] Database parameters
+[INFO]   dialect                : POSTGRES_15
+[INFO]   URL                    : jdbc:postgresql://localhost:32811/test?loggerLevel=OFF
+[INFO]   target dir             : /home/user/project/target/generated-sources/jooq
+[INFO]   target package         : com.example.webapp.jooq
+[INFO]   includes               : [.*]
+[INFO] JavaGenerator parameters
+[INFO] annotations
+[INFO]   generated              : false
+[INFO]   JPA                    : false
+[INFO]   JPA version            :
+[INFO] comments
+[INFO]   comments               : true
+[INFO] sources
+[INFO]   sources                : true
+[INFO] global references
+[INFO]   global references      : true
+[INFO] object types
+[INFO]   interfaces (immutable) : false
+[INFO]   table-valued functions : true
+[INFO] other
+[INFO] Generation remarks
+[INFO] Generating catalogs      : Total: 1
+[INFO] Version                  : Database version is supported by dialect POSTGRES_15: 17.5 (Debian 17.5-1.pgdg120+1)
+[INFO] ARRAYs fetched           : 0 (0 included, 0 excluded)
+[INFO] Tables fetched           : 42 (40 included, 2 excluded)
+[INFO] Routines fetched         : 35 (35 included, 0 excluded)
+[INFO] No schema version is applied for catalog . Regenerating.
+[INFO] Generating catalog       : DefaultCatalog.java
+[INFO] ==========================================================
+[INFO] Generating schemata      : Total: 1
+[INFO] Generating schema        : Public.java
+[INFO] Generating tables
+[INFO] Indexes fetched          : 61 (61 included, 0 excluded)
+[INFO] Generating table         : Company.java [input=company, pk=company_pkey]
+[INFO] Generating table         : User.java [input=user, pk=user_pkey]
+[INFO] Generating table         : Role.java [input=role, pk=role_pkey]
+- https://www.jooq.org/doc/latest/manual/code-generation/codegen-generatorstrategy/
+- https://www.jooq.org/doc/latest/manual/code-generation/codegen-matcherstrategy/
+[INFO] Tables generated         : Total: 421.766ms
+[INFO] Generating table records
+[INFO] Generating record        : CompanyRecord.java
+[INFO] Generating record        : UserRecord.java
+[INFO] Table records generated  : Total: 449.399ms, +27.632ms
+[INFO] Generating routines and table-valued functions
+[INFO] Generating routine       : Encrypt.java
+[INFO] Missing name             : Routine public.encrypt holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.encrypt holds a parameter without a name at position 2
+[INFO] Routines generated       : Total: 509.982ms, +52.111ms
+[INFO] Generation finished: public: Total: 510.052ms, +0.07ms
+[INFO] Affected files: 121
+[INFO] Modified files: 0
+[INFO] No modified files        : This code generation run has not produced any file modifications.
+This means, the schema has not changed, and no other parameters (jOOQ version, driver version, database version,
+and any configuration elements) have changed either.
+In automated builds, it is recommended to prevent unnecessary code generation runs. This run took: 500.067ms
+Possible means to prevent this:
+- Use manual code generation and check in generated sources: https://www.jooq.org/doc/latest/manual/code-generation/codegen-version-control/
+- Use schema version providers: https://www.jooq.org/doc/latest/manual/code-generation/codegen-advanced/codegen-config-database/codegen-database-version-providers/
+- Use gradle tasks and inputs: https://docs.gradle.org/current/userguide/incremental_build.html
+[INFO] Removing excess files
+[INFO] Source directory: /home/user/project/target/generated-sources/jooq added.
+[INFO] Node v20.18.1 is already installed.
+[INFO] > my-webapp-frontend@0.1.0 postinstall
+[INFO] > ./scripts/git-settings.sh
+[INFO] added 1667 packages, and audited 1668 packages in 3s
+[INFO] 354 packages are looking for funding
+[INFO]   run `npm fund` for details
+[INFO] 30 vulnerabilities (9 low, 5 moderate, 15 high, 1 critical)
+[INFO] To address issues that do not require attention, run:
+[INFO]   npm audit fix
+[INFO] To address all issues (including breaking changes), run:
+[INFO]   npm audit fix --force
+[INFO] Run `npm audit` for details.
+[INFO] > my-webapp-frontend@0.1.0 prebuild
+[INFO] > node ./scripts/prebuild.js
+[INFO] > my-webapp-frontend@0.1.0 build
+[INFO] > npm run build:stage && npm run build:prod
+[INFO] > my-webapp-frontend@0.1.0 build:stage
+[INFO] > env-cmd -f .env.stage react-app-rewired build && rm -rf dist-stage && mv build dist-stage
+[INFO] (node:542456) ExperimentalWarning: Importing JSON modules is an experimental feature and might change at any time
+[INFO] (Use `node --trace-warnings ...` to show where the warning was created)
+[INFO] Creating an optimized production build...
+[INFO] Compiled successfully.
+[INFO] File sizes after gzip:
+[INFO]   257.55 kB  build/static/js/main.js
+[INFO]   40.41 kB   build/static/js/962.f23c413d.chunk.js
+[INFO]   8.43 kB    build/static/css/main.d7534f51.css
+[INFO]   918 B      build/static/js/636.3320b849.chunk.js
+[INFO] The project was built assuming it is hosted at /.
+[INFO] You can control this with the homepage field in your package.json.
+[INFO] The build folder is ready to be deployed.
+[INFO] You may serve it with a static server:
+[INFO]   npm install -g serve
+[INFO]   serve -s build
+[INFO] Find out more about deployment here:
+[INFO]   https://cra.link/deployment
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] Copying 145 resources from frontend/dist-prod to target/classes/static/dist-prod
+[INFO] [stdout] Loading class org.jspecify.annotations.Nullable
+[INFO] [stdout] Loading class com.example.webapp.shared.TeamId
+[INFO] [stdout] Loading class java.time.Instant
+[INFO] [stdout] Suggestion: annotation 'org.jspecify.annotations.Nullable' supports 'TYPE_PARAMETER' or 'TYPE_USE' target.
+[INFO] [stdout] Parsing 'com.example.webapp.GlobalControllerExceptionHandler$VndErrors'
+[INFO] [stdout] Parsing Spring component: com.example.webapp.user.api.UserApiController
+[INFO] [stdout] Parsing Spring component: com.example.webapp.user.api.CompanyApiController
+[INFO] [stdout] Parsing Spring component: com.example.webapp.sync.api.UserImportApiController
+[INFO] [stdout] Parsing 'com.example.webapp.user.api.UserDetailsDto' used in 'UserApiController.getUserDetails'
+[INFO] [stdout] Parsing 'com.example.webapp.user.api.AuthContextDto' used in 'SelfController.self'
+[INFO] [stdout] Parsing 'com.example.webapp.user.CompanyResource' used in 'CompanyApiController.getCompany'
+[INFO] [stdout] Writing declarations to: /home/user/project/frontend/src/types/app.d.ts
+[INFO] BUILD SUCCESS
+[INFO] Total time:  36.332 s
