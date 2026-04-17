@@ -91,6 +91,11 @@ lazy_static! {
     /// `[INFO] Loaded 22539 auto-discovered prefixes for remote repository central (...)`
     static ref PREFIX_LOAD_RE: Regex =
         Regex::new(r"Loaded\s+\d+\s+auto-discovered prefixes").unwrap();
+    /// maven-enforcer per-rule `passed` notification — one line per rule on
+    /// every successful build. Format: `Rule <n>: <fqcn> passed`. Expects
+    /// input already passed through `strip_maven_prefix`.
+    static ref ENFORCER_RULE_PASSED_RE: Regex =
+        Regex::new(r"^Rule \d+: \S+ passed").unwrap();
 }
 
 /// JVM warning lines emitted by Java 24+ (restricted methods, native access,
@@ -1108,6 +1113,10 @@ const INFO_NOISE_PATTERNS: &[&str] = &[
     "Migration completed",
     "Inferring ",
     "No <input",
+    // githook-maven-plugin install chatter
+    "Installing commit-msg hook",
+    // maven-compiler-plugin trivia that precedes the actual compile step
+    "Changes detected - recompiling",
     // artifactregistry-maven-wagon chatter — can be dozens of ~300-char
     // lines per build about cached artifacts not matching the current
     // remote-repo set. Non-actionable; the build still proceeds.
@@ -1254,8 +1263,12 @@ fn should_keep_compile_line(line: &str) -> bool {
             return false;
         }
 
-        // Code generator config params and bundle size lines (regex — slower, run last)
-        if CODEGEN_CONFIG_RE.is_match(stripped) || BUNDLE_SIZE_RE.is_match(stripped) {
+        // Code generator config params, bundle size lines, and enforcer
+        // per-rule pass notifications (regex — slower, run last).
+        if CODEGEN_CONFIG_RE.is_match(stripped)
+            || BUNDLE_SIZE_RE.is_match(stripped)
+            || ENFORCER_RULE_PASSED_RE.is_match(stripped)
+        {
             return false;
         }
 
@@ -2996,6 +3009,30 @@ mod tests {
             "kept Google auth JUL warning body:\n{output}"
         );
         // Sanity: the real compile errors must be preserved.
+        assert!(output.contains("COMPILATION ERROR"));
+        assert!(output.contains("BUILD FAILURE"));
+    }
+
+    #[test]
+    fn test_plugin_boilerplate_is_stripped() {
+        // maven-enforcer per-rule `passed` lines, githook plugin hook
+        // install chatter, and maven-compiler `Changes detected` trivia
+        // are plugin wiring noise that the user never acts on.
+        let input = include_str!("../../../tests/fixtures/mvn_compile_artifactregistry.txt");
+        let output = filter_mvn_compile(input);
+        assert!(
+            !output.contains("RequireMavenVersion passed"),
+            "kept enforcer 'Rule N: …passed' line:\n{output}"
+        );
+        assert!(
+            !output.contains("Installing commit-msg hook"),
+            "kept githook plugin install line:\n{output}"
+        );
+        assert!(
+            !output.contains("Changes detected - recompiling"),
+            "kept compiler-plugin 'Changes detected' trivia:\n{output}"
+        );
+        // Real errors must still be there.
         assert!(output.contains("COMPILATION ERROR"));
         assert!(output.contains("BUILD FAILURE"));
     }
