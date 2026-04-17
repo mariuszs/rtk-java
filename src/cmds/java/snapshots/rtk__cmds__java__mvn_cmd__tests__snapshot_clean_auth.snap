@@ -1,0 +1,5 @@
+---
+source: src/cmds/java/mvn_cmd.rs
+expression: output
+---
+mvn clean: deleted /home/user/git/auth/target (1.418 s)

@@ -20,6 +20,7 @@ const MVN_SUBCMD_SAVINGS: &[(&str, f64)] = &[
     ("checkstyle:check", 90.0),
     ("checkstyle", 90.0),
     ("dependency:tree", 70.0),
+    ("clean", 95.0),
 ];
 
 pub const RULES: &[RtkRule] = &[

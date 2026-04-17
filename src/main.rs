@@ -1098,6 +1098,11 @@ enum MvnCommands {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         args: Vec<String>,
     },
+    /// Run `mvn clean` — collapse to one-line summary (what was deleted + time)
+    Clean {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
     /// Compile with compact output (strip [INFO] noise, keep errors and summary)
     Compile {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
@@ -1360,6 +1365,7 @@ fn dispatch_mvn(binary: mvn_cmd::MvnBinary, command: MvnCommands, verbose: u8) -
     match command {
         MvnCommands::Test { args } => mvn_cmd::run_test(binary, &args, verbose),
         MvnCommands::Verify { args } => mvn_cmd::run_verify(binary, &args, verbose),
+        MvnCommands::Clean { args } => mvn_cmd::run_clean(binary, &args, verbose),
         MvnCommands::Compile { args } => mvn_cmd::run_compile(binary, &args, verbose),
         MvnCommands::Checkstyle { args } => mvn_cmd::run_checkstyle(binary, &args, verbose),
         MvnCommands::DepTree { args } => mvn_cmd::run_dep_tree(binary, &args, verbose),
