@@ -783,6 +783,16 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str) -> String {
     }
 
     if state == TestParseState::Preamble {
+        // The build never reached the `T E S T S` marker. That means either:
+        //   (a) the goal ran something that produced no tests (validate,
+        //       a plugin-only phase) — "no tests run" is correct; or
+        //   (b) the build failed earlier (typically at the compile phase).
+        //       In that case, returning a cheerful "no tests run" line
+        //       would hide the actual errors from the user. Fall back to
+        //       the compile filter so the error block reaches them.
+        if clean.contains("BUILD FAILURE") {
+            return filter_mvn_compile(output);
+        }
         return format!("mvn {goal}: no tests run");
     }
 
@@ -2923,6 +2933,27 @@ mod tests {
         // Sanity: we still have the real failure details.
         assert!(output.contains("UserServiceTest.testCreateUser_DuplicateEmail"));
         assert!(output.contains("AssertionError"));
+    }
+
+    #[test]
+    fn test_mvn_test_compile_failure_surfaces_errors() {
+        // Running `mvn test` on a project that fails to compile must NOT
+        // return the cheerful "no tests run" line — users would miss the
+        // actual compile errors. Fall back to the compile filter so the
+        // error block reaches the user.
+        let input = include_str!("../../../tests/fixtures/mvn_test_compile_failure.txt");
+        let output = filter_mvn_test(input);
+        assert!(
+            !output.trim().ends_with("no tests run")
+                && output.len() > "mvn test: no tests run".len(),
+            "mvn test hid compile errors with 'no tests run':\n{output}"
+        );
+        // Must expose at least one real compile error.
+        assert!(
+            output.contains("COMPILATION ERROR") || output.contains("cannot find symbol"),
+            "mvn test output missing compile-error signal:\n{output}"
+        );
+        assert!(output.contains("BUILD FAILURE"));
     }
 
     #[test]
