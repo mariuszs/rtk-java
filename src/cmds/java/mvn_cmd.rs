@@ -256,6 +256,10 @@ pub fn run_checkstyle(binary: MvnBinary, args: &[String], verbose: u8) -> Result
     )
 }
 
+pub fn run_clean(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    run_simple_goal(binary, "clean", "clean", filter_mvn_clean, args, verbose)
+}
+
 pub fn run_dep_tree(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
     run_simple_goal(
         binary,
@@ -1022,6 +1026,62 @@ const CHECKSTYLE_HELP_BOILERPLATE: &[&str] = &[
     "MojoFailureException",
     "cwiki.apache.org",
 ];
+
+/// Filter `mvn clean` output — collapse to one line showing what was deleted
+/// and total time. If clean is combined with a later goal (`mvn clean compile`)
+/// that fails, keep `[ERROR]` lines so the user sees the actual compile error.
+fn filter_mvn_clean(output: &str) -> String {
+    let clean = strip_ansi(output);
+    let mut deleted: Vec<String> = Vec::new();
+    let mut total_time: Option<String> = None;
+    let mut build_failure = false;
+    let mut error_lines: Vec<String> = Vec::new();
+
+    for line in clean.lines() {
+        let trimmed = line.trim();
+        let stripped = strip_maven_prefix(trimmed);
+
+        if let Some(path) = stripped.strip_prefix("Deleting ") {
+            deleted.push(path.trim().to_string());
+            continue;
+        }
+
+        if stripped.contains("BUILD FAILURE") {
+            build_failure = true;
+            continue;
+        }
+
+        if let Some(caps) = TOTAL_TIME_RE.captures(stripped) {
+            total_time = Some(caps.get(1).map_or("", |m| m.as_str()).trim().to_string());
+            continue;
+        }
+
+        if trimmed.starts_with(ERROR_TAG) && !is_maven_boilerplate(trimmed) {
+            let err = stripped.trim();
+            if !err.is_empty() {
+                error_lines.push(err.to_string());
+            }
+        }
+    }
+
+    let time_str = total_time.as_deref().unwrap_or("?");
+
+    if build_failure {
+        let mut result = format!("mvn clean: BUILD FAILURE ({time_str})");
+        for err in error_lines.iter().take(MAX_FAILURES_SHOWN) {
+            result.push('\n');
+            result.push_str("  ");
+            result.push_str(&truncate(err, MAX_LINE_LENGTH));
+        }
+        return result;
+    }
+
+    match deleted.len() {
+        0 => format!("mvn clean: nothing to clean ({time_str})"),
+        1 => format!("mvn clean: deleted {} ({time_str})", deleted[0]),
+        n => format!("mvn clean: deleted {n} targets ({time_str})"),
+    }
+}
 
 /// Filter `mvn checkstyle:check` output:
 /// - strip ANSI codes, mvn/JVM/os-detection startup noise
@@ -1880,6 +1940,91 @@ mod tests {
     fn snapshot_compile_auth() {
         let input = include_str!("../../../tests/fixtures/mvn_compile_auth.txt");
         let output = filter_mvn_compile(input);
+        insta::assert_snapshot!(output);
+    }
+
+    // --- clean filter tests ---
+
+    #[test]
+    fn test_filter_mvn_clean_real_fixture() {
+        let input = include_str!("../../../tests/fixtures/mvn_clean_auth.txt");
+        let output = filter_mvn_clean(input);
+        assert!(
+            output.starts_with("mvn clean: deleted "),
+            "expected 'mvn clean: deleted ...' prefix, got: {}",
+            output
+        );
+        assert!(output.contains("/home/user/git/auth/target"));
+        assert!(output.contains("1.418 s"));
+        assert!(
+            !output.contains("BUILD FAILURE"),
+            "clean fixture is a success case, got: {}",
+            output
+        );
+        assert_eq!(
+            output.lines().count(),
+            1,
+            "single-module clean should collapse to one line, got: {}",
+            output
+        );
+    }
+
+    #[test]
+    fn test_filter_mvn_clean_savings() {
+        let input = include_str!("../../../tests/fixtures/mvn_clean_auth.txt");
+        let output = filter_mvn_clean(input);
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(
+            savings >= 90.0,
+            "mvn clean: expected ≥90% savings, got {:.1}% ({} -> {} tokens)\nOutput: {}",
+            savings,
+            count_tokens(input),
+            count_tokens(&output),
+            output,
+        );
+    }
+
+    #[test]
+    fn test_filter_mvn_clean_no_deletions() {
+        // First clean of a never-built project: no `Deleting` lines, but BUILD SUCCESS.
+        let input = "[INFO] Scanning for projects...\n\
+                     [INFO] Building sample 1.0\n\
+                     [INFO] BUILD SUCCESS\n\
+                     [INFO] Total time:  0.523 s\n";
+        let output = filter_mvn_clean(input);
+        assert_eq!(output, "mvn clean: nothing to clean (0.523 s)");
+    }
+
+    #[test]
+    fn test_filter_mvn_clean_multi_module() {
+        let input = "[INFO] Deleting /repo/mod-a/target\n\
+                     [INFO] Deleting /repo/mod-b/target\n\
+                     [INFO] Deleting /repo/mod-c/target\n\
+                     [INFO] BUILD SUCCESS\n\
+                     [INFO] Total time:  2.101 s\n";
+        let output = filter_mvn_clean(input);
+        assert_eq!(output, "mvn clean: deleted 3 targets (2.101 s)");
+    }
+
+    #[test]
+    fn test_filter_mvn_clean_build_failure_keeps_errors() {
+        // `mvn clean compile` failing at compile — clean filter must still surface [ERROR] lines.
+        let input = "[INFO] Deleting /repo/target\n\
+                     [ERROR] COMPILATION ERROR\n\
+                     [ERROR] /repo/src/main/java/Foo.java:[12,5] cannot find symbol\n\
+                     [ERROR] symbol:   method bar()\n\
+                     [INFO] BUILD FAILURE\n\
+                     [INFO] Total time:  0.9 s\n";
+        let output = filter_mvn_clean(input);
+        assert!(output.starts_with("mvn clean: BUILD FAILURE (0.9 s)"));
+        assert!(output.contains("COMPILATION ERROR"));
+        assert!(output.contains("cannot find symbol"));
+    }
+
+    #[test]
+    fn snapshot_clean_auth() {
+        let input = include_str!("../../../tests/fixtures/mvn_clean_auth.txt");
+        let output = filter_mvn_clean(input);
         insta::assert_snapshot!(output);
     }
 

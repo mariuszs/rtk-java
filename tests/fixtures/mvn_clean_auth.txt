@@ -1,0 +1,33 @@
+[[34;1mINFO[0m] Loaded 22557 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[[34;1mINFO[0m] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
+[[34;1mINFO[0m] Scanning for projects...
+[[34;1mINFO[0m] Loaded 22456 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63.txt)
+[[34;1mINFO[0m] Loaded 22557 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[[33;1mWARNING[0m] Could not transfer metadata /.meta/prefixes.txt from/to shibboleth-releases-5d99c0486312ae43e4bc39d107c6522d62203c00 (https://build.shibboleth.net/nexus/content/repositories/releases/): Checksum validation failed, no checksums available
+[[34;1mINFO[0m] Loaded 22557 auto-discovered prefixes for remote repository maven-central (prefixes-maven-central-de66ab544dabb92499170649134bc3bd0ea8afac.txt)
+[[34;1mINFO[0m] Loaded 22456 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388.txt)
+[[33;1mWARNING[0m] 
+[[33;1mWARNING[0m] 1 problem was encountered while building the effective model for 'com.example:auth:jar:1.3-SNAPSHOT' (use -e to see details)
+[[33;1mWARNING[0m] 
+[[33;1mWARNING[0m] Total model problems reported: 1
+[[33;1mWARNING[0m] 
+[[33;1mWARNING[0m] It is highly recommended to fix these problems because they threaten the stability of your build.
+[[33;1mWARNING[0m] 
+[[33;1mWARNING[0m] For this reason, future Maven versions might no longer support building such malformed projects.
+[[33;1mWARNING[0m] 
+[[34;1mINFO[0m] 
+[[34;1mINFO[0m] [1m-------------------------------------------------< [36;22mcom.example:auth[39;1m >--------------------------------------------------[0m
+[[34;1mINFO[0m] [1mBuilding auth 1.3-SNAPSHOT[0m
+[[34;1mINFO[0m]   from pom.xml
+[[34;1mINFO[0m] [1m---------------------------------------------------------[ jar ]----------------------------------------------------------[0m
+[[34;1mINFO[0m] Loaded 22557 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[[33;1mWARNING[0m] 176 problems were encountered while building the effective model for 'cz.habarta.typescript-generator:typescript-generator-maven-plugin:jar:3.2.1263' during n/a (use -X to see details)
+[[34;1mINFO[0m] 
+[[34;1mINFO[0m] [1m--- [32;22mclean:3.5.0:clean[0m [1m(default-clean)[0m @ [36mauth[39;1m ---[0m
+[[34;1mINFO[0m] Deleting /home/user/git/auth/target
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
+[[34;1mINFO[0m] [32;1mBUILD SUCCESS[0m
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
+[[34;1mINFO[0m] Total time:  1.418 s
+[[34;1mINFO[0m] Finished at: 2026-04-17T22:42:44+02:00
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
