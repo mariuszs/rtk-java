@@ -1077,8 +1077,11 @@ const INFO_NOISE_PATTERNS: &[&str] = &[
     "Create cache directory",
     "Artifacts were already validated",
     " artifact(s) in repository",
-    // maven-resources-plugin non-actionable copy chatter
-    "encoding to copy",
+    // maven-resources-plugin non-actionable copy chatter. `copy filtered`
+    // catches both variants:
+    //   "Using 'UTF-8' encoding to copy filtered resources."
+    //   "The encoding used to copy filtered properties files have not been set…"
+    "copy filtered",
     "skip non existing resourceDirectory",
     // maven-checkstyle-plugin clean-audit output
     "Starting audit",
@@ -2920,5 +2923,20 @@ mod tests {
         // Sanity: we still have the real failure details.
         assert!(output.contains("UserServiceTest.testCreateUser_DuplicateEmail"));
         assert!(output.contains("AssertionError"));
+    }
+
+    #[test]
+    fn test_resources_plugin_encoding_advisory_is_stripped() {
+        // maven-resources-plugin emits a ~100-word `[INFO]` advisory when
+        // it encounters `.properties` files without an explicit filtering
+        // encoding set. Pure documentation-pointer noise on success.
+        let input = include_str!("../../../tests/fixtures/mvn_resources_encoding_warning.txt");
+        let output = filter_mvn_compile(input);
+        assert!(
+            !output.contains("encoding used to copy"),
+            "kept resources-plugin encoding advisory:\n{output}"
+        );
+        assert!(output.contains("BUILD SUCCESS"));
+        assert!(output.contains("Total time"));
     }
 }
