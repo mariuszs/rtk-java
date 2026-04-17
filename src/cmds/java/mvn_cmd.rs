@@ -119,6 +119,31 @@ impl std::fmt::Display for MvnBinary {
     }
 }
 
+/// Goals that share the test-output state machine (surefire + failsafe).
+/// Restricted to the two variants the filter can format — adding a third
+/// forces the matcher here to be updated, which is the point.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum TestLikeGoal {
+    Test,
+    Verify,
+}
+
+impl TestLikeGoal {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Test => "test",
+            Self::Verify => "verify",
+        }
+    }
+
+    fn filter(self) -> fn(&str) -> String {
+        match self {
+            Self::Test => filter_mvn_test,
+            Self::Verify => filter_mvn_verify,
+        }
+    }
+}
+
 /// Build the `(tool_name, tee_label)` pair used for tracking a run of
 /// `<binary> <goal>`. Tee labels use `_` separators (filesystem-safe); tool
 /// names use a space (human-readable in `rtk gain`). Kept as a single helper
@@ -143,17 +168,36 @@ fn mvn_command(binary: MvnBinary) -> std::process::Command {
     }
 }
 
-/// Run `<binary> test` with state-machine filtered output.
+/// Run `<binary> test` with state-machine filter + surefire/failsafe XML enrichment.
 pub fn run_test(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    run_tests_like(binary, TestLikeGoal::Test, args, verbose)
+}
+
+/// Run `<binary> verify`. Verify is the canonical goal that produces
+/// `target/failsafe-reports/` (integration tests), so this is where failsafe
+/// XML enrichment is most valuable; the state machine accumulates surefire +
+/// failsafe `T E S T S` blocks into one combined summary.
+pub fn run_verify(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    run_tests_like(binary, TestLikeGoal::Verify, args, verbose)
+}
+
+fn run_tests_like(
+    binary: MvnBinary,
+    goal: TestLikeGoal,
+    args: &[String],
+    verbose: u8,
+) -> Result<i32> {
+    let goal_str = goal.as_str();
+
     let mut cmd = mvn_command(binary);
-    cmd.arg("test");
+    cmd.arg(goal_str);
 
     for arg in args {
         cmd.arg(arg);
     }
 
     if verbose > 0 {
-        eprintln!("Running: {binary} test {}", args.join(" "));
+        eprintln!("Running: {binary} {goal_str} {}", args.join(" "));
     }
 
     let started_at = std::time::SystemTime::now();
@@ -164,15 +208,16 @@ pub fn run_test(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> 
     let app_pkgs = crate::cmds::java::pom_groupid::detect(&cwd);
 
     let cwd_for_filter = cwd.clone();
+    let filter = goal.filter();
 
-    let (tool_name, tee_label) = mvn_labels(binary, "test", "test");
+    let (tool_name, tee_label) = mvn_labels(binary, goal_str, goal_str);
     runner::run_filtered(
         cmd,
         &tool_name,
         &args.join(" "),
         move |raw: &str| {
-            let filtered = filter_mvn_test(raw);
-            enrich_with_reports(&filtered, &cwd_for_filter, started_at, &app_pkgs)
+            let filtered = filter(raw);
+            enrich_with_reports(&filtered, &cwd_for_filter, started_at, &app_pkgs, goal_str)
         },
         runner::RunOptions::with_tee(&tee_label),
     )
@@ -403,12 +448,13 @@ pub(crate) fn enrich_with_reports(
     cwd: &std::path::Path,
     since: std::time::SystemTime,
     app_packages: &[String],
+    goal: &str,
 ) -> String {
     if !text_summary.starts_with("mvn ") {
         return text_summary.to_string();
     }
 
-    let zero_tests = text_summary == "mvn test: no tests run"
+    let zero_tests = text_summary.ends_with(": no tests run")
         || text_summary.contains(": 0 passed");
     let has_failures =
         text_summary.contains("failed") || text_summary.contains("BUILD FAILURE");
@@ -432,15 +478,14 @@ pub(crate) fn enrich_with_reports(
     );
 
     match (zero_tests, has_failures, &sf, &fs) {
-        (true, _, None, None) => {
-            "mvn test: 0 tests executed — surefire detected no tests. \
+        (true, _, None, None) => format!(
+            "mvn {goal}: 0 tests executed — surefire detected no tests. \
              Check pom.xml (surefire plugin configuration) or run: \
-             rtk proxy mvn test"
-                .to_string()
-        }
+             rtk proxy mvn {goal}"
+        ),
         (_, true, None, None) => format!(
             "{text_summary}\n(no XML reports found — check target/surefire-reports/ \
-             or run: rtk proxy mvn test)"
+             or run: rtk proxy mvn {goal})"
         ),
         _ => render_enriched(text_summary, sf.as_ref(), fs.as_ref()),
     }
@@ -559,13 +604,22 @@ fn counts(r: Option<&SurefireResult>) -> (usize, usize, usize) {
 }
 
 /// Filter `mvn test` output using a state machine parser.
+pub(crate) fn filter_mvn_test(output: &str) -> String {
+    filter_mvn_tests_with_goal(output, "test")
+}
+
+pub(crate) fn filter_mvn_verify(output: &str) -> String {
+    filter_mvn_tests_with_goal(output, "verify")
+}
+
+/// Shared state machine parser for test-producing goals (`test`, `verify`).
 ///
 /// States: Preamble -> Testing -> Summary -> Done
 /// - Preamble: skip everything before "T E S T S" marker
 /// - Testing: collect failure details from [ERROR] headers and assertion lines
 /// - Summary: parse final "Tests run:" line, BUILD SUCCESS/FAILURE, Total time
 /// - Done: stop at Help boilerplate
-fn filter_mvn_test(output: &str) -> String {
+fn filter_mvn_tests_with_goal(output: &str, goal: &str) -> String {
     let clean = strip_ansi(output);
     let mut state = TestParseState::Preamble;
 
@@ -672,7 +726,7 @@ fn filter_mvn_test(output: &str) -> String {
     }
 
     if state == TestParseState::Preamble {
-        return "mvn test: no tests run".to_string();
+        return format!("mvn {goal}: no tests run");
     }
 
     let counts = cumulative;
@@ -681,7 +735,7 @@ fn filter_mvn_test(output: &str) -> String {
 
     if !has_failures {
         let passed = counts.run.saturating_sub(counts.skipped);
-        let mut summary = format!("mvn test: {} passed", passed);
+        let mut summary = format!("mvn {goal}: {} passed", passed);
         if counts.skipped > 0 {
             summary.push_str(&format!(", {} skipped", counts.skipped));
         }
@@ -690,7 +744,7 @@ fn filter_mvn_test(output: &str) -> String {
     }
 
     let failed_count = counts.failures + counts.errors;
-    let mut result = format!("mvn test: {} run, {} failed", counts.run, failed_count);
+    let mut result = format!("mvn {goal}: {} run, {} failed", counts.run, failed_count);
     if counts.skipped > 0 {
         result.push_str(&format!(", {} skipped", counts.skipped));
     }
@@ -1866,7 +1920,6 @@ mod tests {
         // Rare lifecycle phases → passthrough (rare in real usage)
         assert_eq!(route_goal("package"), GoalRouting::Passthrough);
         assert_eq!(route_goal("install"), GoalRouting::Passthrough);
-        assert_eq!(route_goal("verify"), GoalRouting::Passthrough);
         assert_eq!(route_goal("clean"), GoalRouting::Passthrough);
         assert_eq!(route_goal("deploy"), GoalRouting::Passthrough);
 
@@ -2076,7 +2129,12 @@ mod tests {
     #[test]
     fn test_filter_verify_auth_counts() {
         let input = include_str!("../../../tests/fixtures/mvn_verify_auth.txt");
-        let output = filter_mvn_test(input);
+        let output = filter_mvn_verify(input);
+        assert!(
+            output.starts_with("mvn verify:"),
+            "verify filter must emit 'mvn verify:' prefix, got: {}",
+            output
+        );
         assert!(
             output.contains("941 passed"),
             "should accumulate surefire+failsafe (688+262)=950 run, minus 9 skipped = 941 passed, got: {}",
@@ -2102,7 +2160,7 @@ mod tests {
     #[test]
     fn test_filter_verify_auth_savings() {
         let input = include_str!("../../../tests/fixtures/mvn_verify_auth.txt");
-        let output = filter_mvn_test(input);
+        let output = filter_mvn_verify(input);
 
         let input_tokens = count_tokens(input);
         let output_tokens = count_tokens(&output);
@@ -2127,6 +2185,7 @@ mod tests {
             tmp.path(),
             std::time::SystemTime::now(),
             &pkgs("com.example"),
+            "test",
         );
         assert_eq!(out, text);
     }
@@ -2140,9 +2199,51 @@ mod tests {
             tmp.path(),
             std::time::SystemTime::now(),
             &pkgs("com.example"),
+            "test",
         );
         assert!(out.contains("0 tests executed"));
         assert!(out.contains("rtk proxy mvn test") || out.contains("surefire"));
+    }
+
+    #[test]
+    fn enrich_no_tests_for_verify_goal_uses_verify_in_message() {
+        let tmp = tempfile::tempdir().unwrap();
+        let text = "mvn verify: no tests run";
+        let out = super::enrich_with_reports(
+            text,
+            tmp.path(),
+            std::time::SystemTime::now(),
+            &pkgs("com.example"),
+            "verify",
+        );
+        assert!(
+            out.contains("0 tests executed"),
+            "zero-tests branch must fire for verify, got: {}",
+            out
+        );
+        assert!(
+            out.contains("rtk proxy mvn verify"),
+            "error message must reference the verify goal, got: {}",
+            out
+        );
+    }
+
+    #[test]
+    fn snapshot_verify_auth() {
+        let input = include_str!("../../../tests/fixtures/mvn_verify_auth.txt");
+        let output = filter_mvn_verify(input);
+        insta::assert_snapshot!(output);
+    }
+
+    #[test]
+    fn test_filter_mvn_test_still_emits_test_prefix() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_pass_mavenmcp.txt");
+        let output = filter_mvn_test(input);
+        assert!(
+            output.starts_with("mvn test:"),
+            "test filter must keep 'mvn test:' prefix after goal parameterization, got: {}",
+            output
+        );
     }
 
     #[test]
@@ -2158,7 +2259,7 @@ mod tests {
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text = "mvn test: 4 run, 2 failed (01:02 min)\nBUILD FAILURE";
-        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"));
+        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
 
         assert!(out.contains("Failures (from surefire-reports/)"));
         assert!(out.contains("com.example.FailingTest.shouldReturnUser"));
@@ -2185,7 +2286,7 @@ mod tests {
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text = "mvn verify: 10 run, 3 failed (03:30 min)\nBUILD FAILURE";
-        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"));
+        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
         assert!(out.contains("Failures (from surefire-reports/)"));
         assert!(out.contains("Integration failures (from failsafe-reports/)"));
         assert!(out.contains("Caused by: org.hibernate.HibernateException"));
@@ -2200,6 +2301,7 @@ mod tests {
             tmp.path(),
             std::time::SystemTime::now(),
             &pkgs("com.example"),
+            "test",
         );
         assert!(out.contains("no XML reports"));
         assert!(out.contains("rtk proxy mvn test"));
@@ -2215,6 +2317,7 @@ mod tests {
             tmp.path(),
             std::time::SystemTime::now(),
             &pkgs("com.example"),
+            "test",
         );
         assert_eq!(out, text, "10 passed must short-circuit without enrichment");
     }
@@ -2237,7 +2340,7 @@ mod tests {
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text = "mvn test: 7 run, 2 failed (00:10 min)\nBUILD FAILURE";
-        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"));
+        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
         insta::assert_snapshot!(out);
     }
 
@@ -2266,7 +2369,7 @@ mod tests {
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text = "mvn verify: 12 run, 4 failed (05:42 min)\nBUILD FAILURE";
-        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"));
+        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
         insta::assert_snapshot!(out);
     }
 
@@ -2278,6 +2381,7 @@ mod tests {
             tmp.path(),
             std::time::SystemTime::now(),
             &pkgs("com.example"),
+            "test",
         );
         insta::assert_snapshot!(out);
     }
@@ -2292,6 +2396,7 @@ mod tests {
             tmp.path(),
             std::time::SystemTime::now(),
             &pkgs("com.example"),
+            "test",
         );
         assert_eq!(out, text, "happy path must not allocate or append");
     }
@@ -2318,7 +2423,7 @@ mod tests {
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text_summary = "mvn verify: 4 run, 1 failed (01:23 min)\nBUILD FAILURE";
-        let enriched = super::enrich_with_reports(text_summary, tmp.path(), since, &pkgs("com.example"));
+        let enriched = super::enrich_with_reports(text_summary, tmp.path(), since, &pkgs("com.example"), "verify");
 
         let raw_tokens = count_tokens(&raw_log);
         let enriched_tokens = count_tokens(&enriched);

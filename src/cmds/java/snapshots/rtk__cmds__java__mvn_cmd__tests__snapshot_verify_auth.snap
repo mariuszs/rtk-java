@@ -1,0 +1,5 @@
+---
+source: src/cmds/java/mvn_cmd.rs
+expression: output
+---
+mvn verify: 941 passed, 9 skipped (02:11 min)

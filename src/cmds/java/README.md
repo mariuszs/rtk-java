@@ -8,10 +8,11 @@
 - `rtk mvn`: auto-detects `mvnw` wrapper in project root; falls back to system `mvn`
 - `rtk mvnd`: always invokes the Maven Daemon (`mvnd`) — the wrapper is bypassed because `mvnd` is a separate long-lived JVM daemon; metrics are tracked as `mvnd <goal>` in `rtk gain` so mvn/mvnd savings stay separate
 - `mvn test` uses a state-machine parser (Preamble → Testing → Summary → Done) for 97-99%+ savings on real-world output
+- `mvn verify` shares the same state-machine filter as `test`; surefire + failsafe `T E S T S` blocks accumulate into one combined summary. This is the canonical goal that produces `target/failsafe-reports/` (integration tests), so XML enrichment surfaces both unit- and integration-test failures
 - `mvn compile` uses line filtering to strip `[INFO]` noise, download progress, JVM/native-access warnings, and plugin chatter (jOOQ codegen, Liquibase, npm/React builds, typescript-generator). Also routes `process-classes` and `test-compile` through the same filter (same noise profile)
 - `mvn checkstyle:check` (aliased as `checkstyle`) compacts violation lines to `path:line:col [Rule] message`, strips mvn startup noise and Help-link boilerplate, keeps `N Checkstyle violations` summary and BUILD SUCCESS/FAILURE
 - `mvn dependency:tree` strips "omitted for duplicate" lines, "version managed from" annotations, and collapses deep transitive branches
-- Unknown goals stream via `cmd.status()` passthrough (safe for long-running goals like `spring-boot:run`); rare lifecycle phases (`package`, `install`, `verify`, `clean`, `deploy`) also passthrough — filtered only when the output shape matches compile
+- Unknown goals stream via `cmd.status()` passthrough (safe for long-running goals like `spring-boot:run`); rare lifecycle phases (`package`, `install`, `clean`, `deploy`) also passthrough — filtered only when the output shape matches compile
 - Routing via Clap sub-enum with `#[command(external_subcommand)] Other` for unknown goals; compile-like and checkstyle goals received as `Other` are auto-re-dispatched by `route_goal` to the right filter
 
 ## Output enrichment from Surefire/Failsafe XML reports
