@@ -31,6 +31,17 @@ lazy_static! {
     static ref TOTAL_TIME_RE: Regex =
         Regex::new(r"Total time:\s+(.+)")
             .unwrap();
+}
+
+/// Parse `Total time: <value>` from a Maven line already passed through
+/// `strip_maven_prefix`. Returns the trimmed value borrowed from the input.
+fn parse_total_time(stripped: &str) -> Option<&str> {
+    TOTAL_TIME_RE
+        .captures(stripped)
+        .and_then(|caps| caps.get(1).map(|m| m.as_str().trim()))
+}
+
+lazy_static! {
     static ref VERSION_MANAGED_RE: Regex =
         Regex::new(r"\s*\(version managed from [^)]+\)")
             .unwrap();
@@ -42,6 +53,27 @@ lazy_static! {
     /// Frontend bundle size lines: `257.55 kB  build/static/js/main.js`
     static ref BUNDLE_SIZE_RE: Regex =
         Regex::new(r"^\d[\d.]*\s+[kKMG]?B\s")
+            .unwrap();
+    /// Reactor Build Order line: `<module name>   [pom|jar|war|ear]`
+    /// Expects input already passed through `strip_maven_prefix`.
+    static ref REACTOR_BUILD_ORDER_RE: Regex =
+        Regex::new(r"^\S.*\s+\[(?:pom|jar|war|ear)\]\s*$")
+            .unwrap();
+    /// Reactor Summary per-module line:
+    /// `<module> ...... SUCCESS [  0.234 s]` (also FAILURE, SKIPPED).
+    /// Expects input already passed through `strip_maven_prefix`.
+    static ref REACTOR_SUMMARY_LINE_RE: Regex =
+        Regex::new(r"^(\S.*?)\s*\.{2,}\s*(SUCCESS|FAILURE|SKIPPED)\s*\[([^\]]+)\]\s*$")
+            .unwrap();
+    /// Javac error location: `[ERROR] /path/File.java:[line,col] message`
+    /// Capture groups: 1=path, 2=line, 3=col. Used for error dedup.
+    static ref COMPILE_ERROR_LOCATION_RE: Regex =
+        Regex::new(r"^\[ERROR\]\s+(\S+?):\[(\d+),(\d+)\]")
+            .unwrap();
+    /// Javac context line attached to a previous error:
+    /// `[ERROR]   symbol:   ...`, `[ERROR]   location: ...`, required/found/reason.
+    static ref COMPILE_ERROR_CONTEXT_RE: Regex =
+        Regex::new(r"^\[ERROR\]\s+(?:symbol|location|required|found|reason):")
             .unwrap();
     /// Checkstyle violation lines:
     /// `[ERROR] <path>:[<line>[,<col>]] (<category>) <Rule>: <msg>`
@@ -695,8 +727,8 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str) -> String {
                     }
                 }
 
-                if let Some(caps) = TOTAL_TIME_RE.captures(stripped) {
-                    total_time = Some(caps.get(1).map_or("", |m| m.as_str()).trim().to_string());
+                if let Some(t) = parse_total_time(stripped) {
+                    total_time = Some(t.to_string());
                     state = TestParseState::Done;
                 }
             }
@@ -819,6 +851,7 @@ fn is_maven_boilerplate(line: &str) -> bool {
         "See dump files",
         "Failed to execute goal",
         "There are test failures",
+        "For more information about",
     ];
 
     for pattern in BOILERPLATE_PATTERNS {
@@ -836,19 +869,135 @@ fn is_maven_boilerplate(line: &str) -> bool {
 
 /// Filter `mvn compile` (and compile-like goals such as `process-classes`,
 /// `test-compile`) output — strip [INFO] noise, keep errors and summary.
+///
+/// Multi-module reactors emit a `Reactor Build Order:` block and a `Reactor
+/// Summary for …` block with per-module status lines. Both are collapsed:
+/// build-order lines are skipped outright (redundant with per-module Building
+/// headers), and the summary is replaced by a one-liner
+/// `N modules: M SUCCESS, K FAILURE (first-failed-name)` that only surfaces if
+/// something failed (keeps BUILD SUCCESS clean for green builds).
+///
+/// javac `[ERROR] <path>:[<line>,<col>]` lines are deduped by (path, line, col)
+/// because Maven prints them twice on failure — inline during compilation and
+/// again in the trailing `[ERROR]` help block.
 fn filter_mvn_compile(output: &str) -> String {
-    let clean = strip_ansi(output);
-    let result_lines: Vec<&str> = clean
-        .lines()
-        .map(str::trim)
-        .filter(|line| should_keep_compile_line(line))
-        .collect();
+    use std::collections::HashSet;
 
-    if result_lines.is_empty() {
+    let clean = strip_ansi(output);
+    let mut in_build_order = false;
+    // (status, name) per module while the Reactor Summary block is open
+    let mut reactor_modules: Option<Vec<(String, String)>> = None;
+    let mut seen_errors: HashSet<(String, String, String)> = HashSet::new();
+    // When the current `[ERROR] path:[L,C]` was a duplicate, swallow the
+    // javac context lines (`[ERROR] symbol: …`) that would mirror an earlier
+    // occurrence emitted without the `[ERROR]` prefix.
+    let mut swallow_error_context = false;
+    let mut result: Vec<String> = Vec::new();
+
+    for raw in clean.lines() {
+        let line = raw.trim();
+        let stripped = strip_maven_prefix(line);
+
+        if in_build_order {
+            if REACTOR_BUILD_ORDER_RE.is_match(stripped)
+                || stripped.is_empty()
+                || line == INFO_TAG
+            {
+                continue;
+            }
+            in_build_order = false;
+            // fall through
+        }
+
+        if stripped == "Reactor Build Order:" {
+            in_build_order = true;
+            continue;
+        }
+
+        if let Some(modules) = reactor_modules.as_mut() {
+            if let Some(caps) = REACTOR_SUMMARY_LINE_RE.captures(stripped) {
+                modules.push((caps[2].to_string(), caps[1].trim().to_string()));
+                continue;
+            }
+            if stripped.is_empty() || line == INFO_TAG || stripped.starts_with("---") {
+                continue;
+            }
+            if let Some(compact) = format_reactor_summary(modules) {
+                result.push(compact);
+            }
+            reactor_modules = None;
+            // fall through
+        }
+
+        if stripped.starts_with("Reactor Summary for ") {
+            reactor_modules = Some(Vec::new());
+            continue;
+        }
+
+        if !should_keep_compile_line(line) {
+            swallow_error_context = false;
+            continue;
+        }
+
+        if let Some(caps) = COMPILE_ERROR_LOCATION_RE.captures(line) {
+            let key = (caps[1].to_string(), caps[2].to_string(), caps[3].to_string());
+            if !seen_errors.insert(key) {
+                swallow_error_context = true;
+                continue;
+            }
+            swallow_error_context = false;
+        } else if swallow_error_context && COMPILE_ERROR_CONTEXT_RE.is_match(line) {
+            continue;
+        } else {
+            swallow_error_context = false;
+        }
+
+        result.push(line.to_string());
+    }
+
+    if let Some(modules) = reactor_modules.as_ref() {
+        if let Some(compact) = format_reactor_summary(modules) {
+            result.push(compact);
+        }
+    }
+
+    if result.is_empty() {
         return "mvn: ok".to_string();
     }
 
-    result_lines.join("\n")
+    result.join("\n")
+}
+
+/// Render a one-line reactor summary naming failed modules. Returns `None`
+/// when every module succeeded — the trailing `BUILD SUCCESS` line is enough.
+fn format_reactor_summary(modules: &[(String, String)]) -> Option<String> {
+    if modules.is_empty() {
+        return None;
+    }
+    let failed: Vec<&str> = modules
+        .iter()
+        .filter(|(status, _)| status == "FAILURE")
+        .map(|(_, name)| name.as_str())
+        .collect();
+    if failed.is_empty() {
+        return None;
+    }
+    let skipped = modules
+        .iter()
+        .filter(|(s, _)| s == "SKIPPED")
+        .count();
+    let succeeded = modules.len() - failed.len() - skipped;
+    let mut out = format!(
+        "Reactor: {} modules — {} SUCCESS, {} FAILURE",
+        modules.len(),
+        succeeded,
+        failed.len()
+    );
+    if skipped > 0 {
+        out.push_str(&format!(", {skipped} SKIPPED"));
+    }
+    out.push_str(&format!(" ({})", failed.join(", ")));
+    Some(out)
 }
 
 const INFO_NOISE_PATTERNS: &[&str] = &[
@@ -864,6 +1013,7 @@ const INFO_NOISE_PATTERNS: &[&str] = &[
     "Using auto detected",
     "Loaded ",
     "Finished at:",
+    "/pom.xml",
     "from pom.xml",
     "Copying ",
     "argLine set to",
@@ -982,7 +1132,7 @@ fn should_keep_compile_line(line: &str) -> bool {
             }
         }
 
-        if stripped.contains("deprecated") || stripped.contains("WARNING") {
+        if stripped.contains("deprecat") || stripped.contains("WARNING") {
             return false;
         }
 
@@ -1032,17 +1182,22 @@ const CHECKSTYLE_HELP_BOILERPLATE: &[&str] = &[
 /// that fails, keep `[ERROR]` lines so the user sees the actual compile error.
 fn filter_mvn_clean(output: &str) -> String {
     let clean = strip_ansi(output);
-    let mut deleted: Vec<String> = Vec::new();
-    let mut total_time: Option<String> = None;
+    let mut deleted_count: usize = 0;
+    let mut first_deleted: Option<&str> = None;
+    let mut total_time: Option<&str> = None;
     let mut build_failure = false;
-    let mut error_lines: Vec<String> = Vec::new();
+    let mut error_lines: Vec<&str> = Vec::new();
 
     for line in clean.lines() {
         let trimmed = line.trim();
         let stripped = strip_maven_prefix(trimmed);
 
         if let Some(path) = stripped.strip_prefix("Deleting ") {
-            deleted.push(path.trim().to_string());
+            let path = path.trim();
+            if deleted_count == 0 {
+                first_deleted = Some(path);
+            }
+            deleted_count += 1;
             continue;
         }
 
@@ -1051,24 +1206,29 @@ fn filter_mvn_clean(output: &str) -> String {
             continue;
         }
 
-        if let Some(caps) = TOTAL_TIME_RE.captures(stripped) {
-            total_time = Some(caps.get(1).map_or("", |m| m.as_str()).trim().to_string());
-            continue;
+        if total_time.is_none() {
+            if let Some(t) = parse_total_time(stripped) {
+                total_time = Some(t);
+                continue;
+            }
         }
 
-        if trimmed.starts_with(ERROR_TAG) && !is_maven_boilerplate(trimmed) {
+        if error_lines.len() < MAX_FAILURES_SHOWN
+            && trimmed.starts_with(ERROR_TAG)
+            && !is_maven_boilerplate(trimmed)
+        {
             let err = stripped.trim();
             if !err.is_empty() {
-                error_lines.push(err.to_string());
+                error_lines.push(err);
             }
         }
     }
 
-    let time_str = total_time.as_deref().unwrap_or("?");
+    let time_str = total_time.unwrap_or("?");
 
     if build_failure {
         let mut result = format!("mvn clean: BUILD FAILURE ({time_str})");
-        for err in error_lines.iter().take(MAX_FAILURES_SHOWN) {
+        for err in &error_lines {
             result.push('\n');
             result.push_str("  ");
             result.push_str(&truncate(err, MAX_LINE_LENGTH));
@@ -1076,9 +1236,12 @@ fn filter_mvn_clean(output: &str) -> String {
         return result;
     }
 
-    match deleted.len() {
+    match deleted_count {
         0 => format!("mvn clean: nothing to clean ({time_str})"),
-        1 => format!("mvn clean: deleted {} ({time_str})", deleted[0]),
+        1 => format!(
+            "mvn clean: deleted {} ({time_str})",
+            first_deleted.unwrap_or("")
+        ),
         n => format!("mvn clean: deleted {n} targets ({time_str})"),
     }
 }
@@ -1317,6 +1480,77 @@ mod tests {
         assert_eq!(a.failures, 21);
         assert_eq!(a.errors, 32);
         assert_eq!(a.skipped, 43);
+    }
+
+    // --- Regression coverage on fixtures adapted from rtk-ai/rtk#782 ---
+    // (multi-module reactor with aggregated Surefire output + dual-emitted
+    // javac errors — validates our Reactor Summary collapse and error dedup.)
+
+    #[test]
+    fn test_pr782_test_pass_accumulates_modules() {
+        let input = include_str!("../../../tests/fixtures/mvn_pr782_test_pass_raw.txt");
+        let output = filter_mvn_test(input);
+        // Fixture has 6 modules totalling 20 tests — accumulation must not
+        // report only the first module's count.
+        assert!(
+            output.contains("20 passed"),
+            "multi-module accumulation broken, got: {output}"
+        );
+        let savings = 100.0
+            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 95.0, "expected ≥95%, got {:.1}%", savings);
+    }
+
+    #[test]
+    fn test_pr782_test_fail_accumulates_and_dedups() {
+        let input = include_str!("../../../tests/fixtures/mvn_pr782_test_fail_raw.txt");
+        let output = filter_mvn_test(input);
+        assert!(output.contains("20 run, 2 failed"), "got: {output}");
+        // Each failure appears once in the enumerated Failures block
+        // (stack trace may still reference the method name — count enumerator lines).
+        let enumerated = output
+            .lines()
+            .filter(|l| l.starts_with("1. ") || l.starts_with("2. "))
+            .count();
+        assert_eq!(enumerated, 2, "expected exactly 2 enumerated failures in: {output}");
+        let savings = 100.0
+            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 85.0, "expected ≥85%, got {:.1}%", savings);
+    }
+
+    #[test]
+    fn test_pr782_compile_success_collapses_reactor() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_pr782_compile_success_raw.txt");
+        let output = filter_mvn_compile(input);
+        // Per-module SUCCESS lines must be collapsed; only BUILD SUCCESS +
+        // Total time survive for an all-green reactor.
+        assert!(output.contains("BUILD SUCCESS"), "got: {output}");
+        assert!(!output.contains("edeal-common ....."), "got: {output}");
+        let savings = 100.0
+            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 90.0, "expected ≥90%, got {:.1}%", savings);
+    }
+
+    #[test]
+    fn test_pr782_compile_fail_dedups_and_names_failed_module() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_pr782_compile_fail_raw.txt");
+        let output = filter_mvn_compile(input);
+        // Each javac location must appear exactly once (inline; help-block copy deduped).
+        assert_eq!(
+            output.matches("UserService.java:[42,30]").count(),
+            1,
+            "error dedup broken: {output}"
+        );
+        // Failed module surfaced in compact reactor line.
+        assert!(
+            output.contains("FAILURE (edeal-webapp)"),
+            "failed module missing from summary: {output}"
+        );
+        let savings = 100.0
+            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 70.0, "expected ≥70%, got {:.1}%", savings);
     }
 
     #[test]
@@ -1947,20 +2181,10 @@ mod tests {
 
     #[test]
     fn test_filter_mvn_clean_real_fixture() {
+        // Exact output shape covered by snapshot_clean_auth; here we guard the
+        // core invariant: a single-module success collapses to exactly one line.
         let input = include_str!("../../../tests/fixtures/mvn_clean_auth.txt");
         let output = filter_mvn_clean(input);
-        assert!(
-            output.starts_with("mvn clean: deleted "),
-            "expected 'mvn clean: deleted ...' prefix, got: {}",
-            output
-        );
-        assert!(output.contains("/home/user/git/auth/target"));
-        assert!(output.contains("1.418 s"));
-        assert!(
-            !output.contains("BUILD FAILURE"),
-            "clean fixture is a success case, got: {}",
-            output
-        );
         assert_eq!(
             output.lines().count(),
             1,
