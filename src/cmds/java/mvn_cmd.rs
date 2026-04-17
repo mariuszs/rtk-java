@@ -118,6 +118,21 @@ const MVN_ENV_BANNER_PREFIXES: &[&str] = &[
     "OS name:",
 ];
 
+lazy_static! {
+    /// java.util.logging header emitted by GCP libraries near end of build:
+    ///   `Apr 18, 2026 12:19:27 AM com.google.auth.oauth2.X warnY`
+    static ref JUL_LOG_HEADER_RE: Regex =
+        Regex::new(r"^\w{3} \d{1,2}, \d{4} \d{1,2}:\d{2}:\d{2} [AP]M ")
+            .unwrap();
+}
+
+/// Bare-text WARNING lines emitted by non-JVM libraries (artifactregistry-
+/// maven-wagon, google-auth-library, etc.) without any `[INFO]/[ERROR]`
+/// Maven tag. Always non-actionable compared to real compile errors.
+const BARE_PLUGIN_WARNING_PREFIXES: &[&str] = &[
+    "WARNING: Your application has authenticated",
+];
+
 /// Returns true for mvn startup / JVM / os-detection noise that is not
 /// command-specific (applies to compile, checkstyle, and most goals).
 /// Expects a raw (non-trimmed) line or a trimmed line — both work.
@@ -146,6 +161,18 @@ fn is_mvn_startup_noise(line: &str) -> bool {
     // SLF4J static-binder complaints on startup (`SLF4J: Failed to load …`).
     if t.starts_with("SLF4J:") {
         return true;
+    }
+
+    // java.util.logging header line from GCP auth libraries
+    if JUL_LOG_HEADER_RE.is_match(t) {
+        return true;
+    }
+
+    // Bare-text plugin WARNING lines that carry no Maven tag
+    for p in BARE_PLUGIN_WARNING_PREFIXES {
+        if t.starts_with(p) {
+            return true;
+        }
     }
 
     // os-maven-plugin detection output: `[INFO] os.detected.name: linux` etc.
@@ -1081,6 +1108,14 @@ const INFO_NOISE_PATTERNS: &[&str] = &[
     "Migration completed",
     "Inferring ",
     "No <input",
+    // artifactregistry-maven-wagon chatter — can be dozens of ~300-char
+    // lines per build about cached artifacts not matching the current
+    // remote-repo set. Non-actionable; the build still proceeds.
+    "is present in the local repository, but cached",
+    // GCP auth lifecycle chatter from artifactregistry-maven-wagon
+    "Initializing Credentials",
+    "Application Default Credentials",
+    "Refreshing Credentials",
     // pgpverify-maven-plugin chatter (per-artifact verify + summary)
     "Verifying ",
     "Key server(s)",
@@ -2933,6 +2968,50 @@ mod tests {
         // Sanity: we still have the real failure details.
         assert!(output.contains("UserServiceTest.testCreateUser_DuplicateEmail"));
         assert!(output.contains("AssertionError"));
+    }
+
+    #[test]
+    fn test_artifactregistry_and_gcp_auth_are_stripped() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_artifactregistry.txt");
+        let output = filter_mvn_compile(input);
+        // `artifactregistry-maven-wagon` emits ~20 copies of
+        // "Artifact X:Y:Z is present in the local repository, but cached
+        // from a remote repository ID that is unavailable in current build
+        // context…" — non-actionable, must collapse.
+        assert!(
+            !output.contains("is present in the local repository, but cached"),
+            "kept artifactregistry 'is present … cached from' chatter:\n{output}"
+        );
+        // GCP auth startup chatter
+        assert!(!output.contains("Initializing Credentials"));
+        assert!(!output.contains("Application Default Credentials"));
+        assert!(!output.contains("Refreshing Credentials"));
+        // End-of-build JUL-format Google auth warning
+        assert!(
+            !output.contains("warnAboutProblematicCredentials"),
+            "kept Google auth JUL warning header:\n{output}"
+        );
+        assert!(
+            !output.contains("Your application has authenticated using end user credentials"),
+            "kept Google auth JUL warning body:\n{output}"
+        );
+        // Sanity: the real compile errors must be preserved.
+        assert!(output.contains("COMPILATION ERROR"));
+        assert!(output.contains("BUILD FAILURE"));
+    }
+
+    #[test]
+    fn test_artifactregistry_fixture_savings() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_artifactregistry.txt");
+        let output = filter_mvn_compile(input);
+        let in_tok = count_tokens(input);
+        let out_tok = count_tokens(&output);
+        let savings = 100.0 - (out_tok as f64 / in_tok as f64 * 100.0);
+        assert!(
+            savings >= 80.0,
+            "artifactregistry compile-failure fixture: expected ≥80% savings, got {savings:.1}% \
+             (in={in_tok}, out={out_tok})"
+        );
     }
 
     #[test]
