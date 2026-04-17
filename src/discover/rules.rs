@@ -10,6 +10,18 @@ pub struct RtkRule {
     pub subcmd_status: &'static [(&'static str, RtkStatus)],
 }
 
+/// Shared savings table for the mvn and mvnd rules — both binaries run the
+/// same goals through the same filters, so per-goal savings are identical.
+/// Keeping one source of truth prevents the two rules from drifting.
+const MVN_SUBCMD_SAVINGS: &[(&str, f64)] = &[
+    ("test", 99.0),
+    ("verify", 95.0),
+    ("compile", 85.0),
+    ("checkstyle:check", 90.0),
+    ("checkstyle", 90.0),
+    ("dependency:tree", 70.0),
+];
+
 pub const RULES: &[RtkRule] = &[
     RtkRule {
         pattern: r"^(?:git|yadm)\s+(?:-[Cc]\s+\S+\s+)*(status|log|diff|show|add|commit|push|pull|branch|fetch|stash|worktree)",
@@ -677,7 +689,7 @@ pub const RULES: &[RtkRule] = &[
         rewrite_prefixes: &["mvn", "mvnw", "./mvnw"],
         category: "Build",
         savings_pct: 90.0,
-        subcmd_savings: &[],
+        subcmd_savings: MVN_SUBCMD_SAVINGS,
         subcmd_status: &[],
     },
     RtkRule {
@@ -686,7 +698,7 @@ pub const RULES: &[RtkRule] = &[
         rewrite_prefixes: &["mvnd"],
         category: "Build",
         savings_pct: 90.0,
-        subcmd_savings: &[],
+        subcmd_savings: MVN_SUBCMD_SAVINGS,
         subcmd_status: &[],
     },
     RtkRule {

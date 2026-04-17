@@ -238,6 +238,46 @@ pub fn run_compile(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i3
 /// filter while preserving the original goal name in the invocation and in
 /// the tracking label.
 fn run_compile_like(binary: MvnBinary, goal: &str, args: &[String], verbose: u8) -> Result<i32> {
+    let tee_slug = COMPILE_LIKE_GOALS
+        .iter()
+        .find_map(|&(g, slug)| (g == goal).then_some(slug))
+        .expect("goal must be in COMPILE_LIKE_GOALS — gated by route_goal / run_compile");
+    run_simple_goal(binary, goal, tee_slug, filter_mvn_compile, args, verbose)
+}
+
+pub fn run_checkstyle(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    run_simple_goal(
+        binary,
+        "checkstyle:check",
+        "checkstyle",
+        filter_mvn_checkstyle,
+        args,
+        verbose,
+    )
+}
+
+pub fn run_dep_tree(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    run_simple_goal(
+        binary,
+        "dependency:tree",
+        "dep_tree",
+        filter_mvn_dep_tree,
+        args,
+        verbose,
+    )
+}
+
+/// Shared runner for single-filter goals: spawns `<binary> <goal> <args>`,
+/// pipes stdout through `filter`, tees raw output under `tee_slug`. Only used
+/// by goals with no XML enrichment — `run_tests_like` handles test/verify.
+fn run_simple_goal(
+    binary: MvnBinary,
+    goal: &str,
+    tee_slug: &str,
+    filter: fn(&str) -> String,
+    args: &[String],
+    verbose: u8,
+) -> Result<i32> {
     let mut cmd = mvn_command(binary);
     cmd.arg(goal);
     for arg in args {
@@ -245,62 +285,15 @@ fn run_compile_like(binary: MvnBinary, goal: &str, args: &[String], verbose: u8)
     }
 
     if verbose > 0 {
-        eprintln!("Running: {binary} {} {}", goal, args.join(" "));
+        eprintln!("Running: {binary} {goal} {}", args.join(" "));
     }
 
-    let (tool_name, tee_label) = compile_like_labels(binary, goal);
-
+    let (tool_name, tee_label) = mvn_labels(binary, goal, tee_slug);
     runner::run_filtered(
         cmd,
         &tool_name,
         &args.join(" "),
-        filter_mvn_compile,
-        runner::RunOptions::with_tee(&tee_label),
-    )
-}
-
-/// Run `<binary> checkstyle:check` with compact output — strips mvn/JVM startup
-/// noise, keeps violations and BUILD SUCCESS/FAILURE summary.
-pub fn run_checkstyle(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
-    let mut cmd = mvn_command(binary);
-    cmd.arg("checkstyle:check");
-    for arg in args {
-        cmd.arg(arg);
-    }
-
-    if verbose > 0 {
-        eprintln!("Running: {binary} checkstyle:check {}", args.join(" "));
-    }
-
-    let (tool_name, tee_label) = mvn_labels(binary, "checkstyle:check", "checkstyle");
-    runner::run_filtered(
-        cmd,
-        &tool_name,
-        &args.join(" "),
-        filter_mvn_checkstyle,
-        runner::RunOptions::with_tee(&tee_label),
-    )
-}
-
-/// Run `<binary> dependency:tree` with filtered output — strips duplicates and boilerplate.
-pub fn run_dep_tree(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
-    let mut cmd = mvn_command(binary);
-    cmd.arg("dependency:tree");
-
-    for arg in args {
-        cmd.arg(arg);
-    }
-
-    if verbose > 0 {
-        eprintln!("Running: {binary} dependency:tree {}", args.join(" "));
-    }
-
-    let (tool_name, tee_label) = mvn_labels(binary, "dependency:tree", "dep_tree");
-    runner::run_filtered(
-        cmd,
-        &tool_name,
-        &args.join(" "),
-        filter_mvn_dep_tree,
+        filter,
         runner::RunOptions::with_tee(&tee_label),
     )
 }
@@ -314,20 +307,6 @@ const COMPILE_LIKE_GOALS: &[(&str, &str)] = &[
     ("process-classes", "process_classes"),
     ("test-compile", "test_compile"),
 ];
-
-/// Look up the `(tool_name, tee_label)` pair for a compile-like goal, prefixed
-/// with the active binary (`mvn` or `mvnd`). Callers are gated on `route_goal`
-/// / `COMPILE_LIKE_GOALS`, so a miss here means that invariant was broken.
-fn compile_like_labels(binary: MvnBinary, goal: &str) -> (String, String) {
-    let tee_slug = COMPILE_LIKE_GOALS
-        .iter()
-        .find_map(|&(g, slug)| (g == goal).then_some(slug))
-        .unwrap_or_else(|| {
-            debug_assert!(false, "compile_like_labels called with non-compile goal: {goal}");
-            "compile"
-        });
-    mvn_labels(binary, goal, tee_slug)
-}
 
 /// Routing decision for a raw mvn subcommand seen on `run_other` — i.e. the
 /// first positional arg after `rtk mvn`. Pure function, easy to unit-test.
@@ -1957,14 +1936,19 @@ mod tests {
     }
 
     #[test]
-    fn test_compile_like_labels_mvnd() {
-        let (tool, tee) = compile_like_labels(MvnBinary::Mvnd, "compile");
-        assert_eq!(tool, "mvnd compile");
-        assert_eq!(tee, "mvnd_compile");
-
-        let (tool, tee) = compile_like_labels(MvnBinary::Mvnd, "test-compile");
-        assert_eq!(tool, "mvnd test-compile");
-        assert_eq!(tee, "mvnd_test_compile");
+    fn test_compile_like_goals_have_sanitized_tee_slugs() {
+        // tee_slug becomes part of a filesystem path (e.g. `mvnd_test_compile.log`),
+        // so hyphens in Maven goal names must be rewritten to underscores.
+        for (goal, slug) in COMPILE_LIKE_GOALS {
+            assert!(
+                !slug.contains('-'),
+                "tee_slug for goal {goal:?} must not contain '-' (got {slug:?})"
+            );
+            assert!(
+                !slug.contains(':'),
+                "tee_slug for goal {goal:?} must not contain ':' (got {slug:?})"
+            );
+        }
     }
 
     // --- checkstyle filter tests ---
