@@ -55,10 +55,13 @@ lazy_static! {
     static ref BUNDLE_SIZE_RE: Regex =
         Regex::new(r"^\d[\d.]*\s+[kKMG]?B\s")
             .unwrap();
-    /// Reactor Build Order line: `<module name>   [pom|jar|war|ear]`
+    /// Reactor Build Order line, two accepted formats:
+    ///   - `<module name>   [pom|jar|war|ear]` (classic, verbose mode)
+    ///   - `<module name>   <version>`           (mvn 3.9.x default, where
+    ///                                            `<version>` starts with a digit)
     /// Expects input already passed through `strip_maven_prefix`.
     static ref REACTOR_BUILD_ORDER_RE: Regex =
-        Regex::new(r"^\S.*\s+\[(?:pom|jar|war|ear)\]\s*$")
+        Regex::new(r"^\S.*\s+(?:\[(?:pom|jar|war|ear)\]|\d\S*)\s*$")
             .unwrap();
     /// Reactor Summary per-module line:
     /// `<module> ...... SUCCESS [  0.234 s]` (also FAILURE, SKIPPED).
@@ -104,6 +107,17 @@ const JVM_WARNING_PREFIXES: &[&str] = &[
     "WARNING: Please consider reporting",
 ];
 
+/// Bare-text banner emitted by `mvn --version` / `mvn -V` before the build
+/// starts. No `[INFO]/[ERROR]` prefix. Matched by prefix on the already
+/// `trim_start`-ed line.
+const MVN_ENV_BANNER_PREFIXES: &[&str] = &[
+    "Apache Maven ",
+    "Maven home:",
+    "Java version:",
+    "Default locale:",
+    "OS name:",
+];
+
 /// Returns true for mvn startup / JVM / os-detection noise that is not
 /// command-specific (applies to compile, checkstyle, and most goals).
 /// Expects a raw (non-trimmed) line or a trimmed line — both work.
@@ -120,6 +134,18 @@ fn is_mvn_startup_noise(line: &str) -> bool {
         if t.starts_with(p) {
             return true;
         }
+    }
+
+    // `mvn -V` environment banner
+    for p in MVN_ENV_BANNER_PREFIXES {
+        if t.starts_with(p) {
+            return true;
+        }
+    }
+
+    // SLF4J static-binder complaints on startup (`SLF4J: Failed to load …`).
+    if t.starts_with("SLF4J:") {
+        return true;
     }
 
     // os-maven-plugin detection output: `[INFO] os.detected.name: linux` etc.
@@ -705,6 +731,19 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str) -> String {
                     }
                 }
 
+                // The next test class starts — close the current failure so
+                // its "Running <class>" marker does not bleed into the stack
+                // block.
+                if stripped.starts_with("Running ") {
+                    if let Some(f) = current_failure.take() {
+                        total_failures_seen += 1;
+                        if failures.len() < MAX_FAILURES_SHOWN {
+                            failures.push(f);
+                        }
+                    }
+                    continue;
+                }
+
                 if let Some(ref mut f) = current_failure {
                     if f.details.len() >= MAX_DETAIL_LINES {
                         continue;
@@ -1032,6 +1071,19 @@ const INFO_NOISE_PATTERNS: &[&str] = &[
     "Migration completed",
     "Inferring ",
     "No <input",
+    // pgpverify-maven-plugin chatter (per-artifact verify + summary)
+    "Verifying ",
+    "Key server(s)",
+    "Create cache directory",
+    "Artifacts were already validated",
+    " artifact(s) in repository",
+    // maven-resources-plugin non-actionable copy chatter
+    "encoding to copy",
+    "skip non existing resourceDirectory",
+    // maven-checkstyle-plugin clean-audit output
+    "Starting audit",
+    "Audit done",
+    "Checkstyle violations",
     // Code generators (jOOQ, protobuf, openapi-generator, etc.)
     "Generat",
     "Missing name",
@@ -1106,6 +1158,12 @@ const BARE_TEXT_NOISE: &[&str] = &[
 /// Expects pre-trimmed input from callers.
 fn should_keep_compile_line(line: &str) -> bool {
     if line.is_empty() {
+        return false;
+    }
+
+    // `mvn -V` environment banner, JVM restricted-method WARNINGs, SLF4J
+    // static-binder complaints, os-maven-plugin detection — never actionable.
+    if is_mvn_startup_noise(line) {
         return false;
     }
 
@@ -2798,5 +2856,69 @@ mod tests {
             "expected ≥85% savings on enriched failure path, got {savings:.1}% \
              (raw={raw_tokens}, enriched={enriched_tokens})"
         );
+    }
+
+    // --- Regression coverage on fixtures adapted from rtk-ai/rtk#1241 ---
+    // (covers gaps found when running our filter against the competing JVM
+    // PR's fixtures: Maven environment banner, JVM 21+ restricted-method
+    // WARNINGs, SLF4J init noise, pgpverify-maven-plugin chatter,
+    // maven-resources-plugin copy lines, clean-audit checkstyle output, and
+    // mvn 3.9.x Reactor Build Order `<name> <version>` format without
+    // `[pom|jar]` suffix.)
+
+    #[test]
+    fn test_pr1241_compile_pgp_multimodule_savings() {
+        let input = include_str!("../../../tests/fixtures/mvn_pr1241_compile_pgp_multimodule.txt");
+        let output = filter_mvn_compile(input);
+        let in_tok = count_tokens(input);
+        let out_tok = count_tokens(&output);
+        let savings = 100.0 - (out_tok as f64 / in_tok as f64 * 100.0);
+        assert!(
+            savings >= 85.0,
+            "expected ≥85% savings on pgp+multimodule compile success, got {savings:.1}% \
+             (in={in_tok}, out={out_tok})\n--- OUTPUT ---\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_pr1241_compile_pgp_strips_banner_and_jvm_warnings() {
+        let input = include_str!("../../../tests/fixtures/mvn_pr1241_compile_pgp_multimodule.txt");
+        let output = filter_mvn_compile(input);
+        // Environment banner from `mvn -V`
+        assert!(!output.contains("Apache Maven 3.9.6"), "kept Maven banner: {output}");
+        assert!(!output.contains("Java version:"), "kept Java version banner: {output}");
+        assert!(!output.contains("OS name:"), "kept OS banner: {output}");
+        // JVM 21+ restricted-method warnings
+        assert!(!output.contains("restricted method"), "kept JVM restricted-method WARNING: {output}");
+        assert!(!output.contains("SLF4J:"), "kept SLF4J noise: {output}");
+        // pgpverify-maven-plugin chatter
+        assert!(!output.contains("Verifying com.google.guava"), "kept pgp Verifying: {output}");
+        assert!(!output.contains("Key server(s)"), "kept pgp Key server line: {output}");
+        // maven-resources-plugin noise
+        assert!(!output.contains("encoding to copy filtered"), "kept resources encoding line: {output}");
+        assert!(!output.contains("skip non existing resourceDirectory"), "kept skip resourceDirectory: {output}");
+        // clean-audit checkstyle pass
+        assert!(!output.contains("Audit done"), "kept Audit done: {output}");
+        assert!(!output.contains("Checkstyle violations"), "kept checkstyle 0-violations: {output}");
+        // Reactor Build Order modules (mvn 3.9.x `<name> <version>` format)
+        assert!(!output.contains("parent-project 2.4.1-SNAPSHOT"), "kept Reactor Build Order entry: {output}");
+        // Must preserve the essentials
+        assert!(output.contains("BUILD SUCCESS"));
+        assert!(output.contains("Total time"));
+    }
+
+    #[test]
+    fn test_pr1241_test_failure_stack_does_not_bleed_next_test() {
+        let input = include_str!("../../../tests/fixtures/mvn_pr1241_test_failure_simple.txt");
+        let output = filter_mvn_test(input);
+        // The next-class Running marker must NOT appear inside the failure
+        // stack block (cosmetic bleed observed in diag).
+        assert!(
+            !output.contains("Running com.example.repository.UserRepositoryTest"),
+            "failure stack bled into next test's Running marker:\n{output}"
+        );
+        // Sanity: we still have the real failure details.
+        assert!(output.contains("UserServiceTest.testCreateUser_DuplicateEmail"));
+        assert!(output.contains("AssertionError"));
     }
 }
