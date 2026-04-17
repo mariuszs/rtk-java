@@ -11,6 +11,7 @@ use crate::core::utils::{exit_code_from_status, resolved_command, strip_ansi, tr
 use anyhow::{Context, Result};
 use lazy_static::lazy_static;
 use regex::Regex;
+use std::collections::HashSet;
 use std::ffi::OsString;
 use std::fmt::Write as _;
 use std::path::Path;
@@ -61,9 +62,11 @@ lazy_static! {
             .unwrap();
     /// Reactor Summary per-module line:
     /// `<module> ...... SUCCESS [  0.234 s]` (also FAILURE, SKIPPED).
-    /// Expects input already passed through `strip_maven_prefix`.
+    /// Expects input already passed through `strip_maven_prefix`. Capture
+    /// groups: 1=name, 2=status. The trailing `[time]` segment is required
+    /// to match but not captured — we don't use per-module timing.
     static ref REACTOR_SUMMARY_LINE_RE: Regex =
-        Regex::new(r"^(\S.*?)\s*\.{2,}\s*(SUCCESS|FAILURE|SKIPPED)\s*\[([^\]]+)\]\s*$")
+        Regex::new(r"^(\S.*?)\s*\.{2,}\s*(SUCCESS|FAILURE|SKIPPED)\s*\[[^\]]*\]\s*$")
             .unwrap();
     /// Javac error location: `[ERROR] /path/File.java:[line,col] message`
     /// Capture groups: 1=path, 2=line, 3=col. Used for error dedup.
@@ -851,7 +854,7 @@ fn is_maven_boilerplate(line: &str) -> bool {
         "See dump files",
         "Failed to execute goal",
         "There are test failures",
-        "For more information about",
+        "For more information about the errors",
     ];
 
     for pattern in BOILERPLATE_PATTERNS {
@@ -881,18 +884,25 @@ fn is_maven_boilerplate(line: &str) -> bool {
 /// because Maven prints them twice on failure — inline during compilation and
 /// again in the trailing `[ERROR]` help block.
 fn filter_mvn_compile(output: &str) -> String {
-    use std::collections::HashSet;
-
     let clean = strip_ansi(output);
     let mut in_build_order = false;
-    // (status, name) per module while the Reactor Summary block is open
-    let mut reactor_modules: Option<Vec<(String, String)>> = None;
-    let mut seen_errors: HashSet<(String, String, String)> = HashSet::new();
+    // (status, name) per module while the Reactor Summary block is open.
+    // Both slices borrow from `clean`, which outlives this vec.
+    let mut reactor_modules: Option<Vec<(&str, &str)>> = None;
+    // Dedup key is the matched `[ERROR] path:[L,C]` prefix — a slice of `clean`.
+    let mut seen_errors: HashSet<&str> = HashSet::new();
     // When the current `[ERROR] path:[L,C]` was a duplicate, swallow the
     // javac context lines (`[ERROR] symbol: …`) that would mirror an earlier
     // occurrence emitted without the `[ERROR]` prefix.
     let mut swallow_error_context = false;
-    let mut result: Vec<String> = Vec::new();
+    let mut result = String::with_capacity(clean.len() / 4);
+
+    let push = |dst: &mut String, line: &str| {
+        if !dst.is_empty() {
+            dst.push('\n');
+        }
+        dst.push_str(line);
+    };
 
     for raw in clean.lines() {
         let line = raw.trim();
@@ -906,7 +916,7 @@ fn filter_mvn_compile(output: &str) -> String {
                 continue;
             }
             in_build_order = false;
-            // fall through
+            // fall through — current line may be keep-worthy
         }
 
         if stripped == "Reactor Build Order:" {
@@ -916,14 +926,16 @@ fn filter_mvn_compile(output: &str) -> String {
 
         if let Some(modules) = reactor_modules.as_mut() {
             if let Some(caps) = REACTOR_SUMMARY_LINE_RE.captures(stripped) {
-                modules.push((caps[2].to_string(), caps[1].trim().to_string()));
+                let name = caps.get(1).map_or("", |m| m.as_str()).trim();
+                let status = caps.get(2).map_or("", |m| m.as_str());
+                modules.push((status, name));
                 continue;
             }
             if stripped.is_empty() || line == INFO_TAG || stripped.starts_with("---") {
                 continue;
             }
             if let Some(compact) = format_reactor_summary(modules) {
-                result.push(compact);
+                push(&mut result, &compact);
             }
             reactor_modules = None;
             // fall through
@@ -939,25 +951,28 @@ fn filter_mvn_compile(output: &str) -> String {
             continue;
         }
 
-        if let Some(caps) = COMPILE_ERROR_LOCATION_RE.captures(line) {
-            let key = (caps[1].to_string(), caps[2].to_string(), caps[3].to_string());
-            if !seen_errors.insert(key) {
-                swallow_error_context = true;
+        if line.starts_with(ERROR_TAG) {
+            if let Some(m) = COMPILE_ERROR_LOCATION_RE.find(line) {
+                if !seen_errors.insert(m.as_str()) {
+                    swallow_error_context = true;
+                    continue;
+                }
+                swallow_error_context = false;
+            } else if swallow_error_context && COMPILE_ERROR_CONTEXT_RE.is_match(line) {
                 continue;
+            } else {
+                swallow_error_context = false;
             }
-            swallow_error_context = false;
-        } else if swallow_error_context && COMPILE_ERROR_CONTEXT_RE.is_match(line) {
-            continue;
         } else {
             swallow_error_context = false;
         }
 
-        result.push(line.to_string());
+        push(&mut result, line);
     }
 
     if let Some(modules) = reactor_modules.as_ref() {
         if let Some(compact) = format_reactor_summary(modules) {
-            result.push(compact);
+            push(&mut result, &compact);
         }
     }
 
@@ -965,27 +980,24 @@ fn filter_mvn_compile(output: &str) -> String {
         return "mvn: ok".to_string();
     }
 
-    result.join("\n")
+    result
 }
 
 /// Render a one-line reactor summary naming failed modules. Returns `None`
 /// when every module succeeded — the trailing `BUILD SUCCESS` line is enough.
-fn format_reactor_summary(modules: &[(String, String)]) -> Option<String> {
+fn format_reactor_summary(modules: &[(&str, &str)]) -> Option<String> {
     if modules.is_empty() {
         return None;
     }
     let failed: Vec<&str> = modules
         .iter()
-        .filter(|(status, _)| status == "FAILURE")
-        .map(|(_, name)| name.as_str())
+        .filter(|(status, _)| *status == "FAILURE")
+        .map(|(_, name)| *name)
         .collect();
     if failed.is_empty() {
         return None;
     }
-    let skipped = modules
-        .iter()
-        .filter(|(s, _)| s == "SKIPPED")
-        .count();
+    let skipped = modules.iter().filter(|(s, _)| *s == "SKIPPED").count();
     let succeeded = modules.len() - failed.len() - skipped;
     let mut out = format!(
         "Reactor: {} modules — {} SUCCESS, {} FAILURE",
@@ -994,9 +1006,9 @@ fn format_reactor_summary(modules: &[(String, String)]) -> Option<String> {
         failed.len()
     );
     if skipped > 0 {
-        out.push_str(&format!(", {skipped} SKIPPED"));
+        write!(&mut out, ", {skipped} SKIPPED").ok();
     }
-    out.push_str(&format!(" ({})", failed.join(", ")));
+    write!(&mut out, " ({})", failed.join(", ")).ok();
     Some(out)
 }
 
