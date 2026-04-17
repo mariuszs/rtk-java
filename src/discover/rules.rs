@@ -690,7 +690,7 @@ pub const RULES: &[RtkRule] = &[
         subcmd_status: &[],
     },
     RtkRule {
-        pattern: r"^(\.\/?)?mvnw?\s+(test|compile|package|clean|install|dependency:tree)\b",
+        pattern: r"^(\.\/?)?mvnw?\s+(test|verify|compile|package|clean|install|dependency:tree|checkstyle:check|checkstyle)\b",
         rtk_cmd: "rtk mvn",
         rewrite_prefixes: &["mvn", "mvnw", "./mvnw"],
         category: "Build",
@@ -699,7 +699,7 @@ pub const RULES: &[RtkRule] = &[
         subcmd_status: &[],
     },
     RtkRule {
-        pattern: r"^mvnd\s+(test|compile|package|clean|install|dependency:tree|checkstyle:check|checkstyle)\b",
+        pattern: r"^mvnd\s+(test|verify|compile|package|clean|install|dependency:tree|checkstyle:check|checkstyle)\b",
         rtk_cmd: "rtk mvnd",
         rewrite_prefixes: &["mvnd"],
         category: "Build",
