@@ -4,8 +4,9 @@
 
 ## Specifics
 
-- **mvn_cmd.rs** handles Maven (`mvn`) and Maven Wrapper (`mvnw`) commands
-- Auto-detects `mvnw` wrapper in project root; falls back to system `mvn`
+- **mvn_cmd.rs** handles Maven (`mvn`), Maven Wrapper (`mvnw`), and Maven Daemon (`mvnd`) commands
+- `rtk mvn`: auto-detects `mvnw` wrapper in project root; falls back to system `mvn`
+- `rtk mvnd`: always invokes the Maven Daemon (`mvnd`) — the wrapper is bypassed because `mvnd` is a separate long-lived JVM daemon; metrics are tracked as `mvnd <goal>` in `rtk gain` so mvn/mvnd savings stay separate
 - `mvn test` uses a state-machine parser (Preamble → Testing → Summary → Done) for 97-99%+ savings on real-world output
 - `mvn compile` uses line filtering to strip `[INFO]` noise, download progress, JVM/native-access warnings, and plugin chatter (jOOQ codegen, Liquibase, npm/React builds, typescript-generator). Also routes `process-classes` and `test-compile` through the same filter (same noise profile)
 - `mvn checkstyle:check` (aliased as `checkstyle`) compacts violation lines to `path:line:col [Rule] message`, strips mvn startup noise and Help-link boilerplate, keeps `N Checkstyle violations` summary and BUILD SUCCESS/FAILURE

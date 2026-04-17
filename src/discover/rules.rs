@@ -681,6 +681,15 @@ pub const RULES: &[RtkRule] = &[
         subcmd_status: &[],
     },
     RtkRule {
+        pattern: r"^mvnd\s+(test|compile|package|clean|install|dependency:tree|checkstyle:check|checkstyle)\b",
+        rtk_cmd: "rtk mvnd",
+        rewrite_prefixes: &["mvnd"],
+        category: "Build",
+        savings_pct: 90.0,
+        subcmd_savings: &[],
+        subcmd_status: &[],
+    },
+    RtkRule {
         pattern: r"^ping\b",
         rtk_cmd: "rtk ping",
         rewrite_prefixes: &["ping"],

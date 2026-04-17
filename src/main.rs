@@ -692,6 +692,12 @@ enum Commands {
         command: MvnCommands,
     },
 
+    /// Maven Daemon (mvnd) commands with compact output — same filters as `rtk mvn`
+    Mvnd {
+        #[command(subcommand)]
+        command: MvnCommands,
+    },
+
     /// Graphite (gt) stacked PR commands with compact output
     Gt {
         #[command(subcommand)]
@@ -1338,6 +1344,20 @@ fn validate_pnpm_filters(filters: &[String], command: &PnpmCommands) -> Option<S
             None
         }
         _ => None,
+    }
+}
+
+/// Dispatch a parsed `MvnCommands` variant to the appropriate filter in
+/// `mvn_cmd`, forwarding the selected binary (`mvn` or `mvnd`). Both
+/// top-level `Commands::Mvn` and `Commands::Mvnd` route through here so the
+/// two share filter logic while keeping metrics separate.
+fn dispatch_mvn(binary: mvn_cmd::MvnBinary, command: MvnCommands, verbose: u8) -> Result<i32> {
+    match command {
+        MvnCommands::Test { args } => mvn_cmd::run_test(binary, &args, verbose),
+        MvnCommands::Compile { args } => mvn_cmd::run_compile(binary, &args, verbose),
+        MvnCommands::Checkstyle { args } => mvn_cmd::run_checkstyle(binary, &args, verbose),
+        MvnCommands::DepTree { args } => mvn_cmd::run_dep_tree(binary, &args, verbose),
+        MvnCommands::Other(args) => mvn_cmd::run_other(binary, &args, verbose),
     }
 }
 
@@ -2077,13 +2097,8 @@ fn run_cli() -> Result<i32> {
             GoCommands::Other(args) => go_cmd::run_other(&args, cli.verbose)?,
         },
 
-        Commands::Mvn { command } => match command {
-            MvnCommands::Test { args } => mvn_cmd::run_test(&args, cli.verbose)?,
-            MvnCommands::Compile { args } => mvn_cmd::run_compile(&args, cli.verbose)?,
-            MvnCommands::Checkstyle { args } => mvn_cmd::run_checkstyle(&args, cli.verbose)?,
-            MvnCommands::DepTree { args } => mvn_cmd::run_dep_tree(&args, cli.verbose)?,
-            MvnCommands::Other(args) => mvn_cmd::run_other(&args, cli.verbose)?,
-        },
+        Commands::Mvn { command } => dispatch_mvn(mvn_cmd::MvnBinary::Mvn, command, cli.verbose)?,
+        Commands::Mvnd { command } => dispatch_mvn(mvn_cmd::MvnBinary::Mvnd, command, cli.verbose)?,
 
         Commands::Gt { command } => match command {
             GtCommands::Log { args } => gt_cmd::run_log(&args, cli.verbose)?,
@@ -2428,6 +2443,7 @@ fn is_operational_command(cmd: &Commands) -> bool {
             | Commands::Pip { .. }
             | Commands::Go { .. }
             | Commands::Mvn { .. }
+            | Commands::Mvnd { .. }
             | Commands::GolangciLint { .. }
             | Commands::Gt { .. }
     )

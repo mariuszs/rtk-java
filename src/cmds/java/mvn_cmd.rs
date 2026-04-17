@@ -95,18 +95,57 @@ fn is_mvn_startup_noise(line: &str) -> bool {
     false
 }
 
-/// Auto-detect mvnw wrapper; fall back to system `mvn`.
-fn mvn_command() -> std::process::Command {
-    if Path::new("mvnw").exists() {
-        resolved_command("./mvnw")
-    } else {
-        resolved_command("mvn")
+/// Which Maven binary to invoke. `Mvn` auto-detects the `mvnw` wrapper and
+/// falls back to system `mvn`; `Mvnd` always uses the Maven Daemon (`mvnd`),
+/// which is incompatible with the wrapper.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MvnBinary {
+    Mvn,
+    Mvnd,
+}
+
+impl MvnBinary {
+    fn as_str(self) -> &'static str {
+        match self {
+            MvnBinary::Mvn => "mvn",
+            MvnBinary::Mvnd => "mvnd",
+        }
     }
 }
 
-/// Run `mvn test` with state-machine filtered output.
-pub fn run_test(args: &[String], verbose: u8) -> Result<i32> {
-    let mut cmd = mvn_command();
+impl std::fmt::Display for MvnBinary {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+/// Build the `(tool_name, tee_label)` pair used for tracking a run of
+/// `<binary> <goal>`. Tee labels use `_` separators (filesystem-safe); tool
+/// names use a space (human-readable in `rtk gain`). Kept as a single helper
+/// so the `{binary}`/`_` convention stays consistent across all mvn/mvnd runs.
+fn mvn_labels(binary: MvnBinary, goal: &str, tee_slug: &str) -> (String, String) {
+    (format!("{binary} {goal}"), format!("{binary}_{tee_slug}"))
+}
+
+/// Build the base command for the selected binary. For `Mvn`, auto-detects the
+/// `mvnw` wrapper and falls back to system `mvn`. For `Mvnd`, always invokes
+/// `mvnd` directly (the daemon does not use wrapper scripts).
+fn mvn_command(binary: MvnBinary) -> std::process::Command {
+    match binary {
+        MvnBinary::Mvn => {
+            if Path::new("mvnw").exists() {
+                resolved_command("./mvnw")
+            } else {
+                resolved_command("mvn")
+            }
+        }
+        MvnBinary::Mvnd => resolved_command("mvnd"),
+    }
+}
+
+/// Run `<binary> test` with state-machine filtered output.
+pub fn run_test(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    let mut cmd = mvn_command(binary);
     cmd.arg("test");
 
     for arg in args {
@@ -114,27 +153,28 @@ pub fn run_test(args: &[String], verbose: u8) -> Result<i32> {
     }
 
     if verbose > 0 {
-        eprintln!("Running: mvn test {}", args.join(" "));
+        eprintln!("Running: {binary} test {}", args.join(" "));
     }
 
     let started_at = std::time::SystemTime::now();
     let cwd = std::env::current_dir().unwrap_or_else(|e| {
-        eprintln!("rtk mvn: could not determine cwd: {e}");
+        eprintln!("rtk {binary}: could not determine cwd: {e}");
         std::path::PathBuf::from(".")
     });
     let app_pkgs = crate::cmds::java::pom_groupid::detect(&cwd);
 
     let cwd_for_filter = cwd.clone();
 
+    let (tool_name, tee_label) = mvn_labels(binary, "test", "test");
     runner::run_filtered(
         cmd,
-        "mvn test",
+        &tool_name,
         &args.join(" "),
         move |raw: &str| {
             let filtered = filter_mvn_test(raw);
             enrich_with_reports(&filtered, &cwd_for_filter, started_at, &app_pkgs)
         },
-        runner::RunOptions::with_tee("mvn_test"),
+        runner::RunOptions::with_tee(&tee_label),
     )
 }
 
@@ -143,62 +183,63 @@ pub fn run_test(args: &[String], verbose: u8) -> Result<i32> {
 /// `compile` is itself a Maven lifecycle phase (not a goal name we invented),
 /// so no implicit default is added when `args` is empty — `mvn compile` runs
 /// the compile phase directly.
-pub fn run_compile(args: &[String], verbose: u8) -> Result<i32> {
-    run_compile_like("compile", args, verbose)
+pub fn run_compile(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    run_compile_like(binary, "compile", args, verbose)
 }
 
-/// Shared implementation for compile-phase-like goals: runs `mvn <goal> <args>`
+/// Shared implementation for compile-phase-like goals: runs `<binary> <goal> <args>`
 /// through `filter_mvn_compile`. Used directly by `run_compile` and reused by
 /// `run_other` to route `process-classes` / `test-compile` through the same
 /// filter while preserving the original goal name in the invocation and in
 /// the tracking label.
-fn run_compile_like(goal: &str, args: &[String], verbose: u8) -> Result<i32> {
-    let mut cmd = mvn_command();
+fn run_compile_like(binary: MvnBinary, goal: &str, args: &[String], verbose: u8) -> Result<i32> {
+    let mut cmd = mvn_command(binary);
     cmd.arg(goal);
     for arg in args {
         cmd.arg(arg);
     }
 
     if verbose > 0 {
-        eprintln!("Running: mvn {} {}", goal, args.join(" "));
+        eprintln!("Running: {binary} {} {}", goal, args.join(" "));
     }
 
-    let (tool_name, tee_label) = compile_like_labels(goal);
+    let (tool_name, tee_label) = compile_like_labels(binary, goal);
 
     runner::run_filtered(
         cmd,
-        tool_name,
+        &tool_name,
         &args.join(" "),
         filter_mvn_compile,
-        runner::RunOptions::with_tee(tee_label),
+        runner::RunOptions::with_tee(&tee_label),
     )
 }
 
-/// Run `mvn checkstyle:check` with compact output — strips mvn/JVM startup
+/// Run `<binary> checkstyle:check` with compact output — strips mvn/JVM startup
 /// noise, keeps violations and BUILD SUCCESS/FAILURE summary.
-pub fn run_checkstyle(args: &[String], verbose: u8) -> Result<i32> {
-    let mut cmd = mvn_command();
+pub fn run_checkstyle(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    let mut cmd = mvn_command(binary);
     cmd.arg("checkstyle:check");
     for arg in args {
         cmd.arg(arg);
     }
 
     if verbose > 0 {
-        eprintln!("Running: mvn checkstyle:check {}", args.join(" "));
+        eprintln!("Running: {binary} checkstyle:check {}", args.join(" "));
     }
 
+    let (tool_name, tee_label) = mvn_labels(binary, "checkstyle:check", "checkstyle");
     runner::run_filtered(
         cmd,
-        "mvn checkstyle:check",
+        &tool_name,
         &args.join(" "),
         filter_mvn_checkstyle,
-        runner::RunOptions::with_tee("mvn_checkstyle"),
+        runner::RunOptions::with_tee(&tee_label),
     )
 }
 
-/// Run `mvn dependency:tree` with filtered output — strips duplicates and boilerplate.
-pub fn run_dep_tree(args: &[String], verbose: u8) -> Result<i32> {
-    let mut cmd = mvn_command();
+/// Run `<binary> dependency:tree` with filtered output — strips duplicates and boilerplate.
+pub fn run_dep_tree(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    let mut cmd = mvn_command(binary);
     cmd.arg("dependency:tree");
 
     for arg in args {
@@ -206,38 +247,41 @@ pub fn run_dep_tree(args: &[String], verbose: u8) -> Result<i32> {
     }
 
     if verbose > 0 {
-        eprintln!("Running: mvn dependency:tree {}", args.join(" "));
+        eprintln!("Running: {binary} dependency:tree {}", args.join(" "));
     }
 
+    let (tool_name, tee_label) = mvn_labels(binary, "dependency:tree", "dep_tree");
     runner::run_filtered(
         cmd,
-        "mvn dependency:tree",
+        &tool_name,
         &args.join(" "),
         filter_mvn_dep_tree,
-        runner::RunOptions::with_tee("mvn_dep_tree"),
+        runner::RunOptions::with_tee(&tee_label),
     )
 }
 
 /// Goals whose output looks like `mvn compile` (same noise profile: plugin
-/// codegen, npm lifecycle, Liquibase, Docker). Tuples are
-/// `(goal, tool_name, tee_label)` — single source of truth for routing,
-/// tracking labels, and tee filenames.
-const COMPILE_LIKE_GOALS: &[(&str, &str, &str)] = &[
-    ("compile", "mvn compile", "mvn_compile"),
-    ("process-classes", "mvn process-classes", "mvn_process_classes"),
-    ("test-compile", "mvn test-compile", "mvn_test_compile"),
+/// codegen, npm lifecycle, Liquibase, Docker). Tuples are `(goal, tee_slug)`
+/// — tool names are prefixed with the active binary at runtime to keep mvn
+/// and mvnd metrics separate in `rtk gain`.
+const COMPILE_LIKE_GOALS: &[(&str, &str)] = &[
+    ("compile", "compile"),
+    ("process-classes", "process_classes"),
+    ("test-compile", "test_compile"),
 ];
 
-/// Look up the `(tool_name, tee_label)` pair for a compile-like goal. Callers
-/// are gated on `route_goal` / `COMPILE_LIKE_GOALS`, so the fallback is only
-/// reached if that invariant is violated.
-fn compile_like_labels(goal: &str) -> (&'static str, &'static str) {
-    for &(g, tool, tee) in COMPILE_LIKE_GOALS {
-        if g == goal {
-            return (tool, tee);
-        }
-    }
-    ("mvn compile", "mvn_compile")
+/// Look up the `(tool_name, tee_label)` pair for a compile-like goal, prefixed
+/// with the active binary (`mvn` or `mvnd`). Callers are gated on `route_goal`
+/// / `COMPILE_LIKE_GOALS`, so a miss here means that invariant was broken.
+fn compile_like_labels(binary: MvnBinary, goal: &str) -> (String, String) {
+    let tee_slug = COMPILE_LIKE_GOALS
+        .iter()
+        .find_map(|&(g, slug)| (g == goal).then_some(slug))
+        .unwrap_or_else(|| {
+            debug_assert!(false, "compile_like_labels called with non-compile goal: {goal}");
+            "compile"
+        });
+    mvn_labels(binary, goal, tee_slug)
 }
 
 /// Routing decision for a raw mvn subcommand seen on `run_other` — i.e. the
@@ -253,7 +297,7 @@ enum GoalRouting {
 }
 
 fn route_goal(subcommand: &str) -> GoalRouting {
-    if COMPILE_LIKE_GOALS.iter().any(|(g, _, _)| *g == subcommand) {
+    if COMPILE_LIKE_GOALS.iter().any(|(g, _)| *g == subcommand) {
         return GoalRouting::Compile;
     }
     if subcommand == "checkstyle:check" || subcommand == "checkstyle" {
@@ -277,23 +321,23 @@ fn trailing_args(args: &[OsString]) -> Vec<String> {
 /// `checkstyle:check` go through `filter_mvn_checkstyle`; everything else
 /// streams directly via `status()` (safe for long-running goals like
 /// `spring-boot:run`, and metric-only for rare ones like `package`).
-pub fn run_other(args: &[OsString], verbose: u8) -> Result<i32> {
+pub fn run_other(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32> {
     if args.is_empty() {
-        anyhow::bail!("mvn: no subcommand specified");
+        anyhow::bail!("{binary}: no subcommand specified");
     }
 
     let subcommand = args[0].to_string_lossy();
 
     if verbose > 0 {
-        eprintln!("Running: mvn {} ...", subcommand);
+        eprintln!("Running: {binary} {} ...", subcommand);
     }
 
     match route_goal(&subcommand) {
         GoalRouting::Compile => {
-            return run_compile_like(&subcommand, &trailing_args(args), verbose);
+            return run_compile_like(binary, &subcommand, &trailing_args(args), verbose);
         }
         GoalRouting::Checkstyle => {
-            return run_checkstyle(&trailing_args(args), verbose);
+            return run_checkstyle(binary, &trailing_args(args), verbose);
         }
         GoalRouting::Passthrough => {}
     }
@@ -301,22 +345,22 @@ pub fn run_other(args: &[OsString], verbose: u8) -> Result<i32> {
     // Everything else: passthrough with streaming (safe for spring-boot:run etc.)
     let timer = tracking::TimedExecution::start();
 
-    let mut cmd = mvn_command();
+    let mut cmd = mvn_command(binary);
     for arg in args {
         cmd.arg(arg);
     }
 
     let status = cmd
         .status()
-        .with_context(|| format!("Failed to run mvn {}", subcommand))?;
+        .with_context(|| format!("Failed to run {binary} {}", subcommand))?;
 
     let args_str = tracking::args_display(args);
     timer.track_passthrough(
-        &format!("mvn {}", args_str),
-        &format!("rtk mvn {} (passthrough)", args_str),
+        &format!("{binary} {}", args_str),
+        &format!("rtk {binary} {} (passthrough)", args_str),
     );
 
-    Ok(exit_code_from_status(&status, "mvn"))
+    Ok(exit_code_from_status(&status, binary.as_str()))
 }
 
 // ---------------------------------------------------------------------------
@@ -1837,7 +1881,7 @@ mod tests {
 
     #[test]
     fn test_run_other_empty_args_errors() {
-        let result = run_other(&[], 0);
+        let result = run_other(MvnBinary::Mvn, &[], 0);
         assert!(result.is_err());
         let err_msg = result.unwrap_err().to_string();
         assert!(
@@ -1845,6 +1889,29 @@ mod tests {
             "expected 'no subcommand' error, got: {}",
             err_msg
         );
+    }
+
+    #[test]
+    fn test_run_other_empty_args_errors_mvnd() {
+        let result = run_other(MvnBinary::Mvnd, &[], 0);
+        assert!(result.is_err());
+        let err_msg = result.unwrap_err().to_string();
+        assert!(
+            err_msg.contains("mvnd: no subcommand"),
+            "expected 'mvnd: no subcommand' error, got: {}",
+            err_msg
+        );
+    }
+
+    #[test]
+    fn test_compile_like_labels_mvnd() {
+        let (tool, tee) = compile_like_labels(MvnBinary::Mvnd, "compile");
+        assert_eq!(tool, "mvnd compile");
+        assert_eq!(tee, "mvnd_compile");
+
+        let (tool, tee) = compile_like_labels(MvnBinary::Mvnd, "test-compile");
+        assert_eq!(tool, "mvnd test-compile");
+        assert_eq!(tee, "mvnd_test_compile");
     }
 
     // --- checkstyle filter tests ---
