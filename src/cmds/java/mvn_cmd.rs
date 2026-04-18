@@ -1613,13 +1613,13 @@ mod tests {
         assert_eq!(a.skipped, 43);
     }
 
-    // --- Regression coverage on fixtures adapted from rtk-ai/rtk#782 ---
-    // (multi-module reactor with aggregated Surefire output + dual-emitted
-    // javac errors — validates our Reactor Summary collapse and error dedup.)
+    // --- Reactor Summary collapse + javac error dedup ---
+    // Multi-module reactor with aggregated Surefire output + dual-emitted
+    // javac errors. Originally captured from rtk-ai/rtk#782.
 
     #[test]
-    fn test_pr782_test_pass_accumulates_modules() {
-        let input = include_str!("../../../tests/fixtures/mvn_pr782_test_pass_raw.txt");
+    fn test_reactor_test_pass_accumulates_modules() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_pass.txt");
         let output = filter_mvn_test(input);
         // Fixture has 6 modules totalling 20 tests — accumulation must not
         // report only the first module's count.
@@ -1633,8 +1633,8 @@ mod tests {
     }
 
     #[test]
-    fn test_pr782_test_fail_accumulates_and_dedups() {
-        let input = include_str!("../../../tests/fixtures/mvn_pr782_test_fail_raw.txt");
+    fn test_reactor_test_fail_accumulates_and_dedups() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
         let output = filter_mvn_test(input);
         assert!(output.contains("20 run, 2 failed"), "got: {output}");
         // Each failure appears once in the enumerated Failures block
@@ -1650,9 +1650,9 @@ mod tests {
     }
 
     #[test]
-    fn test_pr782_compile_success_collapses_reactor() {
+    fn test_reactor_compile_success_collapses() {
         let input =
-            include_str!("../../../tests/fixtures/mvn_pr782_compile_success_raw.txt");
+            include_str!("../../../tests/fixtures/mvn_compile_reactor_success.txt");
         let output = filter_mvn_compile(input);
         // Per-module SUCCESS lines must be collapsed; only BUILD SUCCESS +
         // Total time survive for an all-green reactor.
@@ -1664,9 +1664,9 @@ mod tests {
     }
 
     #[test]
-    fn test_pr782_compile_fail_dedups_and_names_failed_module() {
+    fn test_reactor_compile_fail_dedups_and_names_module() {
         let input =
-            include_str!("../../../tests/fixtures/mvn_pr782_compile_fail_raw.txt");
+            include_str!("../../../tests/fixtures/mvn_compile_reactor_fail.txt");
         let output = filter_mvn_compile(input);
         // Each javac location must appear exactly once (inline; help-block copy deduped).
         assert_eq!(
@@ -2919,17 +2919,16 @@ mod tests {
         );
     }
 
-    // --- Regression coverage on fixtures adapted from rtk-ai/rtk#1241 ---
-    // (covers gaps found when running our filter against the competing JVM
-    // PR's fixtures: Maven environment banner, JVM 21+ restricted-method
-    // WARNINGs, SLF4J init noise, pgpverify-maven-plugin chatter,
-    // maven-resources-plugin copy lines, clean-audit checkstyle output, and
-    // mvn 3.9.x Reactor Build Order `<name> <version>` format without
-    // `[pom|jar]` suffix.)
+    // --- pgp + multimodule + JVM banner/warning stripping ---
+    // Maven environment banner (`mvn -V`), JVM 21+ restricted-method WARNINGs,
+    // SLF4J init noise, pgpverify-maven-plugin chatter, resources-plugin copy
+    // lines, clean-audit checkstyle output, and mvn 3.9.x Reactor Build Order
+    // `<name> <version>` format without `[pom|jar]` suffix. Originally captured
+    // from rtk-ai/rtk#1241.
 
     #[test]
-    fn test_pr1241_compile_pgp_multimodule_savings() {
-        let input = include_str!("../../../tests/fixtures/mvn_pr1241_compile_pgp_multimodule.txt");
+    fn test_compile_pgp_multimodule_savings() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_pgp_multimodule.txt");
         let output = filter_mvn_compile(input);
         let in_tok = count_tokens(input);
         let out_tok = count_tokens(&output);
@@ -2942,8 +2941,8 @@ mod tests {
     }
 
     #[test]
-    fn test_pr1241_compile_pgp_strips_banner_and_jvm_warnings() {
-        let input = include_str!("../../../tests/fixtures/mvn_pr1241_compile_pgp_multimodule.txt");
+    fn test_compile_pgp_strips_banner_and_jvm_warnings() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_pgp_multimodule.txt");
         let output = filter_mvn_compile(input);
         // Environment banner from `mvn -V`
         assert!(!output.contains("Apache Maven 3.9.6"), "kept Maven banner: {output}");
@@ -2969,8 +2968,8 @@ mod tests {
     }
 
     #[test]
-    fn test_pr1241_test_failure_stack_does_not_bleed_next_test() {
-        let input = include_str!("../../../tests/fixtures/mvn_pr1241_test_failure_simple.txt");
+    fn test_failure_stack_does_not_bleed_into_next_test() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_failure_stack_isolation.txt");
         let output = filter_mvn_test(input);
         // The next-class Running marker must NOT appear inside the failure
         // stack block (cosmetic bleed observed in diag).
