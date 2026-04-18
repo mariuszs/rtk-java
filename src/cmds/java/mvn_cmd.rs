@@ -14,7 +14,7 @@ use regex::Regex;
 use std::collections::HashSet;
 use std::ffi::OsString;
 use std::fmt::Write as _;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 const INFO_TAG: &str = "[INFO]";
 const ERROR_TAG: &str = "[ERROR]";
@@ -517,8 +517,94 @@ fn parse_counts(caps: &regex::Captures) -> TestSummary {
     }
 }
 
+/// Discover surefire/failsafe report directories under `cwd`.
+///
+/// Maven multi-module reactors write reports under each module's own
+/// `target/` directory (`<cwd>/<module>/target/surefire-reports/`).
+/// Single-module builds use `<cwd>/target/surefire-reports/`. We probe
+/// both and return every directory that exists, so reactor and `-pl`
+/// runs from the repo root surface failure details.
+///
+/// Walk depth is limited to 1 (direct child modules). Nested submodules
+/// are not discovered — run `rtk mvn` from the parent module dir for
+/// deeper structures.
+fn discover_report_dirs(cwd: &Path) -> (Vec<PathBuf>, Vec<PathBuf>) {
+    let mut surefire: Vec<PathBuf> = Vec::new();
+    let mut failsafe: Vec<PathBuf> = Vec::new();
+
+    let mut probe_target = |target: PathBuf| {
+        let sf = target.join("surefire-reports");
+        if sf.is_dir() {
+            surefire.push(sf);
+        }
+        let fs = target.join("failsafe-reports");
+        if fs.is_dir() {
+            failsafe.push(fs);
+        }
+    };
+
+    // Single-module / direct: cwd/target/...
+    probe_target(cwd.join("target"));
+
+    // Reactor modules: cwd/<module>/target/...
+    let Ok(entries) = std::fs::read_dir(cwd) else {
+        return (surefire, failsafe);
+    };
+    for entry in entries.flatten() {
+        let Ok(ft) = entry.file_type() else { continue };
+        if !ft.is_dir() {
+            continue;
+        }
+        let path = entry.path();
+        let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
+            continue;
+        };
+        // Skip dot-dirs, the cwd-level target itself (already probed),
+        // and well-known non-module dirs to keep the walk cheap.
+        if name.starts_with('.')
+            || name == "target"
+            || name == "src"
+            || name == "node_modules"
+            || name == "build"
+            || name == "out"
+        {
+            continue;
+        }
+        probe_target(path.join("target"));
+    }
+
+    (surefire, failsafe)
+}
+
+/// Parse every report dir and merge results into one `SurefireResult`.
+/// Returns `None` only when no dir produced any output.
+fn collect_reports(
+    dirs: &[PathBuf],
+    since: std::time::SystemTime,
+    app_packages: &[String],
+) -> Option<SurefireResult> {
+    let mut merged: Option<SurefireResult> = None;
+    for dir in dirs {
+        let Some(r) = surefire_reports::parse_dir(dir, Some(since), app_packages) else {
+            continue;
+        };
+        match &mut merged {
+            Some(acc) => {
+                acc.summary.add(&r.summary);
+                acc.failures.extend(r.failures);
+                acc.files_read += r.files_read;
+                acc.files_skipped_stale += r.files_skipped_stale;
+                acc.files_malformed += r.files_malformed;
+            }
+            None => merged = Some(r),
+        }
+    }
+    merged
+}
+
 /// Wrap the text-filter summary with structured failure details sourced from
 /// `target/surefire-reports/` and `target/failsafe-reports/` XML files.
+/// Discovers per-module report dirs in reactor builds (depth-1 walk).
 pub(crate) fn enrich_with_reports(
     text_summary: &str,
     cwd: &std::path::Path,
@@ -542,16 +628,9 @@ pub(crate) fn enrich_with_reports(
         return text_summary.to_string();
     }
 
-    let sf = surefire_reports::parse_dir(
-        &cwd.join("target/surefire-reports"),
-        Some(since),
-        app_packages,
-    );
-    let fs = surefire_reports::parse_dir(
-        &cwd.join("target/failsafe-reports"),
-        Some(since),
-        app_packages,
-    );
+    let (sf_dirs, fs_dirs) = discover_report_dirs(cwd);
+    let sf = collect_reports(&sf_dirs, since, app_packages);
+    let fs = collect_reports(&fs_dirs, since, app_packages);
 
     match (zero_tests, has_failures, &sf, &fs) {
         (true, _, None, None) => format!(
@@ -831,6 +910,17 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str) -> String {
     let counts = cumulative;
     let time_str = total_time.as_deref().unwrap_or("?");
     let has_failures = counts.failures > 0 || counts.errors > 0;
+
+    // Guard: BUILD FAILURE while still in `Testing` (no `Results:` block,
+    // or one that arrived after the build aborted) means a forked-VM
+    // crash, surefire timeout, or plugin abort — the parser has no count
+    // of failures, but the build is hard-failed. Without this guard the
+    // success branch below would emit "0 passed", silently hiding the
+    // failure. Fall back to the compile filter so the actual error block
+    // (which the raw output still contains) reaches the user.
+    if !has_failures && clean.contains("BUILD FAILURE") {
+        return filter_mvn_compile(output);
+    }
 
     if !has_failures {
         let passed = counts.run.saturating_sub(counts.skipped);
@@ -2777,6 +2867,167 @@ mod tests {
     }
 
     #[test]
+    fn enrich_reactor_finds_per_module_reports() {
+        // Regression: in reactor builds (and `mvn -pl <module>` from the
+        // root), Surefire writes reports under each module's `target/`,
+        // not under the cwd. The enricher must walk depth-1 module dirs
+        // so failure details still surface — otherwise the user gets
+        // "no XML reports found" despite fresh reports existing.
+        let tmp = tempfile::tempdir().unwrap();
+
+        // Module A has the failing test (under <cwd>/module-a/target/...)
+        let mod_a_sf = tmp.path().join("module-a/target/surefire-reports");
+        std::fs::create_dir_all(&mod_a_sf).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/surefire-reports/TEST-com.example.FailingTest.xml",
+            mod_a_sf.join("TEST-com.example.FailingTest.xml"),
+        )
+        .unwrap();
+
+        // Module B has a passing suite (under <cwd>/module-b/target/...)
+        let mod_b_sf = tmp.path().join("module-b/target/surefire-reports");
+        std::fs::create_dir_all(&mod_b_sf).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/surefire-reports/TEST-com.example.PassingTest.xml",
+            mod_b_sf.join("TEST-com.example.PassingTest.xml"),
+        )
+        .unwrap();
+
+        // Module C has integration failure under failsafe-reports
+        let mod_c_fs = tmp.path().join("module-c/target/failsafe-reports");
+        std::fs::create_dir_all(&mod_c_fs).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/failsafe-reports/TEST-com.example.DbIntegrationIT.xml",
+            mod_c_fs.join("TEST-com.example.DbIntegrationIT.xml"),
+        )
+        .unwrap();
+
+        // No reports at <cwd>/target/ — the cwd-only check would miss everything.
+        assert!(!tmp.path().join("target").exists());
+
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let text = "mvn verify: 14 run, 3 failed (02:15 min)\nBUILD FAILURE";
+        let out = super::enrich_with_reports(
+            text,
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "verify",
+        );
+
+        // Failure details from module-a's surefire reports must surface.
+        assert!(
+            out.contains("Failures (from surefire-reports/)"),
+            "missed module-a surefire reports:\n{out}"
+        );
+        assert!(
+            out.contains("com.example.FailingTest.shouldReturnUser"),
+            "missed FailingTest details:\n{out}"
+        );
+
+        // Integration failure from module-c must also surface.
+        assert!(
+            out.contains("Integration failures (from failsafe-reports/)"),
+            "missed module-c failsafe reports:\n{out}"
+        );
+
+        // Negative: must NOT regress to the no-reports hint.
+        assert!(
+            !out.contains("no XML reports"),
+            "discovered per-module reports yet still emitted no-reports hint:\n{out}"
+        );
+    }
+
+    #[test]
+    fn enrich_reactor_real_world_anliksim_multi_module() {
+        // Real reactor build captured from `anliksim/maven-multi-project-example`:
+        // 4-module reactor where module1's `SpeakerTest.speak` fails and
+        // module2 is SKIPPED. Surefire writes per-module reports under
+        // `<module>/target/surefire-reports/`. End-to-end check: filter
+        // the raw log, then enrich against a tmpdir mimicking the real
+        // on-disk layout.
+        let raw = include_str!("../../../tests/fixtures/mvn_test_reactor_module_failure.txt");
+        let text = filter_mvn_test(raw);
+
+        // Sanity: filter must already report failure (Reactor Summary's
+        // module-level FAILURE drives the parser even before XML enrichment).
+        assert!(
+            text.contains("BUILD FAILURE") || text.contains("failed"),
+            "filter dropped failure signal:\n{text}"
+        );
+
+        let tmp = tempfile::tempdir().unwrap();
+        // Mirror the real layout: <cwd>/<module>/target/surefire-reports/
+        let m1 = tmp.path().join("module1/target/surefire-reports");
+        let m2 = tmp.path().join("module2/target/surefire-reports");
+        std::fs::create_dir_all(&m1).unwrap();
+        std::fs::create_dir_all(&m2).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/surefire-reports-modules/module1/TEST-anliksim.SpeakerTest.xml",
+            m1.join("TEST-anliksim.SpeakerTest.xml"),
+        )
+        .unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/surefire-reports-modules/module2/TEST-anliksim.AppTest.xml",
+            m2.join("TEST-anliksim.AppTest.xml"),
+        )
+        .unwrap();
+
+        // Reports were just written — `since` must be older than the copy.
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(&text, tmp.path(), since, &pkgs("anliksim"), "test");
+
+        // Failure details must surface from module1's report (not from cwd/target).
+        assert!(
+            out.contains("anliksim.SpeakerTest.speak"),
+            "missed real-world per-module failure surfacing:\n{out}"
+        );
+        assert!(
+            out.contains("expected") || out.contains("ComparisonFailure"),
+            "missed real failure message:\n{out}"
+        );
+        // No fallback hint — reports were found.
+        assert!(
+            !out.contains("no XML reports"),
+            "discovered per-module reports yet still emitted no-reports hint:\n{out}"
+        );
+    }
+
+    #[test]
+    fn enrich_reactor_skips_dot_dirs_and_node_modules() {
+        // Walker must skip noisy, expensive dirs commonly found alongside
+        // pom.xml (`.git`, `node_modules`, `.idea`, etc.) so the depth-1
+        // walk stays cheap.
+        let tmp = tempfile::tempdir().unwrap();
+        for skipped in [".git", ".idea", "node_modules", "target", "src"] {
+            std::fs::create_dir_all(tmp.path().join(skipped).join("target/surefire-reports"))
+                .unwrap();
+            // Drop a malformed XML to prove the walker did NOT recurse here.
+            std::fs::write(
+                tmp.path()
+                    .join(skipped)
+                    .join("target/surefire-reports/TEST-Bogus.xml"),
+                "<broken/>",
+            )
+            .unwrap();
+        }
+        let text = "mvn test: 5 run, 1 failed (0.5 s)\nBUILD FAILURE";
+        let out = super::enrich_with_reports(
+            text,
+            tmp.path(),
+            std::time::SystemTime::now() - std::time::Duration::from_secs(60),
+            &pkgs("com.example"),
+            "test",
+        );
+        // Should fall through to the no-reports hint — none of the skipped
+        // dirs counted as a module.
+        assert!(
+            out.contains("no XML reports"),
+            "walker recursed into a skipped dir:\n{out}"
+        );
+    }
+
+    #[test]
     fn enrich_failures_without_xml_appends_hint() {
         let tmp = tempfile::tempdir().unwrap();
         let text = "mvn test: 5 run, 2 failed (0.500 s)\nBUILD FAILURE";
@@ -3069,6 +3320,39 @@ mod tests {
             "mvn test output missing compile-error signal:\n{output}"
         );
         assert!(output.contains("BUILD FAILURE"));
+    }
+
+    #[test]
+    fn test_forked_vm_crash_never_emits_synthetic_pass() {
+        // Surefire forked-VM crashes (System.exit, OOM kill, JVM segfault,
+        // plugin timeout) emit `BUILD FAILURE` *without* a `Results:`
+        // block. The state-machine parser leaves Testing with cumulative
+        // counts at zero — without the BUILD FAILURE guard the success
+        // branch would emit "0 passed", silently hiding a hard failure.
+        // Must surface the actual error block via the compile-filter
+        // fallback.
+        let input = include_str!("../../../tests/fixtures/mvn_test_forked_vm_crash.txt");
+        let output = filter_mvn_test(input);
+
+        // Must NOT emit a passing summary.
+        assert!(
+            !output.contains("0 passed"),
+            "forked-VM crash reported as 0 passed:\n{output}"
+        );
+        assert!(
+            !output.contains("mvn test: 0 passed"),
+            "forked-VM crash reported as synthetic pass:\n{output}"
+        );
+
+        // Must surface the hard failure.
+        assert!(
+            output.contains("BUILD FAILURE"),
+            "BUILD FAILURE missing from forked-VM crash output:\n{output}"
+        );
+        assert!(
+            output.contains("forked VM terminated") || output.contains("Crashed tests"),
+            "forked-VM error signal missing:\n{output}"
+        );
     }
 
     #[test]
