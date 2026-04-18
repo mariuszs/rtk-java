@@ -2939,10 +2939,10 @@ mod tests {
     }
 
     #[test]
-    fn enrich_reactor_real_world_anliksim_multi_module() {
-        // Real reactor build captured from `anliksim/maven-multi-project-example`:
-        // 4-module reactor where module1's `SpeakerTest.speak` fails and
-        // module2 is SKIPPED. Surefire writes per-module reports under
+    fn enrich_reactor_real_world_multi_module() {
+        // Real reactor build (anonymized from a public 4-module example):
+        // module1's `SpeakerTest.speak` fails, module2 is SKIPPED.
+        // Surefire writes per-module reports under
         // `<module>/target/surefire-reports/`. End-to-end check: filter
         // the raw log, then enrich against a tmpdir mimicking the real
         // on-disk layout.
@@ -2963,23 +2963,24 @@ mod tests {
         std::fs::create_dir_all(&m1).unwrap();
         std::fs::create_dir_all(&m2).unwrap();
         std::fs::copy(
-            "tests/fixtures/java/surefire-reports-modules/module1/TEST-anliksim.SpeakerTest.xml",
-            m1.join("TEST-anliksim.SpeakerTest.xml"),
+            "tests/fixtures/java/surefire-reports-modules/module1/TEST-com.example.app.SpeakerTest.xml",
+            m1.join("TEST-com.example.app.SpeakerTest.xml"),
         )
         .unwrap();
         std::fs::copy(
-            "tests/fixtures/java/surefire-reports-modules/module2/TEST-anliksim.AppTest.xml",
-            m2.join("TEST-anliksim.AppTest.xml"),
+            "tests/fixtures/java/surefire-reports-modules/module2/TEST-com.example.app.AppTest.xml",
+            m2.join("TEST-com.example.app.AppTest.xml"),
         )
         .unwrap();
 
         // Reports were just written — `since` must be older than the copy.
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let out = super::enrich_with_reports(&text, tmp.path(), since, &pkgs("anliksim"), "test");
+        let out =
+            super::enrich_with_reports(&text, tmp.path(), since, &pkgs("com.example.app"), "test");
 
         // Failure details must surface from module1's report (not from cwd/target).
         assert!(
-            out.contains("anliksim.SpeakerTest.speak"),
+            out.contains("com.example.app.SpeakerTest.speak"),
             "missed real-world per-module failure surfacing:\n{out}"
         );
         assert!(

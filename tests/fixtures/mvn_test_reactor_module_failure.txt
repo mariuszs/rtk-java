@@ -1,130 +1,56 @@
-[[33;1mWARNING[0m] Unable to find the root directory. Create a .mvn directory in the root directory or add the root="true" attribute on the root project's model to identify it.
-[[34;1mINFO[0m] Scanning for projects...
-[[33;1mWARNING[0m] 
-[[33;1mWARNING[0m] 1 problem was encountered while building the effective model for 'anliksim:module1:jar:1.0-SNAPSHOT' (use -e to see details)
-[[33;1mWARNING[0m] 
-[[33;1mWARNING[0m] Total model problems reported: 1
-[[33;1mWARNING[0m] 
-[[33;1mWARNING[0m] It is highly recommended to fix these problems because they threaten the stability of your build.
-[[33;1mWARNING[0m] 
-[[33;1mWARNING[0m] For this reason, future Maven versions might no longer support building such malformed projects.
-[[33;1mWARNING[0m] 
-[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
-[[34;1mINFO[0m] [1mReactor Build Order:[0m
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] Project Bill of Materials                                                                                            [pom]
-[[34;1mINFO[0m] Project Top Level                                                                                                    [pom]
-[[34;1mINFO[0m] Project Module 1                                                                                                     [jar]
-[[34;1mINFO[0m] Project Module 2                                                                                                     [jar]
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] [1m-----------------------------------------------------< [36;22manliksim:bom[39;1m >-----------------------------------------------------[0m
-[[34;1mINFO[0m] [1mBuilding Project Bill of Materials 1.0-SNAPSHOT                                                                      [1/4][0m
-[[34;1mINFO[0m]   from bom/pom.xml
-[[34;1mINFO[0m] [1m---------------------------------------------------------[ pom ]----------------------------------------------------------[0m
-[[34;1mINFO[0m] Copying anliksim:bom:pom:1.0-SNAPSHOT to project local repository
-[[34;1mINFO[0m] Copying anliksim:bom:pom:consumer:1.0-SNAPSHOT to project local repository
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] [1m---------------------------------------------< [36;22manliksim:bom-example-project[39;1m >---------------------------------------------[0m
-[[34;1mINFO[0m] [1mBuilding Project Top Level 1.0-SNAPSHOT                                                                              [2/4][0m
-[[34;1mINFO[0m]   from pom.xml
-[[34;1mINFO[0m] [1m---------------------------------------------------------[ pom ]----------------------------------------------------------[0m
-[[34;1mINFO[0m] Loaded 22562 auto-discovered prefixes for remote repository central (prefixes-central.txt)
-[[34;1mINFO[0m] Copying anliksim:bom-example-project:pom:1.0-SNAPSHOT to project local repository
-[[34;1mINFO[0m] Copying anliksim:bom-example-project:pom:consumer:1.0-SNAPSHOT to project local repository
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] [1m---------------------------------------------------< [36;22manliksim:module1[39;1m >---------------------------------------------------[0m
-[[34;1mINFO[0m] [1mBuilding Project Module 1 1.0-SNAPSHOT                                                                               [3/4][0m
-[[34;1mINFO[0m]   from module1/pom.xml
-[[34;1mINFO[0m] [1m---------------------------------------------------------[ jar ]----------------------------------------------------------[0m
-[[34;1mINFO[0m] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
-[[33;1mWARNING[0m] Version not locked for default bindings plugins [maven-resources-plugin, maven-compiler-plugin, maven-surefire-plugin, maven-jar-plugin], you should define versions in pluginManagement section of your pom.xml or parent
-[[34;1mINFO[0m] Loaded 22456 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63.txt)
-[[34;1mINFO[0m] Loaded 22562 auto-discovered prefixes for remote repository central (prefixes-central.txt)
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] [1m--- [32;22mresources:3.3.1:resources[0m [1m(default-resources)[0m @ [36mmodule1[39;1m ---[0m
-[[34;1mINFO[0m] skip non existing resourceDirectory /home/mariusz/projects/sample/maven-multi-project-example/maven-template-bom/module1/src/main/resources
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] [1m--- [32;22mcompiler:3.13.0:compile[0m [1m(default-compile)[0m @ [36mmodule1[39;1m ---[0m
-[[34;1mINFO[0m] Nothing to compile - all classes are up to date.
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] [1m--- [32;22mresources:3.3.1:testResources[0m [1m(default-testResources)[0m @ [36mmodule1[39;1m ---[0m
-[[34;1mINFO[0m] skip non existing resourceDirectory /home/mariusz/projects/sample/maven-multi-project-example/maven-template-bom/module1/src/test/resources
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] [1m--- [32;22mcompiler:3.13.0:testCompile[0m [1m(default-testCompile)[0m @ [36mmodule1[39;1m ---[0m
-[[34;1mINFO[0m] Nothing to compile - all classes are up to date.
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] [1m--- [32;22msurefire:3.5.2:test[0m [1m(default-test)[0m @ [36mmodule1[39;1m ---[0m
-[[34;1mINFO[0m] Using auto detected provider org.apache.maven.surefire.junit4.JUnit4Provider
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] -------------------------------------------------------
-[[34;1mINFO[0m]  T E S T S
-[[34;1mINFO[0m] -------------------------------------------------------
-[[34;1mINFO[0m] Running anliksim.[1mSpeakerTest[m
-[[31;1mERROR[0m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.022 s[1;31m <<< FAILURE![m -- in anliksim.[1mSpeakerTest[m
-[[31;1mERROR[0m] anliksim.SpeakerTest.speak -- Time elapsed: 0.005 s <<< FAILURE!
+[[34;1mINFO[0m] Scanning for projects...
+[[33;1mWARNING[0m] 1 problem was encountered while building the effective model for 'com.example.app:module1:jar:1.0-SNAPSHOT' (use -e to see details)
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
+[[34;1mINFO[0m] [1mReactor Build Order:[0m
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] Project Bill of Materials                                                                                            [pom]
+[[34;1mINFO[0m] Project Top Level                                                                                                    [pom]
+[[34;1mINFO[0m] Project Module 1                                                                                                     [jar]
+[[34;1mINFO[0m] Project Module 2                                                                                                     [jar]
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] [1m---------------------------------------------------< [36;22mcom.example.app:module1[39;1m >---------------------------------------------------[0m
+[[34;1mINFO[0m] [1mBuilding Project Module 1 1.0-SNAPSHOT                                                                               [3/4][0m
+[[34;1mINFO[0m]   from module1/pom.xml
+[[34;1mINFO[0m] [1m---------------------------------------------------------[ jar ]----------------------------------------------------------[0m
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] [1m--- [32;22mcompiler:3.13.0:compile[0m [1m(default-compile)[0m @ [36mmodule1[39;1m ---[0m
+[[34;1mINFO[0m] Nothing to compile - all classes are up to date.
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] [1m--- [32;22msurefire:3.5.2:test[0m [1m(default-test)[0m @ [36mmodule1[39;1m ---[0m
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] -------------------------------------------------------
+[[34;1mINFO[0m]  T E S T S
+[[34;1mINFO[0m] -------------------------------------------------------
+[[34;1mINFO[0m] Running com.example.app.[1mSpeakerTest[m
+[[31;1mERROR[0m] [1;31mTests [0;1mrun: [0;1m1[m, [1;31mFailures: [0;1;31m1[m, Errors: 0, Skipped: 0, Time elapsed: 0.022 s[1;31m <<< FAILURE![m -- in com.example.app.[1mSpeakerTest[m
+[[31;1mERROR[0m] com.example.app.SpeakerTest.speak -- Time elapsed: 0.005 s <<< FAILURE!
 org.junit.ComparisonFailure: expected:<He[llo]!> but was:<He[re I am]!>
 	at org.junit.Assert.assertEquals(Assert.java:117)
-	at org.junit.Assert.assertEquals(Assert.java:146)
-	at anliksim.SpeakerTest.speak(SpeakerTest.java:11)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
-	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
-	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
-	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
-	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
-	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
-	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
-	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
-	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
-	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
-	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
-	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
-	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
-	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
-	at org.apache.maven.surefire.junit4.JUnit4Provider.execute(JUnit4Provider.java:316)
-	at org.apache.maven.surefire.junit4.JUnit4Provider.executeWithRerun(JUnit4Provider.java:240)
-	at org.apache.maven.surefire.junit4.JUnit4Provider.executeTestSet(JUnit4Provider.java:214)
-	at org.apache.maven.surefire.junit4.JUnit4Provider.invoke(JUnit4Provider.java:155)
-	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
-	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
-	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at com.example.app.SpeakerTest.speak(SpeakerTest.java:11)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
 
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] Results:
-[[34;1mINFO[0m] 
-[[31;1mERROR[0m] [1;31mFailures: [m
-[[31;1mERROR[0m] [1;31m  SpeakerTest.speak:11 expected:<He[llo]!> but was:<He[re I am]!>[m
-[[34;1mINFO[0m] 
-[[31;1mERROR[0m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
-[[34;1mINFO[0m] [1mReactor Summary for Project Top Level 1.0-SNAPSHOT:[0m
-[[34;1mINFO[0m] 
-[[34;1mINFO[0m] Project Bill of Materials ............................................................................ [32;1mSUCCESS[0m [  0.006 s]
-[[34;1mINFO[0m] Project Top Level .................................................................................... [32;1mSUCCESS[0m [  0.090 s]
-[[34;1mINFO[0m] Project Module 1 ..................................................................................... [31;1mFAILURE[0m [  0.421 s]
-[[34;1mINFO[0m] Project Module 2 ..................................................................................... [33;1mSKIPPED[0m
-[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
-[[34;1mINFO[0m] [31;1mBUILD FAILURE[0m
-[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
-[[34;1mINFO[0m] Total time:  0.619 s
-[[34;1mINFO[0m] Finished at: 2026-04-18T20:10:20+02:00
-[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
-[[31;1mERROR[0m] Failed to execute goal [32morg.apache.maven.plugins:maven-surefire-plugin:3.5.2:test[0m [1m(default-test)[0m on project [36mmodule1[0m: [31;1mThere are test failures.[m
-[[31;1mERROR[0m] [31;1m[m
-[[31;1mERROR[0m] [31;1mSee /home/mariusz/projects/sample/maven-multi-project-example/maven-template-bom/module1/target/surefire-reports for the individual test results.[m
-[[31;1mERROR[0m] [31;1mSee dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.[0m[m
-[[31;1mERROR[0m] [0m-> [1m[Help 1][0m[m
-[[31;1mERROR[0m] 
-[[31;1mERROR[0m] To see the full stack trace of the errors, re-run Maven with the '[1m-e[0m' switch
-[[31;1mERROR[0m] Re-run Maven using the '[1m-X[0m' switch to enable verbose output
-[[31;1mERROR[0m] 
-[[31;1mERROR[0m] For more information about the errors and possible solutions, please read the following articles:
-[[31;1mERROR[0m] [1m[Help 1][0m http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
-[[31;1mERROR[0m] 
-[[31;1mERROR[0m] After correcting the problems, you can resume the build with the command
-[[31;1mERROR[0m]   [1mmvn [args] -r[0m
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] Results:
+[[34;1mINFO[0m]
+[[31;1mERROR[0m] [1;31mFailures: [m
+[[31;1mERROR[0m] [1;31m  SpeakerTest.speak:11 expected:<He[llo]!> but was:<He[re I am]!>[m
+[[34;1mINFO[0m]
+[[31;1mERROR[0m] [1;31mTests run: 1, Failures: 1, Errors: 0, Skipped: 0[m
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
+[[34;1mINFO[0m] [1mReactor Summary for Project Top Level 1.0-SNAPSHOT:[0m
+[[34;1mINFO[0m]
+[[34;1mINFO[0m] Project Bill of Materials ............................................................................ [32;1mSUCCESS[0m [  0.006 s]
+[[34;1mINFO[0m] Project Top Level .................................................................................... [32;1mSUCCESS[0m [  0.090 s]
+[[34;1mINFO[0m] Project Module 1 ..................................................................................... [31;1mFAILURE[0m [  0.421 s]
+[[34;1mINFO[0m] Project Module 2 ..................................................................................... [33;1mSKIPPED[0m
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
+[[34;1mINFO[0m] [31;1mBUILD FAILURE[0m
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
+[[34;1mINFO[0m] Total time:  0.619 s
+[[34;1mINFO[0m] Finished at: 2026-04-18T20:10:20+02:00
+[[34;1mINFO[0m] [1m--------------------------------------------------------------------------------------------------------------------------[0m
+[[31;1mERROR[0m] Failed to execute goal [32morg.apache.maven.plugins:maven-surefire-plugin:3.5.2:test[0m [1m(default-test)[0m on project [36mmodule1[0m: [31;1mThere are test failures.[m
+[[31;1mERROR[0m] [31;1mSee /workspace/example-project/module1/target/surefire-reports for the individual test results.[m
+[[31;1mERROR[0m] [0m-> [1m[Help 1][0m[m
+[[31;1mERROR[0m] [1m[Help 1][0m http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
