@@ -228,13 +228,6 @@ impl TestLikeGoal {
             Self::Verify => "verify",
         }
     }
-
-    fn filter(self) -> fn(&str) -> String {
-        match self {
-            Self::Test => filter_mvn_test,
-            Self::Verify => filter_mvn_verify,
-        }
-    }
 }
 
 /// Build the `(tool_name, tee_label)` pair used for tracking a run of
@@ -301,7 +294,6 @@ fn run_tests_like(
     let app_pkgs = crate::cmds::java::pom_groupid::detect(&cwd);
 
     let cwd_for_filter = cwd.clone();
-    let filter = goal.filter();
 
     let (tool_name, tee_label) = mvn_labels(binary, goal_str, goal_str);
     runner::run_filtered(
@@ -309,7 +301,10 @@ fn run_tests_like(
         &tool_name,
         &args.join(" "),
         move |raw: &str| {
-            let filtered = filter(raw);
+            // Thread `app_packages` into the stdout parser so its framework
+            // frame filtering matches the XML enrichment's behavior — keeps
+            // the fallback (no XML reports) format consistent with XML output.
+            let filtered = filter_mvn_tests_with_goal(raw, goal_str, &app_pkgs);
             enrich_with_reports(&filtered, &cwd_for_filter, started_at, &app_pkgs, goal_str)
         },
         runner::RunOptions::with_tee(&tee_label),
@@ -777,12 +772,14 @@ fn counts(r: Option<&SurefireResult>) -> (usize, usize, usize) {
 }
 
 /// Filter `mvn test` output using a state machine parser.
+#[cfg(test)]
 pub(crate) fn filter_mvn_test(output: &str) -> String {
-    filter_mvn_tests_with_goal(output, "test")
+    filter_mvn_tests_with_goal(output, "test", &[])
 }
 
+#[cfg(test)]
 pub(crate) fn filter_mvn_verify(output: &str) -> String {
-    filter_mvn_tests_with_goal(output, "verify")
+    filter_mvn_tests_with_goal(output, "verify", &[])
 }
 
 /// Shared state machine parser for test-producing goals (`test`, `verify`).
@@ -792,7 +789,7 @@ pub(crate) fn filter_mvn_verify(output: &str) -> String {
 /// - Testing: collect failure details from [ERROR] headers and assertion lines
 /// - Summary: parse final "Tests run:" line, BUILD SUCCESS/FAILURE, Total time
 /// - Done: stop at Help boilerplate
-fn filter_mvn_tests_with_goal(output: &str, goal: &str) -> String {
+fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String]) -> String {
     let clean = strip_ansi(output);
     let mut state = TestParseState::Preamble;
 
@@ -877,7 +874,7 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str) -> String {
                     if f.details.len() >= MAX_DETAIL_LINES {
                         continue;
                     }
-                    if is_framework_frame(stripped)
+                    if is_framework_frame_ext(stripped, app_packages)
                         || is_maven_boilerplate(trimmed)
                         || stripped.is_empty()
                         || (trimmed.starts_with(ERROR_TAG) && stripped.contains("<<<"))
@@ -964,8 +961,16 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str) -> String {
     }
     for (i, failure) in failures.iter().enumerate() {
         writeln!(result, "{}. {}", i + 1, failure.name).ok();
-        for detail in &failure.details {
-            writeln!(result, "   {}", truncate(detail, MAX_LINE_LENGTH)).ok();
+        for (di, detail) in failure.details.iter().enumerate() {
+            // First detail line is the exception header (e.g.
+            // `org.junit.ComparisonFailure: expected:<X> but was:<Y>`).
+            // Shorten the FQN to match the XML path's format.
+            let rendered = if di == 0 {
+                shorten_exception_header(detail)
+            } else {
+                detail.clone()
+            };
+            writeln!(result, "   {}", truncate(&rendered, MAX_LINE_LENGTH)).ok();
         }
     }
     if total_failures_seen > MAX_FAILURES_SHOWN {
@@ -1014,6 +1019,64 @@ fn is_framework_frame(line: &str) -> bool {
 
     // "... N more" truncation markers
     line.starts_with("...") && line.contains("more")
+}
+
+/// Extended framework-frame check driven by the legacy whitelist plus
+/// `app_packages` when known. Any `at <pkg>...` frame whose package is not
+/// in `app_packages` is treated as framework noise, matching the XML
+/// enrichment path's filtering behavior.
+///
+/// When `app_packages` is empty, falls back to the whitelist only — this
+/// preserves the pre-app_packages behavior for fixtures and callers that
+/// do not supply a pom groupId.
+fn is_framework_frame_ext(line: &str, app_packages: &[String]) -> bool {
+    if is_framework_frame(line) {
+        return true;
+    }
+    if app_packages.is_empty() {
+        return false;
+    }
+    // Only `at ...` frames are framework-gated. Exception headers and
+    // assertion messages (e.g. "expected:<X> but was:<Y>") never start with
+    // `at ` after `strip_maven_prefix`, so they pass through unchanged.
+    let Some(after_at) = line.strip_prefix("at ") else {
+        return false;
+    };
+    !app_packages
+        .iter()
+        .any(|pkg| after_at.starts_with(pkg.as_str()))
+}
+
+/// Strip the package prefix from an exception header, mirroring the XML
+/// path's `failure_kind_label` (`rsplit('.').next()`). Turns
+/// `"org.junit.ComparisonFailure: expected:<X> but was:<Y>"` into
+/// `"ComparisonFailure: expected:<X> but was:<Y>"`. Passes non-exception
+/// lines through unchanged.
+fn shorten_exception_header(line: &str) -> String {
+    let Some((fqn, rest)) = line.split_once(':') else {
+        return line.to_string();
+    };
+    let fqn_trimmed = fqn.trim();
+    // Must look like a Java FQN: non-empty, no spaces, contains a dot.
+    if fqn_trimmed.is_empty()
+        || fqn_trimmed.contains(char::is_whitespace)
+        || !fqn_trimmed.contains('.')
+    {
+        return line.to_string();
+    }
+    // Every segment must be a valid Java identifier-ish token (letters,
+    // digits, `_`, `$`). This rejects message bodies like "expected:<X>".
+    let valid = fqn_trimmed.split('.').all(|seg| {
+        !seg.is_empty()
+            && seg
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '$')
+    });
+    if !valid {
+        return line.to_string();
+    }
+    let short = fqn_trimmed.rsplit('.').next().unwrap_or(fqn_trimmed);
+    format!("{short}:{rest}")
 }
 
 /// Returns true for Maven boilerplate lines that should be stripped.
@@ -2836,6 +2899,87 @@ mod tests {
             "test filter must keep 'mvn test:' prefix after goal parameterization, got: {}",
             output
         );
+    }
+
+    #[test]
+    fn shorten_exception_header_strips_fqn_package() {
+        // Standard Java exception header: `org.junit.ComparisonFailure: msg`
+        assert_eq!(
+            super::shorten_exception_header(
+                "org.junit.ComparisonFailure: expected:<He[llo]!> but was:<He[re I am]!>",
+            ),
+            "ComparisonFailure: expected:<He[llo]!> but was:<He[re I am]!>",
+        );
+        assert_eq!(
+            super::shorten_exception_header("java.lang.NullPointerException: x"),
+            "NullPointerException: x",
+        );
+    }
+
+    #[test]
+    fn shorten_exception_header_passthrough_for_non_fqn() {
+        // Messages without a package-qualified prefix stay untouched.
+        assert_eq!(
+            super::shorten_exception_header("expected:<200> but was:<404>"),
+            "expected:<200> but was:<404>",
+        );
+        // Simple class name (no dots) — passthrough.
+        assert_eq!(
+            super::shorten_exception_header("AssertionError: boom"),
+            "AssertionError: boom",
+        );
+        // FQN token with whitespace in it — not a class, passthrough.
+        assert_eq!(
+            super::shorten_exception_header("not fqn: value"),
+            "not fqn: value",
+        );
+    }
+
+    #[test]
+    fn text_filter_shortens_exception_fqn_in_first_detail() {
+        // Regression: before unification, stdout parser emitted the full FQN
+        // (`org.junit.ComparisonFailure:`). XML path only shows the short
+        // class name — text fallback must match so both sources render
+        // identically.
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
+        let output = filter_mvn_test(input);
+        assert!(
+            !output.contains("org.junit.ComparisonFailure:"),
+            "text filter leaked FQN — must render short `ComparisonFailure:`:\n{output}"
+        );
+    }
+
+    #[test]
+    fn text_filter_drops_non_app_frames_when_app_packages_known() {
+        // With `app_packages=["com.edeal.frontline"]`, `org.junit.Assert.*`
+        // frames are not app code and must be dropped — same rule the XML
+        // `stack_trace::process` path applies. Without this, the stdout
+        // fallback kept `at org.junit.Assert.assertEquals(Assert.java:117)`
+        // noise while XML output was clean.
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
+        let output =
+            super::filter_mvn_tests_with_goal(input, "test", &pkgs("com.edeal.frontline"));
+        assert!(
+            !output.contains("org.junit.Assert.assertEquals"),
+            "kept `org.junit.Assert` framework frame with app_packages known:\n{output}"
+        );
+    }
+
+    #[test]
+    fn text_filter_preserves_existing_behavior_without_app_packages() {
+        // Empty app_packages falls back to the legacy whitelist — fixtures
+        // that today rely on certain frames surviving must keep working.
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
+        let with_empty = filter_mvn_test(input); // app_packages = &[]
+        let with_pkgs =
+            super::filter_mvn_tests_with_goal(input, "test", &pkgs("com.edeal.frontline"));
+        // Empty-packages mode keeps frames the legacy whitelist doesn't cover.
+        assert!(
+            with_empty.contains("org.junit.Assert.assertEquals"),
+            "empty app_packages must NOT regress the legacy behavior:\n{with_empty}"
+        );
+        // App-packages mode drops them (covered above); sanity-check divergence.
+        assert_ne!(with_empty, with_pkgs);
     }
 
     #[test]
