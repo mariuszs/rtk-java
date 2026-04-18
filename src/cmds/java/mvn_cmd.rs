@@ -651,7 +651,16 @@ fn render_enriched(
     surefire: Option<&SurefireResult>,
     failsafe: Option<&SurefireResult>,
 ) -> String {
-    let mut out = String::from(text_summary);
+    let sf_has_failures = surefire.is_some_and(|sf| !sf.failures.is_empty());
+    let fs_has_failures = failsafe.is_some_and(|fs| !fs.failures.is_empty());
+
+    // XML enrichment is authoritative (stack trace, captured output) — drop the
+    // text filter's `Failures:` block to avoid duplicating the same failures.
+    let mut out = if sf_has_failures || fs_has_failures {
+        strip_text_failures_block(text_summary)
+    } else {
+        text_summary.to_string()
+    };
 
     if let Some(sf) = surefire {
         if !sf.failures.is_empty() {
@@ -674,6 +683,15 @@ fn render_enriched(
     }
 
     out
+}
+
+/// Truncate the text-filter's `\nFailures:\n...` block so XML enrichment
+/// can replace it without duplicating the same test names.
+fn strip_text_failures_block(text_summary: &str) -> String {
+    match text_summary.find("\nFailures:\n") {
+        Some(idx) => text_summary[..idx].trim_end().to_string(),
+        None => text_summary.to_string(),
+    }
 }
 
 fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
@@ -2817,6 +2835,63 @@ mod tests {
             output.starts_with("mvn test:"),
             "test filter must keep 'mvn test:' prefix after goal parameterization, got: {}",
             output
+        );
+    }
+
+    #[test]
+    fn enrich_drops_text_failures_block_when_xml_has_failures() {
+        // Regression: before deduplication the user saw two "Failures"
+        // blocks — one from stdout parsing, one from surefire XML —
+        // listing the same test. XML is authoritative, so the text block
+        // must be stripped whenever XML failures exist.
+        let tmp = tempfile::tempdir().unwrap();
+        let reports_dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&reports_dir).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/surefire-reports/TEST-com.example.FailingTest.xml",
+            reports_dir.join("TEST-com.example.FailingTest.xml"),
+        )
+        .unwrap();
+
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let text = "mvn test: 2 run, 2 failed (0.6 s)\nBUILD FAILURE\n\nFailures:\n\
+                    1. com.example.FailingTest.shouldReturnUser\n\
+                       AssertionFailedError: expected:<200> but was:<404>\n";
+        let out =
+            super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
+
+        // XML block present.
+        assert!(
+            out.contains("Failures (from surefire-reports/)"),
+            "missing XML failures section:\n{out}"
+        );
+        // Text block gone — only the XML variant remains.
+        assert!(
+            !out.contains("\nFailures:\n"),
+            "text-filter 'Failures:' block leaked through — duplicate:\n{out}"
+        );
+        // Summary + BUILD FAILURE preserved.
+        assert!(out.starts_with("mvn test: 2 run, 2 failed (0.6 s)\nBUILD FAILURE"));
+    }
+
+    #[test]
+    fn enrich_keeps_text_failures_block_when_xml_unavailable() {
+        // Fallback guarantee: if XML reports are missing, the text-filter
+        // block is the only source of failure info — must survive.
+        let tmp = tempfile::tempdir().unwrap();
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let text = "mvn test: 1 run, 1 failed (0.5 s)\nBUILD FAILURE\n\nFailures:\n\
+                    1. com.example.LostTest.boom\n";
+        let out =
+            super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
+
+        assert!(
+            out.contains("Failures:\n1. com.example.LostTest.boom"),
+            "fallback dropped text failures when XML was absent:\n{out}"
+        );
+        assert!(
+            out.contains("no XML reports found"),
+            "expected no-reports hint in fallback:\n{out}"
         );
     }
 
