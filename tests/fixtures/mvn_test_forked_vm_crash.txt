@@ -1,0 +1,28 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -------------------------< com.example:app >-------------------------
+[INFO] Building app 1.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- surefire:3.2.5:test (default-test) @ app ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.HeavyTest
+[ERROR] The forked VM terminated without properly saying goodbye. VM crash or System.exit called?
+[ERROR] Command was /bin/sh -c cd '/home/user/project' && /opt/jdk/bin/java -jar /home/user/.m2/repository/org/apache/maven/surefire/surefire-booter/3.2.5/surefire-booter-3.2.5.jar /tmp/surefire12345 2025-12-13T14-22-31_312-jvmRun1 surefire1234tmp surefire_0987tmp
+[ERROR] Process Exit Code: 137
+[ERROR] Crashed tests:
+[ERROR] com.example.HeavyTest
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  45.123 s
+[INFO] Finished at: 2025-12-13T14:23:16+01:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.2.5:test (default-test) on project app: There was an error in the forked process: The forked VM terminated without properly saying goodbye. VM crash or System.exit called?
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
