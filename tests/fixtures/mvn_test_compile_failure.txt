@@ -1,102 +1,32 @@
 [INFO] Scanning for projects...
 [WARNING] Could not transfer metadata org.slf4j:slf4j-api/maven-metadata.xml from/to maven-default-http-blocker (http://0.0.0.0/): Blocked mirror for repositories: [apache.snapshots (http://repository.apache.org/snapshots, default, snapshots)]
-[INFO] 
+[INFO]
 [INFO] -------------------------< com.example:api >-------------------------
 [INFO] Building Example API 1.1-SNAPSHOT
 [INFO]   from pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
-[INFO] 
+[INFO]
 [INFO] --- enforcer:3.4.1:enforce (enforce-maven) @ api ---
 [INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
-[INFO] 
-[INFO] --- githook:1.0.5:install (default) @ api ---
-[INFO] Installing commit-msg hook into /home/user/project/.git/hooks
-[INFO] 
-[INFO] --- jacoco:0.8.11:prepare-agent (prepare-agent) @ api ---
-[INFO] argLine set to -javaagent:/home/user/.m2/repository/org/jacoco/org.jacoco.agent/0.8.11/org.jacoco.agent-0.8.11-runtime.jar=destfile=/home/user/project/target/jacoco.exec
-[INFO] 
-[INFO] --- resources:3.3.1:resources (default-resources) @ api ---
-[INFO] Copying 3 resources from src/main/resources to target/classes
-[INFO] Copying 2 resources from src/main/resources to target/classes
-[INFO] 
+[INFO]
 [INFO] --- compiler:3.11.0:compile (default-compile) @ api ---
 [INFO] Changes detected - recompiling the module! :source
 [INFO] Compiling 173 source files with javac [debug release 17] to target/classes
-[INFO] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPluginProxyClient.java: /home/user/project/src/main/java/com/example/api/v2/boost/BoostPluginProxyClient.java uses or overrides a deprecated API.
-[INFO] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPluginProxyClient.java: Recompile with -Xlint:deprecation for details.
-[INFO] /home/user/project/src/main/java/com/example/api/ExampleApiApplication.java: /home/user/project/src/main/java/com/example/api/ExampleApiApplication.java uses unchecked or unsafe operations.
-[INFO] /home/user/project/src/main/java/com/example/api/ExampleApiApplication.java: Recompile with -Xlint:unchecked for details.
 [INFO] -------------------------------------------------------------
-[WARNING] COMPILATION WARNING : 
-[INFO] -------------------------------------------------------------
-[WARNING] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPluginProxyClient.java:[50,45] handleError(org.springframework.http.client.ClientHttpResponse) in org.springframework.web.client.ResponseErrorHandler has been deprecated and marked for removal
-[WARNING] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPluginProxyClient.java:[41,25] setConnectTimeout(java.time.Duration) in org.springframework.boot.web.client.RestTemplateBuilder has been deprecated and marked for removal
-[WARNING] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPluginProxyClient.java:[42,25] setReadTimeout(java.time.Duration) in org.springframework.boot.web.client.RestTemplateBuilder has been deprecated and marked for removal
-[WARNING] /home/user/project/src/main/java/com/example/api/v2/notification/WebhookClient.java:[37,33] setConnectTimeout(java.time.Duration) in org.springframework.boot.web.client.RestTemplateBuilder has been deprecated and marked for removal
-[WARNING] /home/user/project/src/main/java/com/example/api/v2/notification/WebhookClient.java:[38,33] setReadTimeout(java.time.Duration) in org.springframework.boot.web.client.RestTemplateBuilder has been deprecated and marked for removal
-[INFO] 5 warnings 
-[INFO] -------------------------------------------------------------
-[INFO] -------------------------------------------------------------
-[ERROR] COMPILATION ERROR : 
+[ERROR] COMPILATION ERROR :
 [INFO] -------------------------------------------------------------
 [ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostSkillController.java:[27,36] variable boostService not initialized in the default constructor
 [ERROR] /home/user/project/src/main/java/com/example/api/v2/candidate/CandidateService.java:[67,17] cannot find symbol
   symbol:   variable log
   location: class com.example.api.v2.candidate.CandidateService
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/candidate/CandidateControllerV2.java:[72,17] cannot find symbol
-  symbol:   variable log
-  location: class com.example.api.v2.candidate.CandidateControllerV2
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPersonSkillController.java:[40,29] constructor PersonSkillModel in class com.example.api.v2.boost.PersonSkillModel cannot be applied to given types;
-  required: no arguments
-  found:    java.lang.String,java.lang.String,java.lang.String,boolean,boolean,java.util.List<com.example.api.v2.boost.PersonSkillModel.RatingModel>,com.example.api.v2.boost.PersonSkillModel.LocationModel,java.util.Map<java.lang.String,java.lang.Object>
-  reason: actual and formal argument lists differ in length
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPersonSkillController.java:[58,24] constructor RatingModel in class com.example.api.v2.boost.PersonSkillModel.RatingModel cannot be applied to given types;
-  required: no arguments
-  found:    com.example.api.v2.boost.SkillRatingType,java.lang.Integer,java.time.Instant,rating.rat[...]By())
-  reason: actual and formal argument lists differ in length
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPersonSkillController.java:[67,24] constructor PersonModel in class com.example.api.v2.boost.PersonSkillModel.PersonModel cannot be applied to given types;
-  required: no arguments
-  found:    java.lang.String,java.lang.String,java.lang.String
-  reason: actual and formal argument lists differ in length
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPersonSkillController.java:[83,29] constructor SkillFolderModel in class com.example.api.v2.boost.PersonSkillModel.SkillFolderModel cannot be applied to given types;
-  required: no arguments
-  found:    java.lang.String,java.lang.String
-  reason: actual and formal argument lists differ in length
 [ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[57,17] cannot find symbol
   symbol:   variable log
   location: class com.example.api.general.endpoint.GeneralExceptionHandler
-[ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[124,61] cannot find symbol
-  symbol:   method getStatus()
-  location: variable e of type com.example.api.v2.boost.BoostApiException
-[ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[124,79] cannot find symbol
-  symbol:   method getLogref()
-  location: variable e of type com.example.api.v2.boost.BoostApiException
-[ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[125,47] cannot find symbol
-  symbol:   method getStatus()
-  location: variable e of type com.example.api.v2.boost.BoostApiException
-[ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[134,17] cannot find symbol
-  symbol:   variable log
-  location: class com.example.api.general.endpoint.GeneralExceptionHandler
-[ERROR] /home/user/project/src/main/java/com/example/api/RateLimitFilter.java:[46,17] cannot find symbol
-  symbol:   variable log
-  location: class com.example.api.RateLimitFilter
-[ERROR] /home/user/project/src/main/java/com/example/api/RateLimitFilter.java:[51,25] cannot find symbol
-  symbol:   variable log
-  location: class com.example.api.RateLimitFilter
-[ERROR] /home/user/project/src/main/java/com/example/api/RateLimitFilter.java:[54,25] cannot find symbol
-  symbol:   variable log
-  location: class com.example.api.RateLimitFilter
-[ERROR] /home/user/project/src/main/java/com/example/api/RateLimitFilter.java:[62,33] cannot find symbol
-  symbol:   variable log
-  location: class com.example.api.RateLimitFilter
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostErrorDecoder.java:[39,25] cannot find symbol
-  symbol:   variable log
-  location: class com.example.api.v2.boost.BoostErrorDecoder
 [ERROR] /home/user/project/src/main/java/com/example/api/v2/RemoteBoostApiConfig.java:[73,24] constructor BoostErrorDecoder in class com.example.api.v2.boost.BoostErrorDecoder cannot be applied to given types;
   required: no arguments
   found:    com.fasterxml.jackson.databind.ObjectMapper
   reason: actual and formal argument lists differ in length
-[INFO] 18 errors 
+[INFO] 4 errors
 [INFO] -------------------------------------------------------------
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD FAILURE
@@ -104,77 +34,19 @@
 [INFO] Total time:  1.780 s
 [INFO] Finished at: 2026-04-18T00:21:52+02:00
 [INFO] ------------------------------------------------------------------------
-[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project api: Compilation failure: Compilation failure: 
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project api: Compilation failure: Compilation failure:
 [ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostSkillController.java:[27,36] variable boostService not initialized in the default constructor
 [ERROR] /home/user/project/src/main/java/com/example/api/v2/candidate/CandidateService.java:[67,17] cannot find symbol
 [ERROR]   symbol:   variable log
 [ERROR]   location: class com.example.api.v2.candidate.CandidateService
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/candidate/CandidateControllerV2.java:[72,17] cannot find symbol
-[ERROR]   symbol:   variable log
-[ERROR]   location: class com.example.api.v2.candidate.CandidateControllerV2
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPersonSkillController.java:[40,29] constructor PersonSkillModel in class com.example.api.v2.boost.PersonSkillModel cannot be applied to given types;
-[ERROR]   required: no arguments
-[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String,boolean,boolean,java.util.List<com.example.api.v2.boost.PersonSkillModel.RatingModel>,com.example.api.v2.boost.PersonSkillModel.LocationModel,java.util.Map<java.lang.String,java.lang.Object>
-[ERROR]   reason: actual and formal argument lists differ in length
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPersonSkillController.java:[58,24] constructor RatingModel in class com.example.api.v2.boost.PersonSkillModel.RatingModel cannot be applied to given types;
-[ERROR]   required: no arguments
-[ERROR]   found:    com.example.api.v2.boost.SkillRatingType,java.lang.Integer,java.time.Instant,rating.rat[...]By())
-[ERROR]   reason: actual and formal argument lists differ in length
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPersonSkillController.java:[67,24] constructor PersonModel in class com.example.api.v2.boost.PersonSkillModel.PersonModel cannot be applied to given types;
-[ERROR]   required: no arguments
-[ERROR]   found:    java.lang.String,java.lang.String,java.lang.String
-[ERROR]   reason: actual and formal argument lists differ in length
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostPersonSkillController.java:[83,29] constructor SkillFolderModel in class com.example.api.v2.boost.PersonSkillModel.SkillFolderModel cannot be applied to given types;
-[ERROR]   required: no arguments
-[ERROR]   found:    java.lang.String,java.lang.String
-[ERROR]   reason: actual and formal argument lists differ in length
 [ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[57,17] cannot find symbol
 [ERROR]   symbol:   variable log
 [ERROR]   location: class com.example.api.general.endpoint.GeneralExceptionHandler
-[ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[124,61] cannot find symbol
-[ERROR]   symbol:   method getStatus()
-[ERROR]   location: variable e of type com.example.api.v2.boost.BoostApiException
-[ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[124,79] cannot find symbol
-[ERROR]   symbol:   method getLogref()
-[ERROR]   location: variable e of type com.example.api.v2.boost.BoostApiException
-[ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[125,47] cannot find symbol
-[ERROR]   symbol:   method getStatus()
-[ERROR]   location: variable e of type com.example.api.v2.boost.BoostApiException
-[ERROR] /home/user/project/src/main/java/com/example/api/general/endpoint/GeneralExceptionHandler.java:[134,17] cannot find symbol
-[ERROR]   symbol:   variable log
-[ERROR]   location: class com.example.api.general.endpoint.GeneralExceptionHandler
-[ERROR] /home/user/project/src/main/java/com/example/api/RateLimitFilter.java:[46,17] cannot find symbol
-[ERROR]   symbol:   variable log
-[ERROR]   location: class com.example.api.RateLimitFilter
-[ERROR] /home/user/project/src/main/java/com/example/api/RateLimitFilter.java:[51,25] cannot find symbol
-[ERROR]   symbol:   variable log
-[ERROR]   location: class com.example.api.RateLimitFilter
-[ERROR] /home/user/project/src/main/java/com/example/api/RateLimitFilter.java:[54,25] cannot find symbol
-[ERROR]   symbol:   variable log
-[ERROR]   location: class com.example.api.RateLimitFilter
-[ERROR] /home/user/project/src/main/java/com/example/api/RateLimitFilter.java:[62,33] cannot find symbol
-[ERROR]   symbol:   variable log
-[ERROR]   location: class com.example.api.RateLimitFilter
-[ERROR] /home/user/project/src/main/java/com/example/api/v2/boost/BoostErrorDecoder.java:[39,25] cannot find symbol
-[ERROR]   symbol:   variable log
-[ERROR]   location: class com.example.api.v2.boost.BoostErrorDecoder
 [ERROR] /home/user/project/src/main/java/com/example/api/v2/RemoteBoostApiConfig.java:[73,24] constructor BoostErrorDecoder in class com.example.api.v2.boost.BoostErrorDecoder cannot be applied to given types;
 [ERROR]   required: no arguments
 [ERROR]   found:    com.fasterxml.jackson.databind.ObjectMapper
 [ERROR]   reason: actual and formal argument lists differ in length
 [ERROR] -> [Help 1]
-[ERROR] 
+[ERROR]
 [ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
-[ERROR] Re-run Maven using the -X switch to enable full debug logging.
-[ERROR] 
-[ERROR] For more information about the errors and possible solutions, please read the following articles:
 [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
-WARNING: A restricted method in java.lang.System has been called
-WARNING: java.lang.System::load has been called by org.fusesource.jansi.internal.JansiLoader in an unnamed module (file:/home/user/.m2/wrapper/dists/apache-maven-3.9.6-bin/3311e1d4/apache-maven-3.9.6/lib/jansi-2.4.0.jar)
-WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
-WARNING: Restricted methods will be blocked in a future release unless native access is enabled
-
-WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
-WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/home/user/.m2/wrapper/dists/apache-maven-3.9.6-bin/3311e1d4/apache-maven-3.9.6/lib/guava-32.0.1-jre.jar)
-WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
-WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
