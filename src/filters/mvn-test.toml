@@ -1,0 +1,147 @@
+[filters.mvn-test]
+description = "Compact Maven test output — failures only, strip surefire boilerplate"
+match_command = "^(\\.?\\/?)mvnw?\\s+test\\b"
+strip_ansi = true
+# Stage 3: short-circuit on full success (no errors/failures anywhere)
+match_output = [
+  { pattern = "Tests run: (\\d+), Failures: 0, Errors: 0", message = "mvn test: ok (all tests passed)", unless = "<<< FAILURE|\\[ERROR\\]" },
+]
+# Stage 2: blank out Maven surefire boilerplate and framework stack frames
+replace = [
+  { pattern = "^\\[ERROR\\]\\s*$", replacement = "" },
+  { pattern = "^\\[ERROR\\] -> \\[Help.*", replacement = "" },
+  { pattern = "^\\[ERROR\\] \\[Help \\d+\\].*", replacement = "" },
+  { pattern = "^\\[ERROR\\] See .*/surefire-reports.*", replacement = "" },
+  { pattern = "^\\[ERROR\\] See dump files.*", replacement = "" },
+  { pattern = "^\\[ERROR\\] To see the full stack trace.*", replacement = "" },
+  { pattern = "^\\[ERROR\\] Re-run Maven.*", replacement = "" },
+  { pattern = "^\\[ERROR\\] For more information about.*", replacement = "" },
+  # Strip framework stack frames (Maven, JUnit platform, Surefire, classworlds, JDK internals)
+  { pattern = "^\\[ERROR\\]\\s+at org\\.apache\\.maven\\..*", replacement = "" },
+  { pattern = "^\\[ERROR\\]\\s+at org\\.junit\\.platform\\..*", replacement = "" },
+  { pattern = "^\\[ERROR\\]\\s+at org\\.codehaus\\.plexus\\..*", replacement = "" },
+  { pattern = "^\\[ERROR\\]\\s+at java\\.base/.*", replacement = "" },
+  { pattern = "^\\[ERROR\\]\\s+\\.\\.\\. \\d+ more$", replacement = "" },
+]
+keep_lines_matching = [
+  "\\[ERROR\\]",
+  "BUILD (SUCCESS|FAILURE)",
+  "Tests run:",
+  "<<< FAILURE",
+  "<<< ERROR",
+  "^\\s+at\\s",
+  "Caused by:",
+  "^java\\.lang\\.\\w*Exception",
+  "^java\\.lang\\.\\w*Error",
+  "^org\\.junit\\..*Exception",
+  "^org\\.opentest4j\\.",
+  "expected:",
+  "but was:",
+  "Expected",
+  "Total time:",
+]
+tail_lines = 40
+max_lines = 40
+on_empty = "mvn test: ok (all tests passed)"
+
+[[tests.mvn-test]]
+name = "all tests pass returns ok"
+input = """
+[INFO] Scanning for projects...
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) ---
+[INFO] Compiling 5 source files with javac [debug target 25] to target/classes
+[INFO] --- maven-surefire-plugin:3.5.4:test (default-test) ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] BUILD SUCCESS
+[INFO] Total time:  3.456 s
+"""
+expected = "[INFO] BUILD SUCCESS\n[INFO] Total time:  3.456 s"
+
+[[tests.mvn-test]]
+name = "954 tests pass returns short summary"
+input = """
+[INFO] Scanning for projects...
+[INFO] Building auth 1.3-SNAPSHOT
+[INFO] --- maven-surefire-plugin:3.5.4:test (default-test) ---
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in com.example.PermissionHelperTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in com.example.SampleTest
+[INFO] Tests run: 954, Failures: 0, Errors: 0, Skipped: 9
+[INFO] BUILD SUCCESS
+[INFO] Total time:  01:46 min
+"""
+expected = "mvn test: ok (all tests passed)"
+
+[[tests.mvn-test]]
+name = "test failure preserves error details and strips boilerplate"
+input = """
+[INFO] Scanning for projects...
+[INFO] --- maven-surefire-plugin:3.5.4:test (default-test) ---
+[ERROR] Tests run: 27, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.073 s <<< FAILURE! -- in io.github.mavenmcp.parser.DependencyTreeParserTest
+[ERROR] io.github.mavenmcp.parser.DependencyTreeParserTest.shouldMatchCaseInsensitively -- Time elapsed: 0.004 s <<< FAILURE!
+java.lang.AssertionError:
+Expected size: 1 but was: 3
+[INFO]
+[INFO] BUILD FAILURE
+[INFO] Total time:  0.611 s
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.4:test (default-test) on project maven-mcp: There are test failures.
+[ERROR]
+[ERROR] See /home/mariusz/projects/maven-mcp/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+"""
+expected = "[ERROR] Tests run: 27, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.073 s <<< FAILURE! -- in io.github.mavenmcp.parser.DependencyTreeParserTest\n[ERROR] io.github.mavenmcp.parser.DependencyTreeParserTest.shouldMatchCaseInsensitively -- Time elapsed: 0.004 s <<< FAILURE!\njava.lang.AssertionError:\nExpected size: 1 but was: 3\n[INFO] BUILD FAILURE\n[INFO] Total time:  0.611 s\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.4:test (default-test) on project maven-mcp: There are test failures."
+
+[[tests.mvn-test]]
+name = "multiple test failures with assertion details"
+input = """
+[ERROR]   DependencyTreeParserTest.shouldParseDirectDependency:35
+expected: "org.slf4j"
+ but was: "com.google.guava"
+[ERROR]   DependencyTreeParserTest.shouldParseSimpleTree:22
+expected: "com.example"
+ but was: "org.slf4j"
+[ERROR] Tests run: 17, Failures: 7, Errors: 0, Skipped: 0
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.4:test (default-test) on project maven-mcp: There are test failures.
+[ERROR]
+[ERROR] See /home/mariusz/projects/maven-mcp/target/surefire-reports for the individual test results.
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+"""
+expected = "[ERROR]   DependencyTreeParserTest.shouldParseDirectDependency:35\nexpected: \"org.slf4j\"\n but was: \"com.google.guava\"\n[ERROR]   DependencyTreeParserTest.shouldParseSimpleTree:22\nexpected: \"com.example\"\n but was: \"org.slf4j\"\n[ERROR] Tests run: 17, Failures: 7, Errors: 0, Skipped: 0\n[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.4:test (default-test) on project maven-mcp: There are test failures."
+
+[[tests.mvn-test]]
+name = "real project build failure strips noise"
+input = """
+[INFO] Loaded 22505 auto-discovered prefixes for remote repository central
+[INFO] Scanning for projects...
+[WARNING] Could not transfer metadata from shibboleth-releases
+[WARNING] 176 problems were encountered while building the effective model
+[WARNING] 130 problems were encountered while building the effective model
+[INFO] Building auth 1.3-SNAPSHOT
+[INFO] --- jacoco:0.8.14:prepare-agent (prepare-agent) ---
+[INFO] Testcontainers version: 2.0.4
+[INFO] Found Docker environment with local Unix socket
+[INFO] npm warn deprecated domexception@2.0.1: Use your platform's native DOMException instead
+[INFO] Parsing 'com.devskiller.auth.GlobalControllerExceptionHandler$VndErrors'
+[INFO] BUILD FAILURE
+[INFO] Total time:  37.404 s
+[ERROR] Failed to execute goal cz.habarta.typescript-generator:typescript-generator-maven-plugin:3.2.1263:generate (Generate boost.d.ts) on project auth: Execution failed: Cannot read the array length because "array" is null -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch
+[ERROR] Re-run Maven using the -X switch to enable verbose output
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginExecutionException
+"""
+expected = "[INFO] BUILD FAILURE\n[INFO] Total time:  37.404 s\n[ERROR] Failed to execute goal cz.habarta.typescript-generator:typescript-generator-maven-plugin:3.2.1263:generate (Generate boost.d.ts) on project auth: Execution failed: Cannot read the array length because \"array\" is null -> [Help 1]"

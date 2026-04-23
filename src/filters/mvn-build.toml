@@ -1,13 +1,18 @@
 [filters.mvn-build]
 description = "Compact Maven build output"
-match_command = "^mvn\\s+(compile|package|clean|install)\\b"
+match_command = "^(\\.?\\/?)mvnw?\\s+(compile|package|clean|install)\\b"
 strip_ansi = true
 strip_lines_matching = [
   "^\\[INFO\\] ---",
   "^\\[INFO\\] Building\\s",
+  "^\\[INFO\\] Scanning for projects",
+  "^\\[INFO\\] Compiling \\d+ source file",
+  "^\\[INFO\\] Recompiling the module",
   "^\\[INFO\\] Downloading\\s",
   "^\\[INFO\\] Downloaded\\s",
   "^\\[INFO\\]\\s*$",
+  "^\\[ERROR\\]\\s*$",
+  "^\\[ERROR\\] -> \\[Help",
   "^\\s*$",
   "^Downloading:",
   "^Downloaded:",
@@ -42,3 +47,71 @@ input = """
 [INFO] Finished at: 2024-01-15T10:30:00Z
 """
 expected = "[INFO] BUILD SUCCESS\n[INFO] Total time: 4.123 s\n[INFO] Finished at: 2024-01-15T10:30:00Z"
+
+[[tests.mvn-build]]
+name = "clean success strips all noise"
+input = """
+[INFO] Scanning for projects...
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) ---
+[INFO] Compiling 5 source files with javac [debug target 25] to target/classes
+[INFO] BUILD SUCCESS
+[INFO] Total time:  1.234 s
+"""
+expected = "[INFO] BUILD SUCCESS\n[INFO] Total time:  1.234 s"
+
+[[tests.mvn-build]]
+name = "single compilation error preserves error details"
+input = """
+[INFO] Scanning for projects...
+[INFO]
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 5 source files with javac [debug target 25] to target/classes
+[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[42,15] cannot find symbol
+[INFO]   symbol:   variable foo
+[INFO]   location: class com.example.MyService
+[ERROR] COMPILATION FAILURE
+[ERROR]
+[ERROR] -> [Help 1]
+"""
+expected = "[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[42,15] cannot find symbol\n[INFO]   symbol:   variable foo\n[INFO]   location: class com.example.MyService\n[ERROR] COMPILATION FAILURE"
+
+[[tests.mvn-build]]
+name = "multiple compilation errors preserved"
+input = """
+[INFO] Scanning for projects...
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) ---
+[INFO] Compiling 10 source files with javac [debug target 25] to target/classes
+[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[42,15] cannot find symbol
+[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[55,10] incompatible types: String cannot be converted to int
+[ERROR] /home/user/my-project/src/main/java/com/example/OtherClass.java:[10,20] method doStuff() is not defined
+[ERROR] COMPILATION FAILURE
+[ERROR] -> [Help 1]
+"""
+expected = "[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[42,15] cannot find symbol\n[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[55,10] incompatible types: String cannot be converted to int\n[ERROR] /home/user/my-project/src/main/java/com/example/OtherClass.java:[10,20] method doStuff() is not defined\n[ERROR] COMPILATION FAILURE"
+
+[[tests.mvn-build]]
+name = "mixed errors and warnings preserved"
+input = """
+[INFO] Scanning for projects...
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) ---
+[INFO] Compiling 8 source files with javac [debug target 25] to target/classes
+[WARNING] /home/user/my-project/src/main/java/com/example/OldService.java:[10,5] [deprecation] doStuff() in LegacyApi has been deprecated
+[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[42,15] cannot find symbol
+[WARNING] /home/user/my-project/src/main/java/com/example/OldService.java:[25,12] [unchecked] unchecked cast
+[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[55,10] method not found
+[ERROR] COMPILATION FAILURE
+"""
+expected = "[WARNING] /home/user/my-project/src/main/java/com/example/OldService.java:[10,5] [deprecation] doStuff() in LegacyApi has been deprecated\n[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[42,15] cannot find symbol\n[WARNING] /home/user/my-project/src/main/java/com/example/OldService.java:[25,12] [unchecked] unchecked cast\n[ERROR] /home/user/my-project/src/main/java/com/example/MyService.java:[55,10] method not found\n[ERROR] COMPILATION FAILURE"
+
+[[tests.mvn-build]]
+name = "warnings-only build keeps warnings and success"
+input = """
+[INFO] Scanning for projects...
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) ---
+[INFO] Compiling 3 source files with javac [debug target 25] to target/classes
+[WARNING] /home/user/my-project/src/main/java/com/example/OldService.java:[10,5] [deprecation] doStuff() in LegacyApi has been deprecated
+[WARNING] /home/user/my-project/src/main/java/com/example/OldService.java:[25,12] [unchecked] unchecked cast
+[INFO] BUILD SUCCESS
+"""
+expected = "[WARNING] /home/user/my-project/src/main/java/com/example/OldService.java:[10,5] [deprecation] doStuff() in LegacyApi has been deprecated\n[WARNING] /home/user/my-project/src/main/java/com/example/OldService.java:[25,12] [unchecked] unchecked cast\n[INFO] BUILD SUCCESS"
