@@ -38,6 +38,7 @@ pub fn category_avg_tokens(category: &str, subcmd: &str) -> usize {
         "Infra" => 120,
         "Network" => 150,
         "GitHub" => 200,
+        "GitLab" => 200,
         "PackageManager" => 150,
         _ => 150,
     }
@@ -447,6 +448,8 @@ pub fn rewrite_command(cmd: &str, excluded: &[String]) -> Option<String> {
         return None;
     }
 
+    let compiled = compile_exclude_patterns(excluded);
+
     // Simple (non-compound) already-RTK command — return as-is.
     // For compound commands that start with "rtk" (e.g. "rtk git add . && cargo test"),
     // fall through to rewrite_compound so the remaining segments get rewritten.
@@ -459,11 +462,11 @@ pub fn rewrite_command(cmd: &str, excluded: &[String]) -> Option<String> {
         return Some(trimmed.to_string());
     }
 
-    rewrite_compound(trimmed, excluded)
+    rewrite_compound(trimmed, &compiled)
 }
 
 /// Rewrite a compound command (with `&&`, `||`, `;`, `|`) by rewriting each segment.
-fn rewrite_compound(cmd: &str, excluded: &[String]) -> Option<String> {
+fn rewrite_compound(cmd: &str, excluded: &[ExcludePattern]) -> Option<String> {
     let tokens = tokenize(cmd);
     let mut result = String::with_capacity(cmd.len() + 32);
     let mut any_changed = false;
@@ -595,11 +598,54 @@ const SHELL_PREFIX_BUILTINS: &[&str] = &["noglob", "command", "builtin", "exec",
 
 const MAX_PREFIX_DEPTH: usize = 10;
 
-fn rewrite_segment(seg: &str, excluded: &[String]) -> Option<String> {
+enum ExcludePattern {
+    Regex(Regex),
+    Prefix(String),
+}
+
+fn compile_exclude_patterns(patterns: &[String]) -> Vec<ExcludePattern> {
+    patterns
+        .iter()
+        .filter_map(|pattern| {
+            let trimmed = pattern.trim();
+            if trimmed.is_empty() || trimmed == "^" {
+                eprintln!(
+                    "rtk: warning: ignoring trivial exclude_commands pattern '{}'",
+                    pattern
+                );
+                return None;
+            }
+            let anchored = if trimmed.starts_with('^') {
+                trimmed.to_string()
+            } else {
+                format!(r"^{}($|\s)", regex::escape(trimmed))
+            };
+            Some(match Regex::new(&anchored) {
+                Ok(re) => ExcludePattern::Regex(re),
+                Err(e) => {
+                    eprintln!(
+                        "rtk: warning: invalid exclude_commands pattern '{}': {}",
+                        pattern, e
+                    );
+                    ExcludePattern::Prefix(pattern.clone())
+                }
+            })
+        })
+        .collect()
+}
+
+fn rewrite_segment(seg: &str, excluded: &[ExcludePattern]) -> Option<String> {
     rewrite_segment_inner(seg, excluded, 0)
 }
 
-fn rewrite_segment_inner(seg: &str, excluded: &[String], depth: usize) -> Option<String> {
+fn is_excluded(cmd: &str, excluded: &[ExcludePattern]) -> bool {
+    excluded.iter().any(|pat| match pat {
+        ExcludePattern::Regex(re) => re.is_match(cmd),
+        ExcludePattern::Prefix(prefix) => cmd.starts_with(prefix.as_str()),
+    })
+}
+
+fn rewrite_segment_inner(seg: &str, excluded: &[ExcludePattern], depth: usize) -> Option<String> {
     let trimmed = seg.trim();
     if trimmed.is_empty() {
         return None;
@@ -647,9 +693,9 @@ fn rewrite_segment_inner(seg: &str, excluded: &[String], depth: usize) -> Option
     // Use classify_command for correct ignore/prefix handling
     let rtk_equivalent = match classify_command(cmd_part) {
         Classification::Supported { rtk_equivalent, .. } => {
-            // Check if the base command is excluded from rewriting (#243)
-            let base = cmd_part.split_whitespace().next().unwrap_or("");
-            if excluded.iter().any(|e| e == base) {
+            let stripped = ENV_PREFIX.replace(cmd_part, "");
+            let cmd_clean = stripped.trim();
+            if is_excluded(cmd_clean, excluded) {
                 return None;
             }
             rtk_equivalent
@@ -1682,6 +1728,55 @@ mod tests {
     }
 
     #[test]
+    fn test_classify_glab_mr() {
+        assert!(matches!(
+            classify_command("glab mr list"),
+            Classification::Supported {
+                rtk_equivalent: "rtk glab",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn test_classify_glab_ci() {
+        assert!(matches!(
+            classify_command("glab ci list"),
+            Classification::Supported {
+                rtk_equivalent: "rtk glab",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn test_classify_glab_release() {
+        assert!(matches!(
+            classify_command("glab release list"),
+            Classification::Supported {
+                rtk_equivalent: "rtk glab",
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn test_rewrite_glab_mr_list() {
+        assert_eq!(
+            rewrite_command("glab mr list", &[]),
+            Some("rtk glab mr list".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_glab_ci_status() {
+        assert_eq!(
+            rewrite_command("glab ci status", &[]),
+            Some("rtk glab ci status".into())
+        );
+    }
+
+    #[test]
     fn test_classify_cargo_install() {
         assert!(matches!(
             classify_command("cargo install rtk"),
@@ -2696,6 +2791,31 @@ mod tests {
     }
 
     #[test]
+    fn test_rewrite_npm_bare_subcommand() {
+        let commands = vec!["exec", "run", "run-script", "x"];
+        for command in commands {
+            assert_eq!(
+                rewrite_command(format!("npm {command}").as_str(), &[]),
+                Some(format!("rtk npm {command}")),
+                "Failed for bare command: npm {}",
+                command
+            );
+        }
+    }
+
+    #[test]
+    fn test_rewrite_npm_with_args() {
+        assert_eq!(
+            rewrite_command("npm run test", &[]),
+            Some("rtk npm run test".to_string()),
+        );
+        assert_eq!(
+            rewrite_command("npm exec vitest", &[]),
+            Some("rtk vitest".to_string()),
+        );
+    }
+
+    #[test]
     fn test_rewrite_npx() {
         assert_eq!(
             rewrite_command("npx svgo", &[]),
@@ -2851,6 +2971,57 @@ mod tests {
             rewrite_command("git status && curl https://api.example.com", &excluded),
             Some("rtk git status && curl https://api.example.com".into())
         );
+    }
+
+    #[test]
+    fn test_exclude_env_prefixed_command() {
+        let excluded = vec!["psql".to_string()];
+        assert_eq!(
+            rewrite_command("PGPASSWORD=postgres psql -h localhost", &excluded),
+            None
+        );
+    }
+
+    #[test]
+    fn test_exclude_subcommand_pattern() {
+        let excluded = vec!["git push".to_string()];
+        assert_eq!(rewrite_command("git push origin main", &excluded), None);
+    }
+
+    #[test]
+    fn test_exclude_regex_pattern() {
+        let excluded = vec!["^curl".to_string()];
+        assert_eq!(rewrite_command("curl http://example.com", &excluded), None);
+    }
+
+    #[test]
+    fn test_exclude_invalid_regex_fallback() {
+        let excluded = vec!["curl[".to_string()];
+        assert!(rewrite_command("curl http://example.com", &excluded).is_some());
+    }
+
+    #[test]
+    fn test_exclude_does_not_substring_match() {
+        let excluded = vec!["go".to_string()];
+        assert!(rewrite_command("golangci-lint run ./...", &excluded).is_some());
+    }
+
+    #[test]
+    fn test_exclude_does_not_match_hyphenated_command() {
+        let excluded = vec!["golangci".to_string()];
+        assert!(rewrite_command("golangci-lint run ./...", &excluded).is_some());
+    }
+
+    #[test]
+    fn test_exclude_empty_pattern_ignored() {
+        let excluded = vec!["".to_string()];
+        assert!(rewrite_command("git status", &excluded).is_some());
+    }
+
+    #[test]
+    fn test_exclude_bare_anchor_ignored() {
+        let excluded = vec!["^".to_string()];
+        assert!(rewrite_command("git status", &excluded).is_some());
     }
 
     #[test]
