@@ -1,0 +1,10 @@
+---
+source: src/cmds/java/mvn_cmd.rs
+expression: output
+---
+mvn clean test-compile checkstyle:check (multi-goal)
+[INFO] /app/src/test/java/com/example/security/saml/SamlAdGroupProcessorTest.java: uses unchecked or unsafe operations.
+[INFO] /app/src/test/java/com/example/security/saml/SamlAdGroupProcessorTest.java: Recompile with -Xlint:unchecked for details.
+You have 0 Checkstyle violations.
+BUILD SUCCESS
+Total time: 25.459 s

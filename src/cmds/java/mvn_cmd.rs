@@ -566,6 +566,130 @@ fn split_segments(raw: &str) -> Vec<Segment> {
     segments
 }
 
+// ---------------------------------------------------------------------------
+// Multi-goal composition layer (Task 4)
+// ---------------------------------------------------------------------------
+
+#[derive(Default)]
+struct MultiParts {
+    compile: String,
+    tests: String,      // surefire + failsafe combined (enriched later in run_multi_goal)
+    checkstyle: String,
+    build: String,      // BUILD SUCCESS/FAILURE + Total time (+ Reactor Summary on failure)
+    stray_errors: Vec<String>, // [ERROR] lines from dropped/Other segments
+}
+
+/// Pull the trailing build footer: always keep BUILD SUCCESS/FAILURE + Total
+/// time; on failure also keep the Reactor Summary block (which module failed).
+fn extract_build_block(raw: &str) -> String {
+    let failed = raw.contains("BUILD FAILURE");
+    let mut out: Vec<String> = Vec::new();
+    let mut in_reactor = false;
+    for line in raw.lines() {
+        let s = strip_ansi(line);
+        let st = s.trim();
+        if failed && st.contains("Reactor Summary") {
+            in_reactor = true;
+        }
+        if in_reactor {
+            if st.contains("BUILD FAILURE") || st.contains("BUILD SUCCESS") {
+                in_reactor = false;
+            } else if !is_maven_boilerplate(st) && !st.is_empty() {
+                out.push(strip_maven_prefix(&s).to_string());
+            }
+        }
+        if st.contains("BUILD SUCCESS") || st.contains("BUILD FAILURE") {
+            out.push(if failed { "BUILD FAILURE".to_string() } else { "BUILD SUCCESS".to_string() });
+        }
+        if let Some(t) = parse_total_time(&s) {
+            out.push(format!("Total time: {t}"));
+        }
+    }
+    out.join("\n")
+}
+
+/// Run each segment group through its existing sub-filter and collect the
+/// signal pieces. Pure: no filesystem access (enrichment happens in
+/// run_multi_goal, a later task).
+#[allow(dead_code)]
+fn filter_segments(raw: &str) -> MultiParts {
+    let segments = split_segments(raw);
+    let mut parts = MultiParts::default();
+
+    let mut compile_buf = String::new();
+    let mut test_buf = String::new();
+    let mut has_failsafe = false;
+    let mut checkstyle_buf = String::new();
+
+    for seg in &segments {
+        match seg.kind {
+            SegmentKind::Compile => compile_buf.push_str(&seg.body),
+            SegmentKind::Surefire => test_buf.push_str(&seg.body),
+            SegmentKind::Failsafe => {
+                test_buf.push_str(&seg.body);
+                has_failsafe = true;
+            }
+            SegmentKind::Checkstyle => checkstyle_buf.push_str(&seg.body),
+            SegmentKind::Clean | SegmentKind::Preamble => {} // dropped as noise
+            SegmentKind::Other => {
+                for l in seg.body.lines() {
+                    if strip_ansi(l).trim_start().starts_with(ERROR_TAG) {
+                        parts.stray_errors.push(strip_maven_prefix(&strip_ansi(l)).to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    if !compile_buf.trim().is_empty() {
+        parts.compile = filter_mvn_compile(&compile_buf);
+    }
+    if !test_buf.trim().is_empty() {
+        let goal = if has_failsafe { "verify" } else { "test" };
+        parts.tests = filter_mvn_tests_with_goal(&test_buf, goal, &[]);
+    }
+    if !checkstyle_buf.trim().is_empty() {
+        parts.checkstyle = filter_mvn_checkstyle(&checkstyle_buf);
+    }
+    parts.build = extract_build_block(raw);
+    parts
+}
+
+/// Assemble the final multi-goal report from already-filtered (and possibly
+/// enriched) parts, in canonical order.
+#[allow(dead_code)]
+fn compose_multi(parts: &MultiParts, goals_header: &str) -> String {
+    let mut out = String::new();
+    let _ = writeln!(out, "mvn {goals_header} (multi-goal)");
+    for piece in [&parts.compile, &parts.tests, &parts.checkstyle] {
+        if !piece.trim().is_empty() {
+            out.push_str(piece.trim_end());
+            out.push('\n');
+        }
+    }
+    for e in &parts.stray_errors {
+        out.push_str(e);
+        out.push('\n');
+    }
+    if !parts.build.trim().is_empty() {
+        out.push_str(parts.build.trim_end());
+        out.push('\n');
+    }
+    out.trim_end().to_string()
+}
+
+/// Pure multi-goal filter (no XML enrichment) — snapshot-tested directly.
+/// run_multi_goal (later task) wraps this and adds enrichment on the test portion.
+#[allow(dead_code)]
+fn filter_mvn_multi(raw: &str, goals_header: &str) -> String {
+    // Degraded-input fallback: no markers AND no build footer → never swallow.
+    if !PLUGIN_MARKER_RE.is_match(raw) && !BUILD_FOOTER_RE.is_match(raw) {
+        return raw.to_string();
+    }
+    let parts = filter_segments(raw);
+    compose_multi(&parts, goals_header)
+}
+
 fn route_goal(subcommand: &str) -> GoalRouting {
     if COMPILE_LIKE_GOALS.iter().any(|(g, _)| *g == subcommand) {
         return GoalRouting::Compile;
@@ -3804,5 +3928,20 @@ mod tests {
         ]);
         // The checkstyle segment carries its body up to (not including) the BUILD block.
         assert!(segs[3].body.contains("0 Checkstyle violations"));
+    }
+
+    #[test]
+    fn test_filter_mvn_multi_success() {
+        let input = include_str!("../../../tests/fixtures/mvn_multi_clean_testcompile_checkstyle_pass.txt");
+        let output = filter_mvn_multi(input, "clean test-compile checkstyle:check");
+        assert!(output.contains("(multi-goal)"), "missing header: {output}");
+        assert!(output.contains("BUILD SUCCESS"), "lost BUILD line: {output}");
+        assert!(output.contains("0 Checkstyle violations") || output.contains("0 violations"),
+                "lost checkstyle signal: {output}");
+        // clean noise must be gone
+        assert!(!output.contains("Deleting"), "clean noise leaked: {output}");
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 85.0, "expected ≥85%, got {:.1}%", savings);
+        insta::assert_snapshot!(output);
     }
 }
