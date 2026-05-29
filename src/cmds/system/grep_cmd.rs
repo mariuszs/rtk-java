@@ -51,9 +51,21 @@ pub fn run(
 
     let result = exec_capture(&mut rg_cmd)
         .or_else(|_| {
+            // rg unavailable → native grep. Use the ORIGINAL pattern (grep speaks
+            // BRE natively) and translate/strip rg-only flags so grep never sees
+            // an option it can't parse (the `--type`/`--glob` failures).
+            let (mut grep_args, dropped) = grep_fallback_args(extra_args);
+            if let Some(ft) = file_type {
+                grep_args.push(rg_type_to_glob(ft));
+            }
+            if !dropped.is_empty() {
+                eprintln!(
+                    "rtk: dropped rg-only flags on grep fallback: {}",
+                    dropped.join(" ")
+                );
+            }
             let mut grep_cmd = resolved_command("grep");
-            //When we fall back to grep,include all args, not just -rn.
-            grep_cmd.args(["-rn", pattern, path]).args(extra_args);
+            grep_cmd.args(["-rn", pattern, path]).args(&grep_args);
             exec_capture(&mut grep_cmd)
         })
         .context("grep/rg failed")?;
@@ -314,6 +326,101 @@ fn translate_bre_to_rust(pattern: &str) -> String {
     out
 }
 
+/// rg type name → file glob for grep's `--include` (best-effort common set).
+fn rg_type_to_glob(t: &str) -> String {
+    let ext = match t {
+        "rust" => "rs",
+        "py" | "python" => "py",
+        "js" => "js",
+        "ts" => "ts",
+        "md" | "markdown" => "md",
+        "yaml" => "yaml",
+        other => other, // java→java, go→go, etc.: name already equals ext
+    };
+    format!("--include=*.{}", ext)
+}
+
+/// rg `--glob`/`-g` value → grep `--include`/`--exclude`. A leading `!` is rg's
+/// negation, which maps to grep's `--exclude`.
+fn glob_to_include(g: &str) -> String {
+    if let Some(rest) = g.strip_prefix('!') {
+        format!("--exclude={}", rest)
+    } else {
+        format!("--include={}", g)
+    }
+}
+
+/// rg-only flags that take a VALUE and have no grep equivalent → drop flag + value.
+const RG_VALUE_DROP: &[&str] = &[
+    "--engine",
+    "--max-columns",
+    "-M",
+    "--colors",
+    "--context-separator",
+    "--field-context-separator",
+    "--field-match-separator",
+    "--pre",
+    "--sort",
+    "--sortr",
+];
+
+/// boolean rg-only flags grep can't parse → drop.
+const RG_BOOL_DROP: &[&str] = &[
+    "--no-ignore",
+    "--no-ignore-vcs",
+    "--no-ignore-dot",
+    "--hidden",
+    "--no-heading",
+    "--heading",
+    "--pcre2",
+    "--column",
+    "--no-column",
+];
+
+/// Translate rg `extra_args` into grep-safe args. Returns (kept_args, dropped_args).
+/// Value-taking flags are paired with their value so we never leave a dangling token
+/// that grep would misread as a pattern/path:
+/// - `--type X` / `-tX` / `--type=X`  → `--include=*.<ext>`
+/// - `--glob X` / `-gX` / `--glob=X`  → `--include=X` (or `--exclude=` for `!X`)
+/// - RG_VALUE_DROP flags              → drop flag AND its value
+/// - RG_BOOL_DROP flags               → drop flag
+///
+/// Everything else is kept verbatim (grep-compatible flags like -i, -w, -A, -B, -C).
+fn grep_fallback_args(extra: &[String]) -> (Vec<String>, Vec<String>) {
+    let mut kept = Vec::new();
+    let mut dropped = Vec::new();
+    let mut it = extra.iter().peekable();
+    while let Some(a) = it.next() {
+        if a == "--type" || a == "-t" {
+            if let Some(v) = it.next() {
+                kept.push(rg_type_to_glob(v));
+            }
+        } else if let Some(v) = a.strip_prefix("--type=") {
+            kept.push(rg_type_to_glob(v));
+        } else if let Some(v) = a.strip_prefix("-t").filter(|s| !s.is_empty()) {
+            kept.push(rg_type_to_glob(v));
+        } else if a == "--glob" || a == "-g" {
+            if let Some(v) = it.next() {
+                kept.push(glob_to_include(v));
+            }
+        } else if let Some(v) = a.strip_prefix("--glob=") {
+            kept.push(glob_to_include(v));
+        } else if let Some(v) = a.strip_prefix("-g").filter(|s| !s.is_empty()) {
+            kept.push(glob_to_include(v));
+        } else if RG_VALUE_DROP.contains(&a.as_str()) {
+            dropped.push(a.clone());
+            if let Some(v) = it.next() {
+                dropped.push(v.clone());
+            }
+        } else if RG_BOOL_DROP.contains(&a.as_str()) {
+            dropped.push(a.clone());
+        } else {
+            kept.push(a.clone());
+        }
+    }
+    (kept, dropped)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -539,5 +646,60 @@ mod tests {
     fn test_bre_char_class_untouched() {
         // Inside [...] the chars | ( ) keep their literal meaning in both dialects.
         assert_eq!(translate_bre_to_rust(r"[a|b(]x"), r"[a|b(]x");
+    }
+
+    #[test]
+    fn test_grep_fallback_translates_type_to_include() {
+        let (args, _dropped) =
+            grep_fallback_args(&["-l".to_string(), "--type".to_string(), "java".to_string()]);
+        assert!(args.contains(&"--include=*.java".to_string()), "got {:?}", args);
+        assert!(!args.iter().any(|a| a == "--type"), "got {:?}", args);
+        assert!(args.contains(&"-l".to_string()));
+    }
+
+    #[test]
+    fn test_grep_fallback_drops_bool_rg_flags() {
+        let (args, dropped) =
+            grep_fallback_args(&["--no-ignore-vcs".to_string(), "-i".to_string()]);
+        assert!(!args.iter().any(|a| a == "--no-ignore-vcs"));
+        assert!(args.contains(&"-i".to_string()));
+        assert!(dropped.iter().any(|d| d == "--no-ignore-vcs"));
+    }
+
+    #[test]
+    fn test_rg_type_to_glob_known_and_unknown() {
+        assert_eq!(rg_type_to_glob("rust"), "--include=*.rs");
+        assert_eq!(rg_type_to_glob("java"), "--include=*.java");
+    }
+
+    #[test]
+    fn test_grep_fallback_glob_to_include() {
+        let (args, _) = grep_fallback_args(&["-g".to_string(), "*.rs".to_string()]);
+        assert!(args.contains(&"--include=*.rs".to_string()), "got {:?}", args);
+        assert!(!args.iter().any(|a| a == "-g"), "got {:?}", args);
+    }
+
+    #[test]
+    fn test_grep_fallback_glob_negation_to_exclude() {
+        let (args, _) = grep_fallback_args(&["--glob".to_string(), "!*.test.js".to_string()]);
+        assert!(args.contains(&"--exclude=*.test.js".to_string()), "got {:?}", args);
+    }
+
+    #[test]
+    fn test_grep_fallback_glob_attached_form() {
+        let (args, _) = grep_fallback_args(&["-g*.rs".to_string()]);
+        assert!(args.contains(&"--include=*.rs".to_string()), "got {:?}", args);
+    }
+
+    #[test]
+    fn test_grep_fallback_drops_valued_rg_flag_with_value() {
+        let (args, dropped) = grep_fallback_args(&[
+            "--engine".to_string(),
+            "pcre2".to_string(),
+            "-i".to_string(),
+        ]);
+        assert!(!args.iter().any(|a| a == "pcre2"), "value must drop too: {:?}", args);
+        assert!(args.contains(&"-i".to_string()), "got {:?}", args);
+        assert!(dropped.contains(&"--engine".to_string()), "got {:?}", dropped);
     }
 }
