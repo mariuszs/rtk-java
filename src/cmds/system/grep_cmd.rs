@@ -252,7 +252,7 @@ fn clean_line(line: &str, max_len: usize, context_re: Option<&Regex>, pattern: &
                 format!("{}...", slice)
             }
         } else {
-            let t: String = trimmed.chars().take(max_len - 3).collect();
+            let t: String = trimmed.chars().take(max_len.saturating_sub(3)).collect();
             format!("{}...", t)
         }
     }
@@ -366,6 +366,8 @@ fn glob_to_include(g: &str) -> String {
 }
 
 /// rg-only flags that take a VALUE and have no grep equivalent → drop flag + value.
+/// Dropping the value too is essential: a stranded value (e.g. the `3` in
+/// `--max-depth 3`) would be misread by grep as a pattern or path.
 const RG_VALUE_DROP: &[&str] = &[
     "--engine",
     "--max-columns",
@@ -375,8 +377,17 @@ const RG_VALUE_DROP: &[&str] = &[
     "--field-context-separator",
     "--field-match-separator",
     "--pre",
+    "--pre-glob",
     "--sort",
     "--sortr",
+    "--max-depth",
+    "--iglob",
+    "--type-not",
+    "-T",
+    "--type-add",
+    "--type-clear",
+    "--regex-size-limit",
+    "--dfa-size-limit",
 ];
 
 /// boolean rg-only flags grep can't parse → drop.
@@ -471,6 +482,18 @@ mod tests {
         let cleaned = clean_line(line, 50, None, "result");
         assert!(!cleaned.starts_with(' '));
         assert!(cleaned.len() <= 50);
+    }
+
+    // Regression: a tiny max_len on a long line whose (regex) pattern isn't found
+    // literally hits the truncation else-branch. `max_len - 3` underflowed there
+    // (panic in debug / no-op cap in release); saturating_sub keeps it safe.
+    #[test]
+    fn test_clean_line_tiny_max_len_no_underflow() {
+        let line = "this is a long line that exceeds the cap and lacks the literal pat";
+        for max_len in [0usize, 1, 2, 3] {
+            let cleaned = clean_line(line, max_len, None, "fn.*main");
+            assert!(!cleaned.is_empty());
+        }
     }
 
     #[test]
@@ -731,5 +754,19 @@ mod tests {
         assert!(!args.iter().any(|a| a == "pcre2"), "value must drop too: {:?}", args);
         assert!(args.contains(&"-i".to_string()), "got {:?}", args);
         assert!(dropped.contains(&"--engine".to_string()), "got {:?}", dropped);
+    }
+
+    // The value of a dropped rg-only flag must never strand as a grep pattern/path.
+    #[test]
+    fn test_grep_fallback_drops_max_depth_with_value() {
+        let (args, dropped) = grep_fallback_args(&[
+            "--max-depth".to_string(),
+            "3".to_string(),
+            "-w".to_string(),
+        ]);
+        assert!(!args.iter().any(|a| a == "3"), "stray value must drop: {:?}", args);
+        assert!(!args.iter().any(|a| a == "--max-depth"), "got {:?}", args);
+        assert!(args.contains(&"-w".to_string()), "got {:?}", args);
+        assert!(dropped.contains(&"--max-depth".to_string()), "got {:?}", dropped);
     }
 }
