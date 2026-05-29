@@ -716,14 +716,14 @@ enum Commands {
 
     /// Maven commands with compact output
     Mvn {
-        #[command(subcommand)]
-        command: MvnCommands,
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<OsString>,
     },
 
     /// Maven Daemon (mvnd) commands with compact output — same filters as `rtk mvn`
     Mvnd {
-        #[command(subcommand)]
-        command: MvnCommands,
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<OsString>,
     },
 
     /// Graphite (gt) stacked PR commands with compact output
@@ -1120,45 +1120,6 @@ enum GoCommands {
     Other(Vec<OsString>),
 }
 
-#[derive(Debug, Subcommand)]
-enum MvnCommands {
-    /// Run tests with compact output (state machine parser, 99%+ token reduction)
-    Test {
-        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String>,
-    },
-    /// Run `mvn verify` — same filter as `test` plus failsafe-reports XML enrichment
-    Verify {
-        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String>,
-    },
-    /// Run `mvn clean` — collapse to one-line summary (what was deleted + time)
-    Clean {
-        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String>,
-    },
-    /// Compile with compact output (strip [INFO] noise, keep errors and summary)
-    Compile {
-        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String>,
-    },
-    /// Run `mvn checkstyle:check` with grouped violations and stripped boilerplate
-    #[command(name = "checkstyle:check", alias = "checkstyle")]
-    Checkstyle {
-        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String>,
-    },
-    /// Dependency tree with compact output (strip duplicates and boilerplate)
-    #[command(name = "dependency:tree")]
-    DepTree {
-        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String>,
-    },
-    /// Passthrough: runs any unsupported mvn subcommand directly
-    #[command(external_subcommand)]
-    Other(Vec<OsString>),
-}
-
 /// RTK-only subcommands that should never fall back to raw execution.
 /// If Clap fails to parse these, show the Clap error directly.
 const RTK_META_COMMANDS: &[&str] = &[
@@ -1391,20 +1352,9 @@ fn validate_pnpm_filters(filters: &[String], command: &PnpmCommands) -> Option<S
     }
 }
 
-/// Dispatch a parsed `MvnCommands` variant to the appropriate filter in
-/// `mvn_cmd`, forwarding the selected binary (`mvn` or `mvnd`). Both
-/// top-level `Commands::Mvn` and `Commands::Mvnd` route through here so the
-/// two share filter logic while keeping metrics separate.
-fn dispatch_mvn(binary: mvn_cmd::MvnBinary, command: MvnCommands, verbose: u8) -> Result<i32> {
-    match command {
-        MvnCommands::Test { args } => mvn_cmd::run_test(binary, &args, verbose),
-        MvnCommands::Verify { args } => mvn_cmd::run_verify(binary, &args, verbose),
-        MvnCommands::Clean { args } => mvn_cmd::run_clean(binary, &args, verbose),
-        MvnCommands::Compile { args } => mvn_cmd::run_compile(binary, &args, verbose),
-        MvnCommands::Checkstyle { args } => mvn_cmd::run_checkstyle(binary, &args, verbose),
-        MvnCommands::DepTree { args } => mvn_cmd::run_dep_tree(binary, &args, verbose),
-        MvnCommands::Other(args) => mvn_cmd::run_other(binary, &args, verbose),
-    }
+/// Dispatch an mvn/mvnd invocation to the multi-goal-aware router in mvn_cmd.
+fn dispatch_mvn(binary: mvn_cmd::MvnBinary, args: Vec<OsString>, verbose: u8) -> Result<i32> {
+    mvn_cmd::dispatch(binary, &args, verbose)
 }
 
 fn main() {
@@ -2198,8 +2148,8 @@ fn run_cli() -> Result<i32> {
             GoCommands::Other(args) => go_cmd::run_other(&args, cli.verbose)?,
         },
 
-        Commands::Mvn { command } => dispatch_mvn(mvn_cmd::MvnBinary::Mvn, command, cli.verbose)?,
-        Commands::Mvnd { command } => dispatch_mvn(mvn_cmd::MvnBinary::Mvnd, command, cli.verbose)?,
+        Commands::Mvn { args } => dispatch_mvn(mvn_cmd::MvnBinary::Mvn, args, cli.verbose)?,
+        Commands::Mvnd { args } => dispatch_mvn(mvn_cmd::MvnBinary::Mvnd, args, cli.verbose)?,
 
         Commands::Gt { command } => match command {
             GtCommands::Log { args } => gt_cmd::run_log(&args, cli.verbose)?,
