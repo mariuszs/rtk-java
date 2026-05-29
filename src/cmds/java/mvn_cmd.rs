@@ -312,7 +312,7 @@ fn run_tests_like(
 }
 
 /// Shared implementation for compile-phase-like goals: runs `<binary> <goal> <args>`
-/// through `filter_mvn_compile`. Used by `run_other` to route `compile`,
+/// through `filter_mvn_compile`. Used by `dispatch` to route `compile`,
 /// `process-classes`, and `test-compile` through the same filter while
 /// preserving the original goal name in the invocation and in the tracking
 /// label.
@@ -2940,7 +2940,7 @@ mod tests {
         insta::assert_snapshot!(output);
     }
 
-    // --- run_other routing ---
+    // --- goal routing (dispatch / route_goal) ---
 
     #[test]
     fn test_route_goal() {
