@@ -1,7 +1,7 @@
 //! Filters grep output by grouping matches by file.
 
 use crate::core::config;
-use crate::core::stream::exec_capture;
+use crate::core::stream::{exec_capture, CaptureResult};
 use crate::core::tracking;
 use crate::core::utils::resolved_command;
 use anyhow::{Context, Result};
@@ -49,38 +49,17 @@ pub fn run(
         rg_cmd.arg(arg);
     }
 
+    // rg unavailable → native grep, with the ORIGINAL pattern (grep speaks BRE
+    // natively) and rg-only flags translated/stripped.
     let mut result = exec_capture(&mut rg_cmd)
-        .or_else(|_| {
-            // rg unavailable → native grep. Use the ORIGINAL pattern (grep speaks
-            // BRE natively) and translate/strip rg-only flags so grep never sees
-            // an option it can't parse (the `--type`/`--glob` failures).
-            let (mut grep_args, dropped) = grep_fallback_args(extra_args);
-            if let Some(ft) = file_type {
-                grep_args.push(rg_type_to_glob(ft));
-            }
-            if !dropped.is_empty() {
-                eprintln!(
-                    "rtk: dropped rg-only flags on grep fallback: {}",
-                    dropped.join(" ")
-                );
-            }
-            let mut grep_cmd = resolved_command("grep");
-            grep_cmd.args(["-rn", pattern, path]).args(&grep_args);
-            exec_capture(&mut grep_cmd)
-        })
+        .or_else(|_| run_grep_fallback(pattern, path, file_type, extra_args))
         .context("grep/rg failed")?;
 
     // Safety net: if ripgrep couldn't compile the pattern, do NOT surface a broken
-    // result. Re-run native grep with the user's ORIGINAL pattern (grep reads BRE
-    // natively). RTK's fallback philosophy: never block, never corrupt.
+    // result. Re-run native grep with the user's ORIGINAL pattern. RTK's fallback
+    // philosophy: never block, never corrupt.
     if is_rg_regex_error(result.exit_code, &result.stderr) {
-        let (mut grep_args, _) = grep_fallback_args(extra_args);
-        if let Some(ft) = file_type {
-            grep_args.push(rg_type_to_glob(ft));
-        }
-        let mut grep_cmd = resolved_command("grep");
-        grep_cmd.args(["-rn", pattern, path]).args(&grep_args);
-        if let Ok(fallback) = exec_capture(&mut grep_cmd) {
+        if let Ok(fallback) = run_grep_fallback(pattern, path, file_type, extra_args) {
             result = fallback;
         }
     }
@@ -450,6 +429,30 @@ fn grep_fallback_args(extra: &[String]) -> (Vec<String>, Vec<String>) {
 /// True when ripgrep exited because the pattern failed to compile (not "no match").
 fn is_rg_regex_error(exit_code: i32, stderr: &str) -> bool {
     exit_code == 2 && stderr.contains("regex parse error")
+}
+
+/// Run native grep as a fallback for ripgrep. Searches with the user's ORIGINAL
+/// `pattern` (grep speaks BRE natively), maps `--type` to an `--include` glob, and
+/// translates/strips rg-only flags — warning about any that had to be dropped.
+fn run_grep_fallback(
+    pattern: &str,
+    path: &str,
+    file_type: Option<&str>,
+    extra_args: &[String],
+) -> Result<CaptureResult> {
+    let (mut grep_args, dropped) = grep_fallback_args(extra_args);
+    if let Some(ft) = file_type {
+        grep_args.push(rg_type_to_glob(ft));
+    }
+    if !dropped.is_empty() {
+        eprintln!(
+            "rtk: dropped rg-only flags on grep fallback: {}",
+            dropped.join(" ")
+        );
+    }
+    let mut grep_cmd = resolved_command("grep");
+    grep_cmd.args(["-rn", pattern, path]).args(&grep_args);
+    exec_capture(&mut grep_cmd)
 }
 
 #[cfg(test)]
