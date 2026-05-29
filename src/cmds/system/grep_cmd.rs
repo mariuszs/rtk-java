@@ -49,7 +49,7 @@ pub fn run(
         rg_cmd.arg(arg);
     }
 
-    let result = exec_capture(&mut rg_cmd)
+    let mut result = exec_capture(&mut rg_cmd)
         .or_else(|_| {
             // rg unavailable → native grep. Use the ORIGINAL pattern (grep speaks
             // BRE natively) and translate/strip rg-only flags so grep never sees
@@ -69,6 +69,21 @@ pub fn run(
             exec_capture(&mut grep_cmd)
         })
         .context("grep/rg failed")?;
+
+    // Safety net: if ripgrep couldn't compile the pattern, do NOT surface a broken
+    // result. Re-run native grep with the user's ORIGINAL pattern (grep reads BRE
+    // natively). RTK's fallback philosophy: never block, never corrupt.
+    if is_rg_regex_error(result.exit_code, &result.stderr) {
+        let (mut grep_args, _) = grep_fallback_args(extra_args);
+        if let Some(ft) = file_type {
+            grep_args.push(rg_type_to_glob(ft));
+        }
+        let mut grep_cmd = resolved_command("grep");
+        grep_cmd.args(["-rn", pattern, path]).args(&grep_args);
+        if let Ok(fallback) = exec_capture(&mut grep_cmd) {
+            result = fallback;
+        }
+    }
 
     // Passthrough output flags that produce output that is already small.
     if has_format_flag(extra_args) {
@@ -421,6 +436,11 @@ fn grep_fallback_args(extra: &[String]) -> (Vec<String>, Vec<String>) {
     (kept, dropped)
 }
 
+/// True when ripgrep exited because the pattern failed to compile (not "no match").
+fn is_rg_regex_error(exit_code: i32, stderr: &str) -> bool {
+    exit_code == 2 && stderr.contains("regex parse error")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -664,6 +684,16 @@ mod tests {
         assert!(!args.iter().any(|a| a == "--no-ignore-vcs"));
         assert!(args.contains(&"-i".to_string()));
         assert!(dropped.iter().any(|d| d == "--no-ignore-vcs"));
+    }
+
+    #[test]
+    fn test_is_rg_regex_error_detected() {
+        assert!(is_rg_regex_error(
+            2,
+            "rg: regex parse error:\n  ^\nerror: unclosed group"
+        ));
+        assert!(!is_rg_regex_error(1, "")); // exit 1 = no matches, not an error
+        assert!(!is_rg_regex_error(2, "some other failure"));
     }
 
     #[test]
