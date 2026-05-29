@@ -487,6 +487,85 @@ fn chain_runs_tests(goals: &[String]) -> bool {
     })
 }
 
+lazy_static! {
+    /// `[INFO] --- <plugin>:<version>:<goal> (<exec>) @ <module> ---`
+    static ref PLUGIN_MARKER_RE: Regex =
+        Regex::new(r"^\[INFO\]\s+-{3,}\s+(\S+?):\S+:(\S+)\s+\(").unwrap();
+    /// Start of the trailing reactor/build footer.
+    static ref BUILD_FOOTER_RE: Regex =
+        Regex::new(r"(BUILD SUCCESS|BUILD FAILURE|Reactor Summary)").unwrap();
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum SegmentKind {
+    Preamble,   // before the first plugin marker
+    Clean,
+    Compile,    // compile / testCompile
+    Surefire,   // unit tests
+    Failsafe,   // integration tests
+    Checkstyle,
+    Other,      // jar, resources, install, ...
+}
+
+#[allow(dead_code)]
+struct Segment {
+    kind: SegmentKind,
+    body: String,
+}
+
+/// Classify a plugin marker line into a SegmentKind by its plugin + goal.
+fn classify_marker(plugin: &str, goal: &str) -> SegmentKind {
+    match (plugin, goal) {
+        ("maven-clean-plugin", _) => SegmentKind::Clean,
+        ("maven-compiler-plugin", _) => SegmentKind::Compile,
+        ("maven-surefire-plugin", _) => SegmentKind::Surefire,
+        ("maven-failsafe-plugin", _) => SegmentKind::Failsafe,
+        ("maven-checkstyle-plugin", _) => SegmentKind::Checkstyle,
+        (_, g) if g == "check" && plugin.contains("checkstyle") => SegmentKind::Checkstyle,
+        _ => SegmentKind::Other,
+    }
+}
+
+/// Split raw mvn output into segments at plugin-execution markers. The
+/// trailing BUILD/Reactor footer is NOT a segment — it is handled separately
+/// by `extract_build_block` (later task). Everything before the first marker
+/// is `Preamble`.
+#[allow(dead_code)]
+fn split_segments(raw: &str) -> Vec<Segment> {
+    let mut segments: Vec<Segment> = Vec::new();
+    let mut current_kind = SegmentKind::Preamble;
+    let mut current_body = String::new();
+    let mut in_footer = false;
+
+    for line in raw.lines() {
+        let stripped = strip_ansi(line);
+        if !in_footer && BUILD_FOOTER_RE.is_match(&stripped) {
+            in_footer = true; // stop accumulating into segments
+        }
+        if let Some(caps) = PLUGIN_MARKER_RE.captures(&stripped) {
+            // flush the previous segment
+            if !current_body.is_empty() || current_kind != SegmentKind::Preamble {
+                segments.push(Segment { kind: current_kind, body: std::mem::take(&mut current_body) });
+            } else {
+                current_body.clear();
+            }
+            let plugin = caps.get(1).map_or("", |m| m.as_str());
+            let goal = caps.get(2).map_or("", |m| m.as_str());
+            current_kind = classify_marker(plugin, goal);
+            in_footer = false;
+            continue;
+        }
+        if !in_footer {
+            current_body.push_str(line);
+            current_body.push('\n');
+        }
+    }
+    if !current_body.is_empty() {
+        segments.push(Segment { kind: current_kind, body: current_body });
+    }
+    segments
+}
+
 fn route_goal(subcommand: &str) -> GoalRouting {
     if COMPILE_LIKE_GOALS.iter().any(|(g, _)| *g == subcommand) {
         return GoalRouting::Compile;
@@ -3701,5 +3780,29 @@ mod tests {
         );
         assert!(output.contains("BUILD SUCCESS"));
         assert!(output.contains("Total time"));
+    }
+
+    #[test]
+    fn test_split_segments_classifies() {
+        let raw = "\
+[INFO] Scanning for projects...
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean) @ app ---
+[INFO] Deleting /app/target
+[INFO] --- maven-compiler-plugin:3.13.0:testCompile (default-testCompile) @ app ---
+[INFO] Compiling 12 source files
+[INFO] --- maven-checkstyle-plugin:3.6.0:check (default-cli) @ app ---
+[INFO] You have 0 Checkstyle violations.
+[INFO] BUILD SUCCESS
+[INFO] Total time:  3.0 s";
+        let segs = split_segments(raw);
+        let kinds: Vec<SegmentKind> = segs.iter().map(|s| s.kind).collect();
+        assert_eq!(kinds, vec![
+            SegmentKind::Preamble,
+            SegmentKind::Clean,
+            SegmentKind::Compile,
+            SegmentKind::Checkstyle,
+        ]);
+        // The checkstyle segment carries its body up to (not including) the BUILD block.
+        assert!(segs[3].body.contains("0 Checkstyle violations"));
     }
 }
