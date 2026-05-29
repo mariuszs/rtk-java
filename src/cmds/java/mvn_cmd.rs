@@ -650,8 +650,19 @@ fn compose_multi(parts: &MultiParts, goals_header: &str) -> String {
     let mut out = String::new();
     let _ = writeln!(out, "mvn {goals_header} (multi-goal)");
     for piece in [&parts.compile, &parts.tests, &parts.checkstyle] {
-        if !piece.trim().is_empty() {
-            out.push_str(piece.trim_end());
+        if piece.trim().is_empty() {
+            continue;
+        }
+        let cleaned: String = piece
+            .lines()
+            .filter(|l| {
+                let t = l.trim();
+                t != "BUILD SUCCESS" && t != "BUILD FAILURE"
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        if !cleaned.trim().is_empty() {
+            out.push_str(cleaned.trim_end());
             out.push('\n');
         }
     }

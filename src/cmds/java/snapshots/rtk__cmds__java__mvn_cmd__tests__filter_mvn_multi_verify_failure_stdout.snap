@@ -5,7 +5,6 @@ expression: output
 mvn clean verify (multi-goal)
 mvn: ok
 mvn verify: 68 run, 1 failed (?)
-BUILD FAILURE
 
 Failures:
 1. com.example.app.UserProcessingIT.shouldProcessUser
