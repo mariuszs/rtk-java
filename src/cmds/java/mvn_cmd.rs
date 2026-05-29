@@ -466,6 +466,27 @@ fn parse_goals(args: &[String]) -> Vec<String> {
     goals
 }
 
+/// Phases that actually execute surefire/failsafe (everything from `test`
+/// onward in the default lifecycle).
+#[allow(dead_code)]
+const TEST_RUNNING_PHASES: &[&str] = &[
+    "test", "prepare-package", "package",
+    "pre-integration-test", "integration-test", "post-integration-test",
+    "verify", "install", "deploy",
+];
+
+/// True if any goal in the chain runs tests — gates XML enrichment in
+/// `run_multi_goal`. Avoids a spurious "no XML reports" note when the chain
+/// only compiles / runs checkstyle.
+#[allow(dead_code)]
+fn chain_runs_tests(goals: &[String]) -> bool {
+    goals.iter().any(|g| {
+        TEST_RUNNING_PHASES.contains(&g.as_str())
+            || g.starts_with("surefire:")
+            || g.starts_with("failsafe:")
+    })
+}
+
 fn route_goal(subcommand: &str) -> GoalRouting {
     if COMPILE_LIKE_GOALS.iter().any(|(g, _)| *g == subcommand) {
         return GoalRouting::Compile;
@@ -1859,6 +1880,21 @@ mod tests {
         assert_eq!(parse_goals(&v("-version")), Vec::<String>::new());
         // plugin:goal form
         assert_eq!(parse_goals(&v("dependency:tree")), vec!["dependency:tree"]);
+    }
+
+    // --- chain_runs_tests ---
+
+    #[test]
+    fn test_chain_runs_tests() {
+        let g = |s: &str| s.split(' ').map(String::from).collect::<Vec<_>>();
+        assert!(!chain_runs_tests(&g("clean test-compile checkstyle:check")));
+        assert!(!chain_runs_tests(&g("clean compile")));
+        assert!(chain_runs_tests(&g("clean test")));
+        assert!(chain_runs_tests(&g("clean verify")));
+        assert!(chain_runs_tests(&g("clean install")));
+        // plugin goal forms
+        assert!(chain_runs_tests(&g("surefire:test")));
+        assert!(chain_runs_tests(&g("failsafe:integration-test")));
     }
 
     // --- Reactor Summary collapse + javac error dedup ---
