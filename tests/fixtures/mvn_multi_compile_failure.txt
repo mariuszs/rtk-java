@@ -1,0 +1,42 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -----------------------< com.example:app >------------------------
+[INFO] Building app 1.0.0-SNAPSHOT
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean) @ app ---
+[INFO] Deleting /app/target
+[INFO]
+[INFO] --- maven-resources-plugin:3.3.1:resources (default-resources) @ app ---
+[INFO] Copying 12 resources from src/main/resources to target/classes
+[INFO]
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) @ app ---
+[INFO] Compiling 248 source files with javac [debug release 21] to target/classes
+[INFO]
+[INFO] --- maven-resources-plugin:3.3.1:testResources (default-testResources) @ app ---
+[INFO] Copying 34 resources from src/test/resources to target/test-classes
+[INFO]
+[INFO] --- maven-compiler-plugin:3.13.0:testCompile (default-testCompile) @ app ---
+[INFO] Compiling 96 source files with javac [debug release 21] to target/test-classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR :
+[INFO] -------------------------------------------------------------
+[ERROR] /app/src/test/java/com/example/user/UserServiceTest.java:[42,18] cannot find symbol
+[ERROR]   symbol:   method findByEmail(java.lang.String)
+[ERROR]   location: interface com.example.user.UserRepository
+[ERROR] /app/src/test/java/com/example/user/UserServiceTest.java:[57,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.user.UserServiceTest
+[INFO] 3 errors
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.137 s
+[INFO] Finished at: 2026-05-29T11:20:01+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project app: Compilation failure
+[ERROR] /app/src/test/java/com/example/user/UserServiceTest.java:[42,18] cannot find symbol
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.

@@ -3944,4 +3944,15 @@ mod tests {
         assert!(savings >= 85.0, "expected ≥85%, got {:.1}%", savings);
         insta::assert_snapshot!(output);
     }
+
+    #[test]
+    fn test_filter_mvn_multi_compile_failure() {
+        let input = include_str!("../../../tests/fixtures/mvn_multi_compile_failure.txt");
+        let output = filter_mvn_multi(input, "clean test-compile checkstyle:check");
+        assert!(output.contains("BUILD FAILURE"), "lost failure signal: {output}");
+        assert!(output.contains("cannot find symbol"), "lost compile error detail: {output}");
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 60.0, "failure path still expected ≥60%, got {:.1}%", savings);
+        insta::assert_snapshot!(output);
+    }
 }

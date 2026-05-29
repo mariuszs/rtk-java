@@ -1,0 +1,15 @@
+---
+source: src/cmds/java/mvn_cmd.rs
+expression: output
+---
+mvn clean test-compile checkstyle:check (multi-goal)
+[ERROR] COMPILATION ERROR :
+[ERROR] /app/src/test/java/com/example/user/UserServiceTest.java:[42,18] cannot find symbol
+[ERROR]   symbol:   method findByEmail(java.lang.String)
+[ERROR]   location: interface com.example.user.UserRepository
+[ERROR] /app/src/test/java/com/example/user/UserServiceTest.java:[57,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.user.UserServiceTest
+[INFO] 3 errors
+BUILD FAILURE
+Total time: 4.137 s
