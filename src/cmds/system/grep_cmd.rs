@@ -16,6 +16,7 @@ pub fn run(
     max_results: usize,
     context_only: bool,
     file_type: Option<&str>,
+    source_tool: Option<&str>,
     extra_args: &[String],
     verbose: u8,
 ) -> Result<i32> {
@@ -25,9 +26,9 @@ pub fn run(
         eprintln!("grep: '{}' in {}", pattern, path);
     }
 
-    // Fix: translate POSIX BRE to Rust-regex (rg dialect). In BRE, \| \( \{ \+ \?
-    // are metacharacters and their bare forms are literals — the opposite of Rust/ERE.
-    let rg_pattern = translate_bre_to_rust(pattern);
+    // Dialect-aware: grep BRE is faithfully translated to Rust-regex; rg patterns
+    // pass through untouched (so a literal `\|` stays literal).
+    let rg_pattern = effective_pattern(pattern, source_tool, extra_args);
 
     let mut rg_cmd = resolved_command("rg");
     // --no-ignore-vcs: match grep -r behavior (don't skip .gitignore'd files).
@@ -248,6 +249,23 @@ fn compact_path(path: &str) -> String {
     )
 }
 
+/// Decide the pattern to hand to ripgrep, honoring the source dialect.
+/// grep default = POSIX BRE (translate); grep -E/-P/-F or rg = Rust-compatible (verbatim).
+fn effective_pattern(pattern: &str, source_tool: Option<&str>, extra_args: &[String]) -> String {
+    let is_grep = matches!(source_tool, Some("grep"));
+    let extended = extra_args.iter().any(|a| {
+        matches!(
+            a.as_str(),
+            "-E" | "--extended-regexp" | "-P" | "--perl-regexp" | "-F" | "--fixed-strings"
+        )
+    });
+    if is_grep && !extended {
+        translate_bre_to_rust(pattern)
+    } else {
+        pattern.to_string()
+    }
+}
+
 /// Translate a POSIX Basic Regular Expression (grep default) into Rust-regex
 /// (used by ripgrep). In BRE, `\| \( \) \{ \} \+ \?` are metacharacters and the
 /// bare forms are literals — the exact opposite of Rust/ERE. Shared constructs
@@ -299,6 +317,26 @@ fn translate_bre_to_rust(pattern: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_effective_pattern_grep_translates_bre() {
+        assert_eq!(effective_pattern("a\\|b", Some("grep"), &[]), "a|b");
+    }
+
+    #[test]
+    fn test_effective_pattern_grep_extended_no_translate() {
+        assert_eq!(
+            effective_pattern("a|b", Some("grep"), &["-E".to_string()]),
+            "a|b"
+        );
+    }
+
+    #[test]
+    fn test_effective_pattern_rg_untouched() {
+        assert_eq!(effective_pattern("a\\|b", Some("rg"), &[]), "a\\|b");
+        // default (no source) behaves like rg for backward-compat
+        assert_eq!(effective_pattern("a\\|b", None, &[]), "a\\|b");
+    }
 
     #[test]
     fn test_clean_line() {

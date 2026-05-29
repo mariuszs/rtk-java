@@ -321,6 +321,9 @@ enum Commands {
         /// Show line numbers (always on, accepted for grep/rg compatibility)
         #[arg(short = 'n', long)]
         line_numbers: bool,
+        /// Source tool the hook rewrote (rg|grep); selects the regex dialect. Hidden.
+        #[arg(long = "rtk-source", hide = true)]
+        rtk_source: Option<String>,
         /// Extra ripgrep arguments (e.g., -i, -A 3, -w, --glob)
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         extra_args: Vec<String>,
@@ -1833,6 +1836,7 @@ fn run_cli() -> Result<i32> {
             context_only,
             file_type,
             line_numbers: _, // no-op: line numbers always enabled in grep_cmd::run
+            rtk_source,
             extra_args,
         } => grep_cmd::run(
             &pattern,
@@ -1841,6 +1845,7 @@ fn run_cli() -> Result<i32> {
             max,
             context_only,
             file_type.as_deref(),
+            rtk_source.as_deref(),
             &extra_args,
             cli.verbose,
         )?,
