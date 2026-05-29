@@ -62,8 +62,10 @@ fn has_native_find_flags(args: &[String]) -> bool {
         .any(|a| a == "-name" || a == "-type" || a == "-maxdepth" || a == "-iname")
 }
 
-/// Native find flags that RTK cannot handle correctly.
-/// These involve compound predicates, actions, or semantics we don't support.
+/// Native find features RTK's structured walker can't model faithfully:
+/// compound predicates (-not/-or/-and), actions (-exec/-delete/-print0), and
+/// time/size/perm tests. When any appear, `run_from_args` falls back to the
+/// real `find` (passthrough) instead of blocking the user.
 const UNSUPPORTED_FIND_FLAGS: &[&str] = &[
     "-not", "!", "-or", "-o", "-and", "-a", "-exec", "-execdir", "-delete", "-print0", "-newer",
     "-perm", "-size", "-mtime", "-mmin", "-atime", "-amin", "-ctime", "-cmin", "-empty", "-link",
@@ -82,12 +84,6 @@ fn has_unsupported_find_flags(args: &[String]) -> bool {
 fn parse_find_args(args: &[String]) -> Result<FindArgs> {
     if args.is_empty() {
         return Ok(FindArgs::default());
-    }
-
-    if has_unsupported_find_flags(args) {
-        anyhow::bail!(
-            "rtk find does not support compound predicates or actions (e.g. -not, -exec). Use `find` directly."
-        );
     }
 
     if has_native_find_flags(args) {
@@ -177,7 +173,15 @@ fn parse_rtk_find_args(args: &[String]) -> Result<FindArgs> {
 }
 
 /// Entry point from main.rs — parses raw args then delegates to run().
-pub fn run_from_args(args: &[String], verbose: u8) -> Result<()> {
+///
+/// When args use native find features RTK can't represent (compound predicates,
+/// actions like -exec/-delete, time/size/perm tests) we fall back to the real
+/// `find` unchanged rather than erroring — RTK's mandated fallback pattern.
+pub fn run_from_args(args: &[String], verbose: u8) -> Result<i32> {
+    if has_unsupported_find_flags(args) {
+        return passthrough_find(args, verbose);
+    }
+
     let parsed = parse_find_args(args)?;
     run(
         &parsed.pattern,
@@ -187,7 +191,17 @@ pub fn run_from_args(args: &[String], verbose: u8) -> Result<()> {
         &parsed.file_type,
         parsed.case_insensitive,
         verbose,
-    )
+    )?;
+    Ok(0)
+}
+
+/// Run the real `find` unchanged, streaming output and tracking at 0% savings.
+/// Used when args contain features RTK's structured filter can't represent
+/// (e.g. -exec, -not, -delete). Mirrors the underlying exit code.
+fn passthrough_find(args: &[String], verbose: u8) -> Result<i32> {
+    let os_args: Vec<std::ffi::OsString> =
+        args.iter().map(std::ffi::OsString::from).collect();
+    crate::core::runner::run_passthrough("find", &os_args, verbose)
 }
 
 pub fn run(
@@ -496,17 +510,33 @@ mod tests {
     // --- parse_find_args: unsupported flags ---
 
     #[test]
-    fn parse_native_find_rejects_not() {
-        let result = parse_find_args(&args(&[".", "-name", "*.rs", "-not", "-name", "*_test.rs"]));
-        assert!(result.is_err());
-        let msg = result.unwrap_err().to_string();
-        assert!(msg.contains("compound predicates"));
+    fn unsupported_flags_detected() {
+        assert!(has_unsupported_find_flags(&args(&[
+            ".", "-name", "*.rs", "-not", "-name", "x"
+        ])));
+        assert!(has_unsupported_find_flags(&args(&[
+            ".", "-name", "*.tmp", "-exec", "rm", "{}", ";"
+        ])));
+        assert!(has_unsupported_find_flags(&args(&[".", "-delete"])));
+        assert!(has_unsupported_find_flags(&args(&[".", "-size", "+1M"])));
     }
 
     #[test]
-    fn parse_native_find_rejects_exec() {
-        let result = parse_find_args(&args(&[".", "-name", "*.tmp", "-exec", "rm", "{}", ";"]));
-        assert!(result.is_err());
+    fn supported_flags_not_flagged_as_unsupported() {
+        assert!(!has_unsupported_find_flags(&args(&[
+            ".", "-name", "*.rs", "-type", "f"
+        ])));
+        assert!(!has_unsupported_find_flags(&args(&["*.rs", "src", "-m", "10"])));
+    }
+
+    #[test]
+    fn run_from_args_falls_back_for_unsupported_flags() {
+        // `-not` is unsupported by the structured parser. Instead of erroring
+        // (the old behavior), run_from_args must run the real `find` and return
+        // its exit code. Scoped to src/ with a read-only predicate so it exits 0.
+        let code = run_from_args(&args(&["src", "-name", "*.rs", "-not", "-name", "zzzzz"]), 0)
+            .expect("passthrough find should not error");
+        assert_eq!(code, 0, "successful passthrough find should propagate exit 0");
     }
 
     // --- parse_find_args: RTK syntax ---
