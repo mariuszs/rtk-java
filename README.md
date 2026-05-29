@@ -185,6 +185,8 @@ rtk rspec                       # RSpec tests (JSON, -60%+)
 rtk mvn test                    # Maven tests (-99%)
 rtk mvn verify                  # Maven verify — surefire + failsafe XML enrichment
 rtk mvn clean                   # Maven clean — one-line summary (-95%)
+rtk mvn clean test-compile checkstyle:check  # Multi-goal: per-goal filter, BUILD signal always preserved
+rtk mvn clean verify            # Multi-goal: XML enrichment applies; -q auto-dropped
 rtk mvnd test                   # Maven Daemon tests (same filter, same savings)
 rtk err <cmd>                   # Filter errors only from any command
 rtk test <cmd>                  # Generic test wrapper - failures only (-90%)
