@@ -4013,4 +4013,16 @@ mod tests {
         assert_eq!(classify_marker("spring-boot"), SegmentKind::Other);
         assert_eq!(classify_marker("maven-jar-plugin"), SegmentKind::Other);
     }
+
+    #[test]
+    fn test_filter_mvn_multi_verify_failure_stdout() {
+        let input = include_str!("../../../tests/fixtures/mvn_multi_clean_verify_fail.txt");
+        let output = filter_mvn_multi(input, "clean verify");
+        assert!(output.contains("BUILD FAILURE"), "lost build failure: {output}");
+        assert!(output.contains("UserProcessingIT") || output.contains("failed"),
+                "lost IT failure signal: {output}");
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 80.0, "expected ≥80%, got {:.1}%", savings);
+        insta::assert_snapshot!(output);
+    }
 }
