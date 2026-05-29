@@ -816,10 +816,17 @@ fn rewrite_segment_inner(
     // Try each rewrite prefix (longest first) with word-boundary check
     for &prefix in rule.rewrite_prefixes {
         if let Some(rest) = strip_word_prefix(cmd_part, prefix) {
-            let rewritten = if rest.is_empty() {
-                format!("{}{}", rule.rtk_cmd, redirect_suffix)
+            // Faithful grep/rg: record which binary the user typed so the filter
+            // can pick the right regex dialect (grep = BRE, rg = Rust-regex).
+            let head = if rule.rtk_cmd == "rtk grep" {
+                format!("rtk grep --rtk-source {}", prefix)
             } else {
-                format!("{} {}{}", rule.rtk_cmd, rest, redirect_suffix)
+                rule.rtk_cmd.to_string()
+            };
+            let rewritten = if rest.is_empty() {
+                format!("{}{}", head, redirect_suffix)
+            } else {
+                format!("{} {}{}", head, rest, redirect_suffix)
             };
             return Some(rewritten);
         }
@@ -1393,7 +1400,7 @@ mod tests {
     fn test_rewrite_rg_pattern() {
         assert_eq!(
             rewrite_command_no_prefixes("rg \"fn main\"", &[]),
-            Some("rtk grep \"fn main\"".into())
+            Some("rtk grep --rtk-source rg \"fn main\"".into())
         );
     }
 
@@ -3883,5 +3890,17 @@ mod tests {
             rewrite_command_no_prefixes("git log | head | tail && git status", &[]),
             Some("rtk git log | head | tail && rtk git status".into())
         );
+    }
+
+    #[test]
+    fn test_grep_rewrite_marks_source_grep() {
+        let out = rewrite_command(r"grep -rn 'foo\|bar' .", &[], &[]).unwrap();
+        assert_eq!(out, r"rtk grep --rtk-source grep -rn 'foo\|bar' .");
+    }
+
+    #[test]
+    fn test_rg_rewrite_marks_source_rg() {
+        let out = rewrite_command("rg --type java foo src", &[], &[]).unwrap();
+        assert_eq!(out, "rtk grep --rtk-source rg --type java foo src");
     }
 }
