@@ -1,4 +1,4 @@
-# Java Ecosystem
+# JVM Ecosystem (Maven, Gradle)
 
 > Part of [`src/cmds/`](../README.md) — see also [docs/contributing/TECHNICAL.md](../../../docs/contributing/TECHNICAL.md)
 
@@ -17,6 +17,7 @@
 - Routing via Clap sub-enum with `#[command(external_subcommand)] Other` for unknown goals; compile-like and checkstyle goals received as `Other` are auto-re-dispatched by `route_goal` to the right filter
 - **Multi-goal chains** (≥2 goals, e.g. `mvn clean test-compile checkstyle:check`, `mvn clean verify`, `mvn clean install`): a signal-aware filter splits output by Maven plugin boundary markers, runs each segment group through its matching single-goal filter, and always preserves the BUILD signal — all `[ERROR]` lines, `BUILD SUCCESS`/`BUILD FAILURE` + `Total time`, per-module test counts, checkstyle violation counts, and (on failure) the Reactor Summary failing module. `-q`/`--quiet` is automatically stripped in multi-goal mode so rtk receives full output and does the compression itself. When the chain includes `test`/`verify`/`install`, surefire/failsafe XML enrichment applies exactly as for single-goal `verify`.
 - **0 goals** (e.g. `mvn -version`, `mvn --help`): unfiltered passthrough
+- **gradlew_cmd.rs** handles Gradle Wrapper (`gradlew`) command output
 
 ## Output enrichment from Surefire/Failsafe XML reports
 

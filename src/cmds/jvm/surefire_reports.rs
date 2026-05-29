@@ -3,7 +3,7 @@
 //! Uses quick-xml streaming parser. Time-gated by `started_at` to skip stale
 //! reports from previous runs.
 
-use crate::cmds::java::stack_trace;
+use crate::cmds::jvm::stack_trace;
 use quick_xml::events::{BytesStart, Event};
 use quick_xml::Reader;
 use std::path::Path;

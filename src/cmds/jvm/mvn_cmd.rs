@@ -4,7 +4,7 @@
 //! Preamble -> Testing -> Summary -> Done.
 //! Strips thousands of noise lines to compact failure reports (99%+ savings).
 
-use crate::cmds::java::surefire_reports::{self, FailureKind, SurefireResult, TestFailure, TestSummary};
+use crate::cmds::jvm::surefire_reports::{self, FailureKind, SurefireResult, TestFailure, TestSummary};
 use crate::core::runner;
 use crate::core::tracking;
 use crate::core::utils::{exit_code_from_status, resolved_command, strip_ansi, truncate};
@@ -291,7 +291,7 @@ fn run_tests_like(
         eprintln!("rtk {binary}: could not determine cwd: {e}");
         std::path::PathBuf::from(".")
     });
-    let app_pkgs = crate::cmds::java::pom_groupid::detect(&cwd);
+    let app_pkgs = crate::cmds::jvm::pom_groupid::detect(&cwd);
 
     let cwd_for_filter = cwd.clone();
 
@@ -720,7 +720,7 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
         eprintln!("rtk {binary}: could not determine cwd: {e}");
         std::path::PathBuf::from(".")
     });
-    let app_pkgs = crate::cmds::java::pom_groupid::detect(&cwd);
+    let app_pkgs = crate::cmds::jvm::pom_groupid::detect(&cwd);
     let enrich = chain_runs_tests(&goals);
     let test_goal = if goals.iter().any(|g| g == "verify" || g == "integration-test") {
         "verify"

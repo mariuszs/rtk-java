@@ -1,5 +1,5 @@
 ---
-source: src/cmds/java/mvn_cmd.rs
+source: src/cmds/jvm/mvn_cmd.rs
 expression: out
 ---
 mvn test: 7 run, 2 failed (00:10 min)

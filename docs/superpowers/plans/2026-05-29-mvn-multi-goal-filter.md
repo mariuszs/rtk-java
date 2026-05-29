@@ -27,7 +27,7 @@
   - `Commands::Mvn` / `Commands::Mvnd` (lines ~717-727): change `{ #[command(subcommand)] command: MvnCommands }` → `{ #[arg(trailing_var_arg = true, allow_hyphen_values = true)] args: Vec<OsString> }`.
   - Delete `enum MvnCommands` (lines ~1123-1160).
   - Collapse `dispatch_mvn` (lines ~1398-1408) to a single call into `mvn_cmd::dispatch`.
-- **Modify** `src/cmds/java/mvn_cmd.rs`: add `parse_goals`, `chain_runs_tests`, `split_segments` + `SegmentKind`, `filter_segments` + `MultiParts` + `compose_multi`, `filter_mvn_multi`, `run_multi_goal`, `run_passthrough_all`, `dispatch`; widen `GoalRouting` + `route_goal`; delete `run_other`; update `test_route_goal`; add new unit/snapshot tests.
+- **Modify** `src/cmds/jvm/mvn_cmd.rs`: add `parse_goals`, `chain_runs_tests`, `split_segments` + `SegmentKind`, `filter_segments` + `MultiParts` + `compose_multi`, `filter_mvn_multi`, `run_multi_goal`, `run_passthrough_all`, `dispatch`; widen `GoalRouting` + `route_goal`; delete `run_other`; update `test_route_goal`; add new unit/snapshot tests.
 - **Create** fixtures under `tests/fixtures/`: `mvn_multi_clean_testcompile_checkstyle_pass.txt`, `mvn_multi_compile_failure.txt`, `mvn_multi_clean_verify_fail.txt`, plus a `failsafe-reports` XML fixture for the enrichment path (mirror the existing surefire XML fixture layout used by `surefire_reports` tests).
 
 ---
@@ -35,7 +35,7 @@
 ## Task 1: `parse_goals` — goal detection (pure)
 
 **Files:**
-- Modify: `src/cmds/java/mvn_cmd.rs` (add near `route_goal`, ~line 423)
+- Modify: `src/cmds/jvm/mvn_cmd.rs` (add near `route_goal`, ~line 423)
 - Test: same file, `#[cfg(test)] mod tests`
 
 - [ ] **Step 1: Write the failing tests**
@@ -136,7 +136,7 @@ Expected: PASS.
 
 ```bash
 cargo fmt --all && cargo clippy --all-targets && cargo test --all
-git add src/cmds/java/mvn_cmd.rs
+git add src/cmds/jvm/mvn_cmd.rs
 git commit --no-verify -m "feat(mvn): add parse_goals for multi-goal detection"
 ```
 
@@ -145,7 +145,7 @@ git commit --no-verify -m "feat(mvn): add parse_goals for multi-goal detection"
 ## Task 2: `chain_runs_tests` — enrichment gate (pure)
 
 **Files:**
-- Modify: `src/cmds/java/mvn_cmd.rs` (below `parse_goals`)
+- Modify: `src/cmds/jvm/mvn_cmd.rs` (below `parse_goals`)
 - Test: same file
 
 - [ ] **Step 1: Write the failing test**
@@ -203,7 +203,7 @@ Expected: PASS.
 
 ```bash
 cargo fmt --all && cargo clippy --all-targets && cargo test --all
-git add src/cmds/java/mvn_cmd.rs
+git add src/cmds/jvm/mvn_cmd.rs
 git commit --no-verify -m "feat(mvn): add chain_runs_tests enrichment gate"
 ```
 
@@ -212,7 +212,7 @@ git commit --no-verify -m "feat(mvn): add chain_runs_tests enrichment gate"
 ## Task 3: `split_segments` — marker-based segmentation (pure)
 
 **Files:**
-- Modify: `src/cmds/java/mvn_cmd.rs`
+- Modify: `src/cmds/jvm/mvn_cmd.rs`
 - Test: same file
 
 - [ ] **Step 1: Write the failing test**
@@ -338,7 +338,7 @@ Expected: PASS. If the Preamble flush logic emits an unexpected empty leading se
 
 ```bash
 cargo fmt --all && cargo clippy --all-targets && cargo test --all
-git add src/cmds/java/mvn_cmd.rs
+git add src/cmds/jvm/mvn_cmd.rs
 git commit --no-verify -m "feat(mvn): add marker-based segment splitter"
 ```
 
@@ -347,7 +347,7 @@ git commit --no-verify -m "feat(mvn): add marker-based segment splitter"
 ## Task 4: `filter_segments` + `compose_multi` + `filter_mvn_multi` + SUCCESS fixture
 
 **Files:**
-- Modify: `src/cmds/java/mvn_cmd.rs`
+- Modify: `src/cmds/jvm/mvn_cmd.rs`
 - Create: `tests/fixtures/mvn_multi_clean_testcompile_checkstyle_pass.txt`
 - Test: same file (snapshot + savings)
 
@@ -511,7 +511,7 @@ Run: `cargo test --lib filter_mvn_multi_success` → PASS, savings ≥85%.
 
 ```bash
 cargo fmt --all && cargo clippy --all-targets && cargo test --all
-git add src/cmds/java/mvn_cmd.rs src/cmds/java/snapshots/ tests/fixtures/mvn_multi_clean_testcompile_checkstyle_pass.txt
+git add src/cmds/jvm/mvn_cmd.rs src/cmds/jvm/snapshots/ tests/fixtures/mvn_multi_clean_testcompile_checkstyle_pass.txt
 git commit --no-verify -m "feat(mvn): add multi-goal segment filter (success path)"
 ```
 
@@ -521,7 +521,7 @@ git commit --no-verify -m "feat(mvn): add multi-goal segment filter (success pat
 
 **Files:**
 - Create: `tests/fixtures/mvn_multi_compile_failure.txt`
-- Test: `src/cmds/java/mvn_cmd.rs`
+- Test: `src/cmds/jvm/mvn_cmd.rs`
 
 - [ ] **Step 1: Create the FAILURE fixture**
 
@@ -556,7 +556,7 @@ Run: `cargo test --lib filter_mvn_multi_compile_failure` → PASS.
 
 ```bash
 cargo fmt --all && cargo clippy --all-targets && cargo test --all
-git add src/cmds/java/mvn_cmd.rs src/cmds/java/snapshots/ tests/fixtures/mvn_multi_compile_failure.txt
+git add src/cmds/jvm/mvn_cmd.rs src/cmds/jvm/snapshots/ tests/fixtures/mvn_multi_compile_failure.txt
 git commit --no-verify -m "test(mvn): multi-goal compile-failure snapshot"
 ```
 
@@ -565,7 +565,7 @@ git commit --no-verify -m "test(mvn): multi-goal compile-failure snapshot"
 ## Task 6: `run_multi_goal` — execution + `-q` strip + XML enrichment
 
 **Files:**
-- Modify: `src/cmds/java/mvn_cmd.rs`
+- Modify: `src/cmds/jvm/mvn_cmd.rs`
 - Test: same file (unit test for `-q` stripping)
 
 - [ ] **Step 1: Write the failing test (`-q` stripping helper)**
@@ -619,7 +619,7 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
         eprintln!("rtk {binary}: could not determine cwd: {e}");
         std::path::PathBuf::from(".")
     });
-    let app_pkgs = crate::cmds::java::pom_groupid::detect(&cwd);
+    let app_pkgs = crate::cmds::jvm::pom_groupid::detect(&cwd);
     let enrich = chain_runs_tests(&goals);
     let test_goal = if goals.iter().any(|g| g == "verify" || g == "integration-test") {
         "verify"
@@ -660,7 +660,7 @@ Expected: PASS. (`run_multi_goal` is exercised end-to-end in Task 8; it may stil
 
 ```bash
 cargo fmt --all && cargo clippy --all-targets && cargo test --all
-git add src/cmds/java/mvn_cmd.rs
+git add src/cmds/jvm/mvn_cmd.rs
 git commit --no-verify -m "feat(mvn): add run_multi_goal with -q strip and XML enrichment"
 ```
 
@@ -671,7 +671,7 @@ git commit --no-verify -m "feat(mvn): add run_multi_goal with -q strip and XML e
 This is the atomic switch. After it, multi-goal is live and `dead_code` annotations come off.
 
 **Files:**
-- Modify: `src/cmds/java/mvn_cmd.rs` (`GoalRouting`, `route_goal`, add `dispatch` + `run_passthrough_all`, delete `run_other`, update `test_route_goal`)
+- Modify: `src/cmds/jvm/mvn_cmd.rs` (`GoalRouting`, `route_goal`, add `dispatch` + `run_passthrough_all`, delete `run_other`, update `test_route_goal`)
 - Modify: `src/main.rs` (`Commands::Mvn`/`Mvnd`, delete `MvnCommands`, collapse `dispatch_mvn`)
 
 - [ ] **Step 1: Update the failing test first (`test_route_goal`)**
@@ -846,7 +846,7 @@ Expected: PASS, including `test_route_goal` and all existing single-goal mvn tes
 
 ```bash
 cargo fmt --all && cargo clippy --all-targets && cargo test --all
-git add src/main.rs src/cmds/java/mvn_cmd.rs
+git add src/main.rs src/cmds/jvm/mvn_cmd.rs
 git commit --no-verify -m "feat(mvn): route all goals via dispatch, enable multi-goal filtering"
 ```
 
@@ -855,8 +855,8 @@ git commit --no-verify -m "feat(mvn): route all goals via dispatch, enable multi
 ## Task 8: Multi-module + verify-failure (failsafe XML) fixtures + tests
 
 **Files:**
-- Create: `tests/fixtures/mvn_multi_clean_verify_fail.txt` and a failsafe XML report fixture (mirror the existing surefire XML fixture used by `surefire_reports` tests — check `src/cmds/java/surefire_reports.rs` tests / `tests/fixtures/` for the established `*-reports/*.xml` layout and copy that shape under a temp dir created by the test).
-- Test: `src/cmds/java/mvn_cmd.rs`
+- Create: `tests/fixtures/mvn_multi_clean_verify_fail.txt` and a failsafe XML report fixture (mirror the existing surefire XML fixture used by `surefire_reports` tests — check `src/cmds/jvm/surefire_reports.rs` tests / `tests/fixtures/` for the established `*-reports/*.xml` layout and copy that shape under a temp dir created by the test).
+- Test: `src/cmds/jvm/mvn_cmd.rs`
 
 - [ ] **Step 1: Create the verify-failure fixture**
 
@@ -887,7 +887,7 @@ Run: `cargo test --lib filter_mvn_multi_verify_failure_stdout`; `cargo insta rev
 
 ```bash
 cargo fmt --all && cargo clippy --all-targets && cargo test --all
-git add src/cmds/java/mvn_cmd.rs src/cmds/java/snapshots/ tests/fixtures/mvn_multi_clean_verify_fail.txt
+git add src/cmds/jvm/mvn_cmd.rs src/cmds/jvm/snapshots/ tests/fixtures/mvn_multi_clean_verify_fail.txt
 git commit --no-verify -m "test(mvn): multi-goal verify-failure snapshot"
 ```
 
@@ -896,11 +896,11 @@ git commit --no-verify -m "test(mvn): multi-goal verify-failure snapshot"
 ## Task 9: Docs + final gate
 
 **Files:**
-- Modify: `src/cmds/java/README.md`, `README.md`, `CHANGELOG.md`
+- Modify: `src/cmds/jvm/README.md`, `README.md`, `CHANGELOG.md`
 
 - [ ] **Step 1: Update docs**
 
-In `src/cmds/java/README.md` and the top-level `README.md` mvn section, document that `rtk mvn` now accepts arbitrary goal chains and that multi-goal invocations are filtered per-goal with the BUILD signal always preserved (and `-q` is auto-dropped in multi-goal mode). Add a `CHANGELOG.md` entry under the unreleased section: `feat(mvn): signal-aware multi-goal filtering (clean test-compile checkstyle:check, clean verify, ...)`.
+In `src/cmds/jvm/README.md` and the top-level `README.md` mvn section, document that `rtk mvn` now accepts arbitrary goal chains and that multi-goal invocations are filtered per-goal with the BUILD signal always preserved (and `-q` is auto-dropped in multi-goal mode). Add a `CHANGELOG.md` entry under the unreleased section: `feat(mvn): signal-aware multi-goal filtering (clean test-compile checkstyle:check, clean verify, ...)`.
 
 - [ ] **Step 2: Full gate**
 
@@ -921,7 +921,7 @@ echo "exit=$?"                                                # expect real mvn 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add README.md src/cmds/java/README.md CHANGELOG.md
+git add README.md src/cmds/jvm/README.md CHANGELOG.md
 git commit --no-verify -m "docs(mvn): document multi-goal filtering"
 ```
 
