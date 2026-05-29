@@ -412,6 +412,60 @@ enum GoalRouting {
     Passthrough,
 }
 
+/// Maven lifecycle phases (clean + default + site lifecycles). A bare token
+/// matching one of these is a goal even without a `:`.
+#[allow(dead_code)]
+const MAVEN_PHASES: &[&str] = &[
+    "pre-clean", "clean", "post-clean",
+    "validate", "initialize",
+    "generate-sources", "process-sources", "generate-resources", "process-resources",
+    "compile", "process-classes",
+    "generate-test-sources", "process-test-sources", "generate-test-resources",
+    "process-test-resources", "test-compile", "process-test-classes",
+    "test", "prepare-package", "package",
+    "pre-integration-test", "integration-test", "post-integration-test",
+    "verify", "install", "deploy",
+    "pre-site", "site", "post-site", "site-deploy",
+];
+
+/// Maven options that consume the FOLLOWING token as their value, so that
+/// token must never be treated as a goal (`-pl core`, `-rf :module`).
+#[allow(dead_code)]
+const VALUE_TAKING_OPTS: &[&str] = &[
+    "-pl", "--projects", "-P", "--activate-profiles", "-f", "--file",
+    "-T", "--threads", "-rf", "--resume-from", "-s", "--settings",
+    "-gs", "--global-settings", "-l", "--log-file", "-b", "--builder",
+    "-t", "--toolchains",
+];
+
+/// Extract the goal/phase tokens (in order) from a raw mvn arg vector.
+/// A token is a goal iff it (1) is not a flag, (2) is not the value of a
+/// preceding value-taking option, and (3) is a known lifecycle phase or has
+/// the `plugin:goal` form (contains ':').
+#[allow(dead_code)]
+fn parse_goals(args: &[String]) -> Vec<String> {
+    let mut goals = Vec::new();
+    let mut skip_next = false;
+    for arg in args {
+        if skip_next {
+            skip_next = false;
+            continue;
+        }
+        if arg.starts_with('-') {
+            // `-pl core` style: the value is a separate token. `-pl=core` and
+            // `-Dk=v` keep the value attached, so only bare opts skip-next.
+            if VALUE_TAKING_OPTS.contains(&arg.as_str()) {
+                skip_next = true;
+            }
+            continue;
+        }
+        if MAVEN_PHASES.contains(&arg.as_str()) || arg.contains(':') {
+            goals.push(arg.clone());
+        }
+    }
+    goals
+}
+
 fn route_goal(subcommand: &str) -> GoalRouting {
     if COMPILE_LIKE_GOALS.iter().any(|(g, _)| *g == subcommand) {
         return GoalRouting::Compile;
@@ -1782,6 +1836,29 @@ mod tests {
         assert_eq!(a.failures, 21);
         assert_eq!(a.errors, 32);
         assert_eq!(a.skipped, 43);
+    }
+
+    // --- parse_goals ---
+
+    #[test]
+    fn test_parse_goals_detection() {
+        let v = |s: &str| s.split(' ').map(String::from).collect::<Vec<_>>();
+
+        // Multiple goals + flags
+        assert_eq!(parse_goals(&v("clean test-compile checkstyle:check -Dskip.npm -q")),
+                   vec!["clean", "test-compile", "checkstyle:check"]);
+        // -pl takes a value: `core` is NOT a goal
+        assert_eq!(parse_goals(&v("-pl core test")), vec!["test"]);
+        // -rf takes a value that contains ':' — must not be mistaken for a plugin goal
+        assert_eq!(parse_goals(&v("-rf :mod verify")), vec!["verify"]);
+        // single goal + attached -D flag
+        assert_eq!(parse_goals(&v("test -Dtest=Foo")), vec!["test"]);
+        // leading flag before goals
+        assert_eq!(parse_goals(&v("-q clean install")), vec!["clean", "install"]);
+        // no goals
+        assert_eq!(parse_goals(&v("-version")), Vec::<String>::new());
+        // plugin:goal form
+        assert_eq!(parse_goals(&v("dependency:tree")), vec!["dependency:tree"]);
     }
 
     // --- Reactor Summary collapse + javac error dedup ---
