@@ -1,0 +1,87 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO]
+[INFO] core                                                               [jar]
+[INFO] app                                                                [jar]
+[INFO]
+[INFO] -----------------------< com.example:core >-----------------------
+[INFO] Building core 1.0.0-SNAPSHOT                                       [1/2]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean) @ core ---
+[INFO] Deleting /app/core/target
+[INFO]
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) @ core ---
+[INFO] Compiling 40 source files with javac [debug release 21] to target/classes
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ core ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.core.MapperTest
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.31 s -- in com.example.core.MapperTest
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] -----------------------< com.example:app >------------------------
+[INFO] Building app 1.0.0-SNAPSHOT                                        [2/2]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- maven-clean-plugin:3.2.0:clean (default-clean) @ app ---
+[INFO] Deleting /app/app/target
+[INFO]
+[INFO] --- maven-compiler-plugin:3.13.0:compile (default-compile) @ app ---
+[INFO] Compiling 210 source files with javac [debug release 21] to target/classes
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ app ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.app.ServiceTest
+[INFO] Tests run: 44, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.02 s -- in com.example.app.ServiceTest
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 44, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.app.UserProvisioningIT
+[ERROR] Tests run: 6, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 12.4 s <<< FAILURE! -- in com.example.app.UserProvisioningIT
+[ERROR] com.example.app.UserProvisioningIT.shouldProvisionUser -- Time elapsed: 2.1 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <201> but was: <500>
+	at com.example.app.UserProvisioningIT.shouldProvisionUser(UserProvisioningIT.java:88)
+[INFO]
+[INFO] Results:
+[INFO]
+[ERROR] Failures:
+[ERROR]   UserProvisioningIT.shouldProvisionUser:88 expected: <201> but was: <500>
+[INFO]
+[ERROR] Tests run: 6, Failures: 1, Errors: 0, Skipped: 0
+[INFO]
+[INFO] --- failsafe:3.5.5:verify (default) @ app ---
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for app-parent 1.0.0-SNAPSHOT:
+[INFO]
+[INFO] core ............................................... SUCCESS [  6.123 s]
+[INFO] app ................................................ FAILURE [ 41.108 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  47.231 s
+[INFO] Finished at: 2026-05-29T11:40:00+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-failsafe-plugin:3.5.5:verify (default) on project app: There are test failures.
+[ERROR]
+[ERROR] Please refer to /app/app/target/failsafe-reports for the individual test results.
+[ERROR] -> [Help 1]
