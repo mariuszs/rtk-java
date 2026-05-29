@@ -246,6 +246,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **mvn:** enrich `mvn test` / `verify` / `integration-test` output with structured failure details read from `target/surefire-reports/TEST-*.xml` and `target/failsafe-reports/*.xml`. Stack traces are segmented on `Caused by:` with framework frames collapsed; the root-cause segment is always preserved.
 * **mvn:** autodetect application package from `pom.xml` `<groupId>` (with `<parent>/<groupId>` fallback) for framework-frame classification.
 * **mvn:** red-flag heuristic — `no tests run` with no fresh XML reports emits a diagnostic pointing at surefire misconfiguration.
+* **mvn:** signal-aware multi-goal filtering — filters every goal in a chain (`clean test-compile checkstyle:check`, `clean verify`, `clean install`) instead of only the first; always preserves BUILD SUCCESS/FAILURE, `[ERROR]`s, test counts, and checkstyle violations; auto-drops `-q`; enriches test failures from surefire/failsafe XML when the chain includes test-running goals.
 
 ### Bug Fixes
 
