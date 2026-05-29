@@ -690,6 +690,67 @@ fn filter_mvn_multi(raw: &str, goals_header: &str) -> String {
     compose_multi(&parts, goals_header)
 }
 
+/// Remove `-q` / `--quiet` so RTK receives full output and does the
+/// compression itself (multi-goal "smart quiet").
+fn strip_quiet_flags(args: &[String]) -> Vec<String> {
+    args.iter()
+        .filter(|a| a.as_str() != "-q" && a.as_str() != "--quiet")
+        .cloned()
+        .collect()
+}
+
+/// Run a multi-goal invocation: strip -q, run mvn, filter via filter_segments
+/// and compose_multi, then enrich the test portion from surefire/failsafe XML
+/// when the chain runs tests. Reuses `runner::run_filtered` so exit code and
+/// tee behave like every other goal.
+#[allow(dead_code)]
+fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    let goals = parse_goals(args);
+    let header = goals.join(" ");
+    let run_args = strip_quiet_flags(args);
+
+    let mut cmd = mvn_command(binary);
+    for arg in &run_args {
+        cmd.arg(arg);
+    }
+    if verbose > 0 {
+        eprintln!("Running: {binary} {} (multi-goal)", run_args.join(" "));
+    }
+
+    let started_at = std::time::SystemTime::now();
+    let cwd = std::env::current_dir().unwrap_or_else(|e| {
+        eprintln!("rtk {binary}: could not determine cwd: {e}");
+        std::path::PathBuf::from(".")
+    });
+    let app_pkgs = crate::cmds::java::pom_groupid::detect(&cwd);
+    let enrich = chain_runs_tests(&goals);
+    let test_goal = if goals.iter().any(|g| g == "verify" || g == "integration-test") {
+        "verify"
+    } else {
+        "test"
+    };
+
+    let (tool_name, tee_label) = mvn_labels(binary, "multi", "multi");
+    runner::run_filtered(
+        cmd,
+        &tool_name,
+        &run_args.join(" "),
+        move |raw: &str| {
+            // Degraded-input fallback: never swallow output.
+            if !PLUGIN_MARKER_RE.is_match(raw) && !BUILD_FOOTER_RE.is_match(raw) {
+                return raw.to_string();
+            }
+            let mut parts = filter_segments(raw);
+            if enrich && !parts.tests.trim().is_empty() {
+                parts.tests =
+                    enrich_with_reports(&parts.tests, &cwd, started_at, &app_pkgs, test_goal);
+            }
+            compose_multi(&parts, &header)
+        },
+        runner::RunOptions::with_tee(&tee_label),
+    )
+}
+
 fn route_goal(subcommand: &str) -> GoalRouting {
     if COMPILE_LIKE_GOALS.iter().any(|(g, _)| *g == subcommand) {
         return GoalRouting::Compile;
@@ -3954,5 +4015,13 @@ mod tests {
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 60.0, "failure path still expected ≥60%, got {:.1}%", savings);
         insta::assert_snapshot!(output);
+    }
+
+    #[test]
+    fn test_strip_quiet_flags() {
+        let v = |s: &str| s.split(' ').map(String::from).collect::<Vec<_>>();
+        assert_eq!(strip_quiet_flags(&v("clean verify -q")), v("clean verify"));
+        assert_eq!(strip_quiet_flags(&v("--quiet clean test")), v("clean test"));
+        assert_eq!(strip_quiet_flags(&v("clean test -Dq=1")), v("clean test -Dq=1"));
     }
 }
