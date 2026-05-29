@@ -311,26 +311,16 @@ fn run_tests_like(
     )
 }
 
-/// Run `mvn compile` with line-filtered output.
-///
-/// `compile` is itself a Maven lifecycle phase (not a goal name we invented),
-/// so no implicit default is added when `args` is empty — `mvn compile` runs
-/// the compile phase directly.
-#[allow(dead_code)]
-pub fn run_compile(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
-    run_compile_like(binary, "compile", args, verbose)
-}
-
 /// Shared implementation for compile-phase-like goals: runs `<binary> <goal> <args>`
-/// through `filter_mvn_compile`. Used directly by `run_compile` and reused by
-/// `run_other` to route `process-classes` / `test-compile` through the same
-/// filter while preserving the original goal name in the invocation and in
-/// the tracking label.
+/// through `filter_mvn_compile`. Used by `run_other` to route `compile`,
+/// `process-classes`, and `test-compile` through the same filter while
+/// preserving the original goal name in the invocation and in the tracking
+/// label.
 fn run_compile_like(binary: MvnBinary, goal: &str, args: &[String], verbose: u8) -> Result<i32> {
     let tee_slug = COMPILE_LIKE_GOALS
         .iter()
         .find_map(|&(g, slug)| (g == goal).then_some(slug))
-        .expect("goal must be in COMPILE_LIKE_GOALS — gated by route_goal / run_compile");
+        .expect("goal must be in COMPILE_LIKE_GOALS — gated by route_goal");
     run_simple_goal(binary, goal, tee_slug, filter_mvn_compile, args, verbose)
 }
 
