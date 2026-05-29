@@ -1,5 +1,5 @@
 ---
-source: src/cmds/java/mvn_cmd.rs
+source: src/cmds/jvm/mvn_cmd.rs
 expression: out
 ---
 mvn verify: 12 run, 4 failed (05:42 min)

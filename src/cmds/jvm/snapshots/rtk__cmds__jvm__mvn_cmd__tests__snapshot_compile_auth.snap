@@ -1,5 +1,5 @@
 ---
-source: src/cmds/java/mvn_cmd.rs
+source: src/cmds/jvm/mvn_cmd.rs
 expression: output
 ---
 [INFO] annotations

@@ -44,7 +44,7 @@ src/
 │   ├── js/                    ← npm, pnpm, vitest, lint, tsc, next, prettier, playwright, prisma
 │   ├── python/                ← ruff, pytest, mypy, pip
 │   ├── go/                    ← go, golangci-lint
-│   ├── java/                  ← mvn/mvnw (test, compile, checkstyle, dependency:tree)
+│   ├── jvm/                   ← mvn/mvnw/mvnd, gradlew (test, compile, checkstyle, dependency:tree)
 │   ├── dotnet/                ← dotnet, binlog, trx, format_report
 │   ├── cloud/                 ← aws, container (docker/kubectl), curl, wget, psql
 │   ├── system/                ← ls, tree, read, grep, find, wc, env, json, log, deps, summary, format, local_llm
