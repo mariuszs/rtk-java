@@ -316,6 +316,7 @@ fn run_tests_like(
 /// `compile` is itself a Maven lifecycle phase (not a goal name we invented),
 /// so no implicit default is added when `args` is empty — `mvn compile` runs
 /// the compile phase directly.
+#[allow(dead_code)]
 pub fn run_compile(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
     run_compile_like(binary, "compile", args, verbose)
 }
@@ -400,21 +401,21 @@ const COMPILE_LIKE_GOALS: &[(&str, &str)] = &[
     ("test-compile", "test_compile"),
 ];
 
-/// Routing decision for a raw mvn subcommand seen on `run_other` — i.e. the
-/// first positional arg after `rtk mvn`. Pure function, easy to unit-test.
+/// Routing decision for a raw mvn goal token. Pure function, easy to unit-test.
 #[derive(Debug, PartialEq, Eq)]
 enum GoalRouting {
-    /// Re-dispatch to `run_compile` (filter_mvn_compile).
+    Test,
+    Verify,
+    Clean,
     Compile,
-    /// Re-dispatch to `run_checkstyle` (filter_mvn_checkstyle).
     Checkstyle,
+    DepTree,
     /// Stream unchanged via `status()`; tracked for metrics only.
     Passthrough,
 }
 
 /// Maven lifecycle phases (clean + default + site lifecycles). A bare token
 /// matching one of these is a goal even without a `:`.
-#[allow(dead_code)]
 const MAVEN_PHASES: &[&str] = &[
     "pre-clean", "clean", "post-clean",
     "validate", "initialize",
@@ -430,7 +431,6 @@ const MAVEN_PHASES: &[&str] = &[
 
 /// Maven options that consume the FOLLOWING token as their value, so that
 /// token must never be treated as a goal (`-pl core`, `-rf :module`).
-#[allow(dead_code)]
 const VALUE_TAKING_OPTS: &[&str] = &[
     "-pl", "--projects", "-P", "--activate-profiles", "-f", "--file",
     "-T", "--threads", "-rf", "--resume-from", "-s", "--settings",
@@ -442,7 +442,6 @@ const VALUE_TAKING_OPTS: &[&str] = &[
 /// A token is a goal iff it (1) is not a flag, (2) is not the value of a
 /// preceding value-taking option, and (3) is a known lifecycle phase or has
 /// the `plugin:goal` form (contains ':').
-#[allow(dead_code)]
 fn parse_goals(args: &[String]) -> Vec<String> {
     let mut goals = Vec::new();
     let mut skip_next = false;
@@ -468,7 +467,6 @@ fn parse_goals(args: &[String]) -> Vec<String> {
 
 /// Phases that actually execute surefire/failsafe (everything from `test`
 /// onward in the default lifecycle).
-#[allow(dead_code)]
 const TEST_RUNNING_PHASES: &[&str] = &[
     "test", "prepare-package", "package",
     "pre-integration-test", "integration-test", "post-integration-test",
@@ -478,7 +476,6 @@ const TEST_RUNNING_PHASES: &[&str] = &[
 /// True if any goal in the chain runs tests — gates XML enrichment in
 /// `run_multi_goal`. Avoids a spurious "no XML reports" note when the chain
 /// only compiles / runs checkstyle.
-#[allow(dead_code)]
 fn chain_runs_tests(goals: &[String]) -> bool {
     goals.iter().any(|g| {
         TEST_RUNNING_PHASES.contains(&g.as_str())
@@ -507,7 +504,6 @@ enum SegmentKind {
     Other,      // jar, resources, install, ...
 }
 
-#[allow(dead_code)]
 struct Segment {
     kind: SegmentKind,
     body: String,
@@ -530,7 +526,6 @@ fn classify_marker(plugin: &str, goal: &str) -> SegmentKind {
 /// trailing BUILD/Reactor footer is NOT a segment — it is handled separately
 /// by `extract_build_block` (later task). Everything before the first marker
 /// is `Preamble`.
-#[allow(dead_code)]
 fn split_segments(raw: &str) -> Vec<Segment> {
     let mut segments: Vec<Segment> = Vec::new();
     let mut current_kind = SegmentKind::Preamble;
@@ -611,7 +606,6 @@ fn extract_build_block(raw: &str) -> String {
 /// Run each segment group through its existing sub-filter and collect the
 /// signal pieces. Pure: no filesystem access (enrichment happens in
 /// run_multi_goal, a later task).
-#[allow(dead_code)]
 fn filter_segments(raw: &str) -> MultiParts {
     let segments = split_segments(raw);
     let mut parts = MultiParts::default();
@@ -657,7 +651,6 @@ fn filter_segments(raw: &str) -> MultiParts {
 
 /// Assemble the final multi-goal report from already-filtered (and possibly
 /// enriched) parts, in canonical order.
-#[allow(dead_code)]
 fn compose_multi(parts: &MultiParts, goals_header: &str) -> String {
     let mut out = String::new();
     let _ = writeln!(out, "mvn {goals_header} (multi-goal)");
@@ -703,7 +696,6 @@ fn strip_quiet_flags(args: &[String]) -> Vec<String> {
 /// and compose_multi, then enrich the test portion from surefire/failsafe XML
 /// when the chain runs tests. Reuses `runner::run_filtered` so exit code and
 /// tee behave like every other goal.
-#[allow(dead_code)]
 fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
     let goals = parse_goals(args);
     let header = goals.join(" ");
@@ -755,67 +747,78 @@ fn route_goal(subcommand: &str) -> GoalRouting {
     if COMPILE_LIKE_GOALS.iter().any(|(g, _)| *g == subcommand) {
         return GoalRouting::Compile;
     }
-    if subcommand == "checkstyle:check" || subcommand == "checkstyle" {
-        return GoalRouting::Checkstyle;
+    match subcommand {
+        "test" => GoalRouting::Test,
+        "verify" => GoalRouting::Verify,
+        "clean" => GoalRouting::Clean,
+        "checkstyle:check" | "checkstyle" => GoalRouting::Checkstyle,
+        "dependency:tree" => GoalRouting::DepTree,
+        _ => GoalRouting::Passthrough,
     }
-    GoalRouting::Passthrough
 }
 
-/// Convert `args[1..]` into `Vec<String>`, lossy-decoding any non-UTF-8 bytes.
-/// The subcommand (args[0]) is stripped so callers can re-dispatch to a
-/// `run_*` function that prepends its own goal name.
-fn trailing_args(args: &[OsString]) -> Vec<String> {
-    args.iter()
-        .skip(1)
-        .map(|a| a.to_string_lossy().into_owned())
-        .collect()
-}
-
-/// Handles mvn subcommands not matched by dedicated Clap variants.
-/// Compile-like goals go through `filter_mvn_compile`; `checkstyle` and
-/// `checkstyle:check` go through `filter_mvn_checkstyle`; everything else
-/// streams directly via `status()` (safe for long-running goals like
-/// `spring-boot:run`, and metric-only for rare ones like `package`).
-pub fn run_other(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32> {
-    if args.is_empty() {
-        anyhow::bail!("{binary}: no subcommand specified");
-    }
-
-    let subcommand = args[0].to_string_lossy();
-
+/// Stream an unfiltered mvn invocation (long-running/unsupported goals, or
+/// goal-less commands like `mvn -version`). Tracked for metrics only.
+fn run_passthrough_all(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32> {
     if verbose > 0 {
-        eprintln!("Running: {binary} {} ...", subcommand);
+        eprintln!("Running: {binary} {} (passthrough)", tracking::args_display(args));
     }
-
-    match route_goal(&subcommand) {
-        GoalRouting::Compile => {
-            return run_compile_like(binary, &subcommand, &trailing_args(args), verbose);
-        }
-        GoalRouting::Checkstyle => {
-            return run_checkstyle(binary, &trailing_args(args), verbose);
-        }
-        GoalRouting::Passthrough => {}
-    }
-
-    // Everything else: passthrough with streaming (safe for spring-boot:run etc.)
     let timer = tracking::TimedExecution::start();
-
     let mut cmd = mvn_command(binary);
     for arg in args {
         cmd.arg(arg);
     }
-
     let status = cmd
         .status()
-        .with_context(|| format!("Failed to run {binary} {}", subcommand))?;
-
+        .with_context(|| format!("Failed to run {binary}"))?;
     let args_str = tracking::args_display(args);
     timer.track_passthrough(
-        &format!("{binary} {}", args_str),
-        &format!("rtk {binary} {} (passthrough)", args_str),
+        &format!("{binary} {args_str}"),
+        &format!("rtk {binary} {args_str} (passthrough)"),
     );
-
     Ok(exit_code_from_status(&status, binary.as_str()))
+}
+
+/// Top-level mvn/mvnd entry point. Parses goals from the raw arg vector and
+/// routes: 0 goals → passthrough; 1 goal → its single-goal filter; ≥2 →
+/// multi-goal aggregating filter.
+pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32> {
+    let str_args: Vec<String> = args.iter().map(|a| a.to_string_lossy().into_owned()).collect();
+    let goals = parse_goals(&str_args);
+
+    match goals.len() {
+        0 => run_passthrough_all(binary, args, verbose),
+        1 => {
+            let goal = goals[0].clone();
+            // Pass every arg EXCEPT the matched goal token; the run_* helpers
+            // prepend their own canonical goal name.
+            let rest: Vec<String> = {
+                let mut removed = false;
+                str_args
+                    .iter()
+                    .filter(|a| {
+                        if !removed && **a == goal {
+                            removed = true;
+                            false
+                        } else {
+                            true
+                        }
+                    })
+                    .cloned()
+                    .collect()
+            };
+            match route_goal(&goal) {
+                GoalRouting::Test => run_test(binary, &rest, verbose),
+                GoalRouting::Verify => run_verify(binary, &rest, verbose),
+                GoalRouting::Clean => run_clean(binary, &rest, verbose),
+                GoalRouting::Compile => run_compile_like(binary, &goal, &rest, verbose),
+                GoalRouting::Checkstyle => run_checkstyle(binary, &rest, verbose),
+                GoalRouting::DepTree => run_dep_tree(binary, &rest, verbose),
+                GoalRouting::Passthrough => run_passthrough_all(binary, args, verbose),
+            }
+        }
+        _ => run_multi_goal(binary, &str_args, verbose),
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2935,52 +2938,24 @@ mod tests {
 
     #[test]
     fn test_route_goal() {
-        // Compile-family → compile filter
         assert_eq!(route_goal("compile"), GoalRouting::Compile);
         assert_eq!(route_goal("process-classes"), GoalRouting::Compile);
         assert_eq!(route_goal("test-compile"), GoalRouting::Compile);
-
-        // Checkstyle (both canonical and short form)
         assert_eq!(route_goal("checkstyle:check"), GoalRouting::Checkstyle);
         assert_eq!(route_goal("checkstyle"), GoalRouting::Checkstyle);
-
-        // Rare lifecycle phases → passthrough (rare in real usage)
+        // Now first-class single-goal routes (were Passthrough under the old Clap model):
+        assert_eq!(route_goal("test"), GoalRouting::Test);
+        assert_eq!(route_goal("verify"), GoalRouting::Verify);
+        assert_eq!(route_goal("clean"), GoalRouting::Clean);
+        assert_eq!(route_goal("dependency:tree"), GoalRouting::DepTree);
+        // Still passthrough — no dedicated filter:
         assert_eq!(route_goal("package"), GoalRouting::Passthrough);
         assert_eq!(route_goal("install"), GoalRouting::Passthrough);
-        assert_eq!(route_goal("clean"), GoalRouting::Passthrough);
         assert_eq!(route_goal("deploy"), GoalRouting::Passthrough);
-
-        // Long-running / interactive goals must always passthrough
         assert_eq!(route_goal("spring-boot:run"), GoalRouting::Passthrough);
         assert_eq!(route_goal("quarkus:dev"), GoalRouting::Passthrough);
-
-        // Unknown / typo: passthrough (safer default)
         assert_eq!(route_goal("compilee"), GoalRouting::Passthrough);
         assert_eq!(route_goal(""), GoalRouting::Passthrough);
-    }
-
-    #[test]
-    fn test_run_other_empty_args_errors() {
-        let result = run_other(MvnBinary::Mvn, &[], 0);
-        assert!(result.is_err());
-        let err_msg = result.unwrap_err().to_string();
-        assert!(
-            err_msg.contains("no subcommand"),
-            "expected 'no subcommand' error, got: {}",
-            err_msg
-        );
-    }
-
-    #[test]
-    fn test_run_other_empty_args_errors_mvnd() {
-        let result = run_other(MvnBinary::Mvnd, &[], 0);
-        assert!(result.is_err());
-        let err_msg = result.unwrap_err().to_string();
-        assert!(
-            err_msg.contains("mvnd: no subcommand"),
-            "expected 'mvnd: no subcommand' error, got: {}",
-            err_msg
-        );
     }
 
     #[test]
