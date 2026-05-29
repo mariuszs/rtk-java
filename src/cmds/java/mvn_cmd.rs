@@ -499,16 +499,22 @@ struct Segment {
     body: String,
 }
 
-/// Classify a plugin marker line into a SegmentKind by its plugin + goal.
-fn classify_marker(plugin: &str, goal: &str) -> SegmentKind {
-    match (plugin, goal) {
-        ("maven-clean-plugin", _) => SegmentKind::Clean,
-        ("maven-compiler-plugin", _) => SegmentKind::Compile,
-        ("maven-surefire-plugin", _) => SegmentKind::Surefire,
-        ("maven-failsafe-plugin", _) => SegmentKind::Failsafe,
-        ("maven-checkstyle-plugin", _) => SegmentKind::Checkstyle,
-        (_, g) if g == "check" && plugin.contains("checkstyle") => SegmentKind::Checkstyle,
-        _ => SegmentKind::Other,
+/// Classify a plugin marker into a SegmentKind by its plugin token. Handles
+/// both the full artifact id (`maven-surefire-plugin`) and the short
+/// goal-prefix form (`surefire`) that Maven prints depending on version/config.
+fn classify_marker(plugin: &str) -> SegmentKind {
+    if plugin.contains("clean") {
+        SegmentKind::Clean
+    } else if plugin.contains("compiler") {
+        SegmentKind::Compile
+    } else if plugin.contains("surefire") {
+        SegmentKind::Surefire
+    } else if plugin.contains("failsafe") {
+        SegmentKind::Failsafe
+    } else if plugin.contains("checkstyle") {
+        SegmentKind::Checkstyle
+    } else {
+        SegmentKind::Other
     }
 }
 
@@ -535,8 +541,7 @@ fn split_segments(raw: &str) -> Vec<Segment> {
                 current_body.clear();
             }
             let plugin = caps.get(1).map_or("", |m| m.as_str());
-            let goal = caps.get(2).map_or("", |m| m.as_str());
-            current_kind = classify_marker(plugin, goal);
+            current_kind = classify_marker(plugin);
             in_footer = false;
             continue;
         }
@@ -3988,5 +3993,24 @@ mod tests {
         assert_eq!(strip_quiet_flags(&v("clean verify -q")), v("clean verify"));
         assert_eq!(strip_quiet_flags(&v("--quiet clean test")), v("clean test"));
         assert_eq!(strip_quiet_flags(&v("clean test -Dq=1")), v("clean test -Dq=1"));
+    }
+
+    #[test]
+    fn test_classify_marker_both_forms() {
+        // Full artifact-id form
+        assert_eq!(classify_marker("maven-clean-plugin"), SegmentKind::Clean);
+        assert_eq!(classify_marker("maven-compiler-plugin"), SegmentKind::Compile);
+        assert_eq!(classify_marker("maven-surefire-plugin"), SegmentKind::Surefire);
+        assert_eq!(classify_marker("maven-failsafe-plugin"), SegmentKind::Failsafe);
+        assert_eq!(classify_marker("maven-checkstyle-plugin"), SegmentKind::Checkstyle);
+        // Short goal-prefix form (as seen in real logs)
+        assert_eq!(classify_marker("surefire"), SegmentKind::Surefire);
+        assert_eq!(classify_marker("failsafe"), SegmentKind::Failsafe);
+        assert_eq!(classify_marker("checkstyle"), SegmentKind::Checkstyle);
+        assert_eq!(classify_marker("clean"), SegmentKind::Clean);
+        // Unrelated plugins → Other
+        assert_eq!(classify_marker("maven-resources-plugin"), SegmentKind::Other);
+        assert_eq!(classify_marker("spring-boot"), SegmentKind::Other);
+        assert_eq!(classify_marker("maven-jar-plugin"), SegmentKind::Other);
     }
 }
