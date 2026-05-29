@@ -25,8 +25,9 @@ pub fn run(
         eprintln!("grep: '{}' in {}", pattern, path);
     }
 
-    // Fix: convert BRE alternation \| → | for rg (which uses PCRE-style regex)
-    let rg_pattern = pattern.replace(r"\|", "|");
+    // Fix: translate POSIX BRE to Rust-regex (rg dialect). In BRE, \| \( \{ \+ \?
+    // are metacharacters and their bare forms are literals — the opposite of Rust/ERE.
+    let rg_pattern = translate_bre_to_rust(pattern);
 
     let mut rg_cmd = resolved_command("rg");
     // --no-ignore-vcs: match grep -r behavior (don't skip .gitignore'd files).
@@ -247,6 +248,54 @@ fn compact_path(path: &str) -> String {
     )
 }
 
+/// Translate a POSIX Basic Regular Expression (grep default) into Rust-regex
+/// (used by ripgrep). In BRE, `\| \( \) \{ \} \+ \?` are metacharacters and the
+/// bare forms are literals — the exact opposite of Rust/ERE. Shared constructs
+/// (`.`, `*`, `^`, `$`, `[...]`, `\.`, backrefs) are preserved verbatim.
+fn translate_bre_to_rust(pattern: &str) -> String {
+    let mut out = String::with_capacity(pattern.len() + 8);
+    let mut chars = pattern.chars().peekable();
+    let mut in_class = false;
+
+    while let Some(c) = chars.next() {
+        if in_class {
+            out.push(c);
+            if c == ']' {
+                in_class = false;
+            }
+            continue;
+        }
+        match c {
+            '\\' => match chars.peek() {
+                // BRE metachar: drop the backslash so it becomes a Rust metachar.
+                Some('|') | Some('(') | Some(')') | Some('{') | Some('}') | Some('+')
+                | Some('?') => {
+                    let next = chars.next().expect("peek confirmed Some");
+                    out.push(next);
+                }
+                // Any other escape (\., \\, \d, \1, ...) is preserved as-is.
+                Some(&n) => {
+                    out.push('\\');
+                    out.push(n);
+                    chars.next();
+                }
+                None => out.push('\\'),
+            },
+            '[' => {
+                in_class = true;
+                out.push('[');
+            }
+            // Bare BRE literals → escape so Rust treats them literally.
+            '|' | '(' | ')' | '{' | '}' | '+' | '?' => {
+                out.push('\\');
+                out.push(c);
+            }
+            _ => out.push(c),
+        }
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -409,5 +458,48 @@ mod tests {
             );
         }
         // If rg is not installed, skip gracefully (test still passes)
+    }
+
+    #[test]
+    fn test_bre_alternation_and_literal_paren() {
+        // Real session failure: grep BRE — \| is alternation, bare ( is literal.
+        assert_eq!(
+            translate_bre_to_rust(r#"SUPERADMIN\|getValue\|enum TechnicalRole\|(""#),
+            r#"SUPERADMIN|getValue|enum TechnicalRole|\(""#
+        );
+    }
+
+    #[test]
+    fn test_bre_conflict_markers() {
+        assert_eq!(
+            translate_bre_to_rust(r"^<<<<<<<\|^=======\|^>>>>>>>"),
+            r"^<<<<<<<|^=======|^>>>>>>>"
+        );
+    }
+
+    #[test]
+    fn test_bre_groups_and_intervals() {
+        assert_eq!(translate_bre_to_rust(r"a\{2,3\}"), r"a{2,3}");
+        assert_eq!(translate_bre_to_rust(r"\(ab\)\+"), r"(ab)+");
+    }
+
+    #[test]
+    fn test_bre_bare_metachars_become_literal() {
+        // In BRE, bare | ( ) + ? { } are literal → must be escaped for Rust regex.
+        assert_eq!(translate_bre_to_rust("a+b?"), r"a\+b\?");
+        assert_eq!(translate_bre_to_rust("a|b"), r"a\|b");
+    }
+
+    #[test]
+    fn test_bre_preserves_shared_metachars_and_escapes() {
+        assert_eq!(translate_bre_to_rust(r"foo.*bar"), r"foo.*bar");
+        assert_eq!(translate_bre_to_rust(r"\.txt$"), r"\.txt$");
+        assert_eq!(translate_bre_to_rust(r"^abc"), r"^abc");
+    }
+
+    #[test]
+    fn test_bre_char_class_untouched() {
+        // Inside [...] the chars | ( ) keep their literal meaning in both dialects.
+        assert_eq!(translate_bre_to_rust(r"[a|b(]x"), r"[a|b(]x");
     }
 }
