@@ -109,15 +109,36 @@ pub fn detect_phase(args: &[String]) -> MvnPhase {
 // ── Stack-frame deny-list ────────────────────────────────────────────────────
 
 const FRAMEWORK_FRAME_PREFIXES: &[&str] = &[
+    // JUnit / TestNG / Surefire harness
     "at org.junit.",
     "at junit.",
+    "at org.testng.",
     "at org.apache.maven.surefire.",
+    // JDK internals
     "at sun.reflect.",
     "at jdk.internal.reflect.",
     "at jdk.proxy",
     "at java.base/",
     "at java.lang.reflect.",
     "at java.util.",
+    // Spring framework (test context, MVC, AOP, data)
+    "at org.springframework.",
+    // Mocking / proxy generation
+    "at org.mockito.",
+    "at net.bytebuddy.",
+    // Assertion / matcher libraries (frame is library-internal noise; the
+    // failing user line is kept separately)
+    "at org.assertj.",
+    "at org.hamcrest.",
+    // Servlet containers + servlet API (Spring Boot integration tests)
+    "at org.apache.catalina.",
+    "at org.apache.coyote.",
+    "at org.apache.tomcat.",
+    "at org.eclipse.jetty.",
+    "at jakarta.servlet.",
+    "at javax.servlet.",
+    // Persistence
+    "at org.hibernate.",
 ];
 
 fn is_framework_frame(trimmed: &str) -> bool {
@@ -2104,6 +2125,69 @@ mod tests {
             o.contains("Some unexpected error output"),
             "unclassified ERROR line preserved; got:\n{}",
             o
+        );
+    }
+
+    // ── Modern-framework stack-frame stripping ───────────────────────────────
+
+    #[test]
+    fn surefire_strips_modern_framework_frames() {
+        let i = include_str!("../../../tests/fixtures/mvn_test_fail_spring_slice_raw.txt");
+        let o = filter_surefire(i);
+        // Framework noise from a typical Spring Boot stack must be stripped.
+        for fw in [
+            "at org.springframework.",
+            "at org.mockito.",
+            "at net.bytebuddy.",
+            "at org.apache.catalina.",
+            "at org.apache.coyote.",
+            "at org.apache.tomcat.",
+            "at org.hibernate.",
+        ] {
+            assert!(
+                !o.contains(fw),
+                "framework frame `{}` should be stripped; got:\n{}",
+                fw,
+                o
+            );
+        }
+    }
+
+    #[test]
+    fn surefire_spring_keeps_user_frame_and_signal() {
+        let i = include_str!("../../../tests/fixtures/mvn_test_fail_spring_slice_raw.txt");
+        let o = filter_surefire(i);
+        assert!(
+            o.contains("at com.acme.orders.web.OrderControllerIT.shouldCreateOrder("),
+            "user-code frame preserved; got:\n{}",
+            o
+        );
+        assert!(
+            o.contains("org.opentest4j.AssertionFailedError"),
+            "exception line preserved; got:\n{}",
+            o
+        );
+        assert!(o.contains("BUILD FAILURE"), "footer preserved; got:\n{}", o);
+        assert!(
+            o.contains("Tests run: 8, Failures: 1"),
+            "aggregate preserved; got:\n{}",
+            o
+        );
+    }
+
+    #[test]
+    fn surefire_spring_savings() {
+        let i = include_str!("../../../tests/fixtures/mvn_test_fail_spring_slice_raw.txt");
+        let o = filter_surefire(i);
+        let savings = 100.0 - (count_tokens(&o) as f64 / count_tokens(i) as f64 * 100.0);
+        // Conservative bar matching the surefire convention (see
+        // `filter_surefire_pass_output_compact`). This fixture carries only ~15
+        // framework frames; real Spring Boot traces run 40-80 frames, so the
+        // real-world reduction is materially higher.
+        assert!(
+            savings >= 50.0,
+            "spring-fixture savings >=50%, got {:.1}%",
+            savings
         );
     }
 }

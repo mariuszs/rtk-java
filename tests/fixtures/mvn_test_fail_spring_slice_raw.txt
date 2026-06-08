@@ -1,0 +1,61 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------------< com.acme:orders-api >-------------------------
+[INFO] Building orders-api 1.4.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- surefire:3.5.5:test (default-test) @ orders-api ---
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.acme.orders.web.HealthCheckIT
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.412 s -- in com.acme.orders.web.HealthCheckIT
+[INFO] Running com.acme.orders.web.OrderControllerIT
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 3.187 s <<< FAILURE! -- in com.acme.orders.web.OrderControllerIT
+[ERROR] com.acme.orders.web.OrderControllerIT.shouldCreateOrder -- Time elapsed: 3.041 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: expected: <201 CREATED> but was: <500 INTERNAL_SERVER_ERROR>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:182)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1145)
+	at com.acme.orders.web.OrderControllerIT.shouldCreateOrder(OrderControllerIT.java:73)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.test.context.junit.jupiter.TestTemplateInvocationContextProvider.lambda$invokeTestMethod$0(SpringExtension.java:467)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.invokeTestMethod(SpringExtension.java:466)
+	at org.springframework.test.context.junit.jupiter.SpringExtension.interceptTestMethod(SpringExtension.java:401)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979)
+	at org.springframework.mock.web.MockFilterChain.doFilter(MockFilterChain.java:134)
+	at org.mockito.internal.invocation.InterceptedInvocation.callRealMethod(InterceptedInvocation.java:142)
+	at org.mockito.internal.handler.MockHandlerImpl.handle(MockHandlerImpl.java:124)
+	at net.bytebuddy.implementation.bind.annotation.RuntimeType.invoke(MockMethodInterceptor.java:112)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:189)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:197)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1740)
+	at org.hibernate.engine.spi.ActionQueue.executeActions(ActionQueue.java:645)
+	at org.hibernate.event.internal.DefaultFlushEventListener.onFlush(DefaultFlushEventListener.java:39)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+[INFO] Running com.acme.orders.repo.OrderRepositoryIT
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.204 s -- in com.acme.orders.repo.OrderRepositoryIT
+[INFO]
+[INFO] Results:
+[INFO]
+[ERROR] Failures:
+[ERROR]   OrderControllerIT.shouldCreateOrder:73 expected: <201 CREATED> but was: <500 INTERNAL_SERVER_ERROR>
+[INFO]
+[ERROR] Tests run: 8, Failures: 1, Errors: 0, Skipped: 0
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  18.442 s
+[INFO] Finished at: 2026-06-08T09:14:51Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.5:test (default-test) on project orders-api: There are test failures.
