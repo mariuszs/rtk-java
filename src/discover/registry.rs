@@ -1283,6 +1283,72 @@ mod tests {
         );
     }
 
+    // --- mvn / mvnd: options before the goal ---
+    // Regression: global Maven options (-q, -DskipTests, -pl <mod>, -T <n>)
+    // placed before the lifecycle goal must not break the rewrite. The goal may
+    // follow any number of option tokens, not only the binary directly.
+
+    #[test]
+    fn test_rewrite_mvn_goal_immediately() {
+        // baseline: goal right after the binary still works
+        assert_eq!(
+            rewrite_command_no_prefixes("mvn test", &[]),
+            Some("rtk mvn test".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_mvn_quiet_flag_before_goal() {
+        assert_eq!(
+            rewrite_command_no_prefixes("mvn -q test", &[]),
+            Some("rtk mvn -q test".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_mvnw_quiet_flag_before_goal() {
+        // ./mvnw is normalized to its basename (mvnw); -q must not break it
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw -q test", &[]),
+            Some("rtk mvn -q test".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_mvn_skiptests_property_before_goal() {
+        assert_eq!(
+            rewrite_command_no_prefixes("mvn -DskipTests package", &[]),
+            Some("rtk mvn -DskipTests package".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_mvn_pl_module_value_before_goal() {
+        // -pl takes a separate-word value; the goal follows after it
+        assert_eq!(
+            rewrite_command_no_prefixes("mvn -pl core verify", &[]),
+            Some("rtk mvn -pl core verify".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_mvnd_flag_before_goal() {
+        assert_eq!(
+            rewrite_command_no_prefixes("mvnd -q test", &[]),
+            Some("rtk mvnd -q test".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_mvn_property_only_no_goal_skipped() {
+        // No lifecycle goal present (only a -D property) → must NOT rewrite,
+        // guarding the relaxed pattern against over-matching.
+        assert_eq!(
+            rewrite_command_no_prefixes("mvn -Dmaven.test.skip=true", &[]),
+            None
+        );
+    }
+
     #[test]
     fn test_rewrite_compound_and() {
         assert_eq!(
