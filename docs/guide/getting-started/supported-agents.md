@@ -30,7 +30,7 @@ Agent runs "cargo test"
 |-------|-----------------|---------------------------|
 | Claude Code | Shell hook (`PreToolUse`) | Yes |
 | VS Code Copilot Chat | Shell hook (`PreToolUse`) | Yes |
-| GitHub Copilot CLI | Shell hook (deny-with-suggestion) | No (agent retries) |
+| GitHub Copilot CLI | Shell hook (`preToolUse` `modifiedArgs`) | Yes |
 | Cursor | Shell hook (`preToolUse`) | Yes |
 | Gemini CLI | Rust binary (`BeforeTool`) | Yes |
 | OpenCode | TypeScript plugin (`tool.execute.before`) | Yes |
@@ -61,16 +61,28 @@ rtk init --show    # shows hook status
 ### Cursor
 
 ```bash
-rtk init --global --cursor
+rtk init --global --agent cursor
 ```
 
 Restart Cursor. The hook uses `preToolUse` with Cursor's `updated_input` format.
 
-### VS Code Copilot Chat
+### GitHub Copilot (VS Code Chat + CLI)
 
 ```bash
-rtk init --global --copilot
+rtk init --copilot            # project-scoped (.github/hooks/)
+rtk init --global --copilot   # user-scoped (~/.copilot/hooks/, respects $COPILOT_HOME)
 ```
+
+Project-scoped writes `.github/hooks/rtk-rewrite.json` (both hosts get transparent rewrite — VS Code Chat via `updatedInput`, Copilot CLI via `modifiedArgs`) plus the RTK block in `.github/copilot-instructions.md`. User-scoped writes the same hook config to `~/.copilot/hooks/rtk-rewrite.json` and the RTK block to `~/.copilot/copilot-instructions.md` (both respect `$COPILOT_HOME` if set).
+
+Uninstall:
+
+```bash
+rtk init --uninstall --copilot
+rtk init --uninstall --global --copilot
+```
+
+Removes only RTK's hook file (and, for project, the RTK block in `copilot-instructions.md`). Other files in `.github/hooks/` or `~/.copilot/hooks/` and your own instruction content are untouched.
 
 ### Gemini CLI
 
@@ -128,7 +140,7 @@ The plugin fails open. If `rtk` is missing at load time, the hook is not registe
 ### Cline / Roo Code
 
 ```bash
-rtk init --cline    # creates .clinerules in current project
+rtk init --agent cline    # creates .clinerules in current project
 ```
 
 Cline reads `.clinerules` as custom instructions. RTK adds guidance telling Cline to prefer `rtk <cmd>` over raw commands.
@@ -136,13 +148,14 @@ Cline reads `.clinerules` as custom instructions. RTK adds guidance telling Clin
 ### Windsurf
 
 ```bash
-rtk init --windsurf    # creates .windsurfrules in current project
+rtk init --global --agent windsurf    # creates .windsurfrules in current project
 ```
 
 ### Codex CLI
 
 ```bash
-rtk init --codex    # creates AGENTS.md or patches existing one
+rtk init --codex           # project-scoped (AGENTS.md)
+rtk init --global --codex  # user-global (~/.codex/AGENTS.md)
 ```
 
 ### Kilo Code

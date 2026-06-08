@@ -22,6 +22,12 @@ pub const CURSOR_DIR: &str = ".cursor";
 pub const CODEX_DIR: &str = ".codex";
 pub const GEMINI_DIR: &str = ".gemini";
 
+pub const GITHUB_DIR: &str = ".github";
+pub const COPILOT_HOOK_FILE: &str = "rtk-rewrite.json";
+pub const COPILOT_INSTRUCTIONS_FILE: &str = "copilot-instructions.md";
+pub const COPILOT_USER_DIR: &str = ".copilot";
+pub const COPILOT_HOME_ENV: &str = "COPILOT_HOME";
+
 pub const PI_DIR: &str = ".pi/agent";
 pub const PI_LOCAL_DIR: &str = ".pi";
 pub const PI_EXTENSIONS_SUBDIR: &str = "extensions";

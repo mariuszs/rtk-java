@@ -129,7 +129,7 @@ impl ClaudeProvider {
     /// `/home/chris/2_project`   → `-home-chris-2-project`
     /// `C:\Users\foo\bar`        → `C:-Users-foo-bar`
     pub fn encode_project_path(path: &str) -> String {
-        const SANITIZED_CHARS: &[char] = &['/', '.', '_', '\\'];
+        const SANITIZED_CHARS: &[char] = &['/', '.', '_', '\\', ' ', '[', ']'];
 
         path.chars()
             .map(|c| {
@@ -419,6 +419,17 @@ mod tests {
         let encoded = ClaudeProvider::encode_project_path("/Users/foo/Sites/rtk");
         assert!(encoded.contains("rtk"));
         assert!(encoded.contains("Sites"));
+    }
+
+    #[test]
+    fn test_encode_path_with_spaces() {
+        // Even if run on Unix, encoding should replace backslashes to match Claude's behavior
+        assert_eq!(
+            ClaudeProvider::encode_project_path(
+                r"/home/user/projects/[QZX-7K42] - Análise Genérica de Exemplo"
+            ),
+            "-home-user-projects--QZX-7K42----An-lise-Gen-rica-de-Exemplo"
+        );
     }
 
     #[test]
