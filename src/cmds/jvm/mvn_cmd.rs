@@ -792,6 +792,28 @@ fn run_passthrough_all(binary: MvnBinary, args: &[OsString], verbose: u8) -> Res
 /// Top-level mvn/mvnd entry point. Parses goals from the raw arg vector and
 /// routes: 0 goals → passthrough; 1 goal → its single-goal filter; ≥2 →
 /// multi-goal aggregating filter.
+/// Build the args for a filtered single-goal runner: drop the first occurrence
+/// of the matched goal token (the run_* helpers prepend their own canonical goal
+/// name) and strip `-q`/`--quiet` so RTK receives full output and does the
+/// compression itself — the same "smart quiet" applied in multi-goal mode. The
+/// unfiltered Passthrough route does NOT use this (it keeps `-q` and streams raw).
+fn filtered_goal_args(str_args: &[String], goal: &str) -> Vec<String> {
+    let mut removed = false;
+    let without_goal: Vec<String> = str_args
+        .iter()
+        .filter(|a| {
+            if !removed && a.as_str() == goal {
+                removed = true;
+                false
+            } else {
+                true
+            }
+        })
+        .cloned()
+        .collect();
+    strip_quiet_flags(&without_goal)
+}
+
 pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32> {
     let str_args: Vec<String> = args.iter().map(|a| a.to_string_lossy().into_owned()).collect();
     let goals = parse_goals(&str_args);
@@ -800,23 +822,7 @@ pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32
         0 => run_passthrough_all(binary, args, verbose),
         1 => {
             let goal = goals[0].clone();
-            // Pass every arg EXCEPT the matched goal token; the run_* helpers
-            // prepend their own canonical goal name.
-            let rest: Vec<String> = {
-                let mut removed = false;
-                str_args
-                    .iter()
-                    .filter(|a| {
-                        if !removed && **a == goal {
-                            removed = true;
-                            false
-                        } else {
-                            true
-                        }
-                    })
-                    .cloned()
-                    .collect()
-            };
+            let rest = filtered_goal_args(&str_args, &goal);
             match route_goal(&goal) {
                 GoalRouting::TestsLike(g) => run_tests_like(binary, g, &rest, verbose),
                 GoalRouting::Clean => run_clean(binary, &rest, verbose),
@@ -4035,6 +4041,18 @@ mod tests {
         assert_eq!(strip_quiet_flags(&v("clean verify -q")), v("clean verify"));
         assert_eq!(strip_quiet_flags(&v("--quiet clean test")), v("clean test"));
         assert_eq!(strip_quiet_flags(&v("clean test -Dq=1")), v("clean test -Dq=1"));
+    }
+
+    #[test]
+    fn test_filtered_goal_args() {
+        let v = |s: &str| s.split(' ').map(String::from).collect::<Vec<_>>();
+        // Drops the matched goal token AND strips -q so the filter sees full output.
+        assert_eq!(filtered_goal_args(&v("-q test -DskipTests"), "test"), v("-DskipTests"));
+        assert_eq!(filtered_goal_args(&v("--quiet install -Pprod"), "install"), v("-Pprod"));
+        // Only the first goal token is dropped; -q removed even in tail position.
+        assert_eq!(filtered_goal_args(&v("verify -q"), "verify"), Vec::<String>::new());
+        // -Dq=1 is not a quiet flag — kept.
+        assert_eq!(filtered_goal_args(&v("package -Dq=1"), "package"), v("-Dq=1"));
     }
 
     #[test]
