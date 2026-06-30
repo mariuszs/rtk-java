@@ -212,13 +212,20 @@ impl std::fmt::Display for MvnBinary {
     }
 }
 
-/// Goals that share the test-output state machine (surefire + failsafe).
-/// Restricted to the two variants the filter can format — adding a third
-/// forces the matcher here to be updated, which is the point.
+/// Goals that share the test-output state machine (surefire + failsafe + XML
+/// enrichment). `Test`/`Verify` are the canonical test goals; the lifecycle
+/// goals (`integration-test`, `package`, `install`, `deploy`) run through the
+/// full test phase too, so they reuse the same filter while running their OWN
+/// goal name (not "verify"). The filter is goal-agnostic — `goal` is only a
+/// display label (`mvn <goal>: N passed`) — so new variants format correctly.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TestLikeGoal {
     Test,
     Verify,
+    IntegrationTest,
+    Package,
+    Install,
+    Deploy,
 }
 
 impl TestLikeGoal {
@@ -226,6 +233,10 @@ impl TestLikeGoal {
         match self {
             Self::Test => "test",
             Self::Verify => "verify",
+            Self::IntegrationTest => "integration-test",
+            Self::Package => "package",
+            Self::Install => "install",
+            Self::Deploy => "deploy",
         }
     }
 }
@@ -254,18 +265,6 @@ fn mvn_command(binary: MvnBinary) -> std::process::Command {
     }
 }
 
-/// Run `<binary> test` with state-machine filter + surefire/failsafe XML enrichment.
-pub fn run_test(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
-    run_tests_like(binary, TestLikeGoal::Test, args, verbose)
-}
-
-/// Run `<binary> verify`. Verify is the canonical goal that produces
-/// `target/failsafe-reports/` (integration tests), so this is where failsafe
-/// XML enrichment is most valuable; the state machine accumulates surefire +
-/// failsafe `T E S T S` blocks into one combined summary.
-pub fn run_verify(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
-    run_tests_like(binary, TestLikeGoal::Verify, args, verbose)
-}
 
 fn run_tests_like(
     binary: MvnBinary,
@@ -394,8 +393,9 @@ const COMPILE_LIKE_GOALS: &[(&str, &str)] = &[
 /// Routing decision for a raw mvn goal token. Pure function, easy to unit-test.
 #[derive(Debug, PartialEq, Eq)]
 enum GoalRouting {
-    Test,
-    Verify,
+    /// Test-output goals (test/verify + lifecycle goals that run the test
+    /// phase), filtered by the shared surefire/failsafe state machine.
+    TestsLike(TestLikeGoal),
     Clean,
     Compile,
     Checkstyle,
@@ -754,8 +754,12 @@ fn route_goal(subcommand: &str) -> GoalRouting {
         return GoalRouting::Compile;
     }
     match subcommand {
-        "test" => GoalRouting::Test,
-        "verify" => GoalRouting::Verify,
+        "test" => GoalRouting::TestsLike(TestLikeGoal::Test),
+        "verify" => GoalRouting::TestsLike(TestLikeGoal::Verify),
+        "integration-test" => GoalRouting::TestsLike(TestLikeGoal::IntegrationTest),
+        "package" => GoalRouting::TestsLike(TestLikeGoal::Package),
+        "install" => GoalRouting::TestsLike(TestLikeGoal::Install),
+        "deploy" => GoalRouting::TestsLike(TestLikeGoal::Deploy),
         "clean" => GoalRouting::Clean,
         "checkstyle:check" | "checkstyle" => GoalRouting::Checkstyle,
         "dependency:tree" => GoalRouting::DepTree,
@@ -814,8 +818,7 @@ pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32
                     .collect()
             };
             match route_goal(&goal) {
-                GoalRouting::Test => run_test(binary, &rest, verbose),
-                GoalRouting::Verify => run_verify(binary, &rest, verbose),
+                GoalRouting::TestsLike(g) => run_tests_like(binary, g, &rest, verbose),
                 GoalRouting::Clean => run_clean(binary, &rest, verbose),
                 GoalRouting::Compile => run_compile_like(binary, &goal, &rest, verbose),
                 GoalRouting::Checkstyle => run_checkstyle(binary, &rest, verbose),
@@ -2949,19 +2952,47 @@ mod tests {
         assert_eq!(route_goal("test-compile"), GoalRouting::Compile);
         assert_eq!(route_goal("checkstyle:check"), GoalRouting::Checkstyle);
         assert_eq!(route_goal("checkstyle"), GoalRouting::Checkstyle);
-        // Now first-class single-goal routes (were Passthrough under the old Clap model):
-        assert_eq!(route_goal("test"), GoalRouting::Test);
-        assert_eq!(route_goal("verify"), GoalRouting::Verify);
+        // Test-output state-machine goals (surefire/failsafe + XML enrichment):
+        assert_eq!(route_goal("test"), GoalRouting::TestsLike(TestLikeGoal::Test));
+        assert_eq!(
+            route_goal("verify"),
+            GoalRouting::TestsLike(TestLikeGoal::Verify)
+        );
+        // Lifecycle goals run the full test phase, so they share the same
+        // test-output filter — each running its OWN goal name, not "verify":
+        assert_eq!(
+            route_goal("integration-test"),
+            GoalRouting::TestsLike(TestLikeGoal::IntegrationTest)
+        );
+        assert_eq!(
+            route_goal("package"),
+            GoalRouting::TestsLike(TestLikeGoal::Package)
+        );
+        assert_eq!(
+            route_goal("install"),
+            GoalRouting::TestsLike(TestLikeGoal::Install)
+        );
+        assert_eq!(
+            route_goal("deploy"),
+            GoalRouting::TestsLike(TestLikeGoal::Deploy)
+        );
         assert_eq!(route_goal("clean"), GoalRouting::Clean);
         assert_eq!(route_goal("dependency:tree"), GoalRouting::DepTree);
-        // Still passthrough — no dedicated filter:
-        assert_eq!(route_goal("package"), GoalRouting::Passthrough);
-        assert_eq!(route_goal("install"), GoalRouting::Passthrough);
-        assert_eq!(route_goal("deploy"), GoalRouting::Passthrough);
+        // Still passthrough — no dedicated filter / long-running goals:
         assert_eq!(route_goal("spring-boot:run"), GoalRouting::Passthrough);
         assert_eq!(route_goal("quarkus:dev"), GoalRouting::Passthrough);
         assert_eq!(route_goal("compilee"), GoalRouting::Passthrough);
         assert_eq!(route_goal(""), GoalRouting::Passthrough);
+    }
+
+    #[test]
+    fn test_testlikegoal_as_str() {
+        assert_eq!(TestLikeGoal::Test.as_str(), "test");
+        assert_eq!(TestLikeGoal::Verify.as_str(), "verify");
+        assert_eq!(TestLikeGoal::IntegrationTest.as_str(), "integration-test");
+        assert_eq!(TestLikeGoal::Package.as_str(), "package");
+        assert_eq!(TestLikeGoal::Install.as_str(), "install");
+        assert_eq!(TestLikeGoal::Deploy.as_str(), "deploy");
     }
 
     #[test]
