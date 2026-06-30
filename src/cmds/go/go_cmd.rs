@@ -1,5 +1,6 @@
 //! Filters Go command output — test results, build errors, vet warnings.
 
+use crate::core::guard::never_worse;
 use crate::core::runner;
 use crate::core::tracking;
 use crate::core::truncate::CAP_ERRORS;
@@ -280,7 +281,8 @@ fn run_go_tool_golangci_lint(args: &[OsString], verbose: u8) -> Result<i32> {
     };
 
     let filtered = golangci_cmd::filter_golangci_json(json_output, version);
-    println!("{}", filtered);
+    let shown = never_worse(&raw, &filtered);
+    println!("{}", shown);
 
     if !stderr.trim().is_empty() && verbose > 0 {
         eprintln!("{}", stderr.trim());
@@ -290,7 +292,7 @@ fn run_go_tool_golangci_lint(args: &[OsString], verbose: u8) -> Result<i32> {
         "go tool golangci-lint",
         "rtk go tool golangci-lint",
         &raw,
-        &filtered,
+        shown,
     );
 
     let exit_code = exit_code_from_output(&output, "go tool golangci-lint");
@@ -431,7 +433,6 @@ pub(crate) fn filter_go_test_json(output: &str) -> String {
         result.push_str(&format!(", {} skipped", total_skip));
     }
     result.push_str(&format!(" in {} packages\n", total_packages));
-    result.push_str("═══════════════════════════════════════\n");
 
     // Show package-level failures first (timeouts, signals, panics).
     // Skip packages that already have individual test-level failures — those are displayed
@@ -594,7 +595,6 @@ fn filter_go_build_with_exit(output: &str, exit_code: i32) -> String {
 
     let mut result = String::new();
     result.push_str(&format!("Go build: {} errors\n", errors.len()));
-    result.push_str("═══════════════════════════════════════\n");
 
     const MAX_GO_BUILD_ERRORS: usize = CAP_ERRORS;
     for (i, error) in errors.iter().take(MAX_GO_BUILD_ERRORS).enumerate() {
@@ -718,7 +718,6 @@ fn filter_go_vet(output: &str) -> String {
 
     let mut result = String::new();
     result.push_str(&format!("Go vet: {} issues\n", issues.len()));
-    result.push_str("═══════════════════════════════════════\n");
 
     const MAX_GO_VET_ISSUES: usize = CAP_ERRORS;
     for (i, issue) in issues.iter().take(MAX_GO_VET_ISSUES).enumerate() {
