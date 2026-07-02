@@ -2,7 +2,7 @@
 
 use crate::core::display_helpers::{format_duration, print_period_table};
 use crate::core::tracking::{DayStats, MonthStats, Tracker, WeekStats};
-use crate::core::utils::format_tokens;
+use crate::core::utils::{format_tokens, truncate};
 use crate::hooks::hook_check;
 use anyhow::{Context, Result};
 use chrono::Local;
@@ -246,11 +246,7 @@ pub fn run(
                 println!("──────────────────────────────────────────────────────────");
                 for rec in recent {
                     let time = rec.timestamp.with_timezone(&Local).format("%m-%d %H:%M");
-                    let cmd_short = if rec.rtk_cmd.len() > 25 {
-                        format!("{}...", &rec.rtk_cmd[..22])
-                    } else {
-                        rec.rtk_cmd.clone()
-                    };
+                    let cmd_short = truncate(&rec.rtk_cmd, 25);
                     // added: tier indicators by savings level
                     let sign = if rec.savings_pct >= 70.0 {
                         "▲"
@@ -707,11 +703,7 @@ fn show_failures(tracker: &Tracker) -> Result<()> {
         println!("{}", styled("Top Commands (by frequency)", true));
         println!("{}", "─".repeat(60));
         for (cmd, count) in &summary.top_commands {
-            let cmd_display = if cmd.len() > 50 {
-                format!("{}...", &cmd[..47])
-            } else {
-                cmd.clone()
-            };
+            let cmd_display = truncate(cmd, 50);
             println!("  {:>4}x  {}", count, cmd_display);
         }
         println!();
@@ -721,17 +713,10 @@ fn show_failures(tracker: &Tracker) -> Result<()> {
         println!("{}", styled("Recent Failures (last 10)", true));
         println!("{}", "─".repeat(60));
         for rec in &summary.recent {
-            let ts_short = if rec.timestamp.len() >= 16 {
-                &rec.timestamp[..16]
-            } else {
-                &rec.timestamp
-            };
+            // ISSUE #2787: show the full string when byte 16 is not a char boundary
+            let ts_short = rec.timestamp.get(..16).unwrap_or(&rec.timestamp);
             let status = if rec.fallback_succeeded { "ok" } else { "FAIL" };
-            let cmd_display = if rec.raw_command.len() > 40 {
-                format!("{}...", &rec.raw_command[..37])
-            } else {
-                rec.raw_command.clone()
-            };
+            let cmd_display = truncate(&rec.raw_command, 40);
             println!("  {} [{}] {}", ts_short, status, cmd_display);
         }
         println!();
