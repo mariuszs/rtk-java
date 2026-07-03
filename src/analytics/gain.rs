@@ -713,8 +713,9 @@ fn show_failures(tracker: &Tracker) -> Result<()> {
         println!("{}", styled("Recent Failures (last 10)", true));
         println!("{}", "─".repeat(60));
         for rec in &summary.recent {
-            // ISSUE #2787: show the full string when byte 16 is not a char boundary
-            let ts_short = rec.timestamp.get(..16).unwrap_or(&rec.timestamp);
+            // ISSUE #2787: floor to the previous char boundary so the prefix
+            // never exceeds 16 bytes and never lands mid-character
+            let ts_short = &rec.timestamp[..rec.timestamp.floor_char_boundary(16)];
             let status = if rec.fallback_succeeded { "ok" } else { "FAIL" };
             let cmd_display = truncate(&rec.raw_command, 40);
             println!("  {} [{}] {}", ts_short, status, cmd_display);
