@@ -464,6 +464,9 @@ pub fn run(
     let mut plain = String::new();
     for line in raw_output.lines() {
         let Some((file, line_num, is_match, content)) = parse_match_line(line) else {
+            if line == "--" {
+                plain.push_str("--\n");
+            }
             continue;
         };
         let sep = if is_match { ':' } else { '-' };
@@ -496,10 +499,15 @@ pub fn run(
 
         let file_display = compact_path(file);
         let mut file_shown = 0;
+        let mut prev_line: usize = 0;
         for (line_num, is_match, content) in entries.iter().take(per_file) {
             if shown >= max_results {
                 break;
             }
+            if prev_line > 0 && *line_num > prev_line + 1 {
+                body.push_str("--\n");
+            }
+            prev_line = *line_num;
             let sep = if *is_match { ':' } else { '-' };
             if show_file {
                 body.push_str(&file_display);
