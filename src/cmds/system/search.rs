@@ -339,6 +339,20 @@ fn has_short_flag(flags: &[String], ch: char) -> bool {
         .any(|f| f.starts_with('-') && !f.starts_with("--") && f[1..].contains(ch))
 }
 
+fn has_context_flag(flags: &[String]) -> bool {
+    has_short_flag(flags, 'A')
+        || has_short_flag(flags, 'B')
+        || has_short_flag(flags, 'C')
+        || flags.iter().any(|f| {
+            f == "--after-context"
+                || f == "--before-context"
+                || f == "--context"
+                || f.starts_with("--after-context=")
+                || f.starts_with("--before-context=")
+                || f.starts_with("--context=")
+        })
+}
+
 pub fn run(
     engine: Engine,
     max_line_len: usize,
@@ -482,6 +496,8 @@ pub fn run(
         plain.push('\n');
     }
 
+    let has_context = has_context_flag(&extra_args);
+
     let per_file = config::limits().grep_max_per_file;
     let mut files: Vec<_> = by_file.iter().collect();
     files.sort_by_key(|(f, _)| *f);
@@ -504,7 +520,7 @@ pub fn run(
             if shown >= max_results {
                 break;
             }
-            if prev_line > 0 && *line_num > prev_line + 1 {
+            if has_context && prev_line > 0 && *line_num > prev_line + 1 {
                 body.push_str("--\n");
             }
             prev_line = *line_num;
@@ -1383,5 +1399,33 @@ mod tests {
         // Context lines (dash separator) parse via the updated regex → not counted.
         let stdout = "file.txt\x003-context_before\nfile.txt\x004:match\nfile.txt\x005-context_after\n";
         assert_eq!(unparsed_signal(stdout), 0);
+    }
+
+    // --- has_context_flag ---
+
+    #[test]
+    fn test_has_context_flag_short() {
+        let f = |args: &[&str]| -> bool {
+            has_context_flag(&args.iter().map(|s| s.to_string()).collect::<Vec<_>>())
+        };
+        assert!(f(&["-A", "3"]));
+        assert!(f(&["-B", "2"]));
+        assert!(f(&["-C", "1"]));
+        assert!(!f(&["-rn"]));
+        assert!(!f(&["-i", "-w"]));
+    }
+
+    #[test]
+    fn test_has_context_flag_long() {
+        let f = |args: &[&str]| -> bool {
+            has_context_flag(&args.iter().map(|s| s.to_string()).collect::<Vec<_>>())
+        };
+        assert!(f(&["--after-context", "3"]));
+        assert!(f(&["--before-context", "2"]));
+        assert!(f(&["--context", "1"]));
+        assert!(f(&["--after-context=3"]));
+        assert!(f(&["--before-context=2"]));
+        assert!(f(&["--context=1"]));
+        assert!(!f(&["--color", "auto"]));
     }
 }

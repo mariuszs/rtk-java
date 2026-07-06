@@ -114,6 +114,36 @@ fn group_separator_between_non_adjacent_matches() {
 }
 
 #[test]
+fn no_separator_without_context_flag() {
+    let dir = tempfile::tempdir().unwrap();
+    let f = dir.path().join("nosep.txt");
+    std::fs::write(
+        &f,
+        "match line 1\nfiller\nfiller\nfiller\nmatch line 2\nfiller\nfiller\nmatch line 3\n",
+    )
+    .unwrap();
+
+    let out = rtk()
+        .args(["grep", "-n", "match", f.to_str().unwrap()])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8_lossy(&out.stdout);
+
+    assert!(
+        !stdout.contains("--"),
+        "plain grep without -A/-B/-C must not insert -- separators:\n{stdout}"
+    );
+    assert!(
+        stdout.contains("match line 1"),
+        "first match must be present:\n{stdout}"
+    );
+    assert!(
+        stdout.contains("match line 3"),
+        "third match must be present:\n{stdout}"
+    );
+}
+
+#[test]
 fn only_matching_output_has_no_nul_separator() {
     if !rg_available() {
         return;
