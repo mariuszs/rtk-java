@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test" time="0.0" tests="8" errors="0" skipped="8" failures="0" flakes="0">
+  <testcase name="should_read_billenniunm_users" classname="com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test" time="0.0">
+    <skipped message="Work in progress - not ready for CI"/>
+  </testcase>
+  <testcase name="should_read_integrant_users" classname="com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test" time="0.0">
+    <skipped message="Work in progress - not ready for CI"/>
+  </testcase>
+  <testcase name="should_read_kruk_users2" classname="com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test" time="0.0">
+    <skipped message="Work in progress - not ready for CI"/>
+  </testcase>
+  <testcase name="should_read_devskiller_groups" classname="com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test" time="0.0">
+    <skipped message="Work in progress - not ready for CI"/>
+  </testcase>
+  <testcase name="should_read_xtb_users" classname="com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test" time="0.0">
+    <skipped message="Work in progress - not ready for CI"/>
+  </testcase>
+  <testcase name="should_read_integrant_groups" classname="com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test" time="0.0">
+    <skipped message="Work in progress - not ready for CI"/>
+  </testcase>
+  <testcase name="should_read_kruk_users" classname="com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test" time="0.0">
+    <skipped message="Work in progress - not ready for CI"/>
+  </testcase>
+  <testcase name="should_read_devskiller_users" classname="com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test" time="0.0">
+    <skipped message="Work in progress - not ready for CI"/>
+  </testcase>
+</testsuite>
