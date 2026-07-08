@@ -2496,6 +2496,53 @@ mod tests {
     }
 
     #[test]
+    fn test_filter_maven4_pass_smoke() {
+        // Maven 4.0.0-rc output: short plugin names in markers
+        // (`surefire:3.5.6:test`), `-- in <Class>` per-class summaries, and
+        // JPMS/final-field WARNING preamble. The test state machine must
+        // still produce the compact pass summary.
+        let input = include_str!("../../../tests/fixtures/mvn4_test_pass_auth.txt");
+        let output = filter_mvn_test(input);
+        assert!(
+            output.contains("13 passed"),
+            "should show pass count, got:\n{}",
+            output
+        );
+        assert!(output.contains("19.543 s"), "should contain total time");
+        assert!(
+            !output.contains("WARNING"),
+            "Maven 4 JPMS warnings must be dropped, got:\n{}",
+            output
+        );
+    }
+
+    #[test]
+    fn test_filter_maven4_pass_snapshot() {
+        let input = include_str!("../../../tests/fixtures/mvn4_test_pass_auth.txt");
+        let output = filter_mvn_test(input);
+        insta::assert_snapshot!(output);
+    }
+
+    #[test]
+    fn test_filter_maven4_pass_savings() {
+        let input = include_str!("../../../tests/fixtures/mvn4_test_pass_auth.txt");
+        let output = filter_mvn_test(input);
+
+        let input_tokens = count_tokens(input);
+        let output_tokens = count_tokens(&output);
+        let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
+
+        assert!(
+            savings >= 60.0,
+            "maven 4 test pass: expected >=60% savings, got {:.1}% ({} -> {} tokens)\nOutput:\n{}",
+            savings,
+            input_tokens,
+            output_tokens,
+            output,
+        );
+    }
+
+    #[test]
     fn test_filter_fail_keeps_caused_by_chain() {
         // Usage analysis: after failed runs, agents grep the tee log for
         // 'Caused by' — the text filter's 3-detail-line cap cut the root

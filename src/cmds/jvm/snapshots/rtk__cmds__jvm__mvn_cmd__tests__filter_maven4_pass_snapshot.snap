@@ -1,0 +1,5 @@
+---
+source: src/cmds/jvm/mvn_cmd.rs
+expression: output
+---
+mvn test: 13 passed (19.543 s)

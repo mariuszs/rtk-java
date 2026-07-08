@@ -1,0 +1,100 @@
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
+[INFO] Scanning for projects...
+[INFO] Loaded 23188 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63.txt)
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository maven-central (prefixes-maven-central-de66ab544dabb92499170649134bc3bd0ea8afac.txt)
+[INFO] Loaded 23188 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388.txt)
+[WARNING] 
+[WARNING] 36 problems were encountered while building the effective model for 'com.example:auth:jar:1.3-SNAPSHOT' (use -e to see details)
+[WARNING] 
+[WARNING] Total model problems reported: 36
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] ------------------------< com.example:auth >-------------------------
+[INFO] Building auth 1.3-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[WARNING] 166 problems were encountered while building the effective model for 'cz.habarta.typescript-generator:typescript-generator-maven-plugin:jar:4.1.1' during n/a (use -X to see details)
+[WARNING] 146 problems were encountered while building the effective model for 'org.redisson:redisson-spring-boot-starter:jar:4.6.1' during dependency collection step for project (use -X to see details)
+[WARNING] 76 problems were encountered while building the effective model for 'com.playtika.testcontainers:embedded-redis:jar:3.1.11' during dependency collection step for project (use -X to see details)
+[WARNING] 76 problems were encountered while building the effective model for 'com.playtika.testcontainers:testcontainers-common:jar:3.1.11' during dependency collection step for project (use -X to see details)
+[WARNING] 76 problems were encountered while building the effective model for 'com.playtika.testcontainers:embedded-toxiproxy:jar:3.1.11' during dependency collection step for project (use -X to see details)
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
+[WARNING] 2 problems were encountered while building the effective model for 'com.github.ulisesbocchio:jasypt-spring-boot-starter:jar:3.0.5' during dependency collection step for project (use -X to see details)
+[WARNING] 2 problems were encountered while building the effective model for 'com.github.ulisesbocchio:jasypt-spring-boot:jar:3.0.5' during dependency collection step for project (use -X to see details)
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository maven_central (prefixes-maven_central-6796a36b52d2535b4566f823cedfe43d83a8fd07.txt)
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository sonatype-releases (prefixes-sonatype-releases-b65bf3173052ef4fb692457178186d85f1c3af37.txt)
+[INFO] 
+[INFO] --- jacoco:0.8.14:prepare-agent (prepare-agent) @ auth ---
+[INFO] argLine set to -javaagent:/home/user/.m2/repository/org/jacoco/org.jacoco.agent/0.8.14/org.jacoco.agent-0.8.14-runtime.jar=destfile=/home/user/git/auth/target/jacoco.exec
+[INFO] /home/user/git/auth/src/main/java/com/example/auth/user/role/JpaRoleDefinitionRepository.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- typescript-generator:4.1.1:generate (Generate boost.d.ts) @ auth ---
+[WARNING] 166 problems were encountered while building the effective model for 'cz.habarta.typescript-generator:typescript-generator-maven-plugin:jar:4.1.1' during dependency collection for cz.habarta.typescript-generator:typescript-generator-maven-plugin:jar:4.1.1 () -> [cz.habarta.typescript-generator:typescript-generator-spring:jar:4.1.1 (runtime)] < [example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots), artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases), central (https://repo.maven.apache.org/maven2, default, releases)] (use -X to see details)
+[WARNING] 166 problems were encountered while building the effective model for 'cz.habarta.typescript-generator:typescript-generator-spring:jar:4.1.1' during dependency collection step for plugin (use -X to see details)
+[WARNING] 166 problems were encountered while building the effective model for 'cz.habarta.typescript-generator:typescript-generator-core:jar:4.1.1' during dependency collection step for plugin (use -X to see details)
+[INFO] [stdout] Running TypeScriptGenerator version 4.1.1
+[INFO] [stdout] Skipping plugin execution
+[INFO] 
+[INFO] --- spring-cloud-contract:5.0.2:generateTests (generate-tests) @ auth ---
+[INFO] Generating server tests source code for Spring Cloud Contract Verifier contract verification
+[INFO] Will use contracts provided in the folder [/home/user/git/auth/src/test/resources/contracts]
+[INFO] Directory with contract is present at [/home/user/git/auth/src/test/resources/contracts]
+[INFO] Nothing to generate - all classes are up to date
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ auth ---
+[INFO] Copying 31 resources from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- spring-cloud-contract:5.0.2:convert (convert) @ auth ---
+[INFO] Will use contracts provided in the folder [/home/user/git/auth/src/test/resources/contracts]
+[INFO] Nothing to generate - all stubs are up to date
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ auth ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 283 source files with javac [debug deprecation parameters release 26] to target/test-classes
+[INFO] Hibernate compile-time tooling 7.4.1.Final
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/saml/SamlAdGroupProcessorTest.java:[174,17] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/saml/SamlAdGroupProcessorTest.java:[174,17] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/saml/SamlAdGroupProcessorTest.java:[174,17] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/saml/SamlAdGroupProcessorTest.java:[109,38] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/saml/SamlAdGroupProcessorTest.java:[121,38] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/saml/SamlAdGroupProcessorTest.java:[175,38] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/saml/orangesk/OrangeSKPrincipalReaderTest.java:[29,17] org.springframework.security.saml2.provider.service.authentication.DefaultSaml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/saml/orangesk/OrangeSKPrincipalReaderTest.java:[29,68] org.springframework.security.saml2.provider.service.authentication.DefaultSaml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/token/RefreshTokenServiceTest.java:[325,40] set(K,V,long,@org.jspecify.annotations.NonNull java.util.concurrent.TimeUnit) in org.springframework.data.redis.core.ValueOperations has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/security/token/RefreshTokenServiceTest.java:[451,40] set(K,V,long,@org.jspecify.annotations.NonNull java.util.concurrent.TimeUnit) in org.springframework.data.redis.core.ValueOperations has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/user/UserSpecificationsTest.java:[65,44] findAll(org.springframework.data.jpa.domain.Specification<com.example.auth.user.User>) in com.example.auth.user.UserRepository has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/user/UserSpecificationsTest.java:[78,44] findAll(org.springframework.data.jpa.domain.Specification<com.example.auth.user.User>) in com.example.auth.user.UserRepository has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/user/UserSpecificationsTest.java:[93,44] findAll(org.springframework.data.jpa.domain.Specification<com.example.auth.user.User>) in com.example.auth.user.UserRepository has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/user/UserSpecificationsTest.java:[106,44] findAll(org.springframework.data.jpa.domain.Specification<com.example.auth.user.User>) in com.example.auth.user.UserRepository has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/user/UserSpecificationsTest.java:[155,44] findAll(org.springframework.data.jpa.domain.Specification<com.example.auth.user.User>) in com.example.auth.user.UserRepository has been deprecated
+[WARNING] /home/user/git/auth/src/test/java/com/example/auth/user/password/PasswordPolicyServiceTest.java:[46,70] randomAlphanumeric(int) in org.apache.commons.lang3.RandomStringUtils has been deprecated
+[INFO] /home/user/git/auth/src/test/java/com/example/auth/security/saml/SamlAdGroupProcessorTest.java: /home/user/git/auth/src/test/java/com/example/auth/security/saml/SamlAdGroupProcessorTest.java uses unchecked or unsafe operations.
+[INFO] /home/user/git/auth/src/test/java/com/example/auth/security/saml/SamlAdGroupProcessorTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ auth ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[WARNING] The system property java.util.logging.config.file is configured twice! The property appears in <argLine/> and any of <systemPropertyVariables/>, <systemProperties/> or user property.
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.auth.infrastructure.boost.PermissionDefinitionTest
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.048 s -- in com.example.auth.infrastructure.boost.PermissionDefinitionTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  19.543 s
+[INFO] Finished at: 2026-07-08T22:15:05+02:00
+[INFO] ------------------------------------------------------------------------
