@@ -1171,7 +1171,7 @@ fn render_classes_digest(
     let total_skipped: u32 = suites.iter().map(|s| s.skipped).sum();
     let passed = total.saturating_sub(total_skipped);
 
-    let mut out = format!("# mvn {goal} — {passed} passed");
+    let mut out = format!("# mvn {goal} (from XML reports) — {passed} passed");
     if total_skipped > 0 {
         write!(out, ", {total_skipped} skipped").ok();
     }
@@ -4324,6 +4324,11 @@ mod tests {
         assert!(out.text.contains("Failures (from surefire-reports/)"));
         assert!(out.text.contains("Integration failures (from failsafe-reports/)"));
         assert!(out.text.contains("Caused by: org.hibernate.HibernateException"));
+
+        // The digest must combine both report dirs, not just one.
+        let digest = out.digest.as_ref().expect("digest for combined report dirs");
+        assert!(digest.contains("FailingTest"), "missing surefire class: {digest}");
+        assert!(digest.contains("DbIntegrationIT"), "missing failsafe class: {digest}");
     }
 
     #[test]
