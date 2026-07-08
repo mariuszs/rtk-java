@@ -315,6 +315,7 @@ fn run_tests_like(
     let cwd_for_filter = cwd.clone();
 
     let (tool_name, tee_label) = mvn_labels(binary, goal_str, goal.tee_slug());
+    let tee_label_for_filter = tee_label.clone();
     runner::run_filtered(
         cmd,
         &tool_name,
@@ -324,7 +325,9 @@ fn run_tests_like(
             // frame filtering matches the XML enrichment's behavior — keeps
             // the fallback (no XML reports) format consistent with XML output.
             let filtered = filter_mvn_tests_with_goal(raw, goal_str, &app_pkgs);
-            enrich_with_reports(&filtered, &cwd_for_filter, started_at, &app_pkgs, goal_str).text
+            let enriched =
+                enrich_with_reports(&filtered, &cwd_for_filter, started_at, &app_pkgs, goal_str);
+            finalize_enriched(enriched, &tee_label_for_filter)
         },
         runner::RunOptions::with_tee(&tee_label),
     )
@@ -761,6 +764,7 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
     };
 
     let (tool_name, tee_label) = mvn_labels(binary, "multi", "multi");
+    let tee_label_for_filter = tee_label.clone();
     runner::run_filtered(
         cmd,
         &tool_name,
@@ -772,8 +776,9 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
             }
             let mut parts = filter_segments(raw);
             if enrich && !parts.tests.trim().is_empty() {
-                parts.tests =
-                    enrich_with_reports(&parts.tests, &cwd, started_at, &app_pkgs, test_goal).text;
+                let enriched =
+                    enrich_with_reports(&parts.tests, &cwd, started_at, &app_pkgs, test_goal);
+                parts.tests = finalize_enriched(enriched, &tee_label_for_filter);
             }
             compose_multi(&parts, &header)
         },
@@ -1027,13 +1032,8 @@ fn collect_reports(
 pub(crate) struct Enriched {
     pub(crate) text: String,
     /// Digest file content; `None` -> nothing to write.
-    // TODO(Task 6): production call sites still take `.text` only — remove
-    // this once digest writing + "classes: <path>" reference lines are wired
-    // in (`run_tests_like`/`run_multi_goal`). Read today only by tests.
-    #[allow(dead_code)]
     pub(crate) digest: Option<String>,
     /// Append a "classes: <path>" line after writing the digest.
-    #[allow(dead_code)]
     pub(crate) reference: bool,
 }
 
@@ -1104,6 +1104,21 @@ pub(crate) fn enrich_with_reports(
             reference: digest.is_some(),
             digest,
         },
+    }
+}
+
+/// Write the class digest (if any) through the tee infrastructure and append
+/// the `classes: <path>` reference line when the inline output doesn't carry
+/// the full breakdown. Falls back to the enriched text unchanged when tee is
+/// disabled or the write fails — the summary must never degrade.
+fn finalize_enriched(enriched: Enriched, tee_label: &str) -> String {
+    let Some(digest) = enriched.digest else {
+        return enriched.text;
+    };
+    let slug = format!("{tee_label}_classes");
+    match crate::core::tee::force_tee_display(&digest, &slug) {
+        Some(path) if enriched.reference => format!("{}\nclasses: {}", enriched.text, path),
+        _ => enriched.text,
     }
 }
 

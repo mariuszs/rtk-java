@@ -221,6 +221,14 @@ pub fn force_tee_hint(raw: &str, command_slug: &str) -> Option<String> {
     Some(format_hint(&path))
 }
 
+/// Force-write `content` as a tee file and return its display path
+/// (`~/...`), or None if tee is disabled/skipped. Used for auxiliary
+/// artifacts like the mvn class digest.
+pub fn force_tee_display(content: &str, command_slug: &str) -> Option<String> {
+    let path = force_tee_path(content, command_slug)?;
+    Some(display_path(&path))
+}
+
 /// Returns `[see remaining: tail -n +{line_offset} ~/path]`, or None if tee is disabled/skipped.
 pub fn force_tee_tail_hint(
     content: &str,
