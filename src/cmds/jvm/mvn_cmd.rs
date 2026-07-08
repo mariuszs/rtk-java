@@ -226,6 +226,13 @@ enum TestLikeGoal {
     Package,
     Install,
     Deploy,
+    /// Direct `failsafe:integration-test` plugin goal — runs failsafe without
+    /// the surrounding lifecycle, must be invoked verbatim.
+    FailsafeIntegrationTest,
+    /// Direct `failsafe:verify` plugin goal.
+    FailsafeVerify,
+    /// Direct `surefire:test` plugin goal.
+    SurefireTest,
 }
 
 impl TestLikeGoal {
@@ -237,6 +244,19 @@ impl TestLikeGoal {
             Self::Package => "package",
             Self::Install => "install",
             Self::Deploy => "deploy",
+            Self::FailsafeIntegrationTest => "failsafe:integration-test",
+            Self::FailsafeVerify => "failsafe:verify",
+            Self::SurefireTest => "surefire:test",
+        }
+    }
+
+    /// Filesystem-safe slug for tee labels — plugin goals contain ':'.
+    fn tee_slug(self) -> &'static str {
+        match self {
+            Self::FailsafeIntegrationTest => "failsafe_integration-test",
+            Self::FailsafeVerify => "failsafe_verify",
+            Self::SurefireTest => "surefire_test",
+            _ => self.as_str(),
         }
     }
 }
@@ -294,7 +314,7 @@ fn run_tests_like(
 
     let cwd_for_filter = cwd.clone();
 
-    let (tool_name, tee_label) = mvn_labels(binary, goal_str, goal_str);
+    let (tool_name, tee_label) = mvn_labels(binary, goal_str, goal.tee_slug());
     runner::run_filtered(
         cmd,
         &tool_name,
@@ -760,6 +780,11 @@ fn route_goal(subcommand: &str) -> GoalRouting {
         "package" => GoalRouting::TestsLike(TestLikeGoal::Package),
         "install" => GoalRouting::TestsLike(TestLikeGoal::Install),
         "deploy" => GoalRouting::TestsLike(TestLikeGoal::Deploy),
+        "failsafe:integration-test" => {
+            GoalRouting::TestsLike(TestLikeGoal::FailsafeIntegrationTest)
+        }
+        "failsafe:verify" => GoalRouting::TestsLike(TestLikeGoal::FailsafeVerify),
+        "surefire:test" => GoalRouting::TestsLike(TestLikeGoal::SurefireTest),
         "clean" => GoalRouting::Clean,
         "checkstyle:check" | "checkstyle" => GoalRouting::Checkstyle,
         "dependency:tree" => GoalRouting::DepTree,
@@ -2984,6 +3009,21 @@ mod tests {
         );
         assert_eq!(route_goal("clean"), GoalRouting::Clean);
         assert_eq!(route_goal("dependency:tree"), GoalRouting::DepTree);
+        // Direct plugin-goal invocations run the same test machinery, so they
+        // share the test-output filter — invoked verbatim (plugin goal, not a
+        // lifecycle phase):
+        assert_eq!(
+            route_goal("failsafe:integration-test"),
+            GoalRouting::TestsLike(TestLikeGoal::FailsafeIntegrationTest)
+        );
+        assert_eq!(
+            route_goal("failsafe:verify"),
+            GoalRouting::TestsLike(TestLikeGoal::FailsafeVerify)
+        );
+        assert_eq!(
+            route_goal("surefire:test"),
+            GoalRouting::TestsLike(TestLikeGoal::SurefireTest)
+        );
         // Still passthrough — no dedicated filter / long-running goals:
         assert_eq!(route_goal("spring-boot:run"), GoalRouting::Passthrough);
         assert_eq!(route_goal("quarkus:dev"), GoalRouting::Passthrough);
@@ -2999,6 +3039,21 @@ mod tests {
         assert_eq!(TestLikeGoal::Package.as_str(), "package");
         assert_eq!(TestLikeGoal::Install.as_str(), "install");
         assert_eq!(TestLikeGoal::Deploy.as_str(), "deploy");
+        assert_eq!(
+            TestLikeGoal::FailsafeIntegrationTest.as_str(),
+            "failsafe:integration-test"
+        );
+        assert_eq!(TestLikeGoal::FailsafeVerify.as_str(), "failsafe:verify");
+        assert_eq!(TestLikeGoal::SurefireTest.as_str(), "surefire:test");
+    }
+
+    #[test]
+    fn test_testlikegoal_tee_slugs_are_filesystem_safe() {
+        // Tee labels become filenames — plugin goals must not leak ':' into them.
+        assert_eq!(TestLikeGoal::FailsafeIntegrationTest.tee_slug(), "failsafe_integration-test");
+        assert_eq!(TestLikeGoal::FailsafeVerify.tee_slug(), "failsafe_verify");
+        assert_eq!(TestLikeGoal::SurefireTest.tee_slug(), "surefire_test");
+        assert_eq!(TestLikeGoal::Test.tee_slug(), "test");
     }
 
     #[test]
