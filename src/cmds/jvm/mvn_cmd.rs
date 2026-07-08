@@ -880,6 +880,10 @@ pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32
 // ---------------------------------------------------------------------------
 
 const MAX_DETAIL_LINES: usize = 3;
+/// `Caused by:` headers kept per failure, on top of MAX_DETAIL_LINES. The
+/// root cause is what agents dig for after a failure — usage analysis showed
+/// repeated `grep 'Caused by'` follow-ups on tee logs when it was cut off.
+const MAX_CAUSE_LINES: usize = 4;
 const MAX_FAILURES_SHOWN: usize = 10;
 const MAX_LINE_LENGTH: usize = 200;
 
@@ -895,6 +899,9 @@ enum TestParseState {
 struct FailureEntry {
     name: String,
     details: Vec<String>,
+    /// How many of `details` are `Caused by:` headers — they are capped
+    /// separately from regular detail lines (see `MAX_CAUSE_LINES`).
+    cause_lines: usize,
 }
 
 /// Parse the four count fields from a `TESTS_RUN_RE` captures. The regex
@@ -1236,6 +1243,7 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                     current_failure = Some(FailureEntry {
                         name: test_name,
                         details: Vec::new(),
+                        cause_lines: 0,
                     });
                     continue;
                 }
@@ -1267,7 +1275,16 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                 }
 
                 if let Some(ref mut f) = current_failure {
-                    if f.details.len() >= MAX_DETAIL_LINES {
+                    // `Caused by:` headers get their own budget on top of the
+                    // detail cap — the root cause must never be cut off.
+                    let is_cause = stripped.starts_with("Caused by:");
+                    if is_cause {
+                        if f.cause_lines >= MAX_CAUSE_LINES {
+                            continue;
+                        }
+                    } else if f.details.len().saturating_sub(f.cause_lines)
+                        >= MAX_DETAIL_LINES
+                    {
                         continue;
                     }
                     if is_framework_frame_ext(stripped, app_packages)
@@ -1278,6 +1295,9 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                         continue;
                     }
                     f.details.push(stripped.to_string());
+                    if is_cause {
+                        f.cause_lines += 1;
+                    }
                 }
             }
             TestParseState::Summary => {
@@ -2473,6 +2493,32 @@ mod tests {
             !output.contains("[INFO]"),
             "should not contain raw [INFO] prefix"
         );
+    }
+
+    #[test]
+    fn test_filter_fail_keeps_caused_by_chain() {
+        // Usage analysis: after failed runs, agents grep the tee log for
+        // 'Caused by' — the text filter's 3-detail-line cap cut the root
+        // cause off. Cause headers must survive the cap.
+        let input = include_str!("../../../tests/fixtures/mvn_test_fail_caused_by.txt");
+        let output = filter_mvn_test(input);
+        assert!(
+            output.contains("Caused by: org.springframework.beans.factory.BeanCreationException"),
+            "intermediate cause header must be kept, got:\n{}",
+            output
+        );
+        assert!(
+            output.contains("Missing required property 'auth.scim.encryption-key'"),
+            "root cause header must be kept, got:\n{}",
+            output
+        );
+    }
+
+    #[test]
+    fn test_filter_fail_caused_by_snapshot() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_fail_caused_by.txt");
+        let output = filter_mvn_test(input);
+        insta::assert_snapshot!(output);
     }
 
     #[test]

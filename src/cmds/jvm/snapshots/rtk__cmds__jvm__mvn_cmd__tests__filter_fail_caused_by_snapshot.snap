@@ -1,0 +1,18 @@
+---
+source: src/cmds/jvm/mvn_cmd.rs
+expression: output
+---
+mvn test: 5 run, 2 failed (23.819 s)
+BUILD FAILURE
+
+Failures:
+1. com.example.company.EmailParserTest.should_extract_domain_from_email
+   AssertionFailedError:
+   expected: "broken.example.com"
+   but was: "user.example.com"
+2. com.example.integration.DbIntegrationIT.shouldConnect
+   IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@4c2af006 testClass = com.example.integration.DbIntegrationIT]
+   at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180)
+   at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
+   Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'scimUserController' defined in file [/home/user/project/target/classes/com/example/scim/ScimUserCo...
+   Caused by: java.lang.IllegalArgumentException: Missing required property 'auth.scim.encryption-key' for company provisioning
