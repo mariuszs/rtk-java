@@ -1,0 +1,193 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Detecting the operating system and CPU architecture
+[INFO] ------------------------------------------------------------------------
+[INFO] os.detected.name: linux
+[INFO] os.detected.arch: x86_64
+[INFO] os.detected.bitness: 64
+[INFO] os.detected.version: 7.1
+[INFO] os.detected.version.major: 7
+[INFO] os.detected.version.minor: 1
+[INFO] os.detected.release: fedora
+[INFO] os.detected.release.version: 44
+[INFO] os.detected.release.like.fedora: true
+[INFO] os.detected.classifier: linux-x86_64
+[INFO] 
+[INFO] -------------------------< com.example:map >-------------------------
+[INFO] Building map 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.14:prepare-agent (prepare-agent) @ map ---
+[INFO] argLine set to -javaagent:/home/user/.m2/repository/org/jacoco/org.jacoco.agent/0.8.14/org.jacoco.agent-0.8.14-runtime.jar=destfile=/home/user/git/map/target/jacoco.exec,excludes=net/sf/jsqlparser/**
+[INFO] 
+[INFO] --- testcontainers-jooq-codegen:0.0.4:generate (generate-jooq-sources) @ map ---
+[INFO] Image pull policy will be performed by: DefaultPullPolicy()
+[INFO] Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+[INFO] Testcontainers version: 2.0.2
+[INFO] Loaded org.testcontainers.dockerclient.UnixSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+[INFO] Found Docker environment with local Unix socket (unix:///var/run/docker.sock)
+[INFO] Docker host IP address is localhost
+[INFO] Connected to docker: 
+  Server Version: 28.1.1
+  API Version: 1.49
+  Operating System: Fedora Linux 44 (Workstation Edition)
+  Total Memory: 61418 MB
+[INFO] Creating container for image: testcontainers/ryuk:0.13.0
+[INFO] Container testcontainers/ryuk:0.13.0 is starting: 2f1f7c93f893d77072d0507235eb47a5a03121819bd6499455ce258b8d6580a4
+[INFO] Container testcontainers/ryuk:0.13.0 started in PT0.349624188S
+[INFO] Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+[INFO] Checking the system...
+[INFO] ✔︎ Docker server version should be at least 1.6.0
+[INFO] Creating container for image: postgres:17
+[INFO] Container postgres:17 is starting: 7aad7ca8fa2edd3383828b8e01dd2da21b721e393a552a1766bcea14b8657974
+[INFO] Container postgres:17 started in PT5.843218599S
+[INFO] Container is started (JDBC URL: jdbc:postgresql://localhost:33702/test?loggerLevel=OFF)
+Running Changeset: db/changelog/db.changelog-master.yaml::master-1::user1
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-12::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-13::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-14::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-15::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-16::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-17::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-18::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-19::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-20::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-21::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-22::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-23::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-24::system
+Running Changeset: db/changelog/db.changelog-baseline.yaml::1676025407402-25::system
+Running Changeset: db/changelog/2026/db.changelog.2026-z-step-type-registry-dac-binding-seeds.sql::step-type-registry-dac-activity-step-seed::kuba
+Running Changeset: db/changelog/2026/db.changelog.2026-z-step-type-registry-dac-binding-seeds.sql::step-type-registry-await-rating-session-seed::kuba
+Running Changeset: db/changelog/2026/db.changelog.2026-z-step-type-registry-dac-binding-seeds.sql::step-type-registry-task-seed::kuba
+Running Changeset: db/changelog/2026/db.changelog.2026-z-workflow-definition-cloned-from-template.sql::workflow-definition-cloned-from-template-1::kuba
+Running Changeset: db/changelog/2026/db.changelog.2026-z-workflow-definition-purpose.sql::workflow-definition-purpose-1::kuba
+Running Changeset: db/changelog/2026/db.changelog.2026-zz-dac-activity-richtext.sql::dac-richtext-1::marek
+
+UPDATE SUMMARY
+Run:                        720
+Previously run:               0
+Filtered out:                 0
+-------------------------------
+Total change sets:          720
+
+Liquibase: Update has been successful.
+[INFO] Migration completed
+[INFO] 
+                                      
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@  @@        @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@        @@@@@@@@@@
+@@@@@@@@@@@@@@@@  @@  @@    @@@@@@@@@@
+@@@@@@@@@@  @@@@  @@  @@    @@@@@@@@@@
+@@@@@@@@@@        @@        @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@        @@        @@@@@@@@@@
+@@@@@@@@@@    @@  @@  @@@@  @@@@@@@@@@
+@@@@@@@@@@    @@  @@  @@@@  @@@@@@@@@@
+@@@@@@@@@@        @@  @  @  @@@@@@@@@@
+@@@@@@@@@@        @@        @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@  @@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  Thank you for using jOOQ 3.20.9 (Build date: 2025-11-11T13:09:46Z)
+                                      
+[INFO] 
+
+jOOQ tip of the day: When creating dynamic SQL Conditions, the DSL.trueCondition(), DSL.falseCondition(), DSL.noCondition(): https://blog.jooq.org/create-empty-optional-sql-clauses-with-jooq/
+
+[INFO] Database                 : Inferring driver org.postgresql.Driver from URL jdbc:postgresql://localhost:33702/test?loggerLevel=OFF
+[INFO] Forcing type             : public.analytics_ratings_with_importance._cutoff_date to <priority>0</priority><name>INSTANT</name><hidden>false</hidden><autoConverter>true</autoConverter><includeTypes>| (?i:TIMESTAMPTZ)
+[INFO] Forcing type             : public.each.hs to <priority>-2147483648</priority><userType>org.jooq.postgres.extensions.types.Hstore</userType><hidden>false</hidden><binding>org.jooq.postgres.extensions.bindings.HstoreBinding</binding><includeTypes>hstore</includeTypes><nullability>ALL</nullability><objectType>ALL</objectType><ignoreUnused>false</ignoreUnused>
+[INFO] Forcing type             : public.skeys._1 to <priority>-2147483648</priority><userType>org.jooq.postgres.extensions.types.Hstore</userType><hidden>false</hidden><binding>org.jooq.postgres.extensions.bindings.HstoreBinding</binding><includeTypes>hstore</includeTypes><nullability>ALL</nullability><objectType>ALL</objectType><ignoreUnused>false</ignoreUnused>
+[INFO] Forcing type             : public.svals._1 to <priority>-2147483648</priority><userType>org.jooq.postgres.extensions.types.Hstore</userType><hidden>false</hidden><binding>org.jooq.postgres.extensions.bindings.HstoreBinding</binding><includeTypes>hstore</includeTypes><nullability>ALL</nullability><objectType>ALL</objectType><ignoreUnused>false</ignoreUnused>
+[INFO] Forcing type             : public.omega_definition.created_at to <priority>0</priority><name>INSTANT</name><hidden>false</hidden><autoConverter>true</autoConverter><includeTypes>| (?i:TIMESTAMPTZ)
+[INFO] Forcing type             : public.omega_definition.updated_at to <priority>0</priority><name>INSTANT</name><hidden>false</hidden><autoConverter>true</autoConverter><includeTypes>| (?i:TIMESTAMPTZ)
+[INFO] Forcing type             : public.omega_group.created_at to <priority>0</priority><name>INSTANT</name><hidden>false</hidden><autoConverter>true</autoConverter><includeTypes>| (?i:TIMESTAMPTZ)
+[INFO] Forcing type             : public.omega_group.updated_at to <priority>0</priority><name>INSTANT</name><hidden>false</hidden><autoConverter>true</autoConverter><includeTypes>| (?i:TIMESTAMPTZ)
+[INFO] Forcing type             : public.action_item.kind to <priority>0</priority><userType>com.example.app.actionitem.shared.ActionItemKind</userType><hidden>false</hidden><enumConverter>true</enumConverter><includeExpression>action_item\.kind</includeExpression><nullability>ALL</nullability><objectType>ALL</objectType><ignoreUnused>false</ignoreUnused>
+[INFO] Generating tables        
+[INFO] Generating table         : OmegaDefinition.java [input=omega_definition, pk=omega_definition_pkey]
+[INFO] Generating table         : OmegaGroup.java [input=omega_group, pk=omega_group_pkey]
+[INFO] Generating table         : OmegaProgress.java [input=omega_progress, pk=omega_progress_pkey]
+[INFO] Generating table         : OmegaTier.java [input=omega_tier, pk=omega_tier_pkey]
+[INFO] Missing name             : Routine public.skeys holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.svals holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public._lt_q_regex holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public._lt_q_regex holds a parameter without a name at position 2
+[INFO] --- build-helper:3.6.1:add-source (generate-sources) @ map ---
+[INFO] Source directory: /home/user/git/map/target/generated-sources/jooq added.
+[INFO] Source directory: /home/user/git/map/target/generated-sources/protobuf added.
+[INFO] Source directory: /home/user/git/map/target/generated-sources/query-dsl added.
+[INFO] 
+[INFO] --- git-build-hook:3.5.0:install (default) @ map ---
+[INFO] 
+[INFO] --- exec:3.4.1:exec (npm version) @ map ---
+10.9.7
+[INFO] 
+[INFO] --- exec:3.4.1:exec (npm ci) @ map ---
+
+added 264 packages, and audited 265 packages in 3s
+
+48 packages are looking for funding
+  run `npm fund` for details
+
+30 vulnerabilities (19 moderate, 8 high, 3 critical)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+[INFO] 
+[INFO] --- exec:3.4.1:exec (npm run build) @ map ---
+
+> boost-openapi@3.0.0 build
+> redocly build-docs public --output dist/public/docs.html
+
+[1] redocly.yaml:6:1 at #/theme
+
+Property `theme` is not expected here.
+
+4 |   public:
+5 |     root: ./public/openapi.yaml
+6 | theme:
+  | ^^^^^
+7 |   openapi:
+8 |     theme:
+
+Warning was generated by the configuration struct rule.
+
+
+[INFO] 
+[INFO] --- exec:3.4.1:exec (npm run bundle) @ map ---
+
+> boost-openapi@3.0.0 bundle
+> redocly bundle public --output dist/public/openapi.yaml
+
+[1] redocly.yaml:6:1 at #/theme
+
+Property `theme` is not expected here.
+
+[INFO] /home/user/git/map/src/main/java/com/example/example/education/infrastructure/JdbcLearningMaterialReadRepository.java: Some input files additionally use or override a deprecated API.
+[INFO] /home/user/git/map/src/main/java/com/example/example/infrastructure/context/SmileRedisSerializerFactory.java: Some input files additionally use or override a deprecated API that is marked for removal.
+[INFO] /home/user/git/map/src/main/java/com/example/example/infrastructure/context/SmileRedisSerializerFactory.java: Recompile with -Xlint:removal for details.
+[INFO] /home/user/git/map/src/main/java/com/example/example/infrastructure/database/TenantDataSourceFactory.java: /home/user/git/map/src/main/java/com/example/example/infrastructure/database/TenantDataSourceFactory.java uses unchecked or unsafe operations.
+[INFO] 
+[INFO] --- exec:3.4.1:java (Generate json schema for plugin manifest) @ map ---
+22:00:53.806 [com.example.app.tenant.plugin.manifest.PluginManifestSchema.main()] WARN com.kjetland.jackson.jsonSchema.JsonSchemaGenerator -- Ignoring property 'type' in [simple type, class com.example.app.tenant.plugin.crd.PropertyType] since it has already been added, probably as type-property using polymorphism
+22:00:53.811 [com.example.app.tenant.plugin.manifest.PluginManifestSchema.main()] WARN com.kjetland.jackson.jsonSchema.JsonSchemaGenerator -- Ignoring property 'type' in [simple type, class com.example.app.tenant.plugin.crd.PropertyType] since it has already been added, probably as type-property using polymorphism
+22:00:53.814 [com.example.app.tenant.plugin.manifest.PluginManifestSchema.main()] WARN com.kjetland.jackson.jsonSchema.JsonSchemaGenerator -- Ignoring property 'type' in [simple type, class com.example.app.tenant.plugin.crd.PropertyType] since it has already been added, probably as type-property using polymorphism
+22:00:53.818 [com.example.app.tenant.plugin.manifest.PluginManifestSchema.main()] WARN com.kjetland.jackson.jsonSchema.JsonSchemaGenerator -- Ignoring property 'type' in [simple type, class com.example.app.tenant.plugin.crd.PropertyType] since it has already been added, probably as type-property using polymorphism
+22:00:53.819 [com.example.app.tenant.plugin.manifest.PluginManifestSchema.main()] WARN com.kjetland.jackson.jsonSchema.JsonSchemaGenerator -- Ignoring property 'type' in [simple type, class com.example.app.tenant.plugin.crd.PropertyType] since it has already been added, probably as type-property using polymorphism
+22:00:53.819 [com.example.app.tenant.plugin.manifest.PluginManifestSchema.main()] WARN com.kjetland.jackson.jsonSchema.JsonSchemaGenerator -- Ignoring property 'type' in [simple type, class com.example.app.tenant.plugin.crd.PropertyType] since it has already been added, probably as type-property using polymorphism
+22:00:53.819 [com.example.app.tenant.plugin.manifest.PluginManifestSchema.main()] WARN com.kjetland.jackson.jsonSchema.JsonSchemaGenerator -- Ignoring property 'type' in [simple type, class com.example.app.tenant.plugin.crd.PropertyType] since it has already been added, probably as type-property using polymorphism
+22:00:53.821 [com.example.app.tenant.plugin.manifest.PluginManifestSchema.main()] WARN com.kjetland.jackson.jsonSchema.JsonSchemaGenerator -- Ignoring property 'cardinality' in [simple type, class com.example.app.tenant.plugin.crd.AssociationCardinality] since it has already been added, probably as type-property using polymorphism
+22:00:53.822 [com.example.app.tenant.plugin.manifest.PluginManifestSchema.main()] WARN com.kjetland.jackson.jsonSchema.JsonSchemaGenerator -- Ignoring property 'cardinality' in [simple type, class com.example.app.tenant.plugin.crd.AssociationCardinality] since it has already been added, probably as type-property using polymorphism
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  40.052 s
+[INFO] Finished at: 2026-07-08T22:00:53+02:00
+[INFO] ------------------------------------------------------------------------

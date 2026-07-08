@@ -1543,6 +1543,11 @@ fn filter_mvn_compile(output: &str) -> String {
     // javac context lines (`[ERROR] symbol: …`) that would mirror an earlier
     // occurrence emitted without the `[ERROR]` prefix.
     let mut swallow_error_context = false;
+    // Inside a noisy codegen/exec plugin segment (npm builds, liquibase+jooq
+    // codegen): suppress everything except error-ish lines. These plugins
+    // stream arbitrary tool output — often on bare stderr with no [INFO]
+    // prefix — that no line-level pattern list can keep up with.
+    let mut in_noisy_segment = false;
     let mut result = String::with_capacity(clean.len() / 4);
 
     let push = |dst: &mut String, line: &str| {
@@ -1555,6 +1560,23 @@ fn filter_mvn_compile(output: &str) -> String {
     for raw in clean.lines() {
         let line = raw.trim();
         let stripped = strip_maven_prefix(line);
+
+        if let Some(caps) = PLUGIN_MARKER_RE.captures(line) {
+            let plugin = caps.get(1).map_or("", |m| m.as_str());
+            in_noisy_segment = is_noisy_codegen_plugin(plugin);
+        } else if in_noisy_segment {
+            // Reset on the build footer or the next reactor module header
+            // (`----< group:artifact >----`). Bare `-----` separators inside
+            // tool output (liquibase UPDATE SUMMARY) must NOT reset.
+            if BUILD_FOOTER_RE.is_match(stripped)
+                || (stripped.starts_with("---") && stripped.contains("< "))
+            {
+                in_noisy_segment = false;
+                // fall through — footer lines get their normal handling
+            } else if !is_errorish_segment_line(line, stripped) {
+                continue;
+            }
+        }
 
         if in_build_order {
             if REACTOR_BUILD_ORDER_RE.is_match(stripped)
@@ -1691,6 +1713,8 @@ const INFO_NOISE_PATTERNS: &[&str] = &[
     // GCP auth lifecycle chatter from artifactregistry-maven-wagon
     "Initializing Credentials",
     "Application Default Credentials",
+    // os-maven-plugin extension banner
+    "Detecting the operating system",
     "Refreshing Credentials",
     // pgpverify-maven-plugin chatter (per-artifact verify + summary)
     "Verifying ",
@@ -1777,6 +1801,30 @@ const BARE_TEXT_NOISE: &[&str] = &[
     "and any configuration",
     "| databasechangelog",
 ];
+
+/// Plugins whose executions stream arbitrary tool output (npm builds via
+/// frontend-maven-plugin or exec-maven-plugin, liquibase+jooq codegen). Their
+/// segments are suppressed down to error-ish lines in `filter_mvn_compile`.
+/// Matches both Maven 3 long names and Maven 4 short names (`frontend`,
+/// `exec`).
+fn is_noisy_codegen_plugin(plugin: &str) -> bool {
+    matches!(plugin, "exec" | "exec-maven-plugin" | "frontend" | "frontend-maven-plugin")
+        || plugin.contains("jooq")
+        || plugin.contains("liquibase")
+}
+
+/// Within a suppressed codegen/exec segment, keep only lines that indicate a
+/// failure — Maven `[ERROR]`s, npm/webpack error output, non-zero exits.
+fn is_errorish_segment_line(line: &str, stripped: &str) -> bool {
+    line.starts_with(ERROR_TAG)
+        || stripped.contains("ERR!")
+        || stripped.contains("error")
+        || stripped.contains("Error")
+        || stripped.contains("ERROR")
+        || stripped.contains("Failed")
+        || stripped.contains("failed")
+        || TOTAL_TIME_RE.is_match(stripped)
+}
 
 /// Returns true if a compile-phase output line should be kept.
 /// Expects pre-trimmed input from callers.
@@ -3031,6 +3079,116 @@ mod tests {
             output_tokens,
             output,
         );
+    }
+
+    #[test]
+    fn test_compile_npm_codegen_snapshot() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_npm_codegen.txt");
+        let output = filter_mvn_compile(input);
+        insta::assert_snapshot!(output);
+    }
+
+    #[test]
+    fn test_compile_npm_codegen_savings() {
+        // Real `mvn compile` WITHOUT -Dskip.npm: frontend npm ci/build,
+        // testcontainers+liquibase+jooq codegen, typescript-generator.
+        // Usage analysis: such runs averaged 59% savings vs 99.7% with
+        // -Dskip.npm — the npm/codegen segments are the gap.
+        let input = include_str!("../../../tests/fixtures/mvn_compile_npm_codegen.txt");
+        let output = filter_mvn_compile(input);
+
+        let input_tokens = count_tokens(input);
+        let output_tokens = count_tokens(&output);
+        let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
+
+        assert!(
+            savings >= 90.0,
+            "mvn compile npm+codegen: expected >=90% savings, got {:.1}% ({} -> {} tokens)\nOutput:\n{}",
+            savings,
+            input_tokens,
+            output_tokens,
+            output,
+        );
+    }
+
+    #[test]
+    fn test_compile_npm_codegen_collapses_noise() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_npm_codegen.txt");
+        let output = filter_mvn_compile(input);
+
+        assert!(!output.contains("npm warn deprecated"), "npm deprecation spam must be dropped");
+        assert!(
+            !output.contains("build/static/js/"),
+            "webpack bundle-size listing must be dropped"
+        );
+        assert!(
+            !output.contains("Generating table"),
+            "jooq per-table codegen lines must be dropped"
+        );
+        assert!(
+            !output.contains("Missing name"),
+            "jooq missing-name chatter must be dropped"
+        );
+        assert!(output.contains("BUILD SUCCESS"), "verdict must stay");
+    }
+
+    #[test]
+    fn test_compile_map_liquibase_jooq_snapshot() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_map_liquibase_jooq.txt");
+        let output = filter_mvn_compile(input);
+        insta::assert_snapshot!(output);
+    }
+
+    #[test]
+    fn test_compile_map_liquibase_jooq_savings() {
+        // Real `mvn compile` from a project whose codegen runs liquibase +
+        // jooq on stderr (no [INFO] prefix) and npm via exec-maven-plugin.
+        // Usage analysis: 12 such runs in July 2026 leaked 70k tokens each
+        // (57% savings) — bare-stderr liquibase/jooq chatter was kept.
+        let input = include_str!("../../../tests/fixtures/mvn_compile_map_liquibase_jooq.txt");
+        let output = filter_mvn_compile(input);
+
+        let input_tokens = count_tokens(input);
+        let output_tokens = count_tokens(&output);
+        let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
+
+        assert!(
+            savings >= 85.0,
+            "mvn compile map: expected >=85% savings, got {:.1}% ({} -> {} tokens)\nOutput:\n{}",
+            savings,
+            input_tokens,
+            output_tokens,
+            output,
+        );
+    }
+
+    #[test]
+    fn test_compile_map_drops_bare_stderr_noise() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_map_liquibase_jooq.txt");
+        let output = filter_mvn_compile(input);
+
+        assert!(
+            !output.contains("Running Changeset:"),
+            "bare liquibase changeset lines must be dropped"
+        );
+        assert!(!output.contains("@@@@"), "liquibase ASCII banner must be dropped");
+        assert!(
+            !output.contains("(?i:TIMESTAMP"),
+            "jooq forcedType regex echo must be dropped"
+        );
+        assert!(
+            !output.contains("</includeExpression>"),
+            "jooq forcedType XML echo must be dropped"
+        );
+        assert!(
+            !output.contains("JsonSchemaGenerator"),
+            "timestamped SLF4J codegen warnings must be dropped"
+        );
+        assert!(
+            !output.contains("> redocly"),
+            "bare npm script banner lines must be dropped"
+        );
+        assert!(output.contains("BUILD SUCCESS"), "verdict must stay");
     }
 
     #[test]
@@ -4345,3 +4503,4 @@ mod tests {
         insta::assert_snapshot!(output);
     }
 }
+

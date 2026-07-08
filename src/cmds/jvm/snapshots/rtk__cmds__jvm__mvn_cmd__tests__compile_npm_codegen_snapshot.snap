@@ -1,0 +1,10 @@
+---
+source: src/cmds/jvm/mvn_cmd.rs
+expression: output
+---
+[INFO] Hibernate compile-time tooling 7.4.1.Final
+[INFO] /home/user/git/auth/src/main/java/com/example/auth/user/infra/TeamReadRepositoryImpl.java: Recompile with -Xlint:removal for details.
+[INFO] /home/user/git/auth/src/main/java/com/example/auth/user/role/JpaRoleDefinitionRepository.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/user/git/auth/src/main/java/com/example/auth/user/role/JpaRoleDefinitionRepository.java: Recompile with -Xlint:unchecked for details.
+[INFO] BUILD SUCCESS
+[INFO] Total time:  41.986 s

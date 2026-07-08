@@ -1,0 +1,641 @@
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
+[INFO] Scanning for projects...
+[INFO] Loaded 23188 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63.txt)
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository maven-central (prefixes-maven-central-de66ab544dabb92499170649134bc3bd0ea8afac.txt)
+[INFO] Loaded 23188 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388.txt)
+[WARNING] 
+[WARNING] 36 problems were encountered while building the effective model for 'com.example:auth:jar:1.3-SNAPSHOT' (use -e to see details)
+[WARNING] 
+[WARNING] Total model problems reported: 36
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] ------------------------< com.example:auth >-------------------------
+[INFO] Building auth 1.3-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[WARNING] 166 problems were encountered while building the effective model for 'cz.habarta.typescript-generator:typescript-generator-maven-plugin:jar:4.1.1' during n/a (use -X to see details)
+[WARNING] 146 problems were encountered while building the effective model for 'org.redisson:redisson-spring-boot-starter:jar:4.6.1' during dependency collection step for project (use -X to see details)
+[WARNING] 76 problems were encountered while building the effective model for 'com.playtika.testcontainers:embedded-redis:jar:3.1.11' during dependency collection step for project (use -X to see details)
+[WARNING] 76 problems were encountered while building the effective model for 'com.playtika.testcontainers:testcontainers-common:jar:3.1.11' during dependency collection step for project (use -X to see details)
+[WARNING] 76 problems were encountered while building the effective model for 'com.playtika.testcontainers:embedded-toxiproxy:jar:3.1.11' during dependency collection step for project (use -X to see details)
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
+[WARNING] 2 problems were encountered while building the effective model for 'com.github.ulisesbocchio:jasypt-spring-boot-starter:jar:3.0.5' during dependency collection step for project (use -X to see details)
+[WARNING] 2 problems were encountered while building the effective model for 'com.github.ulisesbocchio:jasypt-spring-boot:jar:3.0.5' during dependency collection step for project (use -X to see details)
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository maven_central (prefixes-maven_central-6796a36b52d2535b4566f823cedfe43d83a8fd07.txt)
+[INFO] Loaded 23191 auto-discovered prefixes for remote repository sonatype-releases (prefixes-sonatype-releases-b65bf3173052ef4fb692457178186d85f1c3af37.txt)
+[INFO] 
+[INFO] --- jacoco:0.8.14:prepare-agent (prepare-agent) @ auth ---
+[INFO] argLine set to -javaagent:/home/user/.m2/repository/org/jacoco/org.jacoco.agent/0.8.14/org.jacoco.agent-0.8.14-runtime.jar=destfile=/home/user/git/auth/target/jacoco.exec
+[INFO] 
+[INFO] --- testcontainers-jooq-codegen:0.0.4:generate (generate-jooq-sources) @ auth ---
+[INFO] Image pull policy will be performed by: DefaultPullPolicy()
+[INFO] Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+[INFO] Testcontainers version: 2.0.5
+[INFO] Loaded org.testcontainers.dockerclient.UnixSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+[INFO] Found Docker environment with local Unix socket (unix:///var/run/docker.sock)
+[INFO] Docker host IP address is localhost
+[INFO] Connected to docker: 
+  Server Version: 28.1.1
+  API Version: 1.49
+  Operating System: Fedora Linux 44 (Workstation Edition)
+  Total Memory: 61418 MB
+[INFO] Creating container for image: testcontainers/ryuk:0.14.0
+[INFO] Container testcontainers/ryuk:0.14.0 is starting: 0bfb84a059e970f45a52034077bb34e4c660b526f4d73006e71783462b86a362
+[INFO] Container testcontainers/ryuk:0.14.0 started in PT0.383551241S
+[INFO] Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+[INFO] Checking the system...
+[INFO] ✔︎ Docker server version should be at least 1.6.0
+[INFO] Creating container for image: postgres:17
+[INFO] Container postgres:17 is starting: 0d2e7b5faee414fe91639a8986293ecc1d64f26c9c1f3d8161290247401e5c35
+[INFO] Container postgres:17 started in PT5.623419503S
+[INFO] Container is started (JDBC URL: jdbc:postgresql://localhost:33700/test?loggerLevel=OFF)
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.database
+[WARNING] [stderr] INFO: Set default schema name to public
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.lockservice
+[WARNING] [stderr] INFO: Successfully acquired change log lock
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1719408042.sql
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1719478245.yaml
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1719571809.yaml
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1721123826.yaml
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1726125249.yaml
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1726133977.yaml
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1726647573.yaml
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1727864000.sql
+[WARNING] [stderr] Jul 08, 2026 9:56:06 PM liquibase.changelog
+[WARNING] [stderr] INFO: Reading resource: db/changelog/2024/db.changelog.2024-1727939482.yaml
+[INFO] Tables fetched           : 47 (45 included, 2 excluded)
+[INFO] Triggers fetched         : 1 (1 included, 0 excluded)
+[INFO] No schema version is applied for catalog . Regenerating.
+[INFO]                          
+[INFO] Generating catalog       : DefaultCatalog.java
+[INFO] ==========================================================
+[INFO] Comments fetched         : 1 (1 included, 0 excluded)
+[INFO] Generating schemata      : Total: 1
+[INFO] No schema version is applied for schema public. Regenerating.
+[INFO] Generating schema        : Public.java
+[INFO] ----------------------------------------------------------
+[INFO] Missing name             : Routine public.pgp_armor_headers holds a parameter without a name at position 1
+[INFO] UDTs fetched             : 0 (0 included, 0 excluded)
+[INFO] Enums fetched            : 0 (0 included, 0 excluded)
+[INFO] Sequences fetched        : 0 (0 included, 0 excluded)
+[INFO] Synonyms fetched         : 0 (0 included, 0 excluded)
+[INFO] Embeddables fetched      : 0 (0 included, 0 excluded)
+[INFO] Routines fetched         : 35 (35 included, 0 excluded)
+[INFO] Packages fetched         : 0 (0 included, 0 excluded)
+[INFO] Generating tables        
+[INFO] Indexes fetched          : 67 (67 included, 0 excluded)
+[INFO] Generating table         : AlphaItem.java [input=alpha_item, pk=alpha_item_pkey]
+[INFO] Generating table         : BetaMapping.java [input=beta_mapping, pk=beta_mapping_pkey]
+[INFO] Generating table         : GammaMapping.java [input=gamma_mapping, pk=gamma_mapping_pkey]
+[INFO] Generating table         : Company.java [input=company, pk=company_pkey]
+[WARNING] Ambiguous key name       : The one-to-many key public.team_company_uuid_fkey generates an inbound key method name team on table public.company which conflicts with the previously generated key method name for key public.company_business_unit_fkey. Use a custom generator strategy to disambiguate the method names for ForeignKeyDefinition, InverseForeignKeyDefinition, and/or ManyToManyKeyDefinition, or simply turn off the feature. More information here:
+ - https://www.jooq.org/doc/latest/manual/code-generation/codegen-generatorstrategy/
+ - https://www.jooq.org/doc/latest/manual/code-generation/codegen-matcherstrategy/
+ - https://www.jooq.org/doc/latest/manual/code-generation/codegen-advanced/codegen-config-generate/codegen-implicit-join-paths/
+[WARNING] Ambiguous key name       : The one-to-many key public.user_company_uuid_fkey generates an inbound key method name user on table public.company which conflicts with the previously generated key method name for key public.fk_company_account_owner. Use a custom generator strategy to disambiguate the method names for ForeignKeyDefinition, InverseForeignKeyDefinition, and/or ManyToManyKeyDefinition, or simply turn off the feature. More information here:
+ - https://www.jooq.org/doc/latest/manual/code-generation/codegen-generatorstrategy/
+ - https://www.jooq.org/doc/latest/manual/code-generation/codegen-matcherstrategy/
+ - https://www.jooq.org/doc/latest/manual/code-generation/codegen-advanced/codegen-config-generate/codegen-implicit-join-paths/
+[INFO] Generating table         : ThetaKey.java [input=theta_key, pk=theta_key_pkey]
+[INFO] Generating table         : IotaConfig.java [input=iota_config, pk=iota_config_pkey]
+[INFO] Generating table         : KappaDomain.java [input=kappa_domain, pk=kappa_domain_pkey]
+[INFO] Generating table         : DeltaConfig.java [input=delta_config, pk=delta_config_pkey]
+[INFO] Generating table         : ZetaDefinition.java [input=zeta_definition, pk=zeta_definition_pkey]
+[INFO] Generating table         : EtaConfig.java [input=eta_config, pk=eta_config_pkey]
+[INFO] Generating table         : EpsilonMappings.java [input=epsilon_mappings, pk=epsilon_mappings_pkey]
+[INFO] Missing name             : Routine public.pgp_pub_decrypt holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_pub_decrypt holds a parameter without a name at position 2
+[INFO] Missing name             : Routine public.pgp_pub_decrypt holds a parameter without a name at position 3
+[INFO] Missing name             : Routine public.pgp_pub_decrypt holds a parameter without a name at position 4
+[INFO] Generating routine       : PgpPubDecryptBytea1.java
+[INFO] Missing name             : Routine public.pgp_pub_decrypt_bytea holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_pub_decrypt_bytea holds a parameter without a name at position 2
+[INFO] Generating routine       : PgpPubDecryptBytea2.java
+[INFO] Missing name             : Routine public.pgp_pub_decrypt_bytea holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_pub_decrypt_bytea holds a parameter without a name at position 2
+[INFO] Missing name             : Routine public.pgp_pub_decrypt_bytea holds a parameter without a name at position 3
+[INFO] Generating routine       : PgpPubDecryptBytea3.java
+[INFO] Missing name             : Routine public.pgp_pub_decrypt_bytea holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_pub_decrypt_bytea holds a parameter without a name at position 2
+[INFO] Missing name             : Routine public.pgp_pub_decrypt_bytea holds a parameter without a name at position 3
+[INFO] Missing name             : Routine public.pgp_pub_decrypt_bytea holds a parameter without a name at position 4
+[INFO] Generating routine       : PgpPubEncrypt1.java
+[INFO] Missing name             : Routine public.pgp_pub_encrypt holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_pub_encrypt holds a parameter without a name at position 2
+[INFO] Generating routine       : PgpPubEncrypt2.java
+[INFO] Missing name             : Routine public.pgp_pub_encrypt holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_pub_encrypt holds a parameter without a name at position 2
+[INFO] Missing name             : Routine public.pgp_pub_encrypt holds a parameter without a name at position 3
+[INFO] Generating routine       : PgpPubEncryptBytea1.java
+[INFO] Missing name             : Routine public.pgp_pub_encrypt_bytea holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_pub_encrypt_bytea holds a parameter without a name at position 2
+[INFO] Generating routine       : PgpPubEncryptBytea2.java
+[INFO] Missing name             : Routine public.pgp_pub_encrypt_bytea holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_pub_encrypt_bytea holds a parameter without a name at position 2
+[INFO] Missing name             : Routine public.pgp_pub_encrypt_bytea holds a parameter without a name at position 3
+[INFO] Generating routine       : PgpSymDecrypt1.java
+[INFO] Missing name             : Routine public.pgp_sym_decrypt holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_sym_decrypt holds a parameter without a name at position 2
+[INFO] Generating routine       : PgpSymDecrypt2.java
+[INFO] Missing name             : Routine public.pgp_sym_decrypt holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_sym_decrypt holds a parameter without a name at position 2
+[INFO] Missing name             : Routine public.pgp_sym_decrypt holds a parameter without a name at position 3
+[INFO] Generating routine       : PgpSymDecryptBytea1.java
+[INFO] Missing name             : Routine public.pgp_sym_decrypt_bytea holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_sym_decrypt_bytea holds a parameter without a name at position 2
+[INFO] Generating routine       : PgpSymDecryptBytea2.java
+[INFO] Missing name             : Routine public.pgp_sym_decrypt_bytea holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_sym_decrypt_bytea holds a parameter without a name at position 2
+[INFO] Missing name             : Routine public.pgp_sym_decrypt_bytea holds a parameter without a name at position 3
+[INFO] Generating routine       : PgpSymEncrypt1.java
+[INFO] Missing name             : Routine public.pgp_sym_encrypt holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_sym_encrypt holds a parameter without a name at position 2
+[INFO] Generating routine       : PgpSymEncrypt2.java
+[INFO] Missing name             : Routine public.pgp_sym_encrypt holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_sym_encrypt holds a parameter without a name at position 2
+[INFO] Missing name             : Routine public.pgp_sym_encrypt holds a parameter without a name at position 3
+[INFO] Generating routine       : PgpSymEncryptBytea1.java
+[INFO] Missing name             : Routine public.pgp_sym_encrypt_bytea holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_sym_encrypt_bytea holds a parameter without a name at position 2
+[INFO] Generating routine       : PgpSymEncryptBytea2.java
+[INFO] Missing name             : Routine public.pgp_sym_encrypt_bytea holds a parameter without a name at position 1
+[INFO] Missing name             : Routine public.pgp_sym_encrypt_bytea holds a parameter without a name at position 2
+[INFO] Missing name             : Routine public.pgp_sym_encrypt_bytea holds a parameter without a name at position 3
+[INFO] Routines generated       : Total: 525.505ms, +51.584ms
+[INFO] Generation finished: public: Total: 525.611ms, +0.105ms
+[INFO]                          
+[INFO] Affected files: 132      
+[INFO] Modified files: 6        
+[INFO] Removing excess files    
+[INFO] 
+[INFO] --- build-helper:3.6.1:add-source (default) @ auth ---
+[INFO] Source directory: /home/user/git/auth/target/generated-sources/jooq added.
+[INFO] 
+[INFO] --- frontend:2.0.0:install-node-and-npm (install node and npm) @ auth ---
+[INFO] Node v20.18.1 is already installed.
+[INFO] 
+[INFO] --- frontend:2.0.0:npm (npm ci) @ auth ---
+[INFO] Running 'npm ci' in /home/user/git/auth/frontend
+[INFO] npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+[INFO] npm warn deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
+[INFO] npm warn deprecated @babel/plugin-proposal-private-methods@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
+[INFO] npm warn deprecated @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
+[INFO] npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
+[INFO] npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
+[INFO] npm warn deprecated rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
+[INFO] npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+[INFO] npm warn deprecated whatwg-encoding@1.0.5: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+[INFO] npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+[INFO] npm warn deprecated abab@2.0.6: Use your platform's native atob() and btoa() methods instead
+[INFO] npm warn deprecated @babel/plugin-proposal-optional-chaining@7.21.0: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-chaining instead.
+[INFO] npm warn deprecated @babel/plugin-proposal-private-property-in-object@7.21.11: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-property-in-object instead.
+[INFO] npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+[INFO] npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+[INFO] npm warn deprecated domexception@2.0.1: Use your platform's native DOMException instead
+[INFO] npm warn deprecated w3c-hr-time@1.0.2: Use your platform's native performance.now() and performance.timeOrigin.
+[INFO] npm warn deprecated q@1.5.1: You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+[INFO] npm warn deprecated
+[INFO] npm warn deprecated (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+[INFO] npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+[INFO] npm warn deprecated workbox-cacheable-response@6.6.0: workbox-background-sync@6.6.0
+[INFO] npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+[INFO] npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
+[INFO] npm warn deprecated svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
+[INFO] npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+[INFO] 
+[INFO] > example-auth-frontend@0.1.0 postinstall
+[INFO] > ./scripts/git-settings.sh
+[INFO] 
+[INFO] 
+[INFO] added 1667 packages, and audited 1668 packages in 6s
+[INFO] 
+[INFO] 354 packages are looking for funding
+[INFO]   run `npm fund` for details
+[INFO] 
+[INFO] 47 vulnerabilities (10 low, 15 moderate, 21 high, 1 critical)
+[INFO] 
+[INFO] To address issues that do not require attention, run:
+[INFO]   npm audit fix
+[INFO] 
+[INFO] To address all issues (including breaking changes), run:
+[INFO]   npm audit fix --force
+[INFO] 
+[INFO] Run `npm audit` for details.
+[INFO] 
+[INFO] --- frontend:2.0.0:npm (npm build) @ auth ---
+[INFO] Running 'npm run build' in /home/user/git/auth/frontend
+[INFO] 
+[INFO] > example-auth-frontend@0.1.0 prebuild
+[INFO] > node ./scripts/prebuild.js
+[INFO] 
+[INFO] 
+[INFO] > example-auth-frontend@0.1.0 build
+[INFO] > npm run build:stage && npm run build:prod
+[INFO] 
+[INFO] 
+[INFO] > example-auth-frontend@0.1.0 build:stage
+[INFO] > env-cmd -f .env.stage react-app-rewired build && rm -rf dist-auth-stage && mv build dist-auth-stage
+[INFO] 
+[INFO] (node:1390686) ExperimentalWarning: Importing JSON modules is an experimental feature and might change at any time
+[INFO] (Use `node --trace-warnings ...` to show where the warning was created)
+[INFO] Creating an optimized production build...
+[INFO] Compiled successfully.
+[INFO] 
+[INFO] File sizes after gzip:
+[INFO] 
+[INFO]   258.68 kB  build/static/js/main.js
+[INFO]   42.53 kB   build/static/js/962.ffb8033a.chunk.js
+[INFO]   37.07 kB   build/static/js/454.332dbd4c.chunk.js
+[INFO]   36.77 kB   build/static/js/515.667ea343.chunk.js
+[INFO]   36.37 kB   build/static/js/682.485fd2fc.chunk.js
+[INFO]   25.02 kB   build/static/js/148.117d80fa.chunk.js
+[INFO]   15.63 kB   build/static/js/947.b89feeea.chunk.js
+[INFO]   13.97 kB   build/static/js/142.0cc7a30b.chunk.js
+[INFO]   12.41 kB   build/static/js/957.bc4c3bb4.chunk.js
+[INFO]   12.3 kB    build/static/js/958.b9fb4035.chunk.js
+[INFO]   10.43 kB   build/static/js/585.f0dc15e9.chunk.js
+[INFO]   8.73 kB    build/static/js/606.a0686952.chunk.js
+[INFO]   8.55 kB    build/static/css/main.a891befd.css
+[INFO]   7.37 kB    build/static/js/773.65420098.chunk.js
+[INFO]   3.32 kB    build/static/js/595.695e688e.chunk.js
+[INFO]   2.85 kB    build/static/js/712.28a77b2f.chunk.js
+[INFO]   2.24 kB    build/static/js/976.8a4638b0.chunk.js
+[INFO]   1.62 kB    build/static/js/729.d56bf06d.chunk.js
+[INFO]   1.25 kB    build/static/js/68.3c34521d.chunk.js
+[INFO]   917 B      build/static/js/636.abb79afc.chunk.js
+[INFO] 
+[INFO] The project was built assuming it is hosted at /.
+[INFO] You can control this with the homepage field in your package.json.
+[INFO] 
+[INFO] The build folder is ready to be deployed.
+[INFO] You may serve it with a static server:
+[INFO] 
+[INFO]   npm install -g serve
+[INFO]   serve -s build
+[INFO] 
+[INFO] Find out more about deployment here:
+[INFO] 
+[INFO]   https://cra.link/deployment
+[INFO] 
+[INFO] 
+[INFO] > example-auth-frontend@0.1.0 build:prod
+[INFO] > env-cmd -f .env.prod react-app-rewired build && rm -rf dist-auth-prod && mv build dist-auth-prod
+[INFO] 
+[INFO] (node:1390813) ExperimentalWarning: Importing JSON modules is an experimental feature and might change at any time
+[INFO] (Use `node --trace-warnings ...` to show where the warning was created)
+[INFO] Creating an optimized production build...
+[INFO] Compiled successfully.
+[INFO] 
+[INFO] File sizes after gzip:
+[INFO] 
+[INFO]   258.66 kB  build/static/js/main.js
+[INFO]   42.53 kB   build/static/js/962.ffb8033a.chunk.js
+[INFO]   37.07 kB   build/static/js/454.332dbd4c.chunk.js
+[INFO]   36.77 kB   build/static/js/515.667ea343.chunk.js
+[INFO]   36.37 kB   build/static/js/682.485fd2fc.chunk.js
+[INFO]   25.02 kB   build/static/js/148.117d80fa.chunk.js
+[INFO]   15.63 kB   build/static/js/947.b89feeea.chunk.js
+[INFO]   13.97 kB   build/static/js/142.0cc7a30b.chunk.js
+[INFO]   12.41 kB   build/static/js/957.bc4c3bb4.chunk.js
+[INFO]   12.3 kB    build/static/js/958.b9fb4035.chunk.js
+[INFO]   10.43 kB   build/static/js/585.f0dc15e9.chunk.js
+[INFO]   8.73 kB    build/static/js/606.a0686952.chunk.js
+[INFO]   8.55 kB    build/static/css/main.a891befd.css
+[INFO]   7.37 kB    build/static/js/773.65420098.chunk.js
+[INFO]   3.32 kB    build/static/js/595.695e688e.chunk.js
+[INFO]   2.85 kB    build/static/js/712.28a77b2f.chunk.js
+[INFO]   2.24 kB    build/static/js/976.8a4638b0.chunk.js
+[INFO]   1.62 kB    build/static/js/729.d56bf06d.chunk.js
+[INFO]   1.25 kB    build/static/js/68.3c34521d.chunk.js
+[INFO]   917 B      build/static/js/636.abb79afc.chunk.js
+[INFO] 
+[INFO] The project was built assuming it is hosted at /.
+[INFO] You can control this with the homepage field in your package.json.
+[INFO] 
+[INFO] The build folder is ready to be deployed.
+[INFO] You may serve it with a static server:
+[INFO] 
+[INFO]   npm install -g serve
+[INFO]   serve -s build
+[INFO] 
+[INFO] Find out more about deployment here:
+[INFO] 
+[INFO]   https://cra.link/deployment
+[INFO] 
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ auth ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] Copying 16 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- resources:3.5.0:copy-resources (position-react-build) @ auth ---
+[INFO] Copying 145 resources from frontend/dist-auth-prod to target/classes/static/dist-auth-prod
+[INFO] Copying 145 resources from frontend/dist-auth-stage to target/classes/static/dist-auth-stage
+[INFO] 
+[INFO] --- resources:3.5.0:copy-resources (copy-integration-guides) @ auth ---
+[INFO] Copying 2 resources from docs to target/classes/guides
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ auth ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 1041 source files with javac [debug deprecation parameters release 26] to target/classes
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/sync/userimport/UserImport.java:[107,37] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleSetEntity.java:[53,33] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/upload/orange/OrangeUserRow.java:[9,1] @Jacksonized requires @Builder, @SuperBuilder, or @Accessors for it to mean anything.
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/upload/orange/sync/OrangeTeamMemberRow.java:[9,1] @Jacksonized requires @Builder, @SuperBuilder, or @Accessors for it to mean anything.
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/upload/billennium/BillenniumUserRow.java:[18,1] @Jacksonized requires @Builder, @SuperBuilder, or @Accessors for it to mean anything.
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/upload/billennium/BillenniumUserAssignmentsRow.java:[10,1] @Jacksonized requires @Builder, @SuperBuilder, or @Accessors for it to mean anything.
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/upload/billennium/BillenniumTeamRow.java:[12,1] @Jacksonized requires @Builder, @SuperBuilder, or @Accessors for it to mean anything.
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/upload/vodeno/VodenoTeamRow.java:[12,1] @Jacksonized requires @Builder, @SuperBuilder, or @Accessors for it to mean anything.
+[INFO] Hibernate compile-time tooling 7.4.1.Final
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[63,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[125,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[63,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[125,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[63,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[125,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[63,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[125,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[63,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[125,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[63,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[125,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[63,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[125,35] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/GlobalControllerExceptionHandler.java:[91,56] UNPROCESSABLE_ENTITY in org.springframework.http.HttpStatus has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleService.java:[546,38] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,48] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,14] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,48] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,14] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,48] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,14] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,48] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,14] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,48] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,14] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,48] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,14] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,48] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/role/RoleRepository.java:[9,14] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/UserSpecification.java:[80,37] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/UserSpecification.java:[80,37] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/UserSpecification.java:[80,37] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/UserSpecification.java:[80,37] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/UserSpecification.java:[80,37] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/UserSpecification.java:[80,37] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/UserSpecification.java:[80,37] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/UserSpecification.java:[81,25] com.example.auth.user.role.RoleEntity in com.example.auth.user.role has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/company/CompanySetupService.java:[125,58] findAll(org.springframework.data.jpa.domain.Specification<com.example.auth.user.User>) in com.example.auth.user.UserRepository has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/company/CompanySetupService.java:[174,31] findAll(org.springframework.data.jpa.domain.Specification<com.example.auth.user.User>) in com.example.auth.user.UserRepository has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/UserFacade.java:[373,50] findAll(org.springframework.data.jpa.domain.Specification<com.example.auth.user.User>) in com.example.auth.user.UserRepository has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/user/team/TeamFacade.java:[313,31] findAll(org.springframework.data.jpa.domain.Specification<com.example.auth.user.User>) in com.example.auth.user.UserRepository has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/company/InMemoryKappaDomainRepository.java:[75,30] getById(ID) in org.springframework.data.jpa.repository.JpaRepository has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/company/InMemoryKappaDomainRepository.java:[70,30] getOne(ID) in org.springframework.data.jpa.repository.JpaRepository has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/orange/OrangeOnboardLogic.java:[253,51] updateAndAddAccess(com.example.auth.user.UserUpdateCommand,@jakarta.validation.constraints.NotNull com.example.auth.user.role.Role) in com.example.auth.user.UserFacade has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/extensions/osk/EmptyStringAsNullDeserializer.java:[11,42] getText() in tools.jackson.core.JsonParser has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/extensions/osk/OrangeSKTeamCreator.java:[127,44] isBusinessRoot(com.example.auth.company.CompanyId,com.example.auth.shared.TeamId) in com.example.auth.user.team.TeamFacade has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/infrastructure/RedisConfiguration.java:[48,33] setRetryInterval(int) in org.redisson.config.BaseConfig has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/scim/dto/ScimUserDeserializer.java:[83,51] asText() in tools.jackson.databind.JsonNode has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/scim/dto/ScimUserDeserializer.java:[136,33] asText() in tools.jackson.databind.JsonNode has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/token/RefreshTokenService.java:[239,52] set(K,V,long,@org.jspecify.annotations.NonNull java.util.concurrent.TimeUnit) in org.springframework.data.redis.core.ValueOperations has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/token/RefreshTokenService.java:[278,52] set(K,V,long,@org.jspecify.annotations.NonNull java.util.concurrent.TimeUnit) in org.springframework.data.redis.core.ValueOperations has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/RequestDeSerializer.java:[15,51] deserialize(byte @org.jspecify.annotations.Nullable []) in org.springframework.util.SerializationUtils has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[20,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[22,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[17,10] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[20,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[22,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[17,10] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[20,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[22,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[17,10] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[20,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[22,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[17,10] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[20,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[22,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[17,10] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[20,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[22,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[17,10] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[20,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[22,40] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SecurityUserHandlerMethodArgumentResolver.java:[17,10] org.springframework.lang.Nullable in org.springframework.lang has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SystemEventPublishingHandler.java:[54,25] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/SystemEventPublishingHandler.java:[54,66] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/SamlPrincipalEmailExtractor.java:[18,46] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/SamlPrincipalEmailExtractor.java:[18,46] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/SamlPrincipalEmailExtractor.java:[18,46] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/SamlPrincipalEmailExtractor.java:[18,46] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/SamlPrincipalEmailExtractor.java:[18,46] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/SamlPrincipalEmailExtractor.java:[18,46] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/SamlPrincipalEmailExtractor.java:[18,46] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java:[26,47] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java:[36,84] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java:[40,84] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java:[26,47] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java:[36,84] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java:[40,84] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java:[26,47] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java:[36,84] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[WARNING] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java:[40,84] org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal in org.springframework.security.saml2.provider.service.authentication has been deprecated
+[INFO] /home/user/git/auth/src/main/java/com/example/auth/security/saml/CompanySamlHandler.java: Some input files additionally use or override a deprecated API.
+[INFO] /home/user/git/auth/src/main/java/com/example/auth/user/infra/TeamReadRepositoryImpl.java: /home/user/git/auth/src/main/java/com/example/auth/user/infra/TeamReadRepositoryImpl.java uses or overrides a deprecated API that is marked for removal.
+[INFO] /home/user/git/auth/src/main/java/com/example/auth/user/infra/TeamReadRepositoryImpl.java: Recompile with -Xlint:removal for details.
+[INFO] /home/user/git/auth/src/main/java/com/example/auth/user/role/JpaRoleDefinitionRepository.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/user/git/auth/src/main/java/com/example/auth/user/role/JpaRoleDefinitionRepository.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- typescript-generator:4.1.1:generate (Generate boost.d.ts) @ auth ---
+[WARNING] 166 problems were encountered while building the effective model for 'cz.habarta.typescript-generator:typescript-generator-maven-plugin:jar:4.1.1' during dependency collection for cz.habarta.typescript-generator:typescript-generator-maven-plugin:jar:4.1.1 () -> [cz.habarta.typescript-generator:typescript-generator-spring:jar:4.1.1 (runtime)] < [example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots), artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases), central (https://repo.maven.apache.org/maven2, default, releases)] (use -X to see details)
+[WARNING] 166 problems were encountered while building the effective model for 'cz.habarta.typescript-generator:typescript-generator-spring:jar:4.1.1' during dependency collection step for plugin (use -X to see details)
+[WARNING] 166 problems were encountered while building the effective model for 'cz.habarta.typescript-generator:typescript-generator-core:jar:4.1.1' during dependency collection step for plugin (use -X to see details)
+[INFO] [stdout] Running TypeScriptGenerator version 4.1.1
+[INFO] [stdout] Loading class org.jspecify.annotations.Nullable
+[INFO] [stdout] Loading class org.jspecify.annotations.Nullable
+[INFO] [stdout] Loading class com.example.auth.shared.TeamId
+[INFO] [stdout] Loading class java.net.URI
+[INFO] [stdout] Loading class java.time.Instant
+[INFO] [stdout] Loading class java.time.LocalDateTime
+[INFO] [stdout] Loading class java.time.Period
+[INFO] [stdout] Loading class java.time.ZonedDateTime
+[INFO] [stdout] Loading class com.example.auth.company.CompanyId
+[INFO] [stdout] Loading class com.example.auth.user.UserId
+[INFO] [stdout] Loading class com.example.auth.shared.RoleId
+[INFO] [stdout] Loading class com.example.auth.app.TechnicalRole
+[INFO] [stdout] Suggestion: annotation 'org.jspecify.annotations.Nullable' supports 'TYPE_PARAMETER' or 'TYPE_USE' target. Consider using 'nullableAnnotations' parameter instead of 'optionalAnnotations'.
+[INFO] [stdout] Parsing 'com.example.auth.GlobalControllerExceptionHandler$VndErrors'
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.api.RoleApiController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.api.SelfController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.api.UserApiController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.api.CompanyApiController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.team.TeamApiController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.password.CredentialsController
+[INFO] [stdout] Parsing Spring component: com.example.auth.sync.api.UserImportApiController
+[INFO] [stdout] Parsing Spring component: com.example.auth.sync.api.TeamImportApiController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.api.MaintenanceController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.api.SecurityLogApiController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.api.tree.TeamTreeApiController
+[INFO] [stdout] Parsing Spring component: com.example.auth.ai.AiChatController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.api.DashboardApiController
+[INFO] [stdout] Parsing Spring component: com.example.auth.company.provisioning.ProvisioningController
+[INFO] [stdout] Parsing Spring component: com.example.auth.security.accessrequest.AlphaItemController
+[INFO] [stdout] Parsing Spring component: com.example.auth.user.serviceuser.ServiceAccountController
+[INFO] [stdout] Parsing Spring component: com.example.auth.partners.microsoftgraph.MicrosoftGraphConsentController
+[INFO] [stdout] Parsing Spring component: com.example.auth.partners.microsoftgraph.MicrosoftGraphCompanyController
+[INFO] [stdout] Parsing Spring component: com.example.auth.partners.microsoftgraph.MicrosoftGraphPrivateApiController
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.CreateRoleDefinitionForm' used in 'RoleApiController.createRole'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.RoleDefinitionDto' used in 'RoleApiController.createRole'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.RoleDefinitionDetailsDto' used in 'RoleApiController.getRoleDetails'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.UpdateRoleDefinitionForm' used in 'RoleApiController.updateRole'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.AuthContextDto' used in 'SelfController.self'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.ResetPasswordToken' used in 'UserApiController.getResetPasswordToken'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.UserDetailsDto' used in 'UserApiController.getUserDetails'
+[INFO] [stdout] Parsing 'com.example.auth.user.role.EffectiveUserRolesDto' used in 'UserApiController.getUserRoles'
+[INFO] [stdout] Parsing 'com.example.auth.user.GrantProductAccessDto' used in 'UserApiController.grantProductAccess'
+[INFO] [stdout] Parsing 'com.example.auth.user.RemoveRolesDto' used in 'UserApiController.removeUserApplicationRoles'
+[INFO] [stdout] Parsing 'com.example.auth.user.UserResource' used in 'UserApiController.removeUserApplicationRoles'
+[INFO] [stdout] Parsing 'com.example.auth.user.RevokeProductAccessDto' used in 'UserApiController.revokeProductAccess'
+[INFO] [stdout] Parsing 'com.example.auth.user.UserRoleMappingUpdateWithTeams' used in 'UserApiController.updateAnyUserRoleDefinitions'
+[INFO] [stdout] Parsing 'com.example.auth.user.BasicUserResource' used in 'UserApiController.updateAnyUserRoleDefinitions'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.UserApiController$UpdateAuthMethodRequest' used in 'UserApiController.updateAuthMethod'
+[INFO] [stdout] Parsing 'com.example.auth.user.TechnicalRolesDto' used in 'UserApiController.updateTechnicalRoles'
+[INFO] [stdout] Parsing 'com.example.auth.user.UserResourceUpdate' used in 'UserApiController.updateUser'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.UserApiController$UpdateUserEnabledRequest' used in 'UserApiController.updateUserEnabled'
+[INFO] [stdout] Parsing 'com.example.auth.user.GetManagedUsersDto' used in 'UserApiController.users'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.CompanyApiController$ChangeUserEmailRequest' used in 'CompanyApiController.changeUserEmail'
+[INFO] [stdout] Parsing 'com.example.auth.company.apikey.CreateThetaKeyRequest' used in 'CompanyApiController.createApiKey'
+[INFO] [stdout] Parsing 'com.example.auth.company.apikey.ThetaKeyCreatedDto' used in 'CompanyApiController.createApiKey'
+[INFO] [stdout] Parsing 'com.example.auth.user.serviceuser.ServiceAccountStatusDto' used in 'CompanyApiController.createServiceAccount'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.CompanyApiController$DeleteUserRequest' used in 'CompanyApiController.deleteUser'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.CompanyApiController$BulkDeleteUsersRequest' used in 'CompanyApiController.deleteUsersBulk'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.CompanyApiController$BulkDeleteUsersResponse' used in 'CompanyApiController.deleteUsersBulk'
+[INFO] [stdout] Parsing 'org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody' used in 'CompanyApiController.exportUsers'
+[INFO] [stdout] Parsing 'com.example.auth.scim.ScimTokenGeneratedDto' used in 'CompanyApiController.generateScimToken'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.UserProducts' used in 'CompanyApiController.getAllProducts'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.UserTechnicalRoles' used in 'CompanyApiController.getAllTechRoles'
+[INFO] [stdout] Parsing 'com.example.auth.company.AuthTokensSettingsDto' used in 'CompanyApiController.getAuthTokensSettings'
+[INFO] [stdout] Parsing 'com.example.auth.user.CompanyResource' used in 'CompanyApiController.getCompany'
+[INFO] [stdout] Parsing 'com.example.auth.company.CompanyInfoDto' used in 'CompanyApiController.getCompanyInfo'
+[INFO] [stdout] Parsing 'com.example.auth.company.DefaultRolesSettingsDto' used in 'CompanyApiController.getDefaultRolesSettings'
+[INFO] [stdout] Parsing 'com.example.auth.partners.entraid.EntraIdConfigDto' used in 'CompanyApiController.getEntraIdConfiguration'
+[INFO] [stdout] Parsing 'com.example.auth.security.saml.DeltaConfigurationDto' used in 'CompanyApiController.getSamlConfiguration'
+[INFO] [stdout] Parsing 'com.example.auth.scim.ScimConfigDto' used in 'CompanyApiController.getScimConfiguration'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.CompanyRoles' used in 'CompanyApiController.listRoles'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.CompanySetupRequestDto' used in 'CompanyApiController.setupCompany'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.CompanySetupResponseDto' used in 'CompanyApiController.setupCompany'
+[INFO] [stdout] Parsing 'com.example.auth.company.UpdateDefaultRolesSettingsDto' used in 'CompanyApiController.updateDefaultRolesSettings'
+[INFO] [stdout] Parsing 'com.example.auth.partners.entraid.UpdateEntraIdConfigDto' used in 'CompanyApiController.updateEntraIdConfiguration'
+[INFO] [stdout] Parsing 'com.example.auth.scim.UpdateScimConfigDto' used in 'CompanyApiController.updateScimConfiguration'
+[INFO] [stdout] Parsing 'com.example.auth.user.UserRoleMappingUpdate' used in 'CompanyApiController.updateUserRoleDefinitions'
+[INFO] [stdout] Parsing 'com.example.auth.user.team.TeamDto' used in 'TeamApiController.addMember'
+[INFO] [stdout] Parsing 'com.example.auth.user.AuthorizationMethod' used in 'CredentialsController.provideAuthorizationMethod'
+[INFO] [stdout] Parsing 'com.example.auth.user.password.CredentialsController$ResetPasswordRequest' used in 'CredentialsController.requestPasswordReset'
+[INFO] [stdout] Parsing 'com.example.auth.user.password.CredentialsController$SetPasswordRequest' used in 'CredentialsController.setNewPassword'
+[INFO] [stdout] Parsing 'com.example.auth.security.saml.ClientID' used in 'MaintenanceController.fetchUser'
+[INFO] [stdout] Parsing 'com.example.auth.mcp.TemporaryRoleGrantRequest' used in 'MaintenanceController.grantTemporaryRole'
+[INFO] [stdout] Parsing 'com.example.auth.mcp.TemporaryRoleGrantResponse' used in 'MaintenanceController.grantTemporaryRole'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.tree.TeamTreeBrowserDetailsDto' used in 'TeamTreeApiController.getTeamDetails'
+[INFO] [stdout] Parsing 'com.example.auth.ai.AiChatController$ChatRequest' used in 'AiChatController.chat'
+[INFO] [stdout] Parsing 'com.example.auth.ai.AiChatResponse' used in 'AiChatController.chat'
+[INFO] [stdout] Parsing 'com.example.auth.ai.AiChatController$ExplainRoleRequest' used in 'AiChatController.explainRole'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.DashboardDto' used in 'DashboardApiController.getDashboard'
+[INFO] [stdout] Parsing 'com.example.auth.company.provisioning.CompanyProvisioningRequestDto' used in 'ProvisioningController.provisionCompany'
+[INFO] [stdout] Parsing 'com.example.auth.company.provisioning.CompanyProvisioningResponseDto' used in 'ProvisioningController.provisionCompany'
+[INFO] [stdout] Parsing 'com.example.auth.security.accessrequest.AlphaItemDto' used in 'AlphaItemController.activateRequest'
+[INFO] [stdout] Parsing 'com.example.auth.security.accessrequest.CreateAlphaItemCommand' used in 'AlphaItemController.createRequest'
+[INFO] [stdout] Parsing 'com.example.auth.security.accessrequest.ApproverDto' used in 'AlphaItemController.validateTargetUser'
+[INFO] [stdout] Parsing 'com.example.auth.security.accessrequest.AlphaItemValidationResult' used in 'AlphaItemController.validateToken'
+[INFO] [stdout] Parsing 'com.example.auth.user.serviceuser.CreateServiceAccountRequest' used in 'ServiceAccountController.create'
+[INFO] [stdout] Parsing 'com.example.auth.user.serviceuser.ServiceAccountSecretResource' used in 'ServiceAccountController.create'
+[INFO] [stdout] Parsing 'com.example.auth.user.serviceuser.ServiceUserId' used in 'ServiceAccountController.disable'
+[INFO] [stdout] Parsing 'com.example.auth.user.serviceuser.ServiceAccountResource' used in 'ServiceAccountController.get'
+[INFO] [stdout] Parsing 'com.example.auth.partners.microsoftgraph.ConnectMicrosoftCompanyAppDto' used in 'MicrosoftGraphCompanyController.connectOwnApp'
+[INFO] [stdout] Parsing 'com.example.auth.partners.microsoftgraph.MicrosoftCompanyAppConnectResultDto' used in 'MicrosoftGraphCompanyController.connectOwnApp'
+[INFO] [stdout] Parsing 'com.example.auth.partners.microsoftgraph.MicrosoftIntegrationStatusDto' used in 'MicrosoftGraphCompanyController.getStatus'
+[INFO] [stdout] Parsing 'com.example.auth.partners.microsoftgraph.MicrosoftAccessTokenDto' used in 'MicrosoftGraphPrivateApiController.getToken'
+[INFO] [stdout] Parsing 'com.example.auth.user.role.RoleScope' used in 'CreateRoleDefinitionForm.roleScope'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.PermissionDefinitionDto' used in 'CreateRoleDefinitionForm.permissions'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.RoleDefinitionBasicDto' used in 'RoleApiController.listRoleDefinitions'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.RoleListElementDto' used in 'RoleApiController.listRoles'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.PermissionDto' used in 'RoleApiController.permissions'
+[INFO] [stdout] Parsing 'com.example.auth.permissions.Product' used in 'AuthContextDto.products'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.UserRoleMappingDto' used in 'UserDetailsDto.assignedRoles'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.UserDetailsDto$SupervisorInfo' used in 'UserDetailsDto.supervisor'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.UserDetailsDto$HrbpInfo' used in 'UserDetailsDto.hrbp'
+[INFO] [stdout] Parsing 'com.example.auth.user.role.EffectiveUserRoleDto' used in 'EffectiveUserRolesDto.roles'
+[INFO] [stdout] Parsing 'com.example.auth.user.AuthMethod' used in 'UserResource.authMethod'
+[INFO] [stdout] Parsing 'org.springframework.security.core.userdetails.UserDetails' used in 'UserResource.<interface>'
+[INFO] [stdout] Parsing 'com.example.auth.user.UpdateUserRoleMappingDto' used in 'UserRoleMappingUpdateWithTeams.roleMappings'
+[INFO] [stdout] Parsing 'com.example.auth.user.role.SystemRole' used in 'BasicUserResource.systemRoles'
+[INFO] [stdout] Parsing 'com.example.auth.user.PageResponse' used in 'UserApiController.users'
+[INFO] [stdout] Parsing 'com.example.auth.user.UserListElementDto' used in 'UserApiController.users'
+[INFO] [stdout] Parsing 'com.example.auth.company.ClientCompanyDto' used in 'CompanyApiController.getClientCompanies'
+[INFO] [stdout] Parsing 'com.example.auth.security.saml.DeltaConfigurationDto$IdentityProviderDto' used in 'DeltaConfigurationDto.identityProviders'
+[INFO] [stdout] Parsing 'com.example.auth.company.apikey.ThetaKeyDto' used in 'CompanyApiController.listApiKeys'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.RoleWithNormalizedPermissionsDto' used in 'CompanyRoles.roles'
+[INFO] [stdout] Parsing 'org.springframework.data.domain.Page' used in 'CompanyApiController.readTeams'
+[INFO] [stdout] Parsing 'com.example.auth.company.FirstUserDto' used in 'CompanySetupRequestDto.firstUser'
+[INFO] [stdout] Parsing 'com.example.auth.user.team.TeamDto$MemberDTO' used in 'TeamDto.members'
+[INFO] [stdout] Parsing 'com.example.auth.user.AuthorizationMethod$AuthorizationMethodType' used in 'AuthorizationMethod.authorizationMethodType'
+[INFO] [stdout] Parsing 'com.example.auth.sync.api.UserImportListDto' used in 'UserImportApiController.getUserImports'
+[INFO] [stdout] Parsing 'com.example.auth.sync.api.TeamImportListDto' used in 'TeamImportApiController.getTeamImports'
+[INFO] [stdout] Parsing 'com.example.auth.user.SecurityOperation' used in 'SecurityLogApiController.getSecurityLogs'
+[INFO] [stdout] Parsing 'com.example.auth.user.SecurityLogStatus' used in 'SecurityLogApiController.getSecurityLogs'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.SecurityLogDto' used in 'SecurityLogApiController.getSecurityLogs'
+[INFO] [stdout] Parsing 'com.example.auth.user.CursorPageResponse' used in 'SecurityLogApiController.getUserSecurityLogs'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.tree.TeamMemberListDto' used in 'TeamTreeApiController.getTeamMembers'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.tree.TeamTreeBrowserNodeDto' used in 'TeamTreeApiController.getTeamTree'
+[INFO] [stdout] Parsing 'com.example.auth.ai.AiChatResponse$Reason' used in 'AiChatResponse.reason'
+[INFO] [stdout] Parsing 'com.example.auth.ai.Clarification' used in 'AiChatResponse.clarification'
+[INFO] [stdout] Parsing 'com.example.auth.ai.AiChatHistoryMessage' used in 'AiChatController.chatHistory'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.DashboardDto$RecentLoginError' used in 'DashboardDto.recentLoginErrors'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.DashboardDto$ScimStatusDto' used in 'DashboardDto.scimStatus'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.DashboardDto$ProductCount' used in 'DashboardDto.productDistribution'
+[INFO] [stdout] Parsing 'com.example.auth.company.provisioning.FeatureDto' used in 'ProvisioningController.getFeatures'
+[INFO] [stdout] Parsing 'com.example.auth.company.provisioning.ProvisioningLogDto' used in 'ProvisioningController.getRecentCompanies'
+[INFO] [stdout] Parsing 'com.example.auth.company.provisioning.CompanyProvisioningRequestDto$FirstUser' used in 'CompanyProvisioningRequestDto.firstUser'
+[INFO] [stdout] Parsing 'com.example.auth.security.accessrequest.AlphaItemStatus' used in 'AlphaItemDto.status'
+[INFO] [stdout] Parsing 'com.example.auth.security.accessrequest.AlphaItemValidationStatus' used in 'AlphaItemValidationResult.status'
+[INFO] [stdout] Parsing 'com.example.auth.partners.microsoftgraph.MicrosoftGraphCompanyAppService$ConnectStatus' used in 'MicrosoftCompanyAppConnectResultDto.status'
+[INFO] [stdout] Parsing 'com.example.auth.permissions.Permission' used in 'PermissionDefinitionDto.permission'
+[INFO] [stdout] Parsing 'com.example.auth.user.permission.PermissionScope' used in 'PermissionDefinitionDto.scope'
+[INFO] [stdout] Parsing 'com.example.auth.infrastructure.boost.PermissionDefinition' used in 'PermissionDto.permissionDefinition'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.RoleSource' used in 'UserRoleMappingDto.source'
+[INFO] [stdout] Parsing 'com.example.auth.user.team.TeamIdWithName' used in 'EffectiveUserRoleDto.teams'
+[INFO] [stdout] Parsing 'org.springframework.security.core.GrantedAuthority' used in 'UserDetails.authorities'
+[INFO] [stdout] Parsing 'com.example.auth.user.UserRoleListElementDto' used in 'UserListElementDto.roleDefinitions'
+[INFO] [stdout] Parsing 'com.example.auth.security.saml.DeltaConfigurationDto$ConfigSource' used in 'IdentityProviderDto.source'
+[INFO] [stdout] Parsing 'com.example.auth.security.saml.DeltaConfigurationDto$CertificateValidityDto' used in 'IdentityProviderDto.certificates'
+[INFO] [stdout] Parsing 'com.example.auth.user.api.role.UserPermissionDto' used in 'RoleWithNormalizedPermissionsDto.permissions'
+[INFO] [stdout] Parsing 'org.springframework.data.domain.Pageable' used in 'Page.pageable'
+[INFO] [stdout] Parsing 'org.springframework.data.domain.Sort' used in 'Page.sort'
+[INFO] [stdout] Parsing 'com.example.auth.sync.ImportOperation' used in 'UserImportListDto.operation'
+[INFO] [stdout] Parsing 'com.example.auth.sync.ImportStatus' used in 'UserImportListDto.status'
+[INFO] [stdout] Parsing 'com.example.auth.sync.ImportAction' used in 'UserImportListDto.action'
+[INFO] [stdout] Parsing 'com.example.auth.sync.ImportSource' used in 'UserImportListDto.source'
+[INFO] [stdout] Parsing 'com.example.auth.sync.userimport.PatchableField' used in 'UserImportListDto.patchedFields'
+[INFO] [stdout] Parsing 'com.example.auth.ai.AiChatHistoryMessage$AiChatRole' used in 'AiChatHistoryMessage.role'
+[INFO] [stdout] Parsing 'com.example.auth.company.provisioning.ProvisioningStatus' used in 'ProvisioningLogDto.status'
+[INFO] [stdout] Parsing 'com.example.auth.security.saml.DeltaConfigurationDto$CertificateStatus' used in 'CertificateValidityDto.status'
+[INFO] [stdout] Parsing 'org.springframework.data.domain.Slice' used in 'Page.<interface>'
+[INFO] [stdout] Writing declarations to: /home/user/git/auth/frontend/src/types/auth.d.ts
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  41.986 s
+[INFO] Finished at: 2026-07-08T21:56:40+02:00
+[INFO] ------------------------------------------------------------------------

@@ -1,0 +1,6 @@
+---
+source: src/cmds/jvm/mvn_cmd.rs
+expression: output
+---
+[INFO] BUILD SUCCESS
+[INFO] Total time:  40.052 s
