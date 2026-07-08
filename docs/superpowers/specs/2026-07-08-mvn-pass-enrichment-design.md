@@ -109,3 +109,39 @@ The happy path must never get worse:
 - **Always inline / always file-only** — rejected in favour of the hybrid:
   inline for tiny runs (`-Dtest=...`) avoids a follow-up Read round-trip;
   file reference keeps big reactor runs to one line.
+
+## Implementation notes (post-review, 2026-07-09)
+
+Shipped behavior deviates from the design above in a few small ways, all
+confirmed against the final whole-branch review:
+
+- **Digest filename**: the digest is written through the existing tee
+  infrastructure as `<epoch>_<tee_label>_classes.log`, not
+  `<ts>_<label>.classes.txt` — `force_tee_display`/`force_tee_path` hard-code
+  the `.log` extension, so the digest reuses that naming rather than
+  introducing a second file-naming scheme. The intent (a separate,
+  on-demand file living next to the tee log, with the same rotation
+  behavior) is unchanged.
+- **Reference line**: rendered as a standalone final line, `classes:
+  <path>`, appended after the (possibly enriched) summary — not folded into
+  the summary line with an em-dash as originally sketched
+  (` — classes: <digest path>`). The standalone-line form is
+  variant-agnostic (works identically for the pass-inline and the
+  failing/zero-tests paths) and simpler to reason about than a
+  per-variant suffix.
+- **Digest header format**: `# mvn <goal> (from XML reports) — <passed>
+  passed[, <K> skipped]`, with no timestamp — the tee filename already
+  carries the epoch, so repeating it in the header would be redundant. The
+  `(from XML reports)` provenance label was added after review: the
+  console summary and the digest count tests from different sources
+  (console text parse vs. XML report files) and can legitimately
+  disagree — a real run showed 1008 (console) vs. 995 (digest) passed,
+  because nested reactor modules can fall outside the depth-1
+  report-dir walk used for XML discovery. The header must make clear
+  which number is which.
+- **Blessed inline-skip behavior**: when the class list exceeds
+  `MAX_INLINE_CLASSES` (forcing the `classes: <path>` reference) but the
+  skipped-test count still fits within `MAX_INLINE_SKIPPED` (≤3), the
+  skipped names are inlined anyway, alongside the reference line. This is
+  intentional, not a bug: skipped tests are anomalies worth surfacing
+  immediately rather than deferring to the digest file.
