@@ -4,12 +4,12 @@
     <system-out><![CDATA[13:58:17.460 [main] WARN  o.s.b.w.t.a.WebMvcTestContextBootstrapper - For test class [com.example.auth.user.UsersTest], the following 'default' context configuration classes were detected but are currently ignored: com.example.auth.user.AbstractUserContract$ContractSecurityConfig. In Spring Framework 7.1, these classes will no longer be ignored. Please update your test configuration accordingly. For details, see: https://docs.spring.io/spring-framework/reference/testing/testcontext-framework/ctx-management/default-config.html
 13:58:17.509 [main] INFO  com.example.auth.user.UsersTest - The following 1 profile is active: "test"
 13:58:17.854 [main] INFO  com.example.auth.user.UsersTest - Started UsersTest in 0.392 seconds (process running for 7.926)
-13:58:18.098 [main] INFO  c.d.auth.user.api.UserApiController - Update user 73e49098-e4ea-f832-e2f0-d68d76a9d7a0
+13:58:18.098 [main] INFO  c.e.auth.user.api.UserApiController - Update user 00000000-0000-0000-0000-000000000001
 ]]></system-out>
   </testcase>
   <testcase name="validate_removeUserApplicationRoles" classname="com.example.auth.user.UsersTest" time="0.007"/>
   <testcase name="validate_addUser" classname="com.example.auth.user.UsersTest" time="0.014">
-    <system-out><![CDATA[13:58:18.172 [main] WARN  c.d.a.u.api.InvitationApiController - User id is not provided, generating one
+    <system-out><![CDATA[13:58:18.172 [main] WARN  c.e.a.u.api.InvitationApiController - User id is not provided, generating one
 ]]></system-out>
   </testcase>
   <testcase name="validate_extendInvitation" classname="com.example.auth.user.UsersTest" time="0.007"/>
