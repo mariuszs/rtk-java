@@ -47,10 +47,28 @@ pub struct TestFailure {
     pub test_output: Option<String>,
 }
 
+#[derive(Debug, PartialEq, Clone)]
+pub struct SuiteStat {
+    pub class_name: String,
+    pub tests: u32,
+    pub skipped: u32,
+    pub time_secs: f64,
+    pub module: Option<String>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct SkippedTest {
+    pub class: String,
+    pub method: String,
+    pub reason: Option<String>,
+}
+
 #[derive(Debug, Default, PartialEq)]
 pub struct SurefireResult {
     pub summary: TestSummary,
     pub failures: Vec<TestFailure>,
+    pub suites: Vec<SuiteStat>,
+    pub skipped_tests: Vec<SkippedTest>,
     pub files_read: usize,
     pub files_skipped_stale: usize,
     pub files_malformed: usize,
@@ -125,6 +143,15 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                             errors: parse_u32_attr(&reader, &e, b"errors"),
                             skipped: parse_u32_attr(&reader, &e, b"skipped"),
                         };
+                        result.suites.push(SuiteStat {
+                            class_name: extract_attr(&reader, &e, b"name").unwrap_or_default(),
+                            tests: file_summary.run,
+                            skipped: file_summary.skipped,
+                            time_secs: extract_attr(&reader, &e, b"time")
+                                .and_then(|v| v.parse::<f64>().ok())
+                                .unwrap_or(0.0),
+                            module: None,
+                        });
                         result.summary.add(&file_summary);
                     }
                     b"testcase" => {
@@ -152,6 +179,13 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                     b"system-err" if current_has_failure => {
                         stderr_buf.clear();
                         capture = Some(CaptureField::SystemErr);
+                    }
+                    b"skipped" => {
+                        result.skipped_tests.push(SkippedTest {
+                            class: current_class.clone().unwrap_or_default(),
+                            method: current_method.clone().unwrap_or_default(),
+                            reason: extract_attr(&reader, &e, b"message").filter(|s| !s.is_empty()),
+                        });
                     }
                     _ => {}
                 }
@@ -316,6 +350,8 @@ pub fn parse_dir(
                 aggregate.files_read += 1;
                 aggregate.summary.add(&file_result.summary);
                 aggregate.failures.extend(file_result.failures);
+                aggregate.suites.extend(file_result.suites);
+                aggregate.skipped_tests.extend(file_result.skipped_tests);
             }
             None => {
                 aggregate.files_malformed += 1;
@@ -569,5 +605,32 @@ mod tests {
             failures[2].test_output.is_none(),
             "third should exceed 10k cumulative"
         );
+    }
+
+    #[test]
+    fn parse_content_collects_suite_stats() {
+        let xml = include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        );
+        let r = parse_content(xml, &[]).expect("real fixture must parse");
+        assert_eq!(r.suites.len(), 1);
+        let s = &r.suites[0];
+        assert_eq!(s.class_name, "com.example.auth.user.UsersTest");
+        assert_eq!(s.tests, r.summary.run);
+        assert_eq!(s.skipped, r.summary.skipped);
+        assert!(s.time_secs > 0.0, "testsuite time attr must be parsed");
+        assert_eq!(s.module, None);
+    }
+
+    #[test]
+    fn parse_content_collects_skipped_test_names() {
+        let xml = include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+        );
+        let r = parse_content(xml, &[]).expect("real fixture must parse");
+        assert_eq!(r.skipped_tests.len(), 8);
+        let st = &r.skipped_tests[0];
+        assert_eq!(st.class, "com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test");
+        assert!(!st.method.is_empty());
     }
 }
