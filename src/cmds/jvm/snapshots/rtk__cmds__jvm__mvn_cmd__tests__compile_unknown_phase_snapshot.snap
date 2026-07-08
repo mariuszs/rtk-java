@@ -1,0 +1,7 @@
+---
+source: src/cmds/jvm/mvn_cmd.rs
+expression: output
+---
+[INFO] BUILD FAILURE
+[INFO] Total time:  0.244 s
+[ERROR] Unknown lifecycle phase "build".

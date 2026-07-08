@@ -1636,6 +1636,11 @@ fn filter_mvn_compile(output: &str) -> String {
             continue;
         }
 
+        if let Some(short) = shorten_unknown_phase_error(stripped) {
+            push(&mut result, &short);
+            continue;
+        }
+
         if !should_keep_compile_line(line) {
             swallow_error_context = false;
             continue;
@@ -1844,6 +1849,17 @@ fn is_errorish_segment_line(line: &str, stripped: &str) -> bool {
         || stripped.contains("Failed")
         || stripped.contains("failed")
         || TOTAL_TIME_RE.is_match(stripped)
+}
+
+/// Collapse Maven's `Unknown lifecycle phase "x"` error to its first
+/// sentence. The raw line ends with `-> [Help 1]`, so the boilerplate filter
+/// would otherwise swallow the reason entirely, and the 30-phase listing in
+/// the middle carries no signal for an agent that just typo'd a goal.
+fn shorten_unknown_phase_error(stripped: &str) -> Option<String> {
+    let idx = stripped.find("Unknown lifecycle phase ")?;
+    let rest = &stripped[idx..];
+    let sentence_end = rest.find(". ").map_or(rest.len(), |i| i + 1);
+    Some(format!("[ERROR] {}", &rest[..sentence_end]))
 }
 
 /// Returns true if a compile-phase output line should be kept.
@@ -3282,6 +3298,35 @@ mod tests {
             "bare npm script banner lines must be dropped"
         );
         assert!(output.contains("BUILD SUCCESS"), "verdict must stay");
+    }
+
+    #[test]
+    fn test_compile_unknown_phase_one_liner() {
+        // `mvn build compile` — "build" is not a Maven 3 phase. The
+        // informative error line ends with "-> [Help 1]", which the
+        // boilerplate filter used to swallow whole, leaving a bare
+        // BUILD FAILURE with no reason. Keep the first sentence, drop the
+        // 30-phase listing and Help boilerplate.
+        let input = include_str!("../../../tests/fixtures/mvn_unknown_phase_raw.txt");
+        let output = filter_mvn_compile(input);
+        assert!(
+            output.contains("Unknown lifecycle phase \"build\"."),
+            "the reason must survive filtering, got:\n{}",
+            output
+        );
+        assert!(
+            !output.contains("Available lifecycle phases are"),
+            "the 30-phase listing must be dropped, got:\n{}",
+            output
+        );
+        assert!(output.contains("BUILD FAILURE"));
+    }
+
+    #[test]
+    fn test_compile_unknown_phase_snapshot() {
+        let input = include_str!("../../../tests/fixtures/mvn_unknown_phase_raw.txt");
+        let output = filter_mvn_compile(input);
+        insta::assert_snapshot!(output);
     }
 
     #[test]
