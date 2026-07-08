@@ -651,6 +651,69 @@ fn rewrite_line_range(cmd: &str) -> Option<String> {
     None
 }
 
+lazy_static! {
+    /// GNU timeout DURATION token: integer/decimal with optional s/m/h/d suffix.
+    static ref TIMEOUT_DURATION_RE: Regex = Regex::new(r"^\d+(\.\d+)?[smhd]?$").unwrap();
+}
+
+/// Split a wrapper command that takes its own leading arguments before the
+/// wrapped command (`timeout [OPTS] DURATION cmd…`, `nice [-n N] cmd…`).
+/// Literal transparent-prefix matching can't express the varying argument, so
+/// these get a dedicated splitter. Returns `(wrapper_prefix, wrapped_command)`
+/// with the prefix taken verbatim from the input. Returns None when the
+/// wrapper syntax is unrecognized — the command is then left untouched.
+fn split_arg_wrapper(cmd: &str) -> Option<(&str, &str)> {
+    let mut tokens: Vec<(usize, &str)> = Vec::new();
+    let mut pos = 0;
+    for part in cmd.split_ascii_whitespace() {
+        let start = cmd[pos..].find(part)? + pos;
+        tokens.push((start, part));
+        pos = start + part.len();
+    }
+
+    let (_, first) = tokens.first()?;
+    let rest_idx = match *first {
+        "timeout" => {
+            let mut i = 1;
+            loop {
+                let (_, tok) = tokens.get(i)?;
+                match *tok {
+                    "--preserve-status" | "--foreground" | "-v" | "--verbose" => i += 1,
+                    "-k" | "-s" | "--kill-after" | "--signal" => i += 2,
+                    t if t.starts_with("--kill-after=") || t.starts_with("--signal=") => i += 1,
+                    t if t.starts_with('-') => return None,
+                    t => {
+                        if !TIMEOUT_DURATION_RE.is_match(t) {
+                            return None;
+                        }
+                        break i + 1;
+                    }
+                }
+            }
+        }
+        "nice" => {
+            let (_, second) = tokens.get(1)?;
+            if *second == "-n" || *second == "--adjustment" {
+                3
+            } else if second.starts_with("--adjustment=")
+                || (second.starts_with('-')
+                    && second[1..].chars().all(|c| c.is_ascii_digit())
+                    && second.len() > 1)
+            {
+                2
+            } else if second.starts_with('-') {
+                return None;
+            } else {
+                1
+            }
+        }
+        _ => return None,
+    };
+
+    let (rest_start, _) = tokens.get(rest_idx)?;
+    Some((cmd[..*rest_start].trim_end(), &cmd[*rest_start..]))
+}
+
 /// Built-in transparent wrappers that use the same strip/recurse/re-prepend
 /// contract as user-configured `transparent_prefixes`.
 const BUILTIN_TRANSPARENT_PREFIXES: &[&str] = &[
@@ -780,6 +843,13 @@ fn rewrite_segment_inner(
             return rewrite_segment_inner(rest, excluded, transparent_prefixes, depth + 1)
                 .map(|rewritten| format!("{} {}", prefix, rewritten));
         }
+    }
+
+    // Wrappers with their own arguments (`timeout 300 cmd`, `nice -n 10 cmd`)
+    // — same contract, but the prefix length varies per invocation.
+    if let Some((wrapper, rest)) = split_arg_wrapper(trimmed) {
+        return rewrite_segment_inner(rest, excluded, transparent_prefixes, depth + 1)
+            .map(|rewritten| format!("{} {}", wrapper, rewritten));
     }
 
     // Strip trailing stderr/stdout redirects before matching (#530)
@@ -1345,6 +1415,96 @@ mod tests {
             rewrite_command_no_prefixes("mvnd -q test", &[]),
             Some("rtk mvnd -q test".into())
         );
+    }
+
+    // --- timeout / nice: wrapper commands with their own arguments ---
+    // Literal transparent-prefix matching can't express the varying duration
+    // (`timeout 300`, `timeout 590`…), so these use a dedicated splitter.
+
+    #[test]
+    fn test_rewrite_timeout_mvnw() {
+        assert_eq!(
+            rewrite_command_no_prefixes("timeout 300 ./mvnw test", &[]),
+            Some("timeout 300 rtk mvn test".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_timeout_suffixed_duration() {
+        assert_eq!(
+            rewrite_command_no_prefixes("timeout 5m git status", &[]),
+            Some("timeout 5m rtk git status".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_timeout_with_kill_after_option() {
+        assert_eq!(
+            rewrite_command_no_prefixes("timeout -k 10 590 cargo test", &[]),
+            Some("timeout -k 10 590 rtk cargo test".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_timeout_signal_eq_option() {
+        assert_eq!(
+            rewrite_command_no_prefixes("timeout --signal=TERM 300 mvn verify", &[]),
+            Some("timeout --signal=TERM 300 rtk mvn verify".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_timeout_unsupported_inner_returns_none() {
+        assert!(rewrite_command_no_prefixes("timeout 300 sleep 5", &[]).is_none());
+    }
+
+    #[test]
+    fn test_rewrite_timeout_missing_duration_returns_none() {
+        // `timeout git status` is invalid timeout syntax — leave it alone
+        assert!(rewrite_command_no_prefixes("timeout git status", &[]).is_none());
+    }
+
+    #[test]
+    fn test_rewrite_timeout_no_command_returns_none() {
+        assert!(rewrite_command_no_prefixes("timeout 300", &[]).is_none());
+    }
+
+    #[test]
+    fn test_rewrite_timeout_in_compound_with_pipe() {
+        assert_eq!(
+            rewrite_command_no_prefixes("timeout 590 ./mvnw -q verify 2>&1 | tail -30", &[]),
+            Some("timeout 590 rtk mvn -q verify 2>&1 | tail -30".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_nice_with_adjustment() {
+        assert_eq!(
+            rewrite_command_no_prefixes("nice -n 10 ./mvnw compile", &[]),
+            Some("nice -n 10 rtk mvn compile".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_nice_without_adjustment() {
+        assert_eq!(
+            rewrite_command_no_prefixes("nice cargo build", &[]),
+            Some("nice rtk cargo build".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_nice_legacy_adjustment() {
+        assert_eq!(
+            rewrite_command_no_prefixes("nice -10 git log -5", &[]),
+            Some("nice -10 rtk git log -5".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_nice_unknown_flag_returns_none() {
+        // Unknown nice option — don't guess, leave the command alone
+        assert!(rewrite_command_no_prefixes("nice --weird git status", &[]).is_none());
     }
 
     #[test]
