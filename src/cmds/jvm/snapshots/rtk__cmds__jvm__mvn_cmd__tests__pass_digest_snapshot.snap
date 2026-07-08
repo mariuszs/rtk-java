@@ -1,0 +1,16 @@
+---
+source: src/cmds/jvm/mvn_cmd.rs
+expression: digest
+---
+# mvn test — 5 passed, 8 skipped
+.: MicrosoftEntraIdClient2Test 8 (0.0s)
+services: UsersTest 5 (0.8s)
+skipped:
+  MicrosoftEntraIdClient2Test.should_read_client3_users — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_client4_users — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_client2_users2 — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_vendor_groups — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_client1_users — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_client4_groups — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_client2_users — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_vendor_users — Work in progress - not ready for CI

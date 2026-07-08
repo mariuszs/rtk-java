@@ -1066,6 +1066,139 @@ pub(crate) fn enrich_with_reports(
     }
 }
 
+// ---------------------------------------------------------------------------
+// Pure renderers for pass-run enrichment (Task 4)
+// ---------------------------------------------------------------------------
+
+const MAX_INLINE_CLASSES: usize = 5;
+const MAX_INLINE_SKIPPED: usize = 3;
+
+#[allow(dead_code)]
+fn short_class(fqcn: &str) -> &str {
+    fqcn.rsplit('.').next().unwrap_or(fqcn)
+}
+
+#[allow(dead_code)]
+fn all_suites<'a>(
+    surefire: Option<&'a SurefireResult>,
+    failsafe: Option<&'a SurefireResult>,
+) -> Vec<&'a surefire_reports::SuiteStat> {
+    surefire
+        .into_iter()
+        .chain(failsafe)
+        .flat_map(|r| r.suites.iter())
+        .collect()
+}
+
+#[allow(dead_code)]
+fn all_skipped<'a>(
+    surefire: Option<&'a SurefireResult>,
+    failsafe: Option<&'a SurefireResult>,
+) -> Vec<&'a surefire_reports::SkippedTest> {
+    surefire
+        .into_iter()
+        .chain(failsafe)
+        .flat_map(|r| r.skipped_tests.iter())
+        .collect()
+}
+
+/// Condensed per-class report written next to the tee log. `None` when no
+/// suites were parsed (nothing worth writing).
+#[allow(dead_code)]
+fn render_classes_digest(
+    goal: &str,
+    surefire: Option<&SurefireResult>,
+    failsafe: Option<&SurefireResult>,
+) -> Option<String> {
+    let suites = all_suites(surefire, failsafe);
+    if suites.is_empty() {
+        return None;
+    }
+    let skipped = all_skipped(surefire, failsafe);
+    let total: u32 = suites.iter().map(|s| s.tests).sum();
+    let total_skipped: u32 = suites.iter().map(|s| s.skipped).sum();
+    let passed = total.saturating_sub(total_skipped);
+
+    let mut out = format!("# mvn {goal} — {passed} passed");
+    if total_skipped > 0 {
+        write!(out, ", {total_skipped} skipped").ok();
+    }
+    out.push('\n');
+
+    // Group by module; BTreeMap for deterministic order, root module last-free
+    // "." key sorts first which is fine.
+    let mut by_module: std::collections::BTreeMap<&str, Vec<String>> =
+        std::collections::BTreeMap::new();
+    for s in &suites {
+        by_module
+            .entry(s.module.as_deref().unwrap_or("."))
+            .or_default()
+            .push(format!(
+                "{} {} ({:.1}s)",
+                short_class(&s.class_name),
+                s.tests,
+                s.time_secs
+            ));
+    }
+    for (module, classes) in &by_module {
+        writeln!(out, "{module}: {}", classes.join(", ")).ok();
+    }
+
+    if !skipped.is_empty() {
+        out.push_str("skipped:\n");
+        for st in &skipped {
+            match &st.reason {
+                Some(reason) => {
+                    writeln!(out, "  {}.{} — {}", short_class(&st.class), st.method, reason)
+                        .ok();
+                }
+                None => {
+                    writeln!(out, "  {}.{}", short_class(&st.class), st.method).ok();
+                }
+            }
+        }
+    }
+    Some(out)
+}
+
+/// Hybrid inline rendering for passing runs. Returns the (possibly extended)
+/// summary and whether the digest reference line is required — true when the
+/// class list or skipped names exceed the inline caps.
+#[allow(dead_code)]
+fn render_pass_inline(
+    text_summary: &str,
+    surefire: Option<&SurefireResult>,
+    failsafe: Option<&SurefireResult>,
+) -> (String, bool) {
+    let suites = all_suites(surefire, failsafe);
+    let skipped = all_skipped(surefire, failsafe);
+    let needs_reference =
+        suites.len() > MAX_INLINE_CLASSES || skipped.len() > MAX_INLINE_SKIPPED;
+
+    let mut out = text_summary.to_string();
+    if !suites.is_empty() && suites.len() <= MAX_INLINE_CLASSES {
+        for s in &suites {
+            write!(
+                out,
+                "\n{}: {} ({:.1}s)",
+                short_class(&s.class_name),
+                s.tests,
+                s.time_secs
+            )
+            .ok();
+        }
+    }
+    if !skipped.is_empty() && skipped.len() <= MAX_INLINE_SKIPPED {
+        for st in &skipped {
+            write!(out, "\nskipped: {}.{}", short_class(&st.class), st.method).ok();
+            if let Some(reason) = &st.reason {
+                write!(out, " — {reason}").ok();
+            }
+        }
+    }
+    (out, needs_reference)
+}
+
 fn render_enriched(
     text_summary: &str,
     surefire: Option<&SurefireResult>,
@@ -4687,6 +4820,85 @@ mod tests {
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 80.0, "expected ≥80%, got {:.1}%", savings);
         insta::assert_snapshot!(output);
+    }
+
+    // --- Pure renderers for pass-run enrichment (Task 4) ---
+
+    fn parsed_fixture(xml: &str) -> super::surefire_reports::SurefireResult {
+        super::surefire_reports::parse_content(xml, &[]).expect("fixture must parse")
+    }
+
+    #[test]
+    fn digest_snapshot_from_real_fixtures() {
+        let mut sf = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        ));
+        let entra = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+        ));
+        sf.suites.extend(entra.suites.clone());
+        sf.skipped_tests.extend(entra.skipped_tests.clone());
+        sf.summary.add(&entra.summary);
+        sf.suites[0].module = Some("services".to_string());
+
+        let digest = super::render_classes_digest("test", Some(&sf), None)
+            .expect("suites present -> digest");
+        insta::assert_snapshot!("pass_digest_snapshot", digest);
+    }
+
+    #[test]
+    fn digest_none_without_suites() {
+        assert_eq!(super::render_classes_digest("test", None, None), None);
+        let empty = super::surefire_reports::SurefireResult::default();
+        assert_eq!(super::render_classes_digest("test", Some(&empty), None), None);
+    }
+
+    #[test]
+    fn pass_inline_small_run_lists_classes() {
+        let sf = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        ));
+        let (out, needs_ref) =
+            super::render_pass_inline("mvn test: 12 passed (3.1 s)", Some(&sf), None);
+        assert!(out.starts_with("mvn test: 12 passed (3.1 s)\n"));
+        assert!(out.contains("UsersTest:"), "short class name inline, got: {out}");
+        assert!(!needs_ref, "1 class <= MAX_INLINE_CLASSES");
+        insta::assert_snapshot!("pass_inline_small_snapshot", out);
+    }
+
+    #[test]
+    fn pass_inline_large_run_defers_to_reference() {
+        // Build >MAX_INLINE_CLASSES suites from the real fixture by cloning
+        // its (real) suite stat under distinct class names.
+        let base = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        ));
+        let mut sf = super::surefire_reports::SurefireResult::default();
+        for i in 0..6 {
+            let mut s = base.suites[0].clone();
+            s.class_name = format!("com.example.auth.Suite{i}Test");
+            sf.suites.push(s);
+            sf.summary.add(&base.summary);
+        }
+        let (out, needs_ref) =
+            super::render_pass_inline("mvn test: 72 passed (9.0 s)", Some(&sf), None);
+        assert_eq!(out, "mvn test: 72 passed (9.0 s)", "no inline list for >5 classes");
+        assert!(needs_ref);
+    }
+
+    #[test]
+    fn pass_inline_many_skipped_forces_reference() {
+        let sf = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+        ));
+        // 8 skipped > MAX_INLINE_SKIPPED: names go to the digest only.
+        let (out, needs_ref) =
+            super::render_pass_inline("mvn test: 5 passed, 8 skipped (2.0 s)", Some(&sf), None);
+        assert!(needs_ref, "skipped names beyond inline cap require the digest reference");
+        assert!(
+            !out.contains("skipped: "),
+            "no skipped-name lines inline when count > cap, got: {out}"
+        );
     }
 }
 
