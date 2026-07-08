@@ -20,6 +20,7 @@ const MVN_SUBCMD_SAVINGS: &[(&str, f64)] = &[
     ("checkstyle:check", 90.0),
     ("checkstyle", 90.0),
     ("dependency:tree", 70.0),
+    ("dependency:list", 80.0),
     ("clean", 95.0),
 ];
 
@@ -721,7 +722,7 @@ pub const RULES: &[RtkRule] = &[
         subcmd_status: &[],
     },
     RtkRule {
-        pattern: r"^(?:\.\/?)?mvnw?\s+(?:\S+\s+)*(test|verify|compile|package|clean|install|integration-test|deploy|dependency:tree|checkstyle:check|checkstyle|failsafe:integration-test|failsafe:verify|surefire:test)\b",
+        pattern: r"^(?:\.\/?)?mvnw?\s+(?:\S+\s+)*(test|verify|compile|package|clean|install|integration-test|deploy|dependency:tree|checkstyle:check|checkstyle|failsafe:integration-test|failsafe:verify|surefire:test|dependency:list)\b",
         rtk_cmd: "rtk mvn",
         rewrite_prefixes: &["mvn", "mvnw", "./mvnw"],
         category: "Build",
@@ -730,7 +731,7 @@ pub const RULES: &[RtkRule] = &[
         subcmd_status: &[],
     },
     RtkRule {
-        pattern: r"^mvnd\s+(?:\S+\s+)*(test|verify|compile|package|clean|install|integration-test|deploy|dependency:tree|checkstyle:check|checkstyle|failsafe:integration-test|failsafe:verify|surefire:test)\b",
+        pattern: r"^mvnd\s+(?:\S+\s+)*(test|verify|compile|package|clean|install|integration-test|deploy|dependency:tree|checkstyle:check|checkstyle|failsafe:integration-test|failsafe:verify|surefire:test|dependency:list)\b",
         rtk_cmd: "rtk mvnd",
         rewrite_prefixes: &["mvnd"],
         category: "Build",

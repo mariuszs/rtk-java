@@ -1417,6 +1417,30 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_rewrite_mvn_dependency_list() {
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw dependency:list -Dskip.npm", &[]),
+            Some("rtk mvn dependency:list -Dskip.npm".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_mvn_failsafe_and_surefire_plugin_goals() {
+        assert_eq!(
+            rewrite_command_no_prefixes("mvn failsafe:verify", &[]),
+            Some("rtk mvn failsafe:verify".into())
+        );
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw failsafe:integration-test -Dit.test=FooIT", &[]),
+            Some("rtk mvn failsafe:integration-test -Dit.test=FooIT".into())
+        );
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw surefire:test -Dtest=FooTest", &[]),
+            Some("rtk mvn surefire:test -Dtest=FooTest".into())
+        );
+    }
+
     // --- timeout / nice: wrapper commands with their own arguments ---
     // Literal transparent-prefix matching can't express the varying duration
     // (`timeout 300`, `timeout 590`…), so these use a dedicated splitter.

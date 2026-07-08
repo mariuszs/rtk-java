@@ -369,6 +369,17 @@ pub fn run_dep_tree(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i
     )
 }
 
+pub fn run_dep_list(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
+    run_simple_goal(
+        binary,
+        "dependency:list",
+        "dep_list",
+        filter_mvn_dep_list,
+        args,
+        verbose,
+    )
+}
+
 /// Shared runner for single-filter goals: spawns `<binary> <goal> <args>`,
 /// pipes stdout through `filter`, tees raw output under `tee_slug`. Only used
 /// by goals with no XML enrichment — `run_tests_like` handles test/verify.
@@ -420,6 +431,7 @@ enum GoalRouting {
     Compile,
     Checkstyle,
     DepTree,
+    DepList,
     /// Stream unchanged via `status()`; tracked for metrics only.
     Passthrough,
 }
@@ -788,6 +800,7 @@ fn route_goal(subcommand: &str) -> GoalRouting {
         "clean" => GoalRouting::Clean,
         "checkstyle:check" | "checkstyle" => GoalRouting::Checkstyle,
         "dependency:tree" => GoalRouting::DepTree,
+        "dependency:list" => GoalRouting::DepList,
         _ => GoalRouting::Passthrough,
     }
 }
@@ -854,6 +867,7 @@ pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32
                 GoalRouting::Compile => run_compile_like(binary, &goal, &rest, verbose),
                 GoalRouting::Checkstyle => run_checkstyle(binary, &rest, verbose),
                 GoalRouting::DepTree => run_dep_tree(binary, &rest, verbose),
+                GoalRouting::DepList => run_dep_list(binary, &rest, verbose),
                 GoalRouting::Passthrough => run_passthrough_all(binary, args, verbose),
             }
         }
@@ -2136,6 +2150,128 @@ fn filter_mvn_dep_tree(output: &str) -> String {
     result_lines.join("\n")
 }
 
+/// Maven dependency scopes, in display order.
+const DEP_LIST_SCOPES: &[&str] = &["compile", "provided", "runtime", "system", "test", "import"];
+
+/// Parse one `dependency:list` entry into `(scope, compact_coordinate)`.
+/// Input shape after the maven prefix is stripped:
+/// `group:artifact:type[:classifier]:version:scope[ (optional)][ -- module …]`.
+/// The default `jar` packaging and the JPMS module note carry no information
+/// for a dependency inventory, so both are dropped; classifiers are kept.
+fn dep_list_entry(stripped: &str) -> Option<(String, String)> {
+    let coord = stripped.split(" -- ").next().unwrap_or(stripped).trim();
+    let (coord, optional) = match coord.strip_suffix("(optional)") {
+        Some(c) => (c.trim(), true),
+        None => (coord, false),
+    };
+    let parts: Vec<&str> = coord.split(':').collect();
+    let (group, artifact, packaging, classifier, version, scope) = match parts.as_slice() {
+        [g, a, t, v, s] => (*g, *a, *t, None, *v, *s),
+        [g, a, t, c, v, s] => (*g, *a, *t, Some(*c), *v, *s),
+        _ => return None,
+    };
+    if !DEP_LIST_SCOPES.contains(&scope) {
+        return None;
+    }
+    // Guard against prose that happens to contain colons: coordinates never
+    // contain whitespace.
+    if coord.contains(char::is_whitespace) {
+        return None;
+    }
+    let mut compact = match (packaging, classifier) {
+        ("jar", None) => format!("{group}:{artifact}:{version}"),
+        ("jar", Some(c)) => format!("{group}:{artifact}:{c}:{version}"),
+        (_, None) => format!("{group}:{artifact}:{packaging}:{version}"),
+        (_, Some(c)) => format!("{group}:{artifact}:{packaging}:{c}:{version}"),
+    };
+    if optional {
+        compact.push_str(" (optional)");
+    }
+    Some((scope.to_string(), compact))
+}
+
+/// Filter `mvn dependency:list` output: dedupe entries across modules, group
+/// them by scope, and drop the `[INFO]` prefix, default `jar` packaging and
+/// JPMS `-- module` notes. Errors and BUILD FAILURE lines are preserved.
+fn filter_mvn_dep_list(output: &str) -> String {
+    let clean = strip_ansi(output);
+    if clean.trim().is_empty() {
+        return "mvn dependency:list: no output".to_string();
+    }
+
+    let mut groups: Vec<(String, Vec<String>)> = Vec::new();
+    let mut seen: HashSet<String> = HashSet::new();
+    let mut module_count = 0usize;
+    let mut error_lines: Vec<String> = Vec::new();
+    let mut build_failure = false;
+
+    for line in clean.lines() {
+        let trimmed = line.trim();
+        let stripped = strip_maven_prefix(trimmed);
+
+        if stripped.starts_with("The following files have been resolved") {
+            module_count += 1;
+            continue;
+        }
+        if trimmed.starts_with(ERROR_TAG) && !stripped.is_empty() {
+            if error_lines.len() < 20 {
+                error_lines.push(stripped.to_string());
+            }
+            continue;
+        }
+        if stripped.contains("BUILD FAILURE") {
+            build_failure = true;
+            continue;
+        }
+        if let Some((scope, compact)) = dep_list_entry(stripped) {
+            let key = format!("{scope} {compact}");
+            if seen.insert(key) {
+                match groups.iter_mut().find(|(s, _)| *s == scope) {
+                    Some((_, deps)) => deps.push(compact),
+                    None => groups.push((scope, vec![compact])),
+                }
+            }
+        }
+    }
+
+    if groups.is_empty() && error_lines.is_empty() && !build_failure {
+        return "mvn dependency:list: no dependencies found".to_string();
+    }
+
+    groups.sort_by_key(|(scope, _)| {
+        DEP_LIST_SCOPES.iter().position(|s| s == scope).unwrap_or(usize::MAX)
+    });
+
+    let total: usize = groups.iter().map(|(_, deps)| deps.len()).sum();
+    let mut out = String::with_capacity(clean.len() / 4);
+    if total > 0 {
+        out.push_str(&format!("mvn dependency:list: {total} unique deps"));
+        if module_count > 1 {
+            let _ = write!(out, " across {module_count} modules");
+        }
+        for (scope, deps) in &mut groups {
+            deps.sort();
+            let _ = write!(out, "\n{scope} ({}):", deps.len());
+            for dep in deps.iter() {
+                let _ = write!(out, "\n  {dep}");
+            }
+        }
+    }
+    if !error_lines.is_empty() || build_failure {
+        if !out.is_empty() {
+            out.push('\n');
+        }
+        out.push_str(&error_lines.join("\n"));
+        if build_failure {
+            if !error_lines.is_empty() {
+                out.push('\n');
+            }
+            out.push_str("BUILD FAILURE");
+        }
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -2656,6 +2792,73 @@ mod tests {
         assert_eq!(output, "mvn dependency:tree: no output");
     }
 
+    // --- dependency:list ---
+
+    #[test]
+    fn test_dep_list_snapshot() {
+        let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
+        let output = filter_mvn_dep_list(input);
+        insta::assert_snapshot!(output);
+    }
+
+    #[test]
+    fn test_dep_list_savings() {
+        let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
+        let output = filter_mvn_dep_list(input);
+
+        let input_tokens = count_tokens(input);
+        let output_tokens = count_tokens(&output);
+        let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
+
+        assert!(
+            savings >= 60.0,
+            "mvn dependency:list: expected >=60% savings, got {:.1}% ({} -> {} tokens)",
+            savings,
+            input_tokens,
+            output_tokens,
+        );
+    }
+
+    #[test]
+    fn test_dep_list_groups_by_scope_and_strips_noise() {
+        let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
+        let output = filter_mvn_dep_list(input);
+
+        assert!(output.contains("compile ("), "should have a compile scope group");
+        assert!(output.contains("test ("), "should have a test scope group");
+        // Coordinates keep group:artifact:version, drop packaging + JPMS noise
+        assert!(
+            output.contains("ch.qos.logback:logback-classic:1.5.34"),
+            "compact coordinate expected"
+        );
+        assert!(!output.contains("-- module"), "JPMS module noise must be dropped");
+        assert!(!output.contains(":jar:"), "default packaging token must be dropped");
+        assert!(!output.contains("[INFO]"), "maven prefixes must be dropped");
+    }
+
+    #[test]
+    fn test_dep_list_empty() {
+        let output = filter_mvn_dep_list("");
+        assert_eq!(output, "mvn dependency:list: no output");
+    }
+
+    #[test]
+    fn test_dep_list_malformed_passthrough_no_panic() {
+        let output = filter_mvn_dep_list("not valid maven output\nrandom text\n");
+        assert!(!output.is_empty());
+    }
+
+    #[test]
+    fn test_dep_list_failure_keeps_errors() {
+        let input = "[INFO] Scanning for projects...\n\
+                     [ERROR] Failed to execute goal on project app: Could not resolve dependencies\n\
+                     [INFO] BUILD FAILURE\n\
+                     [INFO] Total time:  1.2 s\n";
+        let output = filter_mvn_dep_list(input);
+        assert!(output.contains("Could not resolve dependencies"));
+        assert!(output.contains("BUILD FAILURE"));
+    }
+
     #[test]
     fn test_dep_tree_ansi_codes_stripped() {
         let input = "\x1b[34;1m[INFO]\x1b[0m com.example:app:jar:1.0\n\
@@ -3009,6 +3212,7 @@ mod tests {
         );
         assert_eq!(route_goal("clean"), GoalRouting::Clean);
         assert_eq!(route_goal("dependency:tree"), GoalRouting::DepTree);
+        assert_eq!(route_goal("dependency:list"), GoalRouting::DepList);
         // Direct plugin-goal invocations run the same test machinery, so they
         // share the test-output filter — invoked verbatim (plugin goal, not a
         // lifecycle phase):
