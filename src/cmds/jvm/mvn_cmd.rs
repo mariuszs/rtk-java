@@ -324,7 +324,7 @@ fn run_tests_like(
             // frame filtering matches the XML enrichment's behavior — keeps
             // the fallback (no XML reports) format consistent with XML output.
             let filtered = filter_mvn_tests_with_goal(raw, goal_str, &app_pkgs);
-            enrich_with_reports(&filtered, &cwd_for_filter, started_at, &app_pkgs, goal_str)
+            enrich_with_reports(&filtered, &cwd_for_filter, started_at, &app_pkgs, goal_str).text
         },
         runner::RunOptions::with_tee(&tee_label),
     )
@@ -773,7 +773,7 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
             let mut parts = filter_segments(raw);
             if enrich && !parts.tests.trim().is_empty() {
                 parts.tests =
-                    enrich_with_reports(&parts.tests, &cwd, started_at, &app_pkgs, test_goal);
+                    enrich_with_reports(&parts.tests, &cwd, started_at, &app_pkgs, test_goal).text;
             }
             compose_multi(&parts, &header)
         },
@@ -1022,47 +1022,88 @@ fn collect_reports(
     merged
 }
 
+/// Result of enrichment: the (possibly extended) text summary plus optional
+/// digest content to write next to the tee log.
+pub(crate) struct Enriched {
+    pub(crate) text: String,
+    /// Digest file content; `None` -> nothing to write.
+    // TODO(Task 6): production call sites still take `.text` only — remove
+    // this once digest writing + "classes: <path>" reference lines are wired
+    // in (`run_tests_like`/`run_multi_goal`). Read today only by tests.
+    #[allow(dead_code)]
+    pub(crate) digest: Option<String>,
+    /// Append a "classes: <path>" line after writing the digest.
+    #[allow(dead_code)]
+    pub(crate) reference: bool,
+}
+
 /// Wrap the text-filter summary with structured failure details sourced from
 /// `target/surefire-reports/` and `target/failsafe-reports/` XML files.
 /// Discovers per-module report dirs in reactor builds (depth-1 walk).
+///
+/// Passing runs are also enriched: a per-class breakdown is inlined when it
+/// fits (see `MAX_INLINE_CLASSES`/`MAX_INLINE_SKIPPED`), otherwise the
+/// summary is left unchanged and the full breakdown goes only into the
+/// returned digest, with `reference` signaling a "classes: <path>" pointer
+/// line is needed.
 pub(crate) fn enrich_with_reports(
     text_summary: &str,
     cwd: &std::path::Path,
     since: std::time::SystemTime,
     app_packages: &[String],
     goal: &str,
-) -> String {
+) -> Enriched {
+    let passthrough = |text: String| Enriched {
+        text,
+        digest: None,
+        reference: false,
+    };
     if !text_summary.starts_with("mvn ") {
-        return text_summary.to_string();
+        return passthrough(text_summary.to_string());
     }
 
     let zero_tests = text_summary.ends_with(": no tests run")
         || text_summary.contains(": 0 passed");
     let has_failures =
         text_summary.contains("failed") || text_summary.contains("BUILD FAILURE");
-    let looks_clean = text_summary.contains("passed (")
-        && !text_summary.contains("failed")
-        && !text_summary.contains("BUILD FAILURE");
-
-    if looks_clean && !zero_tests {
-        return text_summary.to_string();
-    }
+    // NOTE: replaces the old `looks_clean` substring check ("passed (" missed
+    // "N passed, K skipped (t)" summaries) — a run is passing iff it neither
+    // failed nor ran zero tests.
+    let passing = !zero_tests && !has_failures;
 
     let (sf_dirs, fs_dirs) = discover_report_dirs(cwd);
     let sf = collect_reports(&sf_dirs, since, app_packages, cwd);
     let fs = collect_reports(&fs_dirs, since, app_packages, cwd);
+    let digest = render_classes_digest(goal, sf.as_ref(), fs.as_ref());
 
-    match (zero_tests, has_failures, &sf, &fs) {
-        (true, _, None, None) => format!(
+    if passing {
+        // Fallback invariant: no parsed reports -> summary unchanged, silently.
+        if digest.is_none() {
+            return passthrough(text_summary.to_string());
+        }
+        let (text, reference) = render_pass_inline(text_summary, sf.as_ref(), fs.as_ref());
+        return Enriched {
+            text,
+            digest,
+            reference,
+        };
+    }
+
+    match (zero_tests, &sf, &fs) {
+        (true, None, None) => passthrough(format!(
             "mvn {goal}: 0 tests executed — surefire detected no tests. \
              Check pom.xml (surefire plugin configuration) or run: \
              rtk proxy mvn {goal}"
-        ),
-        (_, true, None, None) => format!(
+        )),
+        (false, None, None) => passthrough(format!(
             "{text_summary}\n(no XML reports found — check target/surefire-reports/ \
              or run: rtk proxy mvn {goal})"
-        ),
-        _ => render_enriched(text_summary, sf.as_ref(), fs.as_ref()),
+        )),
+        _ => Enriched {
+            text: render_enriched(text_summary, sf.as_ref(), fs.as_ref()),
+            reference: digest.is_some(),
+            digest,
+        },
     }
 }
 
@@ -1073,12 +1114,10 @@ pub(crate) fn enrich_with_reports(
 const MAX_INLINE_CLASSES: usize = 5;
 const MAX_INLINE_SKIPPED: usize = 3;
 
-#[allow(dead_code)]
 fn short_class(fqcn: &str) -> &str {
     fqcn.rsplit('.').next().unwrap_or(fqcn)
 }
 
-#[allow(dead_code)]
 fn all_suites<'a>(
     surefire: Option<&'a SurefireResult>,
     failsafe: Option<&'a SurefireResult>,
@@ -1090,7 +1129,6 @@ fn all_suites<'a>(
         .collect()
 }
 
-#[allow(dead_code)]
 fn all_skipped<'a>(
     surefire: Option<&'a SurefireResult>,
     failsafe: Option<&'a SurefireResult>,
@@ -1104,7 +1142,6 @@ fn all_skipped<'a>(
 
 /// Condensed per-class report written next to the tee log. `None` when no
 /// suites were parsed (nothing worth writing).
-#[allow(dead_code)]
 fn render_classes_digest(
     goal: &str,
     surefire: Option<&SurefireResult>,
@@ -1164,7 +1201,6 @@ fn render_classes_digest(
 /// Hybrid inline rendering for passing runs. Returns the (possibly extended)
 /// summary and whether the digest reference line is required — true when the
 /// class list or skipped names exceed the inline caps.
-#[allow(dead_code)]
 fn render_pass_inline(
     text_summary: &str,
     surefire: Option<&SurefireResult>,
@@ -3935,10 +3971,62 @@ mod tests {
         );
     }
 
-    #[test]
-    fn enrich_happy_path_passes_through_without_io() {
+    /// Helper: tempdir with N copies of the real UsersTest fixture under
+    /// target/surefire-reports, class names made distinct.
+    fn tmp_with_reports(n: usize) -> tempfile::TempDir {
         let tmp = tempfile::tempdir().unwrap();
-        // No target/ directory exists under tmp — ensures no I/O fallback would succeed.
+        let dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&dir).unwrap();
+        let xml = include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        );
+        for i in 0..n {
+            let renamed = xml.replace("UsersTest", &format!("Suite{i}Test"));
+            std::fs::write(dir.join(format!("TEST-com.example.Suite{i}Test.xml")), renamed)
+                .unwrap();
+        }
+        tmp
+    }
+
+    #[test]
+    fn enrich_pass_small_run_inlines_classes_and_carries_digest() {
+        let tmp = tmp_with_reports(2);
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "mvn test: 24 passed (3.0 s)",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        );
+        assert!(out.text.contains("Suite0Test:"), "inline class list, got: {}", out.text);
+        assert!(out.digest.is_some(), "digest written even for inline runs");
+        assert!(!out.reference, "2 classes fit inline — no reference line needed");
+    }
+
+    #[test]
+    fn enrich_pass_large_run_defers_to_digest() {
+        let tmp = tmp_with_reports(6);
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "mvn test: 72 passed (9.0 s)",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        );
+        assert_eq!(out.text, "mvn test: 72 passed (9.0 s)");
+        assert!(out.reference);
+        let digest = out.digest.expect("digest for large run");
+        assert!(digest.contains("Suite5Test"), "all classes in digest, got: {digest}");
+    }
+
+    #[test]
+    fn enrich_clean_run_without_reports_passes_through() {
+        // Replaces enrich_happy_path_passes_through_without_io: the pass path now
+        // performs discovery I/O, but with no reports found the summary must come
+        // back byte-identical and nothing is written.
+        let tmp = tempfile::tempdir().unwrap();
         let text = "mvn test: 42 passed (1.234 s)";
         let out = super::enrich_with_reports(
             text,
@@ -3947,7 +4035,36 @@ mod tests {
             &pkgs("com.example"),
             "test",
         );
-        assert_eq!(out, text);
+        assert_eq!(out.text, text);
+        assert_eq!(out.digest, None);
+    }
+
+    #[test]
+    fn enrich_pass_with_skipped_count_in_summary_still_enriches() {
+        // "N passed, K skipped (t)" summaries used to bypass the old
+        // `looks_clean` substring check; the new pass gate must catch them.
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join("TEST-com.example.MicrosoftEntraIdClient2Test.xml"),
+            include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+            ),
+        )
+        .unwrap();
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "mvn test: 5 passed, 8 skipped (2.0 s)",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        );
+        assert!(out.digest.is_some());
+        let digest = out.digest.unwrap();
+        assert!(digest.contains("skipped:"), "skipped names in digest, got: {digest}");
+        assert!(out.reference, "8 skipped > inline cap");
     }
 
     #[test]
@@ -3961,8 +4078,8 @@ mod tests {
             &pkgs("com.example"),
             "test",
         );
-        assert!(out.contains("0 tests executed"));
-        assert!(out.contains("rtk proxy mvn test") || out.contains("surefire"));
+        assert!(out.text.contains("0 tests executed"));
+        assert!(out.text.contains("rtk proxy mvn test") || out.text.contains("surefire"));
     }
 
     #[test]
@@ -3977,14 +4094,14 @@ mod tests {
             "verify",
         );
         assert!(
-            out.contains("0 tests executed"),
+            out.text.contains("0 tests executed"),
             "zero-tests branch must fire for verify, got: {}",
-            out
+            out.text
         );
         assert!(
-            out.contains("rtk proxy mvn verify"),
+            out.text.contains("rtk proxy mvn verify"),
             "error message must reference the verify goal, got: {}",
-            out
+            out.text
         );
     }
 
@@ -4111,16 +4228,18 @@ mod tests {
 
         // XML block present.
         assert!(
-            out.contains("Failures (from surefire-reports/)"),
-            "missing XML failures section:\n{out}"
+            out.text.contains("Failures (from surefire-reports/)"),
+            "missing XML failures section:\n{}",
+            out.text
         );
         // Text block gone — only the XML variant remains.
         assert!(
-            !out.contains("\nFailures:\n"),
-            "text-filter 'Failures:' block leaked through — duplicate:\n{out}"
+            !out.text.contains("\nFailures:\n"),
+            "text-filter 'Failures:' block leaked through — duplicate:\n{}",
+            out.text
         );
         // Summary + BUILD FAILURE preserved.
-        assert!(out.starts_with("mvn test: 2 run, 2 failed (0.6 s)\nBUILD FAILURE"));
+        assert!(out.text.starts_with("mvn test: 2 run, 2 failed (0.6 s)\nBUILD FAILURE"));
     }
 
     #[test]
@@ -4135,12 +4254,14 @@ mod tests {
             super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
 
         assert!(
-            out.contains("Failures:\n1. com.example.LostTest.boom"),
-            "fallback dropped text failures when XML was absent:\n{out}"
+            out.text.contains("Failures:\n1. com.example.LostTest.boom"),
+            "fallback dropped text failures when XML was absent:\n{}",
+            out.text
         );
         assert!(
-            out.contains("no XML reports found"),
-            "expected no-reports hint in fallback:\n{out}"
+            out.text.contains("no XML reports found"),
+            "expected no-reports hint in fallback:\n{}",
+            out.text
         );
     }
 
@@ -4159,9 +4280,9 @@ mod tests {
         let text = "mvn test: 4 run, 2 failed (01:02 min)\nBUILD FAILURE";
         let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
 
-        assert!(out.contains("Failures (from surefire-reports/)"));
-        assert!(out.contains("com.example.FailingTest.shouldReturnUser"));
-        assert!(out.contains("reports:"));
+        assert!(out.text.contains("Failures (from surefire-reports/)"));
+        assert!(out.text.contains("com.example.FailingTest.shouldReturnUser"));
+        assert!(out.text.contains("reports:"));
     }
 
     #[test]
@@ -4185,9 +4306,9 @@ mod tests {
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text = "mvn verify: 10 run, 3 failed (03:30 min)\nBUILD FAILURE";
         let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
-        assert!(out.contains("Failures (from surefire-reports/)"));
-        assert!(out.contains("Integration failures (from failsafe-reports/)"));
-        assert!(out.contains("Caused by: org.hibernate.HibernateException"));
+        assert!(out.text.contains("Failures (from surefire-reports/)"));
+        assert!(out.text.contains("Integration failures (from failsafe-reports/)"));
+        assert!(out.text.contains("Caused by: org.hibernate.HibernateException"));
     }
 
     #[test]
@@ -4241,24 +4362,28 @@ mod tests {
 
         // Failure details from module-a's surefire reports must surface.
         assert!(
-            out.contains("Failures (from surefire-reports/)"),
-            "missed module-a surefire reports:\n{out}"
+            out.text.contains("Failures (from surefire-reports/)"),
+            "missed module-a surefire reports:\n{}",
+            out.text
         );
         assert!(
-            out.contains("com.example.FailingTest.shouldReturnUser"),
-            "missed FailingTest details:\n{out}"
+            out.text.contains("com.example.FailingTest.shouldReturnUser"),
+            "missed FailingTest details:\n{}",
+            out.text
         );
 
         // Integration failure from module-c must also surface.
         assert!(
-            out.contains("Integration failures (from failsafe-reports/)"),
-            "missed module-c failsafe reports:\n{out}"
+            out.text.contains("Integration failures (from failsafe-reports/)"),
+            "missed module-c failsafe reports:\n{}",
+            out.text
         );
 
         // Negative: must NOT regress to the no-reports hint.
         assert!(
-            !out.contains("no XML reports"),
-            "discovered per-module reports yet still emitted no-reports hint:\n{out}"
+            !out.text.contains("no XML reports"),
+            "discovered per-module reports yet still emitted no-reports hint:\n{}",
+            out.text
         );
     }
 
@@ -4330,17 +4455,20 @@ mod tests {
 
         // Failure details must surface from module1's report (not from cwd/target).
         assert!(
-            out.contains("com.example.app.SpeakerTest.speak"),
-            "missed real-world per-module failure surfacing:\n{out}"
+            out.text.contains("com.example.app.SpeakerTest.speak"),
+            "missed real-world per-module failure surfacing:\n{}",
+            out.text
         );
         assert!(
-            out.contains("expected") || out.contains("ComparisonFailure"),
-            "missed real failure message:\n{out}"
+            out.text.contains("expected") || out.text.contains("ComparisonFailure"),
+            "missed real failure message:\n{}",
+            out.text
         );
         // No fallback hint — reports were found.
         assert!(
-            !out.contains("no XML reports"),
-            "discovered per-module reports yet still emitted no-reports hint:\n{out}"
+            !out.text.contains("no XML reports"),
+            "discovered per-module reports yet still emitted no-reports hint:\n{}",
+            out.text
         );
     }
 
@@ -4373,8 +4501,9 @@ mod tests {
         // Should fall through to the no-reports hint — none of the skipped
         // dirs counted as a module.
         assert!(
-            out.contains("no XML reports"),
-            "walker recursed into a skipped dir:\n{out}"
+            out.text.contains("no XML reports"),
+            "walker recursed into a skipped dir:\n{}",
+            out.text
         );
     }
 
@@ -4389,8 +4518,8 @@ mod tests {
             &pkgs("com.example"),
             "test",
         );
-        assert!(out.contains("no XML reports"));
-        assert!(out.contains("rtk proxy mvn test"));
+        assert!(out.text.contains("no XML reports"));
+        assert!(out.text.contains("rtk proxy mvn test"));
     }
 
     #[test]
@@ -4405,7 +4534,7 @@ mod tests {
             &pkgs("com.example"),
             "test",
         );
-        assert_eq!(out, text, "10 passed must short-circuit without enrichment");
+        assert_eq!(out.text, text, "10 passed must short-circuit without enrichment");
     }
 
     #[test]
@@ -4427,7 +4556,7 @@ mod tests {
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text = "mvn test: 7 run, 2 failed (00:10 min)\nBUILD FAILURE";
         let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
-        insta::assert_snapshot!(out);
+        insta::assert_snapshot!(out.text);
     }
 
     #[test]
@@ -4456,7 +4585,7 @@ mod tests {
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text = "mvn verify: 12 run, 4 failed (05:42 min)\nBUILD FAILURE";
         let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
-        insta::assert_snapshot!(out);
+        insta::assert_snapshot!(out.text);
     }
 
     #[test]
@@ -4469,12 +4598,14 @@ mod tests {
             &pkgs("com.example"),
             "test",
         );
-        insta::assert_snapshot!(out);
+        insta::assert_snapshot!(out.text);
     }
 
     #[test]
     fn savings_happy_path_unchanged_by_enrichment() {
-        // Happy path short-circuits without I/O; savings must match pre-enrichment.
+        // Happy path: with no reports discovered under `tmp`, the pass gate's
+        // digest-is-none check falls back to the summary unchanged — savings
+        // must match pre-enrichment.
         let text = "mvn test: 859 passed, 4 skipped (02:11 min)";
         let tmp = tempfile::tempdir().unwrap();
         let out = super::enrich_with_reports(
@@ -4484,7 +4615,7 @@ mod tests {
             &pkgs("com.example"),
             "test",
         );
-        assert_eq!(out, text, "happy path must not allocate or append");
+        assert_eq!(out.text, text, "happy path must not allocate or append");
     }
 
     #[test]
@@ -4512,7 +4643,7 @@ mod tests {
         let enriched = super::enrich_with_reports(text_summary, tmp.path(), since, &pkgs("com.example"), "verify");
 
         let raw_tokens = count_tokens(&raw_log);
-        let enriched_tokens = count_tokens(&enriched);
+        let enriched_tokens = count_tokens(&enriched.text);
         let savings = 100.0 - (enriched_tokens as f64 / raw_tokens as f64 * 100.0);
         assert!(
             savings >= 85.0,
