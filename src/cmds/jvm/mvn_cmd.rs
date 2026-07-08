@@ -974,22 +974,44 @@ fn discover_report_dirs(cwd: &Path) -> (Vec<PathBuf>, Vec<PathBuf>) {
     (surefire, failsafe)
 }
 
+/// Module name for a report dir: first path component of `dir` relative to
+/// `cwd` ("services/target/surefire-reports" -> "services"); `None` for the
+/// root-level `target/` or when the dir is outside `cwd`.
+fn module_for_dir(dir: &std::path::Path, cwd: &std::path::Path) -> Option<String> {
+    let rel = dir.strip_prefix(cwd).ok()?;
+    let first = rel.components().next()?;
+    let name = first.as_os_str().to_str()?;
+    if name == "target" {
+        None
+    } else {
+        Some(name.to_string())
+    }
+}
+
 /// Parse every report dir and merge results into one `SurefireResult`.
 /// Returns `None` only when no dir produced any output.
 fn collect_reports(
     dirs: &[PathBuf],
     since: std::time::SystemTime,
     app_packages: &[String],
+    cwd: &std::path::Path,
 ) -> Option<SurefireResult> {
     let mut merged: Option<SurefireResult> = None;
     for dir in dirs {
         let Some(r) = surefire_reports::parse_dir(dir, Some(since), app_packages) else {
             continue;
         };
+        let module = module_for_dir(dir, cwd);
+        let mut r = r;
+        for s in r.suites.iter_mut() {
+            s.module = module.clone();
+        }
         match &mut merged {
             Some(acc) => {
                 acc.summary.add(&r.summary);
                 acc.failures.extend(r.failures);
+                acc.suites.extend(r.suites);
+                acc.skipped_tests.extend(r.skipped_tests);
                 acc.files_read += r.files_read;
                 acc.files_skipped_stale += r.files_skipped_stale;
                 acc.files_malformed += r.files_malformed;
@@ -1027,8 +1049,8 @@ pub(crate) fn enrich_with_reports(
     }
 
     let (sf_dirs, fs_dirs) = discover_report_dirs(cwd);
-    let sf = collect_reports(&sf_dirs, since, app_packages);
-    let fs = collect_reports(&fs_dirs, since, app_packages);
+    let sf = collect_reports(&sf_dirs, since, app_packages, cwd);
+    let fs = collect_reports(&fs_dirs, since, app_packages, cwd);
 
     match (zero_tests, has_failures, &sf, &fs) {
         (true, _, None, None) => format!(
@@ -4105,6 +4127,32 @@ mod tests {
             !out.contains("no XML reports"),
             "discovered per-module reports yet still emitted no-reports hint:\n{out}"
         );
+    }
+
+    #[test]
+    fn collect_reports_attaches_module_from_dir_layout() {
+        let tmp = tempfile::tempdir().unwrap();
+        let xml = include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        );
+        let root_dir = tmp.path().join("target/surefire-reports");
+        let mod_dir = tmp.path().join("services/target/surefire-reports");
+        std::fs::create_dir_all(&root_dir).unwrap();
+        std::fs::create_dir_all(&mod_dir).unwrap();
+        std::fs::write(root_dir.join("TEST-com.example.A.xml"), xml).unwrap();
+        std::fs::write(mod_dir.join("TEST-com.example.B.xml"), xml).unwrap();
+
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let r = super::collect_reports(
+            &[root_dir, mod_dir],
+            since,
+            &[],
+            tmp.path(),
+        )
+        .expect("reports must parse");
+        let modules: Vec<Option<String>> =
+            r.suites.iter().map(|s| s.module.clone()).collect();
+        assert_eq!(modules, vec![None, Some("services".to_string())]);
     }
 
     #[test]
