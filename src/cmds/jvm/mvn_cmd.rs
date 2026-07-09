@@ -1058,14 +1058,15 @@ pub(crate) fn enrich_with_reports(
         digest: None,
         reference: false,
     };
-    if !text_summary.starts_with("mvn ") {
+    if !text_summary.starts_with("[INFO]")
+        && !text_summary.starts_with("[ERROR]")
+        && !text_summary.starts_with("[WARNING]")
+    {
         return passthrough(text_summary.to_string());
     }
 
-    let zero_tests = text_summary.ends_with(": No tests run")
-        || text_summary.contains(": 0 passed");
-    let has_failures =
-        text_summary.contains("failed") || text_summary.contains("BUILD FAILURE");
+    let zero_tests = text_summary == "[WARNING] No tests were executed!";
+    let has_failures = text_summary.contains("BUILD FAILURE");
     // NOTE: replaces the old `looks_clean` substring check ("passed (" missed
     // "N passed, K skipped (t)" summaries) — a run is passing iff it neither
     // failed nor ran zero tests.
@@ -1231,7 +1232,7 @@ fn render_pass_inline(
 
     // The pass summary ends with a maven-native "BUILD SUCCESS" footer; the
     // inline breakdown slots in before it so the footer stays the last line.
-    let (mut out, build_footer) = match text_summary.strip_suffix("\nBUILD SUCCESS") {
+    let (mut out, build_footer) = match text_summary.strip_suffix("\n[INFO] BUILD SUCCESS") {
         Some(head) => (head.to_string(), true),
         None => (text_summary.to_string(), false),
     };
@@ -1256,7 +1257,7 @@ fn render_pass_inline(
         }
     }
     if build_footer {
-        out.push_str("\nBUILD SUCCESS");
+        out.push_str("\n[INFO] BUILD SUCCESS");
     }
     (out, needs_reference)
 }
@@ -1300,10 +1301,10 @@ fn render_enriched(
     out
 }
 
-/// Truncate the text-filter's `\nFailures:\n...` block so XML enrichment
-/// can replace it without duplicating the same test names.
+/// Truncate the text-filter's `\n[ERROR] Failures:\n...` block so XML
+/// enrichment can replace it without duplicating the same test names.
 fn strip_text_failures_block(text_summary: &str) -> String {
-    match text_summary.find("\nFailures:\n") {
+    match text_summary.find("\n[ERROR] Failures:\n") {
         Some(idx) => text_summary[..idx].trim_end().to_string(),
         None => text_summary.to_string(),
     }
@@ -1420,7 +1421,6 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
 
     let mut cumulative = TestSummary::default();
     let mut section: Option<TestSummary> = None;
-    let mut total_time: Option<String> = None;
     let mut total_failures_seen: usize = 0;
 
     for line in clean.lines() {
@@ -1530,8 +1530,10 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                     }
                 }
 
-                if let Some(t) = parse_total_time(stripped) {
-                    total_time = Some(t.to_string());
+                if parse_total_time(stripped).is_some() {
+                    // Total time is no longer surfaced on the test path (the
+                    // prefix-preserving frame drops it) — only the state
+                    // transition is needed here.
                     state = TestParseState::Done;
                 }
             }
@@ -1554,12 +1556,12 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         if clean.contains("BUILD FAILURE") {
             return filter_mvn_compile(output);
         }
-        // Maven casing ("No tests…") — agents grep with `No tests` verbatim.
-        return format!("mvn {goal}: No tests run");
+        // Surefire's own native line — no synthetic `mvn <goal>:` prose.
+        let _ = goal; // goal no longer interpolated into the no-tests line
+        return "[WARNING] No tests were executed!".to_string();
     }
 
     let counts = cumulative;
-    let time_str = total_time.as_deref().unwrap_or("?");
     let has_failures = counts.failures > 0 || counts.errors > 0;
 
     // Guard: BUILD FAILURE while still in `Testing` (no `Results:` block,
@@ -1573,64 +1575,39 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         return filter_mvn_compile(output);
     }
 
-    // Maven-native aggregate line: agents grep rtk's output with Maven's own
-    // patterns (`Tests run:`, `BUILD SUCCESS|BUILD FAILURE`) — emit them
-    // verbatim so those greps hit. Kept on its own line ending with the
-    // Skipped count because anchored greps (`Skipped: \d+$`) occur in the wild.
+    // Maven's own summary line, prefixed exactly as surefire prints it:
+    // `[INFO]` on a clean pass, `[ERROR]` when there are failures/errors.
+    let agg_prefix = if has_failures { "[ERROR]" } else { "[INFO]" };
     let aggregate = format!(
-        "Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
+        "{agg_prefix} Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
         counts.run, counts.failures, counts.errors, counts.skipped
     );
 
     if !has_failures {
-        let passed = counts.run.saturating_sub(counts.skipped);
-        let mut summary = format!("mvn {goal}: {} passed", passed);
-        if counts.skipped > 0 {
-            summary.push_str(&format!(", {} skipped", counts.skipped));
-        }
-        summary.push_str(&format!(" ({})", time_str));
-        summary.push_str(&format!("\n{aggregate}\nBUILD SUCCESS"));
-        return summary;
+        // Frame only — enrichment (per-class breakdown) is slotted in by
+        // render_pass_inline, before the BUILD footer.
+        return format!("{aggregate}\n[INFO] BUILD SUCCESS");
     }
 
-    let failed_count = counts.failures + counts.errors;
-    let mut result = format!("mvn {goal}: {} run, {} failed", counts.run, failed_count);
-    if counts.skipped > 0 {
-        result.push_str(&format!(", {} skipped", counts.skipped));
-    }
-    result.push_str(&format!(" ({})\n", time_str));
-
-    result.push_str(&aggregate);
-    result.push_str("\nBUILD FAILURE\n");
-
+    let mut result = format!("{aggregate}\n[INFO] BUILD FAILURE\n");
     if !failures.is_empty() {
-        result.push_str("\nFailures:\n");
+        result.push_str("\n[ERROR] Failures:\n");
     }
-    for (i, failure) in failures.iter().enumerate() {
-        // Maven's per-test marker — agents grep for `<<< FAILURE` / `FAILURE!`
-        // to list failing test names.
-        writeln!(result, "{}. {} <<< FAILURE!", i + 1, failure.name).ok();
+    for failure in failures.iter() {
+        // Maven's per-test coord form: `Class.method <<< FAILURE!`, [ERROR]-prefixed.
+        writeln!(result, "[ERROR]   {} <<< FAILURE!", failure.name).ok();
         for (di, detail) in failure.details.iter().enumerate() {
-            // First detail line is the exception header (e.g.
-            // `org.junit.ComparisonFailure: expected:<X> but was:<Y>`).
-            // Shorten the FQN to match the XML path's format.
             let rendered = if di == 0 {
                 shorten_exception_header(detail)
             } else {
                 detail.clone()
             };
-            writeln!(result, "   {}", truncate(&rendered, MAX_LINE_LENGTH)).ok();
+            writeln!(result, "[ERROR]     {}", truncate(&rendered, MAX_LINE_LENGTH)).ok();
         }
     }
     if total_failures_seen > MAX_FAILURES_SHOWN {
-        writeln!(
-            result,
-            "\n... +{} more failures",
-            total_failures_seen - MAX_FAILURES_SHOWN
-        )
-        .ok();
+        writeln!(result, "\n... +{} more failures", total_failures_seen - MAX_FAILURES_SHOWN).ok();
     }
-
     result.trim().to_string()
 }
 
@@ -2972,6 +2949,33 @@ mod tests {
             input_tokens,
             output_tokens,
         );
+    }
+
+    #[test]
+    fn pass_frame_is_prefixed_maven_subset() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_pass_mavenmcp.txt");
+        let out = filter_mvn_test(input);
+        assert!(out.contains("[INFO] Tests run: 183, Failures: 0, Errors: 0, Skipped: 0"),
+            "prefixed aggregate missing:\n{out}");
+        assert_eq!(out.lines().last(), Some("[INFO] BUILD SUCCESS"), "\n{out}");
+        assert!(!out.contains("mvn test:"), "synthetic headline leaked:\n{out}");
+        assert!(!out.contains("Total time"), "Total time leaked:\n{out}");
+    }
+
+    #[test]
+    fn fail_frame_is_prefixed_maven_subset() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
+        let out = filter_mvn_test(input);
+        assert!(out.contains("[ERROR] Tests run: 20, Failures:"), "\n{out}");
+        assert!(out.contains("[INFO] BUILD FAILURE"), "\n{out}");
+        assert!(out.contains("[ERROR] Failures:"), "\n{out}");
+        assert!(!out.contains("mvn test:"), "synthetic headline leaked:\n{out}");
+    }
+
+    #[test]
+    fn no_tests_uses_native_surefire_warning() {
+        let out = filter_mvn_test("[INFO] Building my-project 1.0\n[INFO] BUILD SUCCESS\n");
+        assert_eq!(out, "[WARNING] No tests were executed!");
     }
 
     #[test]
