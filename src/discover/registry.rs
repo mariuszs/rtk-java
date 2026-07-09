@@ -73,6 +73,11 @@ lazy_static! {
     static ref TAIL_N_SPACE: Regex = Regex::new(r"^tail\s+-n\s+(\d+)\s+(\S+)$").unwrap();
     static ref TAIL_LINES_EQ: Regex = Regex::new(r"^tail\s+--lines=(\d+)\s+(\S+)$").unwrap();
     static ref TAIL_LINES_SPACE: Regex = Regex::new(r"^tail\s+--lines\s+(\d+)\s+(\S+)$").unwrap();
+    // A pipe stage that only truncates its stdin to N lines. Deliberately
+    // excludes `-f`, `+N`, `-c` and file arguments — anything beyond plain
+    // numeric truncation keeps its semantics and must not be dropped.
+    static ref TRUNCATION_STAGE: Regex =
+        Regex::new(r"^(?:head|tail)\s+(?:-n\s*\d+|-\d+|--lines(?:=|\s+)\d+)$").unwrap();
 }
 
 const GOLANGCI_GLOBAL_OPT_WITH_VALUE: &[&str] = &[
@@ -516,6 +521,36 @@ pub fn rewrite_command(
     rewrite_compound(trimmed, &compiled, &normalized_prefixes)
 }
 
+/// True when the rewritten segment invokes `rtk mvn`, possibly behind a
+/// transparent prefix (`timeout 590 rtk mvn …`, `nice -n 10 rtk mvn …`).
+fn is_rtk_mvn_invocation(segment: &str) -> bool {
+    let words: Vec<&str> = segment.split_whitespace().collect();
+    words.windows(2).any(|w| w == ["rtk", "mvn"])
+}
+
+/// True when a pipe group (text starting at its first `|`) consists solely of
+/// numeric truncation stages (`tail -3`, `head -n 20`, …). Such stages exist
+/// to tame raw Maven output; after the mvn filter they only cut the compact
+/// summary, so the rewrite drops them. Quoting or substitution disqualifies
+/// the group — semantics can no longer be judged textually.
+fn is_truncation_only_pipe_group(group: &str) -> bool {
+    if group.contains(['\'', '"', '$', '`']) {
+        return false;
+    }
+    let mut stages = group.split('|');
+    if !matches!(stages.next(), Some(first) if first.trim().is_empty()) {
+        return false;
+    }
+    let mut saw_stage = false;
+    for stage in stages {
+        if !TRUNCATION_STAGE.is_match(stage.trim()) {
+            return false;
+        }
+        saw_stage = true;
+    }
+    saw_stage
+}
+
 /// Rewrite a compound command (with `&&`, `||`, `;`, `|`) by rewriting each segment.
 fn rewrite_compound(
     cmd: &str,
@@ -581,13 +616,25 @@ fn rewrite_compound(
 
                 match pipe_group_end {
                     Some(next_op) => {
-                        result.push(' ');
-                        result.push_str(cmd[tok.offset..next_op.offset].trim());
+                        let group = cmd[tok.offset..next_op.offset].trim();
+                        if is_rtk_mvn_invocation(&rewritten) && is_truncation_only_pipe_group(group)
+                        {
+                            any_changed = true;
+                        } else {
+                            result.push(' ');
+                            result.push_str(group);
+                        }
                         seg_start = next_op.offset;
                     }
                     None => {
-                        result.push(' ');
-                        result.push_str(cmd[tok.offset..].trim_start());
+                        let group = cmd[tok.offset..].trim_start();
+                        if is_rtk_mvn_invocation(&rewritten) && is_truncation_only_pipe_group(group)
+                        {
+                            any_changed = true;
+                        } else {
+                            result.push(' ');
+                            result.push_str(group);
+                        }
                         return if any_changed { Some(result) } else { None };
                     }
                 }
@@ -1495,9 +1542,69 @@ mod tests {
 
     #[test]
     fn test_rewrite_timeout_in_compound_with_pipe() {
+        // Trailing truncation is dropped even behind a transparent prefix:
+        // rtk mvn output is already compact, and `tail -30` would cut the
+        // aggregate test summary agents rely on.
         assert_eq!(
             rewrite_command_no_prefixes("timeout 590 ./mvnw -q verify 2>&1 | tail -30", &[]),
-            Some("timeout 590 rtk mvn -q verify 2>&1 | tail -30".into())
+            Some("timeout 590 rtk mvn -q verify 2>&1".into())
+        );
+    }
+
+    #[test]
+    fn test_mvn_trailing_tail_pipe_dropped() {
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw clean test -Dskip.npm 2>&1 | tail -3", &[]),
+            Some("rtk mvn clean test -Dskip.npm 2>&1".into())
+        );
+    }
+
+    #[test]
+    fn test_mvn_trailing_head_pipe_dropped() {
+        assert_eq!(
+            rewrite_command_no_prefixes("mvn verify | head -n 20", &[]),
+            Some("rtk mvn verify".into())
+        );
+    }
+
+    #[test]
+    fn test_mvn_tail_dropped_before_next_operator() {
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw test | tail -3 && echo ok", &[]),
+            Some("rtk mvn test && echo ok".into())
+        );
+    }
+
+    #[test]
+    fn test_mvn_pipe_with_grep_kept() {
+        // Non-truncation stages change semantics — keep the whole group.
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw test 2>&1 | grep ERROR | tail -3", &[]),
+            Some("rtk mvn test 2>&1 | grep ERROR | tail -3".into())
+        );
+    }
+
+    #[test]
+    fn test_mvn_tail_follow_kept() {
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw test | tail -f", &[]),
+            Some("rtk mvn test | tail -f".into())
+        );
+    }
+
+    #[test]
+    fn test_non_mvn_trailing_tail_kept() {
+        assert_eq!(
+            rewrite_command_no_prefixes("cargo test | tail -5", &[]),
+            Some("rtk cargo test | tail -5".into())
+        );
+    }
+
+    #[test]
+    fn test_already_rtk_mvn_trailing_tail_dropped() {
+        assert_eq!(
+            rewrite_command_no_prefixes("rtk mvn test | tail -3", &[]),
+            Some("rtk mvn test".into())
         );
     }
 
