@@ -597,12 +597,14 @@ struct MultiParts {
     compile: String,
     tests: String,      // surefire + failsafe combined (enriched later in run_multi_goal)
     checkstyle: String,
-    build: String,      // BUILD SUCCESS/FAILURE + Total time (+ Reactor Summary on failure)
+    build: String,      // [INFO] BUILD SUCCESS/FAILURE (+ Reactor Summary on failure); no Total time
     stray_errors: Vec<String>, // [ERROR] lines from dropped/Other segments
 }
 
-/// Pull the trailing build footer: always keep BUILD SUCCESS/FAILURE + Total
-/// time; on failure also keep the Reactor Summary block (which module failed).
+/// Pull the trailing build footer: always keep the native `[INFO] BUILD
+/// SUCCESS`/`[INFO] BUILD FAILURE` line; on failure also keep the Reactor
+/// Summary block (which module failed), with prefixes intact. Total time is
+/// intentionally dropped.
 fn extract_build_block(raw: &str) -> String {
     let failed = raw.contains("BUILD FAILURE");
     let mut out: Vec<String> = Vec::new();
@@ -617,15 +619,13 @@ fn extract_build_block(raw: &str) -> String {
             if st.contains("BUILD FAILURE") || st.contains("BUILD SUCCESS") {
                 in_reactor = false;
             } else if !is_maven_boilerplate(st) && !st.is_empty() {
-                out.push(strip_maven_prefix(&s).to_string());
+                out.push(st.to_string()); // keep prefix verbatim
             }
         }
         if st.contains("BUILD SUCCESS") || st.contains("BUILD FAILURE") {
-            out.push(if failed { "BUILD FAILURE".to_string() } else { "BUILD SUCCESS".to_string() });
+            out.push(if failed { "[INFO] BUILD FAILURE".to_string() } else { "[INFO] BUILD SUCCESS".to_string() });
         }
-        if let Some(t) = parse_total_time(&s) {
-            out.push(format!("Total time: {t}"));
-        }
+        // Total time intentionally dropped.
     }
     out.join("\n")
 }
@@ -655,7 +655,7 @@ fn filter_segments(raw: &str) -> MultiParts {
             SegmentKind::Other => {
                 for l in seg.body.lines() {
                     if strip_ansi(l).trim_start().starts_with(ERROR_TAG) {
-                        parts.stray_errors.push(strip_maven_prefix(&strip_ansi(l)).to_string());
+                        parts.stray_errors.push(strip_ansi(l).trim().to_string());
                     }
                 }
             }
@@ -678,9 +678,8 @@ fn filter_segments(raw: &str) -> MultiParts {
 
 /// Assemble the final multi-goal report from already-filtered (and possibly
 /// enriched) parts, in canonical order.
-fn compose_multi(parts: &MultiParts, goals_header: &str) -> String {
+fn compose_multi(parts: &MultiParts, _goals_header: &str) -> String {
     let mut out = String::new();
-    let _ = writeln!(out, "mvn {goals_header} (multi-goal)");
     for piece in [&parts.compile, &parts.tests, &parts.checkstyle] {
         if piece.trim().is_empty() {
             continue;
@@ -689,6 +688,7 @@ fn compose_multi(parts: &MultiParts, goals_header: &str) -> String {
             .lines()
             .filter(|l| {
                 let t = l.trim();
+                let t = t.strip_prefix("[INFO]").map(str::trim).unwrap_or(t);
                 t != "BUILD SUCCESS" && t != "BUILD FAILURE"
             })
             .collect::<Vec<_>>()
@@ -1880,7 +1880,11 @@ fn filter_mvn_compile(output: &str) -> String {
     }
 
     if result.is_empty() {
-        return "mvn: ok".to_string();
+        // Hard subset: nothing keep-worthy survived — emit the native build
+        // line. This branch is unreachable on a failed build: any input
+        // containing BUILD FAILURE retains that line above (see
+        // should_keep_compile_line), so `result` is never empty then.
+        return "[INFO] BUILD SUCCESS".to_string();
     }
 
     result
@@ -4993,12 +4997,13 @@ mod tests {
     fn test_filter_mvn_multi_success() {
         let input = include_str!("../../../tests/fixtures/mvn_multi_clean_testcompile_checkstyle_pass.txt");
         let output = filter_mvn_multi(input, "clean test-compile checkstyle:check");
-        assert!(output.contains("(multi-goal)"), "missing header: {output}");
-        assert!(output.contains("BUILD SUCCESS"), "lost BUILD line: {output}");
+        assert!(!output.contains("(multi-goal)"), "(multi-goal) marker leaked: {output}");
+        assert!(output.contains("[INFO] BUILD SUCCESS"), "lost BUILD line: {output}");
         assert!(output.contains("0 Checkstyle violations") || output.contains("0 violations"),
                 "lost checkstyle signal: {output}");
         // clean noise must be gone
         assert!(!output.contains("Deleting"), "clean noise leaked: {output}");
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 85.0, "expected ≥85%, got {:.1}%", savings);
         insta::assert_snapshot!(output);
@@ -5008,8 +5013,10 @@ mod tests {
     fn test_filter_mvn_multi_compile_failure() {
         let input = include_str!("../../../tests/fixtures/mvn_multi_compile_failure.txt");
         let output = filter_mvn_multi(input, "clean test-compile checkstyle:check");
-        assert!(output.contains("BUILD FAILURE"), "lost failure signal: {output}");
+        assert!(!output.contains("(multi-goal)"), "(multi-goal) marker leaked: {output}");
+        assert!(output.contains("[INFO] BUILD FAILURE"), "lost failure signal: {output}");
         assert!(output.contains("cannot find symbol"), "lost compile error detail: {output}");
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 60.0, "failure path still expected ≥60%, got {:.1}%", savings);
         insta::assert_snapshot!(output);
@@ -5058,12 +5065,26 @@ mod tests {
     fn test_filter_mvn_multi_verify_failure_stdout() {
         let input = include_str!("../../../tests/fixtures/mvn_multi_clean_verify_fail.txt");
         let output = filter_mvn_multi(input, "clean verify");
-        assert!(output.contains("BUILD FAILURE"), "lost build failure: {output}");
+        assert!(!output.contains("(multi-goal)"), "(multi-goal) marker leaked: {output}");
+        assert!(output.contains("[INFO] BUILD FAILURE"), "lost build failure: {output}");
         assert!(output.contains("UserProvisioningIT") || output.contains("failed"),
                 "lost IT failure signal: {output}");
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 80.0, "expected ≥80%, got {:.1}%", savings);
         insta::assert_snapshot!(output);
+    }
+
+    #[test]
+    fn multi_goal_has_no_rtk_markers() {
+        let input = include_str!("../../../tests/fixtures/mvn_multi_clean_verify_fail.txt");
+        let out = filter_mvn_multi(input, "clean verify");
+        assert!(!out.contains("(multi-goal)"), "(multi-goal) marker leaked:\n{out}");
+        assert!(!out.contains("mvn: ok"), "mvn: ok marker leaked:\n{out}");
+        assert!(!out.contains("Total time"), "Total time leaked:\n{out}");
+        assert!(out.contains("[INFO] BUILD FAILURE") || out.contains("[INFO] BUILD SUCCESS"),
+            "native BUILD line missing:\n{out}");
+        assert_eq!(out.matches("BUILD FAILURE").count(), 1, "duplicate BUILD lines:\n{out}");
     }
 
     // --- Pure renderers for pass-run enrichment (Task 4) ---
