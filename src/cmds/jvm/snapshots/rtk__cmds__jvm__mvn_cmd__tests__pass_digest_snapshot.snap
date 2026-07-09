@@ -2,7 +2,7 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: digest
 ---
-# mvn test (from XML reports) — 5 passed, 8 skipped
+# mvn test (from XML reports) — Tests run: 13, Failures: 0, Errors: 0, Skipped: 8
 .: MicrosoftEntraIdClient2Test 8 (0.0s)
 services: UsersTest 5 (0.8s)
 skipped:

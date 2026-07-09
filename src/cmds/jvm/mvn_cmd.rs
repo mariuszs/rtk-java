@@ -1167,14 +1167,19 @@ fn render_classes_digest(
         return None;
     }
     let skipped = all_skipped(surefire, failsafe);
-    let total: u32 = suites.iter().map(|s| s.tests).sum();
-    let total_skipped: u32 = suites.iter().map(|s| s.skipped).sum();
-    let passed = total.saturating_sub(total_skipped);
-
-    let mut out = format!("# mvn {goal} (from XML reports) — {passed} passed");
-    if total_skipped > 0 {
-        write!(out, ", {total_skipped} skipped").ok();
+    // Maven-native aggregate line: agents grep tee logs with Maven's own
+    // summary pattern, so the header must match it verbatim.
+    let mut summary = surefire_reports::TestSummary::default();
+    if let Some(sf) = surefire {
+        summary.add(&sf.summary);
     }
+    if let Some(fs) = failsafe {
+        summary.add(&fs.summary);
+    }
+    let mut out = format!(
+        "# mvn {goal} (from XML reports) — Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
+        summary.run, summary.failures, summary.errors, summary.skipped
+    );
     out.push('\n');
 
     // Group by module; BTreeMap for deterministic order, root module last-free
@@ -4995,6 +5000,35 @@ mod tests {
         let digest = super::render_classes_digest("test", Some(&sf), None)
             .expect("suites present -> digest");
         insta::assert_snapshot!("pass_digest_snapshot", digest);
+    }
+
+    #[test]
+    fn digest_header_uses_maven_native_format() {
+        // Agents grep tee digests with Maven's own summary pattern
+        // (`Tests run: N, Failures: N, Errors: N, Skipped: N`); the header must
+        // match it so those greps hit instead of coming back empty.
+        let mut sf = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        ));
+        let entra = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+        ));
+        sf.suites.extend(entra.suites.clone());
+        sf.skipped_tests.extend(entra.skipped_tests.clone());
+        sf.summary.add(&entra.summary);
+
+        let digest = super::render_classes_digest("test", Some(&sf), None)
+            .expect("suites present -> digest");
+        let header = digest.lines().next().expect("digest has a header line");
+        let maven_re = regex::Regex::new(
+            r"Tests run: (\d+), Failures: (\d+), Errors: (\d+), Skipped: (\d+)$",
+        )
+        .expect("valid regex");
+        let caps = maven_re
+            .captures(header)
+            .unwrap_or_else(|| panic!("header not maven-native: {header}"));
+        assert_eq!(&caps[1], sf.summary.run.to_string().as_str());
+        assert_eq!(&caps[4], sf.summary.skipped.to_string().as_str());
     }
 
     #[test]
