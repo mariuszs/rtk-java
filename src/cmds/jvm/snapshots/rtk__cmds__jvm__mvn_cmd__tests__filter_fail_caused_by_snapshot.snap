@@ -2,18 +2,17 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: output
 ---
-mvn test: 5 run, 2 failed (23.819 s)
-Tests run: 5, Failures: 2, Errors: 0, Skipped: 0
-BUILD FAILURE
+[ERROR] Tests run: 5, Failures: 2, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
 
-Failures:
-1. com.example.company.EmailParserTest.should_extract_domain_from_email <<< FAILURE!
-   AssertionFailedError:
-   expected: "broken.example.com"
-   but was: "user.example.com"
-2. com.example.integration.DbIntegrationIT.shouldConnect <<< FAILURE!
-   IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@4c2af006 testClass = com.example.integration.DbIntegrationIT]
-   at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180)
-   at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
-   Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'scimUserController' defined in file [/home/user/project/target/classes/com/example/scim/ScimUserCo...
-   Caused by: java.lang.IllegalArgumentException: Missing required property 'auth.scim.encryption-key' for company provisioning
+[ERROR] Failures:
+[ERROR]   com.example.company.EmailParserTest.should_extract_domain_from_email <<< FAILURE!
+[ERROR]     AssertionFailedError:
+[ERROR]     expected: "broken.example.com"
+[ERROR]     but was: "user.example.com"
+[ERROR]   com.example.integration.DbIntegrationIT.shouldConnect <<< FAILURE!
+[ERROR]     IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@4c2af006 testClass = com.example.integration.DbIntegrationIT]
+[ERROR]     at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180)
+[ERROR]     at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:124)
+[ERROR]     Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'scimUserController' defined in file [/home/user/project/target/classes/com/example/scim/ScimUserCo...
+[ERROR]     Caused by: java.lang.IllegalArgumentException: Missing required property 'auth.scim.encryption-key' for company provisioning

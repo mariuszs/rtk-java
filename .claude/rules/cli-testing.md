@@ -125,8 +125,13 @@ pnpm list > tests/fixtures/pnpm_list_raw.txt
 | `gh pr view` | 87%+ | Remove ASCII art, verbose metadata |
 | `pnpm list` | 70%+ | Compact dependency tree |
 | `docker ps` | 60%+ | Essential fields only |
+| `mvn dependency:list` | 10%+ | Documented fidelity exception (2026-07-09): verbatim native subset keeps every resolved line — savings come only from boilerplate removal |
+| `mvn dependency:tree` (large/deep) | 20%+ | Documented fidelity exception (2026-07-09): transitive lines kept verbatim, no invented `(N transitive)` collapse — deep trees keep almost everything |
+| `mvn dependency:tree` (small trees) | 60%+ | Boilerplate-heavy small trees still compress normally |
 
-**Release blocker**: If savings drop below 60% for any filter, investigate and fix before merge.
+**Release blocker**: If savings drop below 60% for any filter, investigate and fix before merge —
+except `mvn dependency:list`/`dependency:tree` on large/deep inputs, which are a documented
+fidelity exception (see thresholds above); `guard::never_worse` remains their hard floor.
 
 ## Cross-Platform Testing (🔴 Critical)
 

@@ -2,22 +2,22 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: out.text
 ---
-mvn test: 7 run, 2 failed (00:10 min)
-BUILD FAILURE
+[ERROR] Tests run: 7, Failures: 2, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
 
-Failures (from surefire-reports/):
-1. com.example.FailingTest.shouldReturnUser <<< FAILURE!
-   AssertionFailedError: expected:<200> but was:<404>
-     org.opentest4j.AssertionFailedError: expected:<200> but was:<404>
-     	... 1 framework frames omitted
-     	at com.example.FailingTest.shouldReturnUser(FailingTest.java:42)
-     	... 1 framework frames omitted
+[ERROR] Failures:
+[ERROR]   com.example.FailingTest.shouldReturnUser <<< FAILURE!
+[ERROR]     AssertionFailedError: expected:<200> but was:<404>
+[ERROR]       org.opentest4j.AssertionFailedError: expected:<200> but was:<404>
+[ERROR]       	... 1 framework frames omitted
+[ERROR]       	at com.example.FailingTest.shouldReturnUser(FailingTest.java:42)
+[ERROR]       	... 1 framework frames omitted
 
-2. com.example.FailingTest.shouldHandleNull <<< FAILURE!
-   AssertionError: Unexpected exception: NullPointerException
-     java.lang.AssertionError: Unexpected exception: NullPointerException
-     	at com.example.FailingTest.shouldHandleNull(FailingTest.java:55)
-     	... 1 framework frames omitted
+[ERROR]   com.example.FailingTest.shouldHandleNull <<< FAILURE!
+[ERROR]     AssertionError: Unexpected exception: NullPointerException
+[ERROR]       java.lang.AssertionError: Unexpected exception: NullPointerException
+[ERROR]       	at com.example.FailingTest.shouldHandleNull(FailingTest.java:55)
+[ERROR]       	... 1 framework frames omitted
 
 
 

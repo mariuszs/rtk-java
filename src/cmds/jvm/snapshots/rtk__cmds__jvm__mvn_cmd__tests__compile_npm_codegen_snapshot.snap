@@ -7,4 +7,3 @@ expression: output
 [INFO] /home/user/git/auth/src/main/java/com/example/auth/user/role/JpaRoleDefinitionRepository.java: Some input files use unchecked or unsafe operations.
 [INFO] /home/user/git/auth/src/main/java/com/example/auth/user/role/JpaRoleDefinitionRepository.java: Recompile with -Xlint:unchecked for details.
 [INFO] BUILD SUCCESS
-[INFO] Total time:  41.986 s

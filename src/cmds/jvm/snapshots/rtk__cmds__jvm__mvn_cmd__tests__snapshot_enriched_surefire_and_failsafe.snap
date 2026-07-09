@@ -2,46 +2,46 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: out.text
 ---
-mvn verify: 12 run, 4 failed (05:42 min)
-BUILD FAILURE
+[ERROR] Tests run: 12, Failures: 4, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
 
-Failures (from surefire-reports/):
-1. com.example.FailingTest.shouldReturnUser <<< FAILURE!
-   AssertionFailedError: expected:<200> but was:<404>
-     org.opentest4j.AssertionFailedError: expected:<200> but was:<404>
-     	... 1 framework frames omitted
-     	at com.example.FailingTest.shouldReturnUser(FailingTest.java:42)
-     	... 1 framework frames omitted
+[ERROR] Failures:
+[ERROR]   com.example.FailingTest.shouldReturnUser <<< FAILURE!
+[ERROR]     AssertionFailedError: expected:<200> but was:<404>
+[ERROR]       org.opentest4j.AssertionFailedError: expected:<200> but was:<404>
+[ERROR]       	... 1 framework frames omitted
+[ERROR]       	at com.example.FailingTest.shouldReturnUser(FailingTest.java:42)
+[ERROR]       	... 1 framework frames omitted
 
-2. com.example.FailingTest.shouldHandleNull <<< FAILURE!
-   AssertionError: Unexpected exception: NullPointerException
-     java.lang.AssertionError: Unexpected exception: NullPointerException
-     	at com.example.FailingTest.shouldHandleNull(FailingTest.java:55)
-     	... 1 framework frames omitted
+[ERROR]   com.example.FailingTest.shouldHandleNull <<< FAILURE!
+[ERROR]     AssertionError: Unexpected exception: NullPointerException
+[ERROR]       java.lang.AssertionError: Unexpected exception: NullPointerException
+[ERROR]       	at com.example.FailingTest.shouldHandleNull(FailingTest.java:55)
+[ERROR]       	... 1 framework frames omitted
 
 
 
-Integration failures (from failsafe-reports/):
-1. com.example.PortConflictIT.shouldStartServer <<< FAILURE!
-   [error] BindException: Address already in use
-     java.net.BindException: Address already in use
-     	... 2 framework frames omitted
-     	at com.example.PortConflictIT.shouldStartServer(PortConflictIT.java:42)
+[ERROR] Integration failures:
+[ERROR]   com.example.PortConflictIT.shouldStartServer <<< FAILURE!
+[ERROR]     [error] BindException: Address already in use
+[ERROR]       java.net.BindException: Address already in use
+[ERROR]       	... 2 framework frames omitted
+[ERROR]       	at com.example.PortConflictIT.shouldStartServer(PortConflictIT.java:42)
 
-2. com.example.DbIntegrationIT.shouldConnect <<< FAILURE!
-   [error] IllegalStateException: Failed to load ApplicationContext
-     java.lang.IllegalStateException: Failed to load ApplicationContext
-     	... 3 framework frames omitted
-     Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSource'
-     	... 3 framework frames omitted
-     Caused by: org.hibernate.HibernateException: Unable to acquire JDBC Connection; nested exception is java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed ...
-     	... 1 framework frames omitted
-     	at com.example.DbIntegrationIT.shouldConnect(DbIntegrationIT.java:88)
-     	... 1 framework frames omitted
-  captured output:
-    [STDERR]
-    2026-04-15 10:42:17 ERROR HikariDataSource - HikariPool-1 - Connection is not available
-    Connection refused (Connection refused)
+[ERROR]   com.example.DbIntegrationIT.shouldConnect <<< FAILURE!
+[ERROR]     [error] IllegalStateException: Failed to load ApplicationContext
+[ERROR]       java.lang.IllegalStateException: Failed to load ApplicationContext
+[ERROR]       	... 3 framework frames omitted
+[ERROR]       Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSource'
+[ERROR]       	... 3 framework frames omitted
+[ERROR]       Caused by: org.hibernate.HibernateException: Unable to acquire JDBC Connection; nested exception is java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed ...
+[ERROR]       	... 1 framework frames omitted
+[ERROR]       	at com.example.DbIntegrationIT.shouldConnect(DbIntegrationIT.java:88)
+[ERROR]       	... 1 framework frames omitted
+[ERROR]     captured output:
+[ERROR]       [STDERR]
+[ERROR]       2026-04-15 10:42:17 ERROR HikariDataSource - HikariPool-1 - Connection is not available
+[ERROR]       Connection refused (Connection refused)
 
 
 

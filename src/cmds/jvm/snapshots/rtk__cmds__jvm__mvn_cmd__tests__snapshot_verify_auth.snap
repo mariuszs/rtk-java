@@ -2,6 +2,5 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: output
 ---
-mvn verify: 941 passed, 9 skipped (02:11 min)
-Tests run: 950, Failures: 0, Errors: 0, Skipped: 9
-BUILD SUCCESS
+[INFO] Tests run: 950, Failures: 0, Errors: 0, Skipped: 9
+[INFO] BUILD SUCCESS

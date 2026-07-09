@@ -1333,7 +1333,7 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
     if failures.len() > MAX_FAILURES_PER_SOURCE {
         writeln!(
             out,
-            "... +{} more failures",
+            "[ERROR]   ... +{} more failures",
             failures.len() - MAX_FAILURES_PER_SOURCE
         )
         .ok();
@@ -1604,7 +1604,15 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         }
     }
     if total_failures_seen > MAX_FAILURES_SHOWN {
-        writeln!(result, "\n... +{} more failures", total_failures_seen - MAX_FAILURES_SHOWN).ok();
+        // Same `[ERROR]`-prefixed shape as render_failure_block's overflow
+        // line (which also follows a blank separator) — every emitted line
+        // stays a Maven-prefixed subset.
+        writeln!(
+            result,
+            "\n[ERROR]   ... +{} more failures",
+            total_failures_seen - MAX_FAILURES_SHOWN
+        )
+        .ok();
     }
     result.trim().to_string()
 }
@@ -2278,12 +2286,15 @@ fn filter_mvn_checkstyle(output: &str) -> String {
                 continue;
             }
 
-            // Keep: N-errors / N-violations / BUILD SUCCESS|FAILURE / Total time
+            // Keep: N-errors / N-violations / BUILD SUCCESS|FAILURE.
+            // Total time is deliberately NOT kept — fidelity decision
+            // (2026-07-09, deferred from Task 4 per its own report): "no
+            // Total time anywhere" holds uniformly across every mvn surface,
+            // matching the compile/clean subsets.
             if stripped.contains("Checkstyle violations")
                 || stripped.contains("reported by Checkstyle")
                 || stripped.contains("BUILD SUCCESS")
                 || stripped.contains("BUILD FAILURE")
-                || TOTAL_TIME_RE.is_match(stripped)
             {
                 // Keep the `[INFO]` tag verbatim — retained lines stay a
                 // prefix-preserving subset of Maven's own output.
@@ -2570,7 +2581,7 @@ mod tests {
         // Fixture has 6 modules totalling 20 tests — accumulation must not
         // report only the first module's count.
         assert!(
-            output.contains("20 passed"),
+            output.contains("Tests run: 20, Failures: 0, Errors: 0, Skipped: 0"),
             "multi-module accumulation broken, got: {output}"
         );
         let savings = 100.0
@@ -2582,13 +2593,14 @@ mod tests {
     fn test_reactor_test_fail_accumulates_and_dedups() {
         let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
         let output = filter_mvn_test(input);
-        assert!(output.contains("20 run, 2 failed"), "got: {output}");
+        assert!(
+            output.contains("Tests run: 20, Failures: 2, Errors: 0, Skipped: 0"),
+            "got: {output}"
+        );
         // Each failure appears once in the enumerated Failures block
-        // (stack trace may still reference the method name — count enumerator lines).
-        let enumerated = output
-            .lines()
-            .filter(|l| l.starts_with("1. ") || l.starts_with("2. "))
-            .count();
+        // (stack trace may still reference the method name — count Maven's
+        // own `<<< FAILURE!` markers instead of the old "N. " numbering).
+        let enumerated = output.lines().filter(|l| l.ends_with("<<< FAILURE!")).count();
         assert_eq!(enumerated, 2, "expected exactly 2 enumerated failures in: {output}");
         let savings = 100.0
             - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
@@ -2634,16 +2646,14 @@ mod tests {
     fn test_filter_pass_output() {
         let input = include_str!("../../../tests/fixtures/mvn_test_pass_mavenmcp.txt");
         let output = filter_mvn_test(input);
+        // Native subset: Maven's own `[INFO] Tests run: ...` aggregate line,
+        // no synthetic "mvn test:" prose, no invented "Total time".
         assert!(
-            output.contains("mvn test:"),
-            "should contain summary prefix"
+            output.contains("[INFO] Tests run: 183, Failures: 0, Errors: 0, Skipped: 0"),
+            "should contain maven-native aggregate line, got: {output}"
         );
-        assert!(output.contains("183 passed"), "should show 183 passed");
-        assert!(output.contains("4.748 s"), "should contain total time");
-        assert!(
-            !output.contains("[INFO]"),
-            "should not contain raw [INFO] prefix"
-        );
+        assert!(!output.contains("mvn test:"), "synthetic headline leaked: {output}");
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
     }
 
     // --- Maven-native summary trailer ---
@@ -2656,7 +2666,7 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_test_pass_mavenmcp.txt");
         let output = filter_mvn_test(input);
         let aggregate = regex::Regex::new(
-            r"(?m)^Tests run: 183, Failures: 0, Errors: 0, Skipped: 0$",
+            r"(?m)^\[INFO\] Tests run: 183, Failures: 0, Errors: 0, Skipped: 0$",
         )
         .expect("test regex");
         assert!(
@@ -2665,7 +2675,7 @@ mod tests {
         );
         assert_eq!(
             output.lines().last(),
-            Some("BUILD SUCCESS"),
+            Some("[INFO] BUILD SUCCESS"),
             "BUILD SUCCESS must be the final line:\n{output}"
         );
     }
@@ -2675,7 +2685,7 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
         let output = filter_mvn_test(input);
         let aggregate = regex::Regex::new(
-            r"(?m)^Tests run: 20, Failures: \d+, Errors: \d+, Skipped: \d+$",
+            r"(?m)^\[ERROR\] Tests run: 20, Failures: \d+, Errors: \d+, Skipped: \d+$",
         )
         .expect("test regex");
         assert!(
@@ -2701,11 +2711,11 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn4_test_pass_auth.txt");
         let output = filter_mvn_test(input);
         assert!(
-            output.contains("13 passed"),
-            "should show pass count, got:\n{}",
+            output.contains("[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0"),
+            "should show maven-native aggregate line, got:\n{}",
             output
         );
-        assert!(output.contains("19.543 s"), "should contain total time");
+        assert!(!output.contains("Total time"), "Total time leaked:\n{output}");
         assert!(
             !output.contains("WARNING"),
             "Maven 4 JPMS warnings must be dropped, got:\n{}",
@@ -2770,11 +2780,11 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_test_fail_auth.txt");
         let output = filter_mvn_test(input);
         assert!(
-            output.contains("5 run, 2 failed"),
-            "should show run/failed counts, got: {}",
+            output.contains("Tests run: 5, Failures: 2, Errors: 0, Skipped: 0"),
+            "should show maven-native aggregate line, got: {}",
             output
         );
-        assert!(output.contains("23.819 s"), "should contain total time");
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
         assert!(
             output.contains("EmailParserTest.should_extract_domain_from_email"),
             "should list first failure"
@@ -2840,13 +2850,14 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_test_large_suite.txt");
         let output = filter_mvn_test(input);
         assert!(
-            output.contains("3262 run, 23 failed"),
-            "should show run/failed counts, got: {}",
+            output.contains("Tests run: 3262, Failures: 3, Errors: 20, Skipped: 4"),
+            "should show maven-native aggregate line, got: {}",
             output
         );
         assert!(
-            output.contains("+13 more failures"),
-            "should cap at 10 and show remaining"
+            output.contains("[ERROR]   ... +13 more failures"),
+            "should cap at 10 and show remaining, [ERROR]-prefixed, got: {}",
+            output
         );
         assert!(
             output.contains("SearchReadModelTest"),
@@ -2897,6 +2908,54 @@ mod tests {
         assert!(!out.contains("mvn test:"), "synthetic headline leaked:\n{out}");
     }
 
+    // --- Task 7: regression fences for native-format fidelity ---
+    //
+    // These pin the whole-branch invariant across every `mvn test` shape:
+    // no synthetic `mvn <goal>:` prose, no RTK-only markers, and Maven's own
+    // `[INFO]`/`[ERROR]`/`[WARNING]` prefixes survive on every retained or
+    // reconstructed line.
+    //
+    // `"rtk"` is checked as a bare substring (not just a whole word) per the
+    // brief's banned-marker list. Verified empirically first: none of the
+    // three fixtures below contain "rtk" in any casing or substring form
+    // (`grep -in rtk` on each returns zero matches), and `filter_mvn_test`
+    // never invokes XML enrichment (no cwd/tee path is passed), so there is
+    // no tee-log-reference source of a legitimate "rtk" substring on this
+    // code path either. A plain `!out.contains("rtk")` is therefore safe
+    // here with no false-positive risk — if a future fixture legitimately
+    // needs to carry "rtk" (e.g. an artifact id), tighten this to the
+    // specific leak shapes (`rtk proxy`, `rtk gain`) instead of loosening it.
+    #[test]
+    fn no_surface_emits_synthetic_or_rtk_markers() {
+        let cases: &[&str] = &[
+            include_str!("../../../tests/fixtures/mvn_test_pass_mavenmcp.txt"),
+            include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt"),
+            include_str!("../../../tests/fixtures/mvn_test_compile_failure.txt"),
+        ];
+        for raw in cases {
+            let out = filter_mvn_test(raw);
+            for banned in [
+                "mvn test:",
+                "(from surefire-reports/)",
+                "(from failsafe-reports/)",
+                "(multi-goal)",
+                "mvn: ok",
+                "\nclasses:",
+                "rtk",
+                "Total time",
+            ] {
+                assert!(!out.contains(banned), "banned marker `{banned}` in:\n{out}");
+            }
+        }
+    }
+
+    #[test]
+    fn retained_lines_keep_maven_prefixes() {
+        let out = filter_mvn_test(include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt"));
+        assert!(out.lines().any(|l| l.starts_with("[ERROR] Tests run:")), "\n{out}");
+        assert!(out.lines().any(|l| l.starts_with("[INFO] BUILD FAILURE")), "\n{out}");
+    }
+
     #[test]
     fn no_tests_uses_native_surefire_warning() {
         let out = filter_mvn_test("[INFO] Building my-project 1.0\n[INFO] BUILD SUCCESS\n");
@@ -2906,7 +2965,7 @@ mod tests {
     #[test]
     fn test_empty_input() {
         let output = filter_mvn_test("");
-        assert_eq!(output, "mvn test: No tests run");
+        assert_eq!(output, "[WARNING] No tests were executed!");
     }
 
     #[test]
@@ -2914,13 +2973,14 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_test_many_failures.txt");
         let output = filter_mvn_test(input);
         assert!(
-            output.contains("28 run, 28 failed"),
-            "should show total run/failed counts, got: {}",
+            output.contains("Tests run: 28, Failures: 0, Errors: 28, Skipped: 0"),
+            "should show maven-native aggregate line, got: {}",
             output
         );
         assert!(
-            output.contains("+4 more failures"),
-            "should cap at 10 and show remaining count"
+            output.contains("[ERROR]   ... +4 more failures"),
+            "should cap at 10 and show remaining count, [ERROR]-prefixed, got: {}",
+            output
         );
     }
 
@@ -2947,8 +3007,8 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_test_multimodule.txt");
         let output = filter_mvn_test(input);
         assert!(
-            output.contains("860 run, 4 failed"),
-            "should show total run/failed across modules, got: {}",
+            output.contains("Tests run: 860, Failures: 0, Errors: 4, Skipped: 4"),
+            "should show maven-native aggregate line across modules, got: {}",
             output
         );
         assert!(
@@ -2959,10 +3019,7 @@ mod tests {
             output.contains("ServiceUnavailableException"),
             "should include error details"
         );
-        assert!(
-            output.contains("01:31 min"),
-            "should contain total time"
-        );
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
     }
 
     #[test]
@@ -2988,18 +3045,11 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_test_pass_large_ansi.txt");
         let output = filter_mvn_test(input);
         assert!(
-            output.contains("950 passed"),
-            "should show 950 passed (959-9 skipped), got: {}",
+            output.contains("[INFO] Tests run: 959, Failures: 0, Errors: 0, Skipped: 9"),
+            "should show maven-native aggregate line (959 run, 9 skipped), got: {}",
             output
         );
-        assert!(
-            output.contains("9 skipped"),
-            "should show 9 skipped"
-        );
-        assert!(
-            output.contains("01:32 min"),
-            "should contain total time"
-        );
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
         assert!(
             !output.contains("PortUnreachableException"),
             "should strip app log noise"
@@ -3039,7 +3089,7 @@ mod tests {
     fn test_no_test_section() {
         let input = "[INFO] Building my-project 1.0\n[INFO] BUILD SUCCESS\n";
         let output = filter_mvn_test(input);
-        assert_eq!(output, "mvn test: No tests run");
+        assert_eq!(output, "[WARNING] No tests were executed!");
     }
 
     // --- dependency:tree tests ---
@@ -3208,9 +3258,12 @@ mod tests {
         let output_tokens = count_tokens(&output);
         let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
 
+        // Verbatim native subset (fidelity decision 2026-07-09): dep:list keeps all
+        // resolved lines, so savings come only from boilerplate removal.
+        // guard::never_worse is the hard floor.
         assert!(
-            savings >= 60.0,
-            "mvn dependency:list: expected >=60% savings, got {:.1}% ({} -> {} tokens)",
+            savings >= 10.0,
+            "mvn dependency:list: expected >=10% savings, got {:.1}% ({} -> {} tokens)",
             savings,
             input_tokens,
             output_tokens,
@@ -3343,6 +3396,8 @@ mod tests {
 
     #[test]
     fn test_dep_tree_large_savings_above_80() {
+        // NOTE: threshold is 20%, not 80% (name kept for git-blame continuity —
+        // see the fidelity-decision comment below for why).
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_large.txt");
         let output = filter_mvn_dep_tree(input);
 
@@ -3350,9 +3405,13 @@ mod tests {
         let output_tokens = count_tokens(&output);
         let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
 
+        // Verbatim native subset (fidelity decision 2026-07-09): dep:tree keeps
+        // transitive lines verbatim (no invented "(N transitive)" collapse), so
+        // savings come only from boilerplate removal — large, deep trees keep
+        // almost everything. guard::never_worse is the hard floor.
         assert!(
-            savings >= 80.0,
-            "mvn dep tree large: expected >=80% savings, got {:.1}% ({} -> {} tokens)",
+            savings >= 20.0,
+            "mvn dep tree large: expected >=20% savings, got {:.1}% ({} -> {} tokens)",
             savings, input_tokens, output_tokens,
         );
     }
@@ -3853,7 +3912,8 @@ mod tests {
             output
         );
         assert!(output.contains("BUILD SUCCESS"), "should keep BUILD SUCCESS");
-        assert!(output.contains("Total time"), "should keep Total time");
+        // Total time is dropped uniformly across every mvn surface.
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
 
         // Strip ANSI escapes (fixture has them)
         assert!(
@@ -3934,7 +3994,8 @@ mod tests {
 
         // Keep: final result
         assert!(output.contains("BUILD FAILURE"));
-        assert!(output.contains("Total time"));
+        // Total time is dropped uniformly across every mvn surface.
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
 
         // Keep: each of 4 violations (rule name must survive the rewrite)
         for rule in &[
@@ -4009,25 +4070,11 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_verify_auth.txt");
         let output = filter_mvn_verify(input);
         assert!(
-            output.starts_with("mvn verify:"),
-            "verify filter must emit 'mvn verify:' prefix, got: {}",
+            output.contains("[INFO] Tests run: 950, Failures: 0, Errors: 0, Skipped: 9"),
+            "should accumulate surefire+failsafe (688+262)=950 run, 9 skipped (8 surefire + 1 failsafe), got: {}",
             output
         );
-        assert!(
-            output.contains("941 passed"),
-            "should accumulate surefire+failsafe (688+262)=950 run, minus 9 skipped = 941 passed, got: {}",
-            output
-        );
-        assert!(
-            output.contains("9 skipped"),
-            "should accumulate skipped (8 surefire + 1 failsafe), got: {}",
-            output
-        );
-        assert!(
-            output.contains("02:11 min"),
-            "should preserve total time, got: {}",
-            output
-        );
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
         assert!(
             !output.contains("BUILD FAILURE"),
             "passing verify run should not say FAILURE, got: {}",
@@ -4075,13 +4122,19 @@ mod tests {
         let tmp = tmp_with_reports(2);
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let out = super::enrich_with_reports(
-            "mvn test: 24 passed (3.0 s)",
+            "[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
             tmp.path(),
             since,
             &pkgs("com.example"),
             "test",
         );
-        assert!(out.text.contains("Suite0Test:"), "inline class list, got: {}", out.text);
+        // Inline breakdown is rendered in surefire's own line shape, not the
+        // old compact "Suite0Test:" form.
+        assert!(
+            out.text.contains("[INFO] Tests run: 5 -- in com.example.auth.user.Suite0Test"),
+            "inline class list, got: {}",
+            out.text
+        );
         assert!(out.digest.is_some(), "digest written even for inline runs");
         assert!(!out.reference, "2 classes fit inline — no reference line needed");
     }
@@ -4094,20 +4147,20 @@ mod tests {
         let tmp = tmp_with_reports(2);
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let out = super::enrich_with_reports(
-            "mvn test: 24 passed (3.0 s)\nTests run: 24, Failures: 0, Errors: 0, Skipped: 0\nBUILD SUCCESS",
+            "[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
             tmp.path(),
             since,
             &pkgs("com.example"),
             "test",
         );
         assert!(
-            out.text.contains("Suite0Test:"),
+            out.text.contains("[INFO] Tests run: 5 -- in com.example.auth.user.Suite0Test"),
             "inline class list, got: {}",
             out.text
         );
         assert_eq!(
             out.text.lines().last(),
-            Some("BUILD SUCCESS"),
+            Some("[INFO] BUILD SUCCESS"),
             "BUILD SUCCESS must stay last, got: {}",
             out.text
         );
@@ -4117,14 +4170,15 @@ mod tests {
     fn enrich_pass_large_run_defers_to_digest() {
         let tmp = tmp_with_reports(6);
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let text = "[INFO] Tests run: 72, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS";
         let out = super::enrich_with_reports(
-            "mvn test: 72 passed (9.0 s)",
+            text,
             tmp.path(),
             since,
             &pkgs("com.example"),
             "test",
         );
-        assert_eq!(out.text, "mvn test: 72 passed (9.0 s)");
+        assert_eq!(out.text, text);
         assert!(out.reference);
         let digest = out.digest.expect("digest for large run");
         assert!(digest.contains("Suite5Test"), "all classes in digest, got: {digest}");
@@ -4164,7 +4218,7 @@ mod tests {
         .unwrap();
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let out = super::enrich_with_reports(
-            "mvn test: 5 passed, 8 skipped (2.0 s)",
+            "[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 8\n[INFO] BUILD SUCCESS",
             tmp.path(),
             since,
             &pkgs("com.example"),
@@ -4226,11 +4280,19 @@ mod tests {
 
     #[test]
     fn test_filter_mvn_test_still_emits_test_prefix() {
+        // Renamed intent: goal parameterization must NOT reintroduce the old
+        // synthetic 'mvn test:' prefix — the native subset starts with
+        // Maven's own [INFO]/[ERROR] aggregate line instead.
         let input = include_str!("../../../tests/fixtures/mvn_test_pass_mavenmcp.txt");
         let output = filter_mvn_test(input);
         assert!(
-            output.starts_with("mvn test:"),
-            "test filter must keep 'mvn test:' prefix after goal parameterization, got: {}",
+            !output.starts_with("mvn test:"),
+            "synthetic 'mvn test:' prefix leaked after goal parameterization, got: {}",
+            output
+        );
+        assert!(
+            output.starts_with("[INFO]"),
+            "test filter must emit Maven's own [INFO]-prefixed aggregate line, got: {}",
             output
         );
     }
@@ -4332,26 +4394,32 @@ mod tests {
         .unwrap();
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "mvn test: 2 run, 2 failed (0.6 s)\nBUILD FAILURE\n\nFailures:\n\
-                    1. com.example.FailingTest.shouldReturnUser\n\
-                       AssertionFailedError: expected:<200> but was:<404>\n";
+        let text = "[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE\n\n\
+                    [ERROR] Failures:\n\
+                    [ERROR]   com.example.FailingTest.shouldReturnUser <<< FAILURE!\n\
+                    [ERROR]     AssertionFailedError: expected:<200> but was:<404>\n";
         let out =
             super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
 
-        // XML block present.
+        // XML block present — shouldHandleNull only exists in the XML fixture,
+        // not in the hand-written text block above, so its presence proves
+        // the XML-sourced section rendered.
         assert!(
-            out.text.contains("Failures (from surefire-reports/)"),
+            out.text.contains("shouldHandleNull"),
             "missing XML failures section:\n{}",
             out.text
         );
-        // Text block gone — only the XML variant remains.
-        assert!(
-            !out.text.contains("\nFailures:\n"),
+        // Text block gone — only the XML variant remains (exactly one header).
+        assert_eq!(
+            out.text.matches("[ERROR] Failures:").count(),
+            1,
             "text-filter 'Failures:' block leaked through — duplicate:\n{}",
             out.text
         );
         // Summary + BUILD FAILURE preserved.
-        assert!(out.text.starts_with("mvn test: 2 run, 2 failed (0.6 s)\nBUILD FAILURE"));
+        assert!(out.text.starts_with(
+            "[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE"
+        ));
     }
 
     #[test]
@@ -4360,18 +4428,19 @@ mod tests {
         // block is the only source of failure info — must survive.
         let tmp = tempfile::tempdir().unwrap();
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "mvn test: 1 run, 1 failed (0.5 s)\nBUILD FAILURE\n\nFailures:\n\
-                    1. com.example.LostTest.boom\n";
+        let text = "[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE\n\n\
+                    [ERROR] Failures:\n\
+                    [ERROR]   com.example.LostTest.boom <<< FAILURE!\n";
         let out =
             super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
 
         assert!(
-            out.text.contains("Failures:\n1. com.example.LostTest.boom"),
+            out.text.contains("[ERROR] Failures:\n[ERROR]   com.example.LostTest.boom <<< FAILURE!"),
             "fallback dropped text failures when XML was absent:\n{}",
             out.text
         );
         assert!(
-            out.text.contains("no XML reports found"),
+            out.text.contains("no XML reports"),
             "expected no-reports hint in fallback:\n{}",
             out.text
         );
@@ -4389,10 +4458,10 @@ mod tests {
         .unwrap();
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "mvn test: 4 run, 2 failed (01:02 min)\nBUILD FAILURE";
+        let text = "[ERROR] Tests run: 4, Failures: 2, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
         let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
 
-        assert!(out.text.contains("Failures (from surefire-reports/)"));
+        assert!(out.text.contains("[ERROR] Failures:"));
         assert!(out.text.contains("com.example.FailingTest.shouldReturnUser"));
         assert!(out.text.contains("reports:"));
     }
@@ -4416,10 +4485,10 @@ mod tests {
         .unwrap();
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "mvn verify: 10 run, 3 failed (03:30 min)\nBUILD FAILURE";
+        let text = "[ERROR] Tests run: 10, Failures: 3, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
         let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
-        assert!(out.text.contains("Failures (from surefire-reports/)"));
-        assert!(out.text.contains("Integration failures (from failsafe-reports/)"));
+        assert!(out.text.contains("[ERROR] Failures:"));
+        assert!(out.text.contains("[ERROR] Integration failures:"));
         assert!(out.text.contains("Caused by: org.hibernate.HibernateException"));
 
         // The digest must combine both report dirs, not just one.
@@ -4468,7 +4537,7 @@ mod tests {
         assert!(!tmp.path().join("target").exists());
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "mvn verify: 14 run, 3 failed (02:15 min)\nBUILD FAILURE";
+        let text = "[ERROR] Tests run: 14, Failures: 3, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
         let out = super::enrich_with_reports(
             text,
             tmp.path(),
@@ -4479,7 +4548,7 @@ mod tests {
 
         // Failure details from module-a's surefire reports must surface.
         assert!(
-            out.text.contains("Failures (from surefire-reports/)"),
+            out.text.contains("[ERROR] Failures:"),
             "missed module-a surefire reports:\n{}",
             out.text
         );
@@ -4491,7 +4560,7 @@ mod tests {
 
         // Integration failure from module-c must also surface.
         assert!(
-            out.text.contains("Integration failures (from failsafe-reports/)"),
+            out.text.contains("[ERROR] Integration failures:"),
             "missed module-c failsafe reports:\n{}",
             out.text
         );
@@ -4607,7 +4676,7 @@ mod tests {
             )
             .unwrap();
         }
-        let text = "mvn test: 5 run, 1 failed (0.5 s)\nBUILD FAILURE";
+        let text = "[ERROR] Tests run: 5, Failures: 1, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
         let out = super::enrich_with_reports(
             text,
             tmp.path(),
@@ -4627,7 +4696,7 @@ mod tests {
     #[test]
     fn enrich_failures_without_xml_appends_hint() {
         let tmp = tempfile::tempdir().unwrap();
-        let text = "mvn test: 5 run, 2 failed (0.500 s)\nBUILD FAILURE";
+        let text = "[ERROR] Tests run: 5, Failures: 2, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
         let out = super::enrich_with_reports(
             text,
             tmp.path(),
@@ -4636,7 +4705,7 @@ mod tests {
             "test",
         );
         assert!(out.text.contains("no XML reports"));
-        assert!(out.text.contains("check target/surefire-reports/"));
+        assert!(out.text.contains("under target/surefire-reports/"));
     }
 
     #[test]
@@ -4671,7 +4740,7 @@ mod tests {
         }
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "mvn test: 7 run, 2 failed (00:10 min)\nBUILD FAILURE";
+        let text = "[ERROR] Tests run: 7, Failures: 2, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
         let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
         insta::assert_snapshot!(out.text);
     }
@@ -4700,7 +4769,7 @@ mod tests {
         .unwrap();
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "mvn verify: 12 run, 4 failed (05:42 min)\nBUILD FAILURE";
+        let text = "[ERROR] Tests run: 12, Failures: 4, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
         let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
         insta::assert_snapshot!(out.text);
     }
@@ -5004,6 +5073,15 @@ mod tests {
         // clean noise must be gone
         assert!(!output.contains("Deleting"), "clean noise leaked: {output}");
         assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        // Single-module fixture — no per-module Reactor Summary line contains
+        // the substring "BUILD SUCCESS", so a plain count is meaningful here
+        // (mirrors the failure-path sibling's `multi_goal_has_no_rtk_markers`
+        // exactly-one-BUILD-line fence).
+        assert_eq!(
+            output.matches("BUILD SUCCESS").count(),
+            1,
+            "duplicate BUILD lines:\n{output}"
+        );
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 85.0, "expected ≥85%, got {:.1}%", savings);
         insta::assert_snapshot!(output);
