@@ -1092,12 +1092,10 @@ pub(crate) fn enrich_with_reports(
     match (zero_tests, &sf, &fs) {
         (true, None, None) => passthrough(format!(
             "mvn {goal}: No tests run (0 tests executed — surefire detected \
-             no tests). Check pom.xml (surefire plugin configuration) or run: \
-             rtk proxy mvn {goal}"
+             no tests). Check pom.xml (surefire plugin configuration)."
         )),
         (false, None, None) => passthrough(format!(
-            "{text_summary}\n(no XML reports found — check target/surefire-reports/ \
-             or run: rtk proxy mvn {goal})"
+            "{text_summary}\n(no XML reports found — check target/surefire-reports/)"
         )),
         _ => Enriched {
             text: render_enriched(text_summary, sf.as_ref(), fs.as_ref()),
@@ -4199,7 +4197,7 @@ mod tests {
             "test",
         );
         assert!(out.text.contains("0 tests executed"));
-        assert!(out.text.contains("rtk proxy mvn test") || out.text.contains("surefire"));
+        assert!(out.text.contains("surefire detected"));
     }
 
     #[test]
@@ -4219,7 +4217,7 @@ mod tests {
             out.text
         );
         assert!(
-            out.text.contains("rtk proxy mvn verify"),
+            out.text.contains("mvn verify"),
             "error message must reference the verify goal, got: {}",
             out.text
         );
@@ -4644,7 +4642,7 @@ mod tests {
             "test",
         );
         assert!(out.text.contains("no XML reports"));
-        assert!(out.text.contains("rtk proxy mvn test"));
+        assert!(out.text.contains("check target/surefire-reports/"));
     }
 
     #[test]
