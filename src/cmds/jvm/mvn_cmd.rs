@@ -2176,9 +2176,6 @@ const CHECKSTYLE_HELP_BOILERPLATE: &[&str] = &[
 /// that fails, keep `[ERROR]` lines so the user sees the actual compile error.
 fn filter_mvn_clean(output: &str) -> String {
     let clean = strip_ansi(output);
-    let mut deleted_count: usize = 0;
-    let mut first_deleted: Option<&str> = None;
-    let mut total_time: Option<&str> = None;
     let mut build_failure = false;
     let mut error_lines: Vec<&str> = Vec::new();
 
@@ -2186,25 +2183,9 @@ fn filter_mvn_clean(output: &str) -> String {
         let trimmed = line.trim();
         let stripped = strip_maven_prefix(trimmed);
 
-        if let Some(path) = stripped.strip_prefix("Deleting ") {
-            let path = path.trim();
-            if deleted_count == 0 {
-                first_deleted = Some(path);
-            }
-            deleted_count += 1;
-            continue;
-        }
-
         if stripped.contains("BUILD FAILURE") {
             build_failure = true;
             continue;
-        }
-
-        if total_time.is_none() {
-            if let Some(t) = parse_total_time(stripped) {
-                total_time = Some(t);
-                continue;
-            }
         }
 
         if error_lines.len() < MAX_FAILURES_SHOWN
@@ -2218,26 +2199,17 @@ fn filter_mvn_clean(output: &str) -> String {
         }
     }
 
-    let time_str = total_time.unwrap_or("?");
-
     if build_failure {
-        let mut result = format!("mvn clean: BUILD FAILURE ({time_str})");
+        let mut result = String::from("[INFO] BUILD FAILURE");
         for err in &error_lines {
-            result.push('\n');
-            result.push_str("  ");
+            result.push_str("\n[ERROR]   ");
             result.push_str(&truncate(err, MAX_LINE_LENGTH));
         }
         return result;
     }
 
-    match deleted_count {
-        0 => format!("mvn clean: nothing to clean ({time_str})"),
-        1 => format!(
-            "mvn clean: deleted {} ({time_str})",
-            first_deleted.unwrap_or("")
-        ),
-        n => format!("mvn clean: deleted {n} targets ({time_str})"),
-    }
+    // Hard subset: clean has no native compact line other than the build result.
+    "[INFO] BUILD SUCCESS".to_string()
 }
 
 /// Filter `mvn checkstyle:check` output:
@@ -2262,6 +2234,13 @@ fn filter_mvn_checkstyle(output: &str) -> String {
 
         let line = raw.trim();
         if line.is_empty() {
+            continue;
+        }
+
+        // Drop raw (unprefixed) Checkstyle audit-tool boilerplate — Checkstyle's
+        // AuditListener writes these directly to stdout, bypassing the Maven
+        // logger, so they carry no `[INFO]` tag for the noise filter above.
+        if line == "Starting audit..." || line == "Audit done." {
             continue;
         }
 
@@ -2305,7 +2284,9 @@ fn filter_mvn_checkstyle(output: &str) -> String {
                 || stripped.contains("BUILD FAILURE")
                 || TOTAL_TIME_RE.is_match(stripped)
             {
-                result.push(stripped.to_string());
+                // Keep the `[INFO]` tag verbatim — retained lines stay a
+                // prefix-preserving subset of Maven's own output.
+                result.push(line.to_string());
                 continue;
             }
 
@@ -2331,7 +2312,7 @@ fn filter_mvn_checkstyle(output: &str) -> String {
     }
 
     if result.is_empty() {
-        return "mvn checkstyle: ok".to_string();
+        return "[INFO] BUILD SUCCESS".to_string();
     }
 
     result.join("\n")
@@ -3720,23 +3701,26 @@ mod tests {
     #[test]
     fn test_filter_mvn_clean_no_deletions() {
         // First clean of a never-built project: no `Deleting` lines, but BUILD SUCCESS.
+        // Hard subset: a passing clean run collapses to exactly the native build line.
         let input = "[INFO] Scanning for projects...\n\
                      [INFO] Building sample 1.0\n\
                      [INFO] BUILD SUCCESS\n\
                      [INFO] Total time:  0.523 s\n";
         let output = filter_mvn_clean(input);
-        assert_eq!(output, "mvn clean: nothing to clean (0.523 s)");
+        assert_eq!(output, "[INFO] BUILD SUCCESS");
     }
 
     #[test]
     fn test_filter_mvn_clean_multi_module() {
+        // Hard subset: deletion count no longer surfaces — a passing clean run
+        // collapses to exactly the native build line regardless of module count.
         let input = "[INFO] Deleting /repo/mod-a/target\n\
                      [INFO] Deleting /repo/mod-b/target\n\
                      [INFO] Deleting /repo/mod-c/target\n\
                      [INFO] BUILD SUCCESS\n\
                      [INFO] Total time:  2.101 s\n";
         let output = filter_mvn_clean(input);
-        assert_eq!(output, "mvn clean: deleted 3 targets (2.101 s)");
+        assert_eq!(output, "[INFO] BUILD SUCCESS");
     }
 
     #[test]
@@ -3749,7 +3733,7 @@ mod tests {
                      [INFO] BUILD FAILURE\n\
                      [INFO] Total time:  0.9 s\n";
         let output = filter_mvn_clean(input);
-        assert!(output.starts_with("mvn clean: BUILD FAILURE (0.9 s)"));
+        assert!(output.starts_with("[INFO] BUILD FAILURE"));
         assert!(output.contains("COMPILATION ERROR"));
         assert!(output.contains("cannot find symbol"));
     }
@@ -3759,6 +3743,12 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_clean_auth.txt");
         let output = filter_mvn_clean(input);
         insta::assert_snapshot!(output);
+    }
+
+    #[test]
+    fn clean_pass_is_native_build_line() {
+        let out = filter_mvn_clean("[INFO] Deleting /p/target\n[INFO] BUILD SUCCESS\n[INFO] Total time: 0.4 s\n");
+        assert_eq!(out, "[INFO] BUILD SUCCESS");
     }
 
     // --- goal routing (dispatch / route_goal) ---
@@ -4017,6 +4007,12 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_checkstyle_violations.txt");
         let output = filter_mvn_checkstyle(input);
         insta::assert_snapshot!(output);
+    }
+
+    #[test]
+    fn checkstyle_pass_is_native_build_line() {
+        let out = filter_mvn_checkstyle("[INFO] Starting audit...\nAudit done.\n[INFO] BUILD SUCCESS\n");
+        assert_eq!(out, "[INFO] BUILD SUCCESS");
     }
 
     #[test]
