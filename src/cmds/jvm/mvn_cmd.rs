@@ -2096,10 +2096,6 @@ fn should_keep_compile_line(line: &str) -> bool {
         return true;
     }
 
-    if TOTAL_TIME_RE.is_match(stripped) {
-        return true;
-    }
-
     // Strip [INFO] noise
     if line.starts_with(INFO_TAG) {
         if stripped.is_empty() {
@@ -2131,6 +2127,11 @@ fn should_keep_compile_line(line: &str) -> bool {
             || BUNDLE_SIZE_RE.is_match(stripped)
             || ENFORCER_RULE_PASSED_RE.is_match(stripped)
         {
+            return false;
+        }
+
+        // Drop Total time line (summary timing not actionable)
+        if TOTAL_TIME_RE.is_match(stripped) {
             return false;
         }
 
@@ -2676,8 +2677,8 @@ mod tests {
         let input =
             include_str!("../../../tests/fixtures/mvn_compile_reactor_success.txt");
         let output = filter_mvn_compile(input);
-        // Per-module SUCCESS lines must be collapsed; only BUILD SUCCESS +
-        // Total time survive for an all-green reactor.
+        // Per-module SUCCESS lines must be collapsed; only BUILD SUCCESS
+        // survives for an all-green reactor.
         assert!(output.contains("BUILD SUCCESS"), "got: {output}");
         assert!(!output.contains("edeal-common ....."), "got: {output}");
         let savings = 100.0
@@ -3407,8 +3408,8 @@ mod tests {
             output
         );
         assert!(
-            output.contains("Total time:"),
-            "should keep Total time"
+            !output.contains("Total time:"),
+            "Total time must be dropped:\n{output}"
         );
 
         // Must strip plugin noise
@@ -3621,7 +3622,7 @@ mod tests {
         let input = "[INFO] BUILD SUCCESS\n[INFO] Total time: 2.5 s\n";
         let output = filter_mvn_compile(input);
         assert!(output.contains("BUILD SUCCESS"));
-        assert!(output.contains("Total time:"));
+        assert!(!output.contains("Total time:"));
     }
 
     #[test]
@@ -4828,7 +4829,7 @@ mod tests {
         assert!(!output.contains("parent-project 2.4.1-SNAPSHOT"), "kept Reactor Build Order entry: {output}");
         // Must preserve the essentials
         assert!(output.contains("BUILD SUCCESS"));
-        assert!(output.contains("Total time"));
+        assert!(!output.contains("Total time"));
     }
 
     #[test]
@@ -4980,7 +4981,7 @@ mod tests {
             "kept resources-plugin encoding advisory:\n{output}"
         );
         assert!(output.contains("BUILD SUCCESS"));
-        assert!(output.contains("Total time"));
+        assert!(!output.contains("Total time"), "Total time must be dropped:\n{output}");
     }
 
     #[test]
