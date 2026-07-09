@@ -2,5 +2,6 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: out
 ---
-mvn test: 12 passed (3.1 s)
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Tests run: 5 -- in com.example.auth.user.UsersTest
+[INFO] BUILD SUCCESS

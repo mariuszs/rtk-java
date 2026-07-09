@@ -4188,9 +4188,12 @@ mod tests {
     fn enrich_clean_run_without_reports_passes_through() {
         // Replaces enrich_happy_path_passes_through_without_io: the pass path now
         // performs discovery I/O, but with no reports found the summary must come
-        // back byte-identical and nothing is written.
+        // back byte-identical and nothing is written. Native-format input (not
+        // the old synthetic "mvn test: …" string) so this actually clears the
+        // prefix gate and exercises the `passing && digest.is_none()`
+        // passthrough branch instead of the early non-prefixed exit.
         let tmp = tempfile::tempdir().unwrap();
-        let text = "mvn test: 42 passed (1.234 s)";
+        let text = "[INFO] Tests run: 42, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS";
         let out = super::enrich_with_reports(
             text,
             tmp.path(),
@@ -4708,20 +4711,18 @@ mod tests {
         assert!(out.text.contains("under target/surefire-reports/"));
     }
 
-    #[test]
-    fn enrich_happy_path_with_10_passed_is_short_circuited() {
-        // Regression: "10 passed" must not trigger zero_tests via substring of "0 passed".
-        let tmp = tempfile::tempdir().unwrap();
-        let text = "mvn test: 10 passed (0.500 s)";
-        let out = super::enrich_with_reports(
-            text,
-            tmp.path(),
-            std::time::SystemTime::now(),
-            &pkgs("com.example"),
-            "test",
-        );
-        assert_eq!(out.text, text, "10 passed must short-circuit without enrichment");
-    }
+    // enrich_happy_path_with_10_passed_is_short_circuited deleted: it guarded
+    // against zero_tests matching via a substring of "0 passed" inside "10
+    // passed", but that check is now an exact-equality comparison against
+    // `"[WARNING] No tests were executed!"` (see zero_tests in
+    // enrich_with_reports) — the substring bug it regression-tested no
+    // longer exists. Repurposed with a native-format "no reports" input it
+    // would be byte-for-byte identical to
+    // enrich_clean_run_without_reports_passes_through /
+    // savings_happy_path_unchanged_by_enrichment (same passthrough branch,
+    // same assertions), and with reports present it would duplicate
+    // enrich_pass_small_run_inlines_classes_and_carries_digest /
+    // enrich_pass_large_run_defers_to_digest. No unique invariant survives.
 
     #[test]
     fn snapshot_enriched_surefire_only() {
@@ -4791,8 +4792,10 @@ mod tests {
     fn savings_happy_path_unchanged_by_enrichment() {
         // Happy path: with no reports discovered under `tmp`, the pass gate's
         // digest-is-none check falls back to the summary unchanged — savings
-        // must match pre-enrichment.
-        let text = "mvn test: 859 passed, 4 skipped (02:11 min)";
+        // must match pre-enrichment. Native-format input so the prefix gate
+        // is actually cleared (the old synthetic "mvn test: …" string took
+        // the early non-prefixed passthrough and never reached the pass gate).
+        let text = "[INFO] Tests run: 859, Failures: 0, Errors: 0, Skipped: 4\n[INFO] BUILD SUCCESS";
         let tmp = tempfile::tempdir().unwrap();
         let out = super::enrich_with_reports(
             text,
@@ -4807,8 +4810,13 @@ mod tests {
     #[test]
     fn savings_enriched_failures_stays_under_15_percent() {
         // Simulate a ~2000-line build log whose text filter produced a short
-        // summary, plus one big failsafe XML with system-err and a 3-segment
-        // Caused-by chain. Total enriched output must be ≥85% smaller than raw.
+        // native-format summary, plus one big failsafe XML with system-err and
+        // a 3-segment Caused-by chain. Total enriched output must be ≥85%
+        // smaller than raw. The summary must clear the `[INFO]`/`[ERROR]`/
+        // `[WARNING]` prefix gate — a synthetic "mvn verify: …" input (the old
+        // shape) takes the early non-prefixed passthrough exit and the
+        // failsafe XML below is never parsed, so the "enriched" savings figure
+        // it measured was really just "short string vs. long string".
         let raw_log: String = std::iter::repeat_n(
             "[INFO] Running com.example.some.Heavy.Test — lots of noisy build output\n",
             2000,
@@ -4825,8 +4833,22 @@ mod tests {
         .unwrap();
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text_summary = "mvn verify: 4 run, 1 failed (01:23 min)\nBUILD FAILURE";
+        let text_summary =
+            "[ERROR] Tests run: 2, Failures: 0, Errors: 1, Skipped: 0\n[INFO] BUILD FAILURE";
         let enriched = super::enrich_with_reports(text_summary, tmp.path(), since, &pkgs("com.example"), "verify");
+
+        // Sanity: the failsafe XML was actually parsed into the output this
+        // time — the old test's old-format input never reached this code.
+        assert!(
+            enriched.text.contains("[ERROR] Integration failures:"),
+            "expected failsafe XML to be parsed into the enriched output, got: {}",
+            enriched.text
+        );
+        assert!(
+            enriched.text.contains("Caused by: org.hibernate.HibernateException"),
+            "expected the 3-segment Caused-by chain to survive enrichment, got: {}",
+            enriched.text
+        );
 
         let raw_tokens = count_tokens(&raw_log);
         let enriched_tokens = count_tokens(&enriched.text);
@@ -5227,15 +5249,34 @@ mod tests {
 
     #[test]
     fn pass_inline_small_run_lists_classes() {
+        // Native-format input WITH the real "\n[INFO] BUILD SUCCESS" footer —
+        // the old "mvn test: …" string had no footer to strip, so the
+        // strip-then-reappend branch (~:1240-1258) was never exercised.
         let sf = parsed_fixture(include_str!(
             "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
         ));
-        let (out, needs_ref) =
-            super::render_pass_inline("mvn test: 12 passed (3.1 s)", Some(&sf), None);
-        assert!(out.starts_with("mvn test: 12 passed (3.1 s)\n"));
+        let text = "[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS";
+        let (out, needs_ref) = super::render_pass_inline(text, Some(&sf), None);
+        assert!(
+            out.starts_with("[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0\n"),
+            "got: {out}"
+        );
         assert!(
             out.contains("[INFO] Tests run: 5 -- in com.example.auth.user.UsersTest"),
             "surefire-shaped breakdown line, got: {out}"
+        );
+        let idx_breakdown = out
+            .find("[INFO] Tests run: 5 -- in com.example.auth.user.UsersTest")
+            .expect("breakdown present");
+        let idx_footer = out.rfind("[INFO] BUILD SUCCESS").expect("footer present");
+        assert!(
+            idx_breakdown < idx_footer,
+            "breakdown must land before the BUILD SUCCESS footer, got: {out}"
+        );
+        assert_eq!(
+            out.lines().last(),
+            Some("[INFO] BUILD SUCCESS"),
+            "footer must stay the last line, got: {out}"
         );
         assert!(!needs_ref, "1 class <= MAX_INLINE_CLASSES");
         insta::assert_snapshot!("pass_inline_small_snapshot", out);
@@ -5245,6 +5286,10 @@ mod tests {
     fn pass_inline_large_run_defers_to_reference() {
         // Build >MAX_INLINE_CLASSES suites from the real fixture by cloning
         // its (real) suite stat under distinct class names.
+        //
+        // Native-format input WITH the real "\n[INFO] BUILD SUCCESS" footer —
+        // even when no breakdown is inlined, the footer must survive the
+        // strip-then-reappend round trip (~:1240-1258) as the last line.
         let base = parsed_fixture(include_str!(
             "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
         ));
@@ -5255,9 +5300,13 @@ mod tests {
             sf.suites.push(s);
             sf.summary.add(&base.summary);
         }
-        let (out, needs_ref) =
-            super::render_pass_inline("mvn test: 72 passed (9.0 s)", Some(&sf), None);
-        assert_eq!(out, "mvn test: 72 passed (9.0 s)", "no inline list for >5 classes");
+        let text = "[INFO] Tests run: 72, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS";
+        let (out, needs_ref) = super::render_pass_inline(text, Some(&sf), None);
+        assert_eq!(
+            out, text,
+            "no inline list for >5 classes; footer must stay last line unchanged"
+        );
+        assert_eq!(out.lines().last(), Some("[INFO] BUILD SUCCESS"));
         assert!(needs_ref);
     }
 
