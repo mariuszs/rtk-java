@@ -43,9 +43,6 @@ fn parse_total_time(stripped: &str) -> Option<&str> {
 }
 
 lazy_static! {
-    static ref VERSION_MANAGED_RE: Regex =
-        Regex::new(r"\s*\(version managed from [^)]+\)")
-            .unwrap();
     /// Code generator config params: `dialect                : POSTGRES_15`
     /// Also matches parens/hyphens in keys: `interfaces (immutable) : false`
     static ref CODEGEN_CONFIG_RE: Regex =
@@ -2322,53 +2319,65 @@ fn filter_mvn_checkstyle(output: &str) -> String {
 // Line filter for mvn dependency:tree output
 // ---------------------------------------------------------------------------
 
-/// Filter `mvn dependency:tree` — strip Maven boilerplate, omitted duplicates,
-/// and "version managed" annotations. Keep tree structure and conflicts.
-/// Returns the tree depth of a dependency line (0 = root, 1 = direct dep, 2+ = transitive).
-/// Counts tree-drawing segments: each `|  `, `+- `, `\- `, or `   ` at the start adds one level.
-fn dep_tree_depth(line: &str) -> usize {
-    let mut depth = 0;
-    let bytes = line.as_bytes();
-    let mut i = 0;
-    while i + 2 < bytes.len() {
-        match (bytes[i], bytes[i + 1], bytes[i + 2]) {
-            (b'|', b' ', b' ') | (b'+', b'-', b' ') | (b'\\', b'-', b' ') | (b' ', b' ', b' ') => {
-                depth += 1;
-                i += 3;
-            }
-            _ => break,
-        }
-    }
-    depth
-}
-
+/// Filter `mvn dependency:tree` output into a faithful, prefix-preserving
+/// SUBSET of Maven's own lines — no invented grouping, no transitive
+/// collapse, no stripped `(version managed from …)` annotations. The tree
+/// rows (root, `+- `, `\- `, `|  ` continuations), `[ERROR]` lines (capped at
+/// 20), and the `BUILD SUCCESS`/`BUILD FAILURE` line are kept verbatim
+/// (prefix intact); everything else — startup/download noise, separator
+/// banners, `Total time:`/`Finished at:`, and `omitted for duplicate` repeats
+/// — is dropped as a whole line.
 fn filter_mvn_dep_tree(output: &str) -> String {
     let clean = strip_ansi(output);
+    let mut result: Vec<String> = Vec::new();
+    let mut error_count = 0usize;
 
-    // First pass: collect clean tree lines
-    let mut tree_lines: Vec<String> = Vec::new();
     for line in clean.lines() {
         let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
 
-        if trimmed.is_empty() || is_maven_boilerplate(trimmed) {
+        if trimmed.starts_with(ERROR_TAG) {
+            let stripped = strip_maven_prefix(trimmed);
+            if !stripped.is_empty() && error_count < 20 {
+                result.push(trimmed.to_string());
+                error_count += 1;
+            }
+            continue;
+        }
+
+        if trimmed.starts_with(WARNING_TAG) {
+            continue;
+        }
+
+        if !trimmed.starts_with(INFO_TAG) {
+            // Bare (untagged) startup/JVM noise — never a tree line.
+            continue;
+        }
+
+        if is_maven_boilerplate(trimmed) {
             continue;
         }
 
         let stripped = strip_maven_prefix(trimmed);
 
-        if trimmed.starts_with(WARNING_TAG) {
+        if stripped.contains("BUILD SUCCESS") || stripped.contains("BUILD FAILURE") {
+            result.push(trimmed.to_string());
             continue;
         }
-        if trimmed.starts_with(INFO_TAG)
-            && (stripped.is_empty()
-                || stripped.starts_with("Scanning ")
-                || stripped.starts_with("Building ")
-                || stripped.starts_with("Loaded ")
-                || stripped.contains("from pom.xml")
-                || stripped.contains("BUILD SUCCESS")
-                || stripped.contains("BUILD FAILURE")
-                || stripped.starts_with("Total time:")
-                || stripped.starts_with("Finished at:"))
+
+        if stripped.is_empty()
+            || stripped.starts_with("Scanning ")
+            || stripped.starts_with("Building ")
+            || stripped.starts_with("Loaded ")
+            || stripped.starts_with("Downloading")
+            || stripped.starts_with("Downloaded")
+            || stripped.starts_with("Progress")
+            || stripped.contains("from pom.xml")
+            || stripped.starts_with("Total time:")
+            || stripped.starts_with("Finished at:")
+            || stripped.starts_with("---")
         {
             continue;
         }
@@ -2377,176 +2386,105 @@ fn filter_mvn_dep_tree(output: &str) -> String {
             continue;
         }
 
-        let cleaned = if stripped.contains("version managed from") {
-            VERSION_MANAGED_RE.replace_all(stripped, "").into_owned()
-        } else {
-            stripped.to_string()
-        };
-
-        tree_lines.push(cleaned);
+        // Actual dependency-tree row — keep verbatim, `[INFO]` prefix intact.
+        result.push(trimmed.to_string());
     }
 
-    if tree_lines.is_empty() {
-        return "mvn dependency:tree: no output".to_string();
+    if result.is_empty() {
+        return "[INFO] BUILD SUCCESS".to_string();
     }
 
-    // Second pass: collapse transitive deps (depth 2+) into counts on their parent
-    let mut result_lines: Vec<String> = Vec::new();
-    let mut i = 0;
-    while i < tree_lines.len() {
-        let depth = dep_tree_depth(&tree_lines[i]);
-
-        if depth <= 1 {
-            // Root or direct dep — count transitive children
-            let mut transitive_count = 0;
-            let mut j = i + 1;
-            while j < tree_lines.len() {
-                let child_depth = dep_tree_depth(&tree_lines[j]);
-                if child_depth <= depth {
-                    break;
-                }
-                if child_depth >= depth + 2 {
-                    transitive_count += 1;
-                }
-                j += 1;
-            }
-
-            if depth == 1 && transitive_count > 0 {
-                result_lines.push(format!(
-                    "{} ({} transitive)",
-                    tree_lines[i], transitive_count
-                ));
-            } else {
-                result_lines.push(tree_lines[i].clone());
-            }
-        }
-        // depth 2+ lines are skipped (counted above)
-        i += 1;
-    }
-
-    result_lines.join("\n")
+    result.join("\n")
 }
 
-/// Maven dependency scopes, in display order.
-const DEP_LIST_SCOPES: &[&str] = &["compile", "provided", "runtime", "system", "test", "import"];
-
-/// Parse one `dependency:list` entry into `(scope, compact_coordinate)`.
-/// Input shape after the maven prefix is stripped:
-/// `group:artifact:type[:classifier]:version:scope[ (optional)][ -- module …]`.
-/// The default `jar` packaging and the JPMS module note carry no information
-/// for a dependency inventory, so both are dropped; classifiers are kept.
-fn dep_list_entry(stripped: &str) -> Option<(String, String)> {
-    let coord = stripped.split(" -- ").next().unwrap_or(stripped).trim();
-    let (coord, optional) = match coord.strip_suffix("(optional)") {
-        Some(c) => (c.trim(), true),
-        None => (coord, false),
+/// Returns true when `trimmed` (the un-prefix-stripped `[INFO]` line) looks
+/// like a `dependency:list` resolved-file entry. Maven indents these with
+/// extra leading spaces under the "The following files have been resolved:"
+/// header (`[INFO]    group:artifact:type[:classifier]:version:scope[ ...]`),
+/// unlike ordinary single-space `[INFO] message` lines — that structural
+/// marker plus a loose colon-count shape check is enough to recognize a
+/// resolved coordinate without re-parsing, re-formatting, or judging what a
+/// "real" scope word is.
+fn dep_list_is_resolved_entry(trimmed: &str) -> bool {
+    let Some(rest) = trimmed.strip_prefix(INFO_TAG) else {
+        return false;
     };
-    let parts: Vec<&str> = coord.split(':').collect();
-    let (group, artifact, packaging, classifier, version, scope) = match parts.as_slice() {
-        [g, a, t, v, s] => (*g, *a, *t, None, *v, *s),
-        [g, a, t, c, v, s] => (*g, *a, *t, Some(*c), *v, *s),
-        _ => return None,
-    };
-    if !DEP_LIST_SCOPES.contains(&scope) {
-        return None;
+    if !rest.starts_with("   ") {
+        return false;
     }
-    // Guard against prose that happens to contain colons: coordinates never
-    // contain whitespace.
-    if coord.contains(char::is_whitespace) {
-        return None;
+    let body = rest.trim();
+    let coord = body.split(" -- ").next().unwrap_or(body);
+    let coord = coord.strip_suffix(" (optional)").unwrap_or(coord);
+    if coord.is_empty() || coord.contains(char::is_whitespace) {
+        return false;
     }
-    let mut compact = match (packaging, classifier) {
-        ("jar", None) => format!("{group}:{artifact}:{version}"),
-        ("jar", Some(c)) => format!("{group}:{artifact}:{c}:{version}"),
-        (_, None) => format!("{group}:{artifact}:{packaging}:{version}"),
-        (_, Some(c)) => format!("{group}:{artifact}:{packaging}:{c}:{version}"),
-    };
-    if optional {
-        compact.push_str(" (optional)");
-    }
-    Some((scope.to_string(), compact))
+    // `group:artifact:type:version:scope` (4 colons) or
+    // `group:artifact:type:classifier:version:scope` (5 colons).
+    matches!(coord.matches(':').count(), 4 | 5)
 }
 
-/// Filter `mvn dependency:list` output: dedupe entries across modules, group
-/// them by scope, and drop the `[INFO]` prefix, default `jar` packaging and
-/// JPMS `-- module` notes. Errors and BUILD FAILURE lines are preserved.
+/// Filter `mvn dependency:list` output into a faithful, prefix-preserving
+/// SUBSET of Maven's own lines — no dedup across modules, no scope grouping,
+/// no `N unique deps` count, no stripped packaging/JPMS notes. The resolved
+/// header, every resolved coordinate line, `[ERROR]` lines (capped at 20),
+/// and the `BUILD SUCCESS`/`BUILD FAILURE` line are kept verbatim (prefix
+/// intact); everything else is dropped as a whole line.
 fn filter_mvn_dep_list(output: &str) -> String {
     let clean = strip_ansi(output);
-    if clean.trim().is_empty() {
-        return "mvn dependency:list: no output".to_string();
-    }
-
-    let mut groups: Vec<(String, Vec<String>)> = Vec::new();
-    let mut seen: HashSet<String> = HashSet::new();
-    let mut module_count = 0usize;
-    let mut error_lines: Vec<String> = Vec::new();
-    let mut build_failure = false;
+    let mut result: Vec<String> = Vec::new();
+    let mut error_count = 0usize;
 
     for line in clean.lines() {
         let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+
+        if trimmed.starts_with(ERROR_TAG) {
+            let stripped = strip_maven_prefix(trimmed);
+            if !stripped.is_empty() && error_count < 20 {
+                result.push(trimmed.to_string());
+                error_count += 1;
+            }
+            continue;
+        }
+
+        if trimmed.starts_with(WARNING_TAG) {
+            continue;
+        }
+
+        if !trimmed.starts_with(INFO_TAG) {
+            // Bare (untagged) startup/JVM noise — never a resolved entry.
+            continue;
+        }
+
+        if is_maven_boilerplate(trimmed) {
+            continue;
+        }
+
         let stripped = strip_maven_prefix(trimmed);
 
+        if stripped.contains("BUILD SUCCESS") || stripped.contains("BUILD FAILURE") {
+            result.push(trimmed.to_string());
+            continue;
+        }
+
         if stripped.starts_with("The following files have been resolved") {
-            module_count += 1;
+            result.push(trimmed.to_string());
             continue;
         }
-        if trimmed.starts_with(ERROR_TAG) && !stripped.is_empty() {
-            if error_lines.len() < 20 {
-                error_lines.push(stripped.to_string());
-            }
-            continue;
+
+        if dep_list_is_resolved_entry(trimmed) {
+            result.push(trimmed.to_string());
         }
-        if stripped.contains("BUILD FAILURE") {
-            build_failure = true;
-            continue;
-        }
-        if let Some((scope, compact)) = dep_list_entry(stripped) {
-            let key = format!("{scope} {compact}");
-            if seen.insert(key) {
-                match groups.iter_mut().find(|(s, _)| *s == scope) {
-                    Some((_, deps)) => deps.push(compact),
-                    None => groups.push((scope, vec![compact])),
-                }
-            }
-        }
+        // else: drop — Scanning/Building/Loaded/module-name-extraction/etc.
     }
 
-    if groups.is_empty() && error_lines.is_empty() && !build_failure {
-        return "mvn dependency:list: no dependencies found".to_string();
+    if result.is_empty() {
+        return "[INFO] BUILD SUCCESS".to_string();
     }
 
-    groups.sort_by_key(|(scope, _)| {
-        DEP_LIST_SCOPES.iter().position(|s| s == scope).unwrap_or(usize::MAX)
-    });
-
-    let total: usize = groups.iter().map(|(_, deps)| deps.len()).sum();
-    let mut out = String::with_capacity(clean.len() / 4);
-    if total > 0 {
-        out.push_str(&format!("mvn dependency:list: {total} unique deps"));
-        if module_count > 1 {
-            let _ = write!(out, " across {module_count} modules");
-        }
-        for (scope, deps) in &mut groups {
-            deps.sort();
-            let _ = write!(out, "\n{scope} ({}):", deps.len());
-            for dep in deps.iter() {
-                let _ = write!(out, "\n  {dep}");
-            }
-        }
-    }
-    if !error_lines.is_empty() || build_failure {
-        if !out.is_empty() {
-            out.push('\n');
-        }
-        out.push_str(&error_lines.join("\n"));
-        if build_failure {
-            if !error_lines.is_empty() {
-                out.push('\n');
-            }
-            out.push_str("BUILD FAILURE");
-        }
-    }
-    out
+    result.join("\n")
 }
 
 #[cfg(test)]
@@ -3107,8 +3045,8 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_simple.txt");
         let output = filter_mvn_dep_tree(input);
         assert!(
-            output.contains("com.example:my-app:jar:1.0.0"),
-            "should contain root artifact, got: {}",
+            output.contains("[INFO] com.example:my-app:jar:1.0.0"),
+            "should contain root artifact verbatim, got: {}",
             output
         );
         assert!(
@@ -3120,12 +3058,12 @@ mod tests {
             "should contain guava"
         );
         assert!(
-            !output.contains("[INFO]"),
-            "should strip [INFO] prefix"
+            output.contains("[INFO]"),
+            "[INFO] prefix must survive on kept lines — faithful native subset"
         );
         assert!(
-            !output.contains("BUILD SUCCESS"),
-            "should strip boilerplate"
+            output.contains("[INFO] BUILD SUCCESS"),
+            "BUILD SUCCESS is a native Maven line — keep it verbatim"
         );
         assert!(
             !output.contains("Scanning"),
@@ -3143,8 +3081,8 @@ mod tests {
             output
         );
         assert!(
-            !output.contains("BUILD SUCCESS"),
-            "should strip boilerplate"
+            output.contains("[INFO] BUILD SUCCESS"),
+            "BUILD SUCCESS is a native Maven line — keep it verbatim"
         );
     }
 
@@ -3167,12 +3105,12 @@ mod tests {
     }
 
     #[test]
-    fn test_dep_tree_beacon_cleans_version_managed() {
+    fn test_dep_tree_beacon_keeps_version_managed_verbatim() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_beacon.txt");
         let output = filter_mvn_dep_tree(input);
         assert!(
-            !output.contains("version managed from"),
-            "should strip 'version managed' annotations"
+            output.contains("version managed from"),
+            "'version managed' annotations are native Maven content — keep verbatim, do not strip"
         );
     }
 
@@ -3215,7 +3153,37 @@ mod tests {
     #[test]
     fn test_dep_tree_empty() {
         let output = filter_mvn_dep_tree("");
-        assert_eq!(output, "mvn dependency:tree: no output");
+        assert_eq!(output, "[INFO] BUILD SUCCESS");
+    }
+
+    // --- Task 5 guard tests: faithful verbatim native subset ---
+
+    #[test]
+    fn dep_list_is_verbatim_native_subset() {
+        // reuse the existing dep:list fixture the current tests include_str! (mvn_dependency_list_auth.txt)
+        let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
+        let out = filter_mvn_dep_list(input);
+        assert!(!out.contains("mvn dependency:list:"), "synthetic headline leaked:\n{out}");
+        assert!(!out.contains(" unique deps"), "invented count leaked:\n{out}");
+        // no invented per-scope group header like "compile (5):"
+        assert!(!regex::Regex::new(r"(?m)^\[INFO\] (compile|test|provided|runtime|system|import) \(\d+\):").unwrap().is_match(&out),
+            "invented scope-group header leaked:\n{out}");
+        // native resolved lines survive WITH their [INFO] prefix and :scope suffix
+        assert!(out.lines().any(|l| l.starts_with("[INFO]") && (l.ends_with(":compile") || l.ends_with(":test") || l.ends_with(":runtime"))),
+            "native [INFO] resolved lines missing:\n{out}");
+    }
+
+    #[test]
+    fn dep_tree_empty_is_native_build_line() {
+        assert_eq!(filter_mvn_dep_tree("[INFO] BUILD SUCCESS\n"), "[INFO] BUILD SUCCESS");
+    }
+
+    #[test]
+    fn dep_tree_keeps_transitive_lines_verbatim() {
+        let input = "[INFO] com.example:root:jar:1.0\n[INFO] +- org.a:b:jar:2.0:compile\n[INFO] |  \\- org.c:d:jar:3.0:compile\n[INFO] BUILD SUCCESS\n";
+        let out = filter_mvn_dep_tree(input);
+        assert!(out.contains("[INFO] |  \\- org.c:d:jar:3.0:compile"), "transitive line must survive verbatim:\n{out}");
+        assert!(!out.contains("transitive)"), "must NOT collapse into an invented (N transitive) count:\n{out}");
     }
 
     // --- dependency:list ---
@@ -3246,26 +3214,42 @@ mod tests {
     }
 
     #[test]
-    fn test_dep_list_groups_by_scope_and_strips_noise() {
+    fn test_dep_list_keeps_resolved_lines_verbatim_no_grouping() {
         let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
         let output = filter_mvn_dep_list(input);
 
-        assert!(output.contains("compile ("), "should have a compile scope group");
-        assert!(output.contains("test ("), "should have a test scope group");
-        // Coordinates keep group:artifact:version, drop packaging + JPMS noise
+        // No invented per-scope group headers (e.g. "[INFO] compile (5):") —
+        // note real coordinate lines legitimately contain "compile (optional)"
+        // as a substring, so this must be an anchored-line check, not a
+        // blanket `contains`.
+        let scope_header_re =
+            regex::Regex::new(r"(?m)^\[INFO\] (compile|test|provided|runtime|system|import) \(\d+\):$")
+                .unwrap();
         assert!(
-            output.contains("ch.qos.logback:logback-classic:1.5.34"),
-            "compact coordinate expected"
+            !scope_header_re.is_match(&output),
+            "must not invent a scope group header:\n{output}"
         );
-        assert!(!output.contains("-- module"), "JPMS module noise must be dropped");
-        assert!(!output.contains(":jar:"), "default packaging token must be dropped");
-        assert!(!output.contains("[INFO]"), "maven prefixes must be dropped");
+        // Native resolved lines survive verbatim: full type:version:scope,
+        // JPMS `-- module` note, and the `[INFO]` prefix all kept intact.
+        assert!(
+            output.contains(
+                "[INFO]    ch.qos.logback:logback-classic:jar:1.5.34:compile -- module ch.qos.logback.classic"
+            ),
+            "native resolved line must survive verbatim:\n{output}"
+        );
+        assert!(output.contains("-- module"), "JPMS module note is native content — keep it");
+        assert!(output.contains(":jar:"), "default packaging token is native content — keep it");
+        assert!(output.contains("[INFO]"), "maven prefixes must survive on kept lines");
+        assert!(
+            output.contains("[INFO] The following files have been resolved:"),
+            "native resolved-files header must survive verbatim"
+        );
     }
 
     #[test]
     fn test_dep_list_empty() {
         let output = filter_mvn_dep_list("");
-        assert_eq!(output, "mvn dependency:list: no output");
+        assert_eq!(output, "[INFO] BUILD SUCCESS");
     }
 
     #[test]
@@ -3305,19 +3289,19 @@ mod tests {
             "should contain direct dep"
         );
         assert!(
-            !output.contains("hamcrest"),
-            "should collapse transitive dep"
+            output.contains("hamcrest"),
+            "transitive deps are kept verbatim now — no invented collapse"
         );
     }
 
     #[test]
-    fn test_dep_tree_large_collapses_transitive() {
+    fn test_dep_tree_large_keeps_transitive_verbatim() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_large.txt");
         let output = filter_mvn_dep_tree(input);
 
-        // Should show root artifact
+        // Should show root artifact, verbatim with its [INFO] prefix
         assert!(
-            output.contains("com.example.demo:webapp"),
+            output.contains("[INFO] com.example.demo:webapp"),
             "should contain root artifact"
         );
 
@@ -3327,27 +3311,28 @@ mod tests {
             "should contain direct dep"
         );
 
-        // Transitive deps (depth 2+) should NOT appear as separate lines
+        // Transitive deps (depth 2+) are kept verbatim now — no invented
+        // collapse into a "(N transitive)" count.
         assert!(
-            !output.contains("logback-classic"),
-            "should not show transitive dep logback-classic"
+            output.contains("logback-classic"),
+            "transitive dep logback-classic must survive verbatim"
         );
         assert!(
-            !output.contains("logback-core"),
-            "should not show transitive dep logback-core"
+            output.contains("logback-core"),
+            "transitive dep logback-core must survive verbatim"
+        );
+        assert!(
+            !output.contains("transitive)"),
+            "must not invent a (N transitive) collapse count"
         );
 
-        // Direct deps with children should show transitive count
-        assert!(
-            output.contains("transitive"),
-            "should show transitive count for deps with children"
-        );
-
-        // Output should be dramatically smaller
+        // One `omitted for duplicate` entry in the fixture is dropped as a
+        // whole-line redundant repeat; everything else survives, so the
+        // output should be close to the input's tree-line count.
         let output_lines = output.lines().count();
         assert!(
-            output_lines < 40,
-            "collapsed tree should be under 40 lines, got {}",
+            output_lines > 100,
+            "verbatim tree should keep the vast majority of tree lines, got {}",
             output_lines
         );
     }
