@@ -1033,7 +1033,7 @@ pub(crate) struct Enriched {
     pub(crate) text: String,
     /// Digest file content; `None` -> nothing to write.
     pub(crate) digest: Option<String>,
-    /// Append a "classes: <path>" line after writing the digest.
+    /// Append a "[full per-class report: <path>]" line after writing the digest.
     pub(crate) reference: bool,
 }
 
@@ -1044,8 +1044,8 @@ pub(crate) struct Enriched {
 /// Passing runs are also enriched: a per-class breakdown is inlined when it
 /// fits (see `MAX_INLINE_CLASSES`/`MAX_INLINE_SKIPPED`), otherwise the
 /// summary is left unchanged and the full breakdown goes only into the
-/// returned digest, with `reference` signaling a "classes: <path>" pointer
-/// line is needed.
+/// returned digest, with `reference` signaling a
+/// "[full per-class report: <path>]" pointer line is needed.
 pub(crate) fn enrich_with_reports(
     text_summary: &str,
     cwd: &std::path::Path,
