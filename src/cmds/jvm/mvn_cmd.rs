@@ -1062,7 +1062,7 @@ pub(crate) fn enrich_with_reports(
         return passthrough(text_summary.to_string());
     }
 
-    let zero_tests = text_summary.ends_with(": no tests run")
+    let zero_tests = text_summary.ends_with(": No tests run")
         || text_summary.contains(": 0 passed");
     let has_failures =
         text_summary.contains("failed") || text_summary.contains("BUILD FAILURE");
@@ -1091,8 +1091,8 @@ pub(crate) fn enrich_with_reports(
 
     match (zero_tests, &sf, &fs) {
         (true, None, None) => passthrough(format!(
-            "mvn {goal}: 0 tests executed — surefire detected no tests. \
-             Check pom.xml (surefire plugin configuration) or run: \
+            "mvn {goal}: No tests run (0 tests executed — surefire detected \
+             no tests). Check pom.xml (surefire plugin configuration) or run: \
              rtk proxy mvn {goal}"
         )),
         (false, None, None) => passthrough(format!(
@@ -1231,7 +1231,12 @@ fn render_pass_inline(
     let needs_reference =
         suites.len() > MAX_INLINE_CLASSES || skipped.len() > MAX_INLINE_SKIPPED;
 
-    let mut out = text_summary.to_string();
+    // The pass summary ends with a maven-native "BUILD SUCCESS" footer; the
+    // inline breakdown slots in before it so the footer stays the last line.
+    let (mut out, build_footer) = match text_summary.strip_suffix("\nBUILD SUCCESS") {
+        Some(head) => (head.to_string(), true),
+        None => (text_summary.to_string(), false),
+    };
     if !suites.is_empty() && suites.len() <= MAX_INLINE_CLASSES {
         for s in &suites {
             write!(
@@ -1251,6 +1256,9 @@ fn render_pass_inline(
                 write!(out, " — {reason}").ok();
             }
         }
+    }
+    if build_footer {
+        out.push_str("\nBUILD SUCCESS");
     }
     (out, needs_reference)
 }
@@ -1306,7 +1314,9 @@ fn strip_text_failures_block(text_summary: &str) -> String {
 fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
     let shown = failures.iter().take(MAX_FAILURES_PER_SOURCE);
     for (i, f) in shown.enumerate() {
-        writeln!(out, "{}. {}.{}", i + 1, f.test_class, f.test_method).ok();
+        // Maven's per-test marker — agents grep for `<<< FAILURE` / `FAILURE!`
+        // to list failing test names.
+        writeln!(out, "{}. {}.{} <<< FAILURE!", i + 1, f.test_class, f.test_method).ok();
         if let Some(kind_label) = failure_kind_label(f) {
             writeln!(out, "   {kind_label}").ok();
         }
@@ -1546,7 +1556,8 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         if clean.contains("BUILD FAILURE") {
             return filter_mvn_compile(output);
         }
-        return format!("mvn {goal}: no tests run");
+        // Maven casing ("No tests…") — agents grep with `No tests` verbatim.
+        return format!("mvn {goal}: No tests run");
     }
 
     let counts = cumulative;
@@ -1564,6 +1575,15 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         return filter_mvn_compile(output);
     }
 
+    // Maven-native aggregate line: agents grep rtk's output with Maven's own
+    // patterns (`Tests run:`, `BUILD SUCCESS|BUILD FAILURE`) — emit them
+    // verbatim so those greps hit. Kept on its own line ending with the
+    // Skipped count because anchored greps (`Skipped: \d+$`) occur in the wild.
+    let aggregate = format!(
+        "Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
+        counts.run, counts.failures, counts.errors, counts.skipped
+    );
+
     if !has_failures {
         let passed = counts.run.saturating_sub(counts.skipped);
         let mut summary = format!("mvn {goal}: {} passed", passed);
@@ -1571,6 +1591,7 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
             summary.push_str(&format!(", {} skipped", counts.skipped));
         }
         summary.push_str(&format!(" ({})", time_str));
+        summary.push_str(&format!("\n{aggregate}\nBUILD SUCCESS"));
         return summary;
     }
 
@@ -1581,13 +1602,16 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
     }
     result.push_str(&format!(" ({})\n", time_str));
 
-    result.push_str("BUILD FAILURE\n");
+    result.push_str(&aggregate);
+    result.push_str("\nBUILD FAILURE\n");
 
     if !failures.is_empty() {
         result.push_str("\nFailures:\n");
     }
     for (i, failure) in failures.iter().enumerate() {
-        writeln!(result, "{}. {}", i + 1, failure.name).ok();
+        // Maven's per-test marker — agents grep for `<<< FAILURE` / `FAILURE!`
+        // to list failing test names.
+        writeln!(result, "{}. {} <<< FAILURE!", i + 1, failure.name).ok();
         for (di, detail) in failure.details.iter().enumerate() {
             // First detail line is the exception header (e.g.
             // `org.junit.ComparisonFailure: expected:<X> but was:<Y>`).
@@ -2722,6 +2746,52 @@ mod tests {
         );
     }
 
+    // --- Maven-native summary trailer ---
+    // Mined from real agent sessions: rtk's output gets piped through
+    // `grep -E 'Tests run:|BUILD SUCCESS|BUILD FAILURE|<<< FAILURE'`, so the
+    // summary must contain Maven's own patterns verbatim.
+
+    #[test]
+    fn test_pass_summary_emits_maven_native_trailer() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_pass_mavenmcp.txt");
+        let output = filter_mvn_test(input);
+        let aggregate = regex::Regex::new(
+            r"(?m)^Tests run: 183, Failures: 0, Errors: 0, Skipped: 0$",
+        )
+        .expect("test regex");
+        assert!(
+            aggregate.is_match(&output),
+            "maven-native aggregate line missing:\n{output}"
+        );
+        assert_eq!(
+            output.lines().last(),
+            Some("BUILD SUCCESS"),
+            "BUILD SUCCESS must be the final line:\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_fail_summary_emits_maven_native_aggregate_and_failure_marks() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
+        let output = filter_mvn_test(input);
+        let aggregate = regex::Regex::new(
+            r"(?m)^Tests run: 20, Failures: \d+, Errors: \d+, Skipped: \d+$",
+        )
+        .expect("test regex");
+        assert!(
+            aggregate.is_match(&output),
+            "maven-native aggregate line missing:\n{output}"
+        );
+        let marked = output
+            .lines()
+            .filter(|l| l.ends_with("<<< FAILURE!"))
+            .count();
+        assert_eq!(
+            marked, 2,
+            "each enumerated failure must carry Maven's <<< FAILURE! marker:\n{output}"
+        );
+    }
+
     #[test]
     fn test_filter_maven4_pass_smoke() {
         // Maven 4.0.0-rc output: short plugin names in markers
@@ -2909,7 +2979,7 @@ mod tests {
     #[test]
     fn test_empty_input() {
         let output = filter_mvn_test("");
-        assert_eq!(output, "mvn test: no tests run");
+        assert_eq!(output, "mvn test: No tests run");
     }
 
     #[test]
@@ -3026,9 +3096,12 @@ mod tests {
         let output_tokens = count_tokens(&output);
         let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
 
+        // 94% not 95%: the fixture is only ~350 tokens, so the fixed-size
+        // maven-native trailer (Tests run/BUILD SUCCESS, ~13 tokens) weighs
+        // ~4% here while being noise on real multi-thousand-token logs.
         assert!(
-            savings >= 95.0,
-            "mvn test large ANSI pass: expected >=95% savings, got {:.1}% ({} -> {} tokens)",
+            savings >= 94.0,
+            "mvn test large ANSI pass: expected >=94% savings, got {:.1}% ({} -> {} tokens)",
             savings,
             input_tokens,
             output_tokens,
@@ -3039,7 +3112,7 @@ mod tests {
     fn test_no_test_section() {
         let input = "[INFO] Building my-project 1.0\n[INFO] BUILD SUCCESS\n";
         let output = filter_mvn_test(input);
-        assert_eq!(output, "mvn test: no tests run");
+        assert_eq!(output, "mvn test: No tests run");
     }
 
     // --- dependency:tree tests ---
@@ -4025,6 +4098,33 @@ mod tests {
     }
 
     #[test]
+    fn enrich_pass_inline_breakdown_precedes_build_success() {
+        // The pass summary now ends with a maven-native trailer; the inline
+        // class breakdown must slot in before it so BUILD SUCCESS stays the
+        // final line (agents `tail` the output expecting the footer last).
+        let tmp = tmp_with_reports(2);
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "mvn test: 24 passed (3.0 s)\nTests run: 24, Failures: 0, Errors: 0, Skipped: 0\nBUILD SUCCESS",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        );
+        assert!(
+            out.text.contains("Suite0Test:"),
+            "inline class list, got: {}",
+            out.text
+        );
+        assert_eq!(
+            out.text.lines().last(),
+            Some("BUILD SUCCESS"),
+            "BUILD SUCCESS must stay last, got: {}",
+            out.text
+        );
+    }
+
+    #[test]
     fn enrich_pass_large_run_defers_to_digest() {
         let tmp = tmp_with_reports(6);
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
@@ -4090,7 +4190,7 @@ mod tests {
     #[test]
     fn enrich_no_tests_with_no_reports_emits_red_flag() {
         let tmp = tempfile::tempdir().unwrap();
-        let text = "mvn test: no tests run";
+        let text = "mvn test: No tests run";
         let out = super::enrich_with_reports(
             text,
             tmp.path(),
@@ -4105,7 +4205,7 @@ mod tests {
     #[test]
     fn enrich_no_tests_for_verify_goal_uses_verify_in_message() {
         let tmp = tempfile::tempdir().unwrap();
-        let text = "mvn verify: no tests run";
+        let text = "mvn verify: No tests run";
         let out = super::enrich_with_reports(
             text,
             tmp.path(),
@@ -4617,7 +4717,7 @@ mod tests {
     fn snapshot_red_flag_no_tests() {
         let tmp = tempfile::tempdir().unwrap();
         let out = super::enrich_with_reports(
-            "mvn test: no tests run",
+            "mvn test: No tests run",
             tmp.path(),
             std::time::SystemTime::now(),
             &pkgs("com.example"),
@@ -4817,8 +4917,8 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_test_compile_failure.txt");
         let output = filter_mvn_test(input);
         assert!(
-            !output.trim().ends_with("no tests run")
-                && output.len() > "mvn test: no tests run".len(),
+            !output.trim().ends_with("No tests run")
+                && output.len() > "mvn test: No tests run".len(),
             "mvn test hid compile errors with 'no tests run':\n{output}"
         );
         // Must expose at least one real compile error.

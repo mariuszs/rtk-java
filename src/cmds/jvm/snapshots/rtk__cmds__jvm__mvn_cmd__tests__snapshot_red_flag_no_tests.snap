@@ -1,5 +1,5 @@
 ---
 source: src/cmds/jvm/mvn_cmd.rs
-expression: out
+expression: out.text
 ---
-mvn test: 0 tests executed — surefire detected no tests. Check pom.xml (surefire plugin configuration) or run: rtk proxy mvn test
+mvn test: No tests run (0 tests executed — surefire detected no tests). Check pom.xml (surefire plugin configuration) or run: rtk proxy mvn test

@@ -5,9 +5,10 @@ expression: output
 mvn clean verify (multi-goal)
 mvn: ok
 mvn verify: 68 run, 1 failed (?)
+Tests run: 68, Failures: 1, Errors: 0, Skipped: 0
 
 Failures:
-1. com.example.app.UserProvisioningIT.shouldProvisionUser
+1. com.example.app.UserProvisioningIT.shouldProvisionUser <<< FAILURE!
    AssertionFailedError: expected: <201> but was: <500>
    at com.example.app.UserProvisioningIT.shouldProvisionUser(UserProvisioningIT.java:88)
 Reactor Summary for app-parent 1.0.0-SNAPSHOT:

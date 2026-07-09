@@ -1,19 +1,19 @@
 ---
 source: src/cmds/jvm/mvn_cmd.rs
-expression: out
+expression: out.text
 ---
 mvn verify: 12 run, 4 failed (05:42 min)
 BUILD FAILURE
 
 Failures (from surefire-reports/):
-1. com.example.FailingTest.shouldReturnUser
+1. com.example.FailingTest.shouldReturnUser <<< FAILURE!
    AssertionFailedError: expected:<200> but was:<404>
      org.opentest4j.AssertionFailedError: expected:<200> but was:<404>
      	... 1 framework frames omitted
      	at com.example.FailingTest.shouldReturnUser(FailingTest.java:42)
      	... 1 framework frames omitted
 
-2. com.example.FailingTest.shouldHandleNull
+2. com.example.FailingTest.shouldHandleNull <<< FAILURE!
    AssertionError: Unexpected exception: NullPointerException
      java.lang.AssertionError: Unexpected exception: NullPointerException
      	at com.example.FailingTest.shouldHandleNull(FailingTest.java:55)
@@ -22,13 +22,13 @@ Failures (from surefire-reports/):
 
 
 Integration failures (from failsafe-reports/):
-1. com.example.PortConflictIT.shouldStartServer
+1. com.example.PortConflictIT.shouldStartServer <<< FAILURE!
    [error] BindException: Address already in use
      java.net.BindException: Address already in use
      	... 2 framework frames omitted
      	at com.example.PortConflictIT.shouldStartServer(PortConflictIT.java:42)
 
-2. com.example.DbIntegrationIT.shouldConnect
+2. com.example.DbIntegrationIT.shouldConnect <<< FAILURE!
    [error] IllegalStateException: Failed to load ApplicationContext
      java.lang.IllegalStateException: Failed to load ApplicationContext
      	... 3 framework frames omitted
