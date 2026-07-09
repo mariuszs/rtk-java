@@ -2,4 +2,4 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: out.text
 ---
-mvn test: No tests run (0 tests executed — surefire detected no tests). Check pom.xml (surefire plugin configuration).
+[WARNING] No tests were executed! (surefire detected no tests — check pom.xml)

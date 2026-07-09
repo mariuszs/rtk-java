@@ -1091,10 +1091,10 @@ pub(crate) fn enrich_with_reports(
     }
 
     match (zero_tests, &sf, &fs) {
-        (true, None, None) => passthrough(format!(
-            "mvn {goal}: No tests run (0 tests executed — surefire detected \
-             no tests). Check pom.xml (surefire plugin configuration)."
-        )),
+        (true, None, None) => passthrough(
+            "[WARNING] No tests were executed! (surefire detected no tests — check pom.xml)"
+                .to_string(),
+        ),
         (false, None, None) => passthrough(format!(
             "{text_summary}\n(no XML reports found — check target/surefire-reports/)"
         )),
@@ -4192,7 +4192,7 @@ mod tests {
     #[test]
     fn enrich_no_tests_with_no_reports_emits_red_flag() {
         let tmp = tempfile::tempdir().unwrap();
-        let text = "mvn test: No tests run";
+        let text = "[WARNING] No tests were executed!";
         let out = super::enrich_with_reports(
             text,
             tmp.path(),
@@ -4200,14 +4200,17 @@ mod tests {
             &pkgs("com.example"),
             "test",
         );
-        assert!(out.text.contains("0 tests executed"));
-        assert!(out.text.contains("surefire detected"));
+        assert!(out.text.contains("No tests were executed"), "got: {}", out.text);
+        assert!(out.text.contains("surefire"), "got: {}", out.text);
     }
 
     #[test]
-    fn enrich_no_tests_for_verify_goal_uses_verify_in_message() {
+    fn enrich_no_tests_native_warning_is_goal_independent() {
+        // The native surefire warning carries no goal — a verify-goal call
+        // must emit the same `[WARNING] No tests were executed!` line as test,
+        // with no synthetic `mvn <goal>:` prose.
         let tmp = tempfile::tempdir().unwrap();
-        let text = "mvn verify: No tests run";
+        let text = "[WARNING] No tests were executed!";
         let out = super::enrich_with_reports(
             text,
             tmp.path(),
@@ -4216,13 +4219,13 @@ mod tests {
             "verify",
         );
         assert!(
-            out.text.contains("0 tests executed"),
+            out.text.contains("No tests were executed"),
             "zero-tests branch must fire for verify, got: {}",
             out.text
         );
         assert!(
-            out.text.contains("mvn verify"),
-            "error message must reference the verify goal, got: {}",
+            !out.text.contains("mvn verify"),
+            "native warning must not reference the goal, got: {}",
             out.text
         );
     }
@@ -4719,7 +4722,7 @@ mod tests {
     fn snapshot_red_flag_no_tests() {
         let tmp = tempfile::tempdir().unwrap();
         let out = super::enrich_with_reports(
-            "mvn test: No tests run",
+            "[WARNING] No tests were executed!",
             tmp.path(),
             std::time::SystemTime::now(),
             &pkgs("com.example"),
