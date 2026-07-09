@@ -1096,7 +1096,7 @@ pub(crate) fn enrich_with_reports(
                 .to_string(),
         ),
         (false, None, None) => passthrough(format!(
-            "{text_summary}\n(no XML reports found — check target/surefire-reports/)"
+            "{text_summary}\n[WARNING] no XML reports under target/surefire-reports/"
         )),
         _ => Enriched {
             text: render_enriched(text_summary, sf.as_ref(), fs.as_ref()),
@@ -1107,16 +1107,19 @@ pub(crate) fn enrich_with_reports(
 }
 
 /// Write the class digest (if any) through the tee infrastructure and append
-/// the `classes: <path>` reference line when the inline output doesn't carry
-/// the full breakdown. Falls back to the enriched text unchanged when tee is
-/// disabled or the write fails — the summary must never degrade.
+/// the `[full per-class report: <path>]` reference line when the inline
+/// output doesn't carry the full breakdown. Falls back to the enriched text
+/// unchanged when tee is disabled or the write fails — the summary must
+/// never degrade.
 fn finalize_enriched(enriched: Enriched, tee_label: &str) -> String {
     let Some(digest) = enriched.digest else {
         return enriched.text;
     };
     let slug = format!("{tee_label}_classes");
     match crate::core::tee::force_tee_display(&digest, &slug) {
-        Some(path) if enriched.reference => format!("{}\nclasses: {}", enriched.text, path),
+        Some(path) if enriched.reference => {
+            format!("{}\n[full per-class report: {}]", enriched.text, path)
+        }
         _ => enriched.text,
     }
 }
@@ -1157,7 +1160,7 @@ fn all_skipped<'a>(
 /// Condensed per-class report written next to the tee log. `None` when no
 /// suites were parsed (nothing worth writing).
 fn render_classes_digest(
-    goal: &str,
+    _goal: &str,
     surefire: Option<&SurefireResult>,
     failsafe: Option<&SurefireResult>,
 ) -> Option<String> {
@@ -1167,7 +1170,12 @@ fn render_classes_digest(
     }
     let skipped = all_skipped(surefire, failsafe);
     // Maven-native aggregate line: agents grep tee logs with Maven's own
-    // summary pattern, so the header must match it verbatim.
+    // summary pattern, so the header must match it verbatim — no RTK label,
+    // no goal prose. (The digest's own file-reference note lives in
+    // `finalize_enriched`'s "[full per-class report: <path>]" line, not
+    // here, so this header stays a pure Maven-native aggregate — keeping the
+    // pre-existing `digest_header_uses_maven_native_format` regex, which
+    // anchors on `Skipped: N` at end-of-line, passing.)
     let mut summary = surefire_reports::TestSummary::default();
     if let Some(sf) = surefire {
         summary.add(&sf.summary);
@@ -1176,7 +1184,7 @@ fn render_classes_digest(
         summary.add(&fs.summary);
     }
     let mut out = format!(
-        "# mvn {goal} (from XML reports) — Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
+        "[INFO] Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
         summary.run, summary.failures, summary.errors, summary.skipped
     );
     out.push('\n');
@@ -1238,22 +1246,14 @@ fn render_pass_inline(
     };
     if !suites.is_empty() && suites.len() <= MAX_INLINE_CLASSES {
         for s in &suites {
-            write!(
-                out,
-                "\n{}: {} ({:.1}s)",
-                short_class(&s.class_name),
-                s.tests,
-                s.time_secs
-            )
-            .ok();
+            // Reconstruct surefire's own per-class line (reactor-suppressed),
+            // trimming zero-valued fields on a clean pass.
+            write!(out, "\n[INFO] Tests run: {} -- in {}", s.tests, s.class_name).ok();
         }
     }
     if !skipped.is_empty() && skipped.len() <= MAX_INLINE_SKIPPED {
         for st in &skipped {
-            write!(out, "\nskipped: {}.{}", short_class(&st.class), st.method).ok();
-            if let Some(reason) = &st.reason {
-                write!(out, " — {reason}").ok();
-            }
+            write!(out, "\n[INFO] Tests run: 0, Skipped: 1 -- in {}", st.class).ok();
         }
     }
     if build_footer {
@@ -1280,14 +1280,14 @@ fn render_enriched(
 
     if let Some(sf) = surefire {
         if !sf.failures.is_empty() {
-            out.push_str("\n\nFailures (from surefire-reports/):\n");
+            out.push_str("\n\n[ERROR] Failures:\n");
             render_failure_block(&mut out, &sf.failures);
         }
     }
 
     if let Some(fs) = failsafe {
         if !fs.failures.is_empty() {
-            out.push_str("\n\nIntegration failures (from failsafe-reports/):\n");
+            out.push_str("\n\n[ERROR] Integration failures:\n");
             render_failure_block(&mut out, &fs.failures);
         }
     }
@@ -1312,22 +1312,23 @@ fn strip_text_failures_block(text_summary: &str) -> String {
 
 fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
     let shown = failures.iter().take(MAX_FAILURES_PER_SOURCE);
-    for (i, f) in shown.enumerate() {
+    for f in shown {
         // Maven's per-test marker — agents grep for `<<< FAILURE` / `FAILURE!`
-        // to list failing test names.
-        writeln!(out, "{}. {}.{} <<< FAILURE!", i + 1, f.test_class, f.test_method).ok();
+        // to list failing test names. Every line keeps the `[ERROR]` prefix
+        // so retained/reconstructed output stays greppable like Maven's own.
+        writeln!(out, "[ERROR]   {}.{} <<< FAILURE!", f.test_class, f.test_method).ok();
         if let Some(kind_label) = failure_kind_label(f) {
-            writeln!(out, "   {kind_label}").ok();
+            writeln!(out, "[ERROR]     {kind_label}").ok();
         }
         if let Some(trace) = &f.stack_trace {
             for line in trace.lines() {
-                writeln!(out, "     {line}").ok();
+                writeln!(out, "[ERROR]       {line}").ok();
             }
         }
         if let Some(output) = f.test_output.as_deref().filter(|s| !s.is_empty()) {
-            writeln!(out, "  captured output:").ok();
+            writeln!(out, "[ERROR]     captured output:").ok();
             for line in output.lines() {
-                writeln!(out, "    {line}").ok();
+                writeln!(out, "[ERROR]       {line}").ok();
             }
         }
         out.push('\n');
@@ -5151,7 +5152,10 @@ mod tests {
         let (out, needs_ref) =
             super::render_pass_inline("mvn test: 12 passed (3.1 s)", Some(&sf), None);
         assert!(out.starts_with("mvn test: 12 passed (3.1 s)\n"));
-        assert!(out.contains("UsersTest:"), "short class name inline, got: {out}");
+        assert!(
+            out.contains("[INFO] Tests run: 5 -- in com.example.auth.user.UsersTest"),
+            "surefire-shaped breakdown line, got: {out}"
+        );
         assert!(!needs_ref, "1 class <= MAX_INLINE_CLASSES");
         insta::assert_snapshot!("pass_inline_small_snapshot", out);
     }
@@ -5189,6 +5193,92 @@ mod tests {
             !out.contains("skipped: "),
             "no skipped-name lines inline when count > cap, got: {out}"
         );
+    }
+
+    // --- Enrichment rendered in Maven's own line shape (Task 2) ---
+
+    /// Two failures built the same way `surefire_reports`'s own
+    /// `TestFailure` literal tests construct fixtures (no neighbouring
+    /// `render_failure_block` test existed to reuse in this file).
+    fn sf_result_with_two_failures() -> SurefireResult {
+        SurefireResult {
+            failures: vec![
+                TestFailure {
+                    test_class: "com.example.FooTest".to_string(),
+                    test_method: "shouldWork".to_string(),
+                    kind: FailureKind::Failure,
+                    message: Some("expected:<true> but was:<false>".to_string()),
+                    failure_type: Some("org.opentest4j.AssertionFailedError".to_string()),
+                    stack_trace: Some(
+                        "at com.example.FooTest.shouldWork(FooTest.java:42)".to_string(),
+                    ),
+                    test_output: None,
+                },
+                TestFailure {
+                    test_class: "com.example.BarTest".to_string(),
+                    test_method: "shouldAlsoWork".to_string(),
+                    kind: FailureKind::Error,
+                    message: Some("boom".to_string()),
+                    failure_type: Some("java.lang.IllegalStateException".to_string()),
+                    stack_trace: None,
+                    test_output: None,
+                },
+            ],
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn breakdown_uses_surefire_line_shape() {
+        let tmp = tmp_with_reports(2);
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "[INFO] Tests run: 24, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        );
+        // tmp_with_reports(2) clones the real UsersTest fixture (5 tests,
+        // FQCN com.example.auth.user.UsersTest) under Suite{i}Test names —
+        // the brief's illustrative "12"/"com.example.Suite0Test" don't match
+        // this helper's actual fixture-derived numbers/FQCN; asserting the
+        // real values here instead.
+        assert!(
+            out.text.contains("[INFO] Tests run: 5 -- in com.example.auth.user.Suite0Test"),
+            "surefire-shaped breakdown missing:\n{}",
+            out.text
+        );
+        assert_eq!(out.text.lines().last(), Some("[INFO] BUILD SUCCESS"), "\n{}", out.text);
+        assert!(!out.text.contains("Suite0Test:"), "old compact form leaked:\n{}", out.text);
+    }
+
+    #[test]
+    fn enriched_failures_header_is_native() {
+        let out = super::render_enriched(
+            "[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE",
+            Some(&sf_result_with_two_failures()),
+            None,
+        );
+        assert!(out.contains("[ERROR] Failures:"), "\n{out}");
+        assert!(!out.contains("(from surefire-reports/)"), "path-tell leaked:\n{out}");
+        assert!(!out.contains("1. "), "RTK numbering leaked:\n{out}");
+    }
+
+    #[test]
+    fn digest_reference_uses_tee_hint_style() {
+        let tmp = tmp_with_reports(8); // > MAX_INLINE_CLASSES -> reference line
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "[INFO] Tests run: 96, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        );
+        let text = super::finalize_enriched(out, "mvn_test");
+        assert!(text.contains("[full per-class report:"), "tee-hint-style ref missing:\n{text}");
+        assert!(!text.contains("classes:"), "old RTK ref leaked:\n{text}");
     }
 }
 

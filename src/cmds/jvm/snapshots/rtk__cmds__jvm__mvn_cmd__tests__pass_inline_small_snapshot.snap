@@ -3,4 +3,4 @@ source: src/cmds/jvm/mvn_cmd.rs
 expression: out
 ---
 mvn test: 12 passed (3.1 s)
-UsersTest: 5 (0.8s)
+[INFO] Tests run: 5 -- in com.example.auth.user.UsersTest
