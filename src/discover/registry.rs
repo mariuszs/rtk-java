@@ -2972,48 +2972,24 @@ mod tests {
 
     #[test]
     fn test_classify_lint() {
+        // Only DIRECT tool invocations classify as `rtk lint` — the tool and
+        // its args are fully visible, so re-running it with `-f json` is
+        // faithful.
         let commands = vec![
             "npm exec biome",
             "npm exec eslint",
-            "npm rum biome",
-            "npm rum eslint",
-            "npm rum lint",
-            "npm run biome",
-            "npm run eslint",
-            "npm run lint",
-            "npm run-script biome",
-            "npm run-script eslint",
-            "npm run-script lint",
-            "npm urn biome",
-            "npm urn eslint",
-            "npm urn lint",
             "npm x biome",
             "npm x eslint",
             "pnpm dlx biome",
             "pnpm dlx eslint",
             "pnpm exec biome",
             "pnpm exec eslint",
-            "pnpm run biome",
-            "pnpm run eslint",
-            "pnpm run lint",
-            "pnpm run-script biome",
-            "pnpm run-script eslint",
-            "pnpm run-script lint",
-            "npm biome",
-            "npm eslint",
-            "npm lint",
             "npx biome",
             "npx eslint",
-            "npx lint",
-            "pnpm biome",
-            "pnpm eslint",
-            "pnpm lint",
             "pnpx biome",
             "pnpx eslint",
-            "pnpx lint",
             "biome",
             "eslint",
-            "lint",
         ];
         for command in commands {
             assert!(
@@ -3028,58 +3004,95 @@ mod tests {
                 command
             );
         }
+
+        // Script invocations (`npm run lint` etc.) run an arbitrary
+        // user-defined script — assuming it equals `eslint .` produced false
+        // failures on real projects (observed 2026-07-10). They must NEVER
+        // classify as `rtk lint`.
+        let script_forms = vec![
+            "npm run lint",
+            "npm run eslint",
+            "npm run biome",
+            "npm run-script lint",
+            "npm rum lint",
+            "npm urn lint",
+            "pnpm run lint",
+            "pnpm run eslint",
+            "pnpm run-script lint",
+            "npm lint",
+            "pnpm lint",
+            "pnpm eslint",
+            "lint",
+        ];
+        for command in script_forms {
+            assert!(
+                !matches!(
+                    classify_command(command),
+                    Classification::Supported {
+                        rtk_equivalent: "rtk lint",
+                        ..
+                    }
+                ),
+                "script form must not map to rtk lint: {}",
+                command
+            );
+        }
     }
 
     #[test]
     fn test_rewrite_lint() {
+        // Direct tool invocations rewrite to `rtk lint`.
         let commands = vec![
             "npm exec biome",
             "npm exec eslint",
-            "npm rum biome",
-            "npm rum eslint",
-            "npm rum lint",
-            "npm run biome",
-            "npm run eslint",
-            "npm run lint",
-            "npm run-script biome",
-            "npm run-script eslint",
-            "npm run-script lint",
-            "npm urn biome",
-            "npm urn eslint",
-            "npm urn lint",
             "npm x biome",
             "npm x eslint",
             "pnpm dlx biome",
             "pnpm dlx eslint",
             "pnpm exec biome",
             "pnpm exec eslint",
-            "pnpm run biome",
-            "pnpm run eslint",
-            "pnpm run lint",
-            "pnpm run-script biome",
-            "pnpm run-script eslint",
-            "pnpm run-script lint",
-            "npm biome",
-            "npm eslint",
-            "npm lint",
             "npx biome",
             "npx eslint",
-            "npx lint",
-            "pnpm biome",
-            "pnpm eslint",
-            "pnpm lint",
             "pnpx biome",
             "pnpx eslint",
-            "pnpx lint",
             "biome",
             "eslint",
-            "lint",
         ];
         for command in commands {
             assert_eq!(
                 rewrite_command_no_prefixes(command, &[]),
                 Some("rtk lint".into()),
                 "Failed for command: {}",
+                command
+            );
+        }
+
+        // Script invocations keep their real script: generic npm/pnpm/npx
+        // rewrite (the script body is unknown — fidelity over savings).
+        assert_eq!(
+            rewrite_command_no_prefixes("npm run lint", &[]),
+            Some("rtk npm run lint".into())
+        );
+        assert_eq!(
+            rewrite_command_no_prefixes("npm run eslint", &[]),
+            Some("rtk npm run eslint".into())
+        );
+        assert_eq!(
+            rewrite_command_no_prefixes("pnpm run lint", &[]),
+            Some("rtk pnpm run lint".into())
+        );
+        assert_eq!(
+            rewrite_command_no_prefixes("npx lint", &[]),
+            Some("rtk npx lint".into())
+        );
+
+        // Ambiguous shorthand (script vs binary) and a bare script name get
+        // no rewrite at all — passthrough is never wrong.
+        for command in ["npm lint", "pnpm lint", "pnpm eslint", "lint"] {
+            assert_eq!(
+                rewrite_command_no_prefixes(command, &[]),
+                None,
+                "ambiguous form must not rewrite: {}",
                 command
             );
         }
