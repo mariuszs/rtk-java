@@ -1,0 +1,33 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.example:repro >--------------------------
+[INFO] Building repro 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ repro ---
+[INFO] skip non existing resourceDirectory /tmp/claude-1000/-home-mariusz-projects-rtk-java/df28e768-e887-4192-9d9a-074f2221af70/scratchpad/mvn-repro/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ repro ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ repro ---
+[INFO] skip non existing resourceDirectory /tmp/claude-1000/-home-mariusz-projects-rtk-java/df28e768-e887-4192-9d9a-074f2221af70/scratchpad/mvn-repro/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ repro ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ repro ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.285 s
+[INFO] Finished at: 2026-07-10T20:31:41+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.1.2:test (default-test) on project repro: No tests matching pattern "TokenExpiryReconciliationSchedulerTest" were executed! (Set -Dsurefire.failIfNoSpecifiedTests=false to ignore this error.) -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

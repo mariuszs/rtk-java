@@ -1726,6 +1726,16 @@ fn is_maven_boilerplate(line: &str) -> bool {
         return true;
     }
 
+    // `Failed to execute goal … on project X: <cause>` is the ONLY carrier
+    // of the failure cause for non-test goals (enforcer rules, surefire
+    // "No tests matching pattern", plugin aborts) — it must survive even
+    // though it usually ends in `-> [Help 1]`. The one redundant variant is
+    // `…: There are test failures.`, whose cause is shown separately as
+    // per-test failure details.
+    if stripped.contains("Failed to execute goal") {
+        return stripped.contains("There are test failures");
+    }
+
     const BOILERPLATE_PATTERNS: &[&str] = &[
         "-> [Help",
         "http://cwiki.apache.org",
@@ -1736,7 +1746,6 @@ fn is_maven_boilerplate(line: &str) -> bool {
         "full stack trace",
         "enable verbose output",
         "See dump files",
-        "Failed to execute goal",
         "There are test failures",
         "For more information about the errors",
     ];
@@ -5042,6 +5051,45 @@ mod tests {
         assert!(
             output.contains("forked VM terminated") || output.contains("Crashed tests"),
             "forked-VM error signal missing:\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_no_matching_tests_keeps_failure_cause() {
+        // When surefire aborts because -Dtest matched nothing, the ONLY
+        // carrier of the cause is the `[ERROR] Failed to execute goal …:
+        // No tests matching pattern …` line. Same shape as enforcer
+        // failures (`…: Some Enforcer rules have failed`): the build dies
+        // before `T E S T S`, the parser falls back to the compile filter,
+        // and the cause line must survive — dropping it leaves only the
+        // `-rf :module` resume hint (observed in real sessions, 2026-07-10).
+        let input =
+            include_str!("../../../tests/fixtures/mvn_test_no_matching_tests.txt");
+        let output = filter_mvn_test(input);
+
+        assert!(
+            output.contains("BUILD FAILURE"),
+            "BUILD FAILURE missing:\n{output}"
+        );
+        assert!(
+            output.contains("Failed to execute goal")
+                && output.contains("No tests matching pattern"),
+            "the 'Failed to execute goal … No tests matching pattern' cause \
+             line must survive filtering:\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_redundant_test_failures_goal_line_still_stripped() {
+        // The `Failed to execute goal …: There are test failures.` variant
+        // is redundant — the actual failures are shown separately — and
+        // must stay stripped even after the cause-line fix above.
+        let input =
+            include_str!("../../../tests/fixtures/mvn_quiet_fail_raw.txt");
+        let output = filter_mvn_test(input);
+        assert!(
+            !output.contains("Failed to execute goal"),
+            "redundant 'There are test failures' goal line leaked:\n{output}"
         );
     }
 
