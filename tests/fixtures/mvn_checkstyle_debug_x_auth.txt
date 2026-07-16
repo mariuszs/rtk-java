@@ -1,0 +1,1663 @@
+Apache Maven 4.0.0-rc-5 (fb3ecaef88106acb40467a450248dfdbd75f3b35)
+Maven home: /home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591
+Java version: 26.0.1, vendor: Eclipse Adoptium, runtime: /home/mariusz/.sdkman/candidates/java/26.0.1-tem
+Default locale: en_US, platform encoding: UTF-8
+OS name: "linux", version: "7.1.3-201.fc44.x86_64", arch: "amd64", family: "unix"
+Command line: /home/mariusz/.sdkman/candidates/java/26.0.1-tem/bin/java --enable-native-access=ALL-UNNAMED -classpath /home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/boot/plexus-classworlds-2.9.0.jar -Dclassworlds.conf=/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/bin/m2.conf -Dmaven.home=/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591 -Dmaven.mainClass=org.apache.maven.cling.MavenCling -Dlibrary.jline.path=/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/lib/jline-native -Dmaven.multiModuleProjectDirectory=/home/mariusz/git/auth org.codehaus.plexus.classworlds.launcher.Launcher checkstyle:check -X -B
+Terminal: DumbTerminal (type=dumb, provider=dumb)
+[DEBUG] Configured core extensions (in precedence order):
+[DEBUG] * Source file: /home/mariusz/git/auth/.mvn/extensions.xml
+[DEBUG]   - com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5 -> /home/mariusz/git/auth/.mvn/extensions.xml:3
+[DEBUG] Selected core extensions (in loading order):
+[DEBUG] * com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5: /home/mariusz/git/auth/.mvn/extensions.xml:3
+[DEBUG] Reading installation settings from '/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/conf/settings.xml'
+[DEBUG] Reading project settings from '/home/mariusz/git/auth/.mvn/settings.xml'
+[DEBUG] Reading user settings from '/home/mariusz/.m2/settings.xml'
+[DEBUG] Created adapter factory; available factories [file-lock, rwlock-local, semaphore-local, noop]; available name mappers [discriminating, file-gav, file-hgav, file-static, gav, static]
+[DEBUG] Using manager EnhancedLocalRepositoryManager with priority 10.0 for /home/mariusz/.m2/repository
+[DEBUG] Creating adapter using nameMapper 'file-gav' and factory 'file-lock'
+[DEBUG] Group rules file for remote repository central (https://repo.maven.apache.org/maven2, default, releases) not available
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
+[DEBUG] Loaded prefixes for remote repository central from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-central.txt'
+[INFO] Loaded 23261 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[DEBUG] Reading file model from com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5
+WARNING: Final field modelId in class org.apache.maven.api.model.InputSource has been mutated reflectively by class org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState in unnamed module @27a389e6 (file:/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/lib/maven-impl-4.0.0-rc-5.jar)
+WARNING: Use --enable-final-field-mutation=ALL-UNNAMED to avoid a warning
+WARNING: Mutating final fields will be blocked in a future release unless final field mutation is enabled
+[DEBUG] Collector skip mode enabled: versionless (key function GACE)
+[DEBUG] Reading file model from com.google.auth:google-auth-library-oauth2-http:1.33.1
+[DEBUG] Reading file model from org.apache.maven.wagon:wagon-http-shared:3.5.3
+[DEBUG] Reading file model from com.google.cloud.artifactregistry:artifactregistry-auth-common:2.2.5
+[DEBUG] Reading file model from org.apache.maven:maven-plugin-api:3.9.9
+[DEBUG] Reading file model from com.google.http-client:google-http-client:1.46.3
+[DEBUG] Reading file model from com.google.guava:guava:33.4.6-jre
+[DEBUG] Reading file model from org.apache.maven.wagon:wagon-providers:3.5.3
+[DEBUG] Reading file model from com.google.guava:guava-parent:33.4.6-jre
+[DEBUG] Reading file model from com.google.auth:google-auth-library-parent:1.33.1
+[DEBUG] Reading file model from com.google.http-client:google-http-client-parent:1.46.3
+[DEBUG] Reading file model from org.apache.maven:maven:3.9.9
+[DEBUG] Reading file model from org.apache.maven.wagon:wagon:3.5.3
+[DEBUG] Reading file model from com.google.cloud:google-cloud-shared-config:1.14.4
+[DEBUG] Reading file model from org.apache.maven:maven-parent:43
+[DEBUG] Reading file model from com.google.cloud:native-image-shared-config:1.14.4
+[DEBUG] Reading file model from org.apache.maven:maven-parent:34
+[DEBUG] Merging repositories from org.apache.maven:maven-parent:pom:43
+    central (https://repo.maven.apache.org/maven2, default, releases)
+apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Merging repositories from org.apache.maven:maven-parent:pom:34
+    central (https://repo.maven.apache.org/maven2, default, releases)
+apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Group rules file for remote repository apache.snapshots (https://repository.apache.org/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from org.apache:apache:33
+[DEBUG] Group rules file for remote repository apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515 (https://repository.apache.org/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from com.google.http-client:google-http-client-jackson2:1.46.3
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
+[DEBUG] Loaded prefixes for remote repository apache.snapshots from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt'
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
+[DEBUG] Reading file model from org.slf4j:slf4j-api:2.0.17
+[DEBUG] Reading file model from org.apache:apache:23
+[DEBUG] Reading file model from org.slf4j:slf4j-parent:2.0.17
+[DEBUG] Reading file model from org.slf4j:slf4j-bom:2.0.17
+[DEBUG] Reading file model from com.google.http-client:google-http-client-bom:1.46.2
+[DEBUG] Replacing repositories from org.apache.maven:maven-plugin-api:jar:3.9.9
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Replacing repositories from org.apache.maven.wagon:wagon-http-shared:jar:3.5.3
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Reading file model from org.junit:junit-bom:5.10.3
+[DEBUG] Reading file model from org.apache.httpcomponents:httpclient:4.5.14
+[DEBUG] Reading file model from org.apache.httpcomponents:httpcore:4.4.16
+[DEBUG] Reading file model from org.slf4j:slf4j-api:1.7.36
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-utils:3.3.1
+[DEBUG] Reading file model from org.slf4j:slf4j-parent:1.7.36
+[DEBUG] Reading file model from org.apache.maven.wagon:wagon-provider-api:3.5.3
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:5.1
+[DEBUG] Reading file model from org.apache.httpcomponents:httpcomponents-client:4.5.14
+[DEBUG] Reading file model from org.apache.httpcomponents:httpcomponents-core:4.4.16
+[DEBUG] Reading file model from org.apache.httpcomponents:httpcomponents-parent:11
+[DEBUG] Reading file model from org.apache.maven:maven-model:3.9.9
+[DEBUG] Reading file model from org.apache.maven:maven-artifact:3.9.9
+[DEBUG] Reading file model from org.eclipse.sisu:org.eclipse.sisu.plexus:0.9.0.M3
+[DEBUG] Reading file model from org.eclipse.sisu:sisu-inject:0.9.0.M3
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-utils:3.5.1
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-classworlds:2.8.0
+[DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for apache.snapshots (http://repository.apache.org/snapshots).
+[DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for apache.snapshots (http://repository.apache.org/snapshots).
+[DEBUG] Merging repositories from org.apache.httpcomponents:httpcomponents-parent:pom:11
+    central (https://repo.maven.apache.org/maven2, default, releases)
+apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+[DEBUG] Merging repositories from org.apache.httpcomponents:httpcomponents-parent:pom:11
+    central (https://repo.maven.apache.org/maven2, default, releases)
+apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+[DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for maven-default-http-blocker (http://0.0.0.0/).
+[DEBUG] Group rules file for remote repository maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked) not available
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:16
+[DEBUG] Replacing repositories from org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.9.0.M3
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:10
+[DEBUG] Reading file model from org.apache:apache:21
+[DEBUG] Group rules file for remote repository sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from com.google.guava:guava:30.1.1-android
+[DEBUG] Replacing repositories from org.apache.httpcomponents:httpcore:jar:4.4.16
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+[DEBUG] Reading file model from org.junit:junit-bom:5.10.1
+[DEBUG] Reading file model from io.grpc:grpc-context:1.70.0
+[DEBUG] Replacing repositories from org.apache.httpcomponents:httpclient:jar:4.5.14
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+[DEBUG] Reading file model from com.google.guava:guava-parent:30.1.1-android
+[DEBUG] Reading file model from io.opencensus:opencensus-api:0.31.1
+[DEBUG] Reading file model from io.opencensus:opencensus-contrib-http-util:0.31.1
+[DEBUG] Reading file model from com.google.auto.value:auto-value-annotations:1.11.0
+[DEBUG] Reading file model from com.google.http-client:google-http-client:1.46.2
+[DEBUG] Reading file model from com.google.auth:google-auth-library-credentials:1.33.1
+[DEBUG] Reading file model from com.google.http-client:google-http-client-gson:1.46.2
+[DEBUG] Reading file model from com.google.auto.value:auto-value-parent:1.11.0
+[DEBUG] Reading file model from com.google.http-client:google-http-client-parent:1.46.2
+[DEBUG] Reading file model from com.google.guava:guava:33.4.0-android
+[DEBUG] Reading file model from com.google.code.gson:gson:2.12.1
+[DEBUG] Reading file model from com.google.cloud:native-image-shared-config:1.14.0
+[DEBUG] Reading file model from com.google.code.gson:gson-parent:2.12.1
+[DEBUG] Reading file model from com.google.guava:guava-parent:33.4.0-android
+[DEBUG] Reading file model from org.jspecify:jspecify:1.0.0
+[DEBUG] Reading file model from com.fasterxml.jackson.core:jackson-core:2.18.2
+[DEBUG] Group rules file for remote repository maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked) not available
+[DEBUG] Reading file model from com.google.guava:failureaccess:1.0.3
+[DEBUG] Reading file model from commons-codec:commons-codec:1.15
+[DEBUG] Merging repositories from com.fasterxml.jackson.core:jackson-core:jar:2.18.2
+    central (https://repo.maven.apache.org/maven2, default, releases)
+sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+[DEBUG] Reading file model from org.apache.commons:commons-parent:52
+[DEBUG] Replacing repositories from commons-codec:commons-codec:jar:1.15
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Using transporter JdkTransporter with priority 10.0 for https://oss.sonatype.org/content/repositories/snapshots
+[DEBUG] Using connector BasicRepositoryConnector with priority 0.0 for https://oss.sonatype.org/content/repositories/snapshots
+[DEBUG] Final pipeline: offline( rrf( basic( sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) ) ) )
+[DEBUG] Writing tracking file '/home/mariusz/.m2/repository/.meta/resolver-status.properties'
+[DEBUG] Could not find metadata /.meta/prefixes.txt in sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots)
+[DEBUG] Prefix file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Group rules file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from org.junit:junit-bom:5.10.2
+[DEBUG] Reading file model from io.grpc:grpc-api:1.70.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-xml:3.0.1
+[DEBUG] Reading file model from org.eclipse.sisu:org.eclipse.sisu.inject:0.9.0.M3
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-component-annotations:2.1.0
+[DEBUG] Reading file model from com.google.code.gson:gson:2.11.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-containers:2.1.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:18
+[DEBUG] Reading file model from com.google.code.gson:gson-parent:2.11.0
+[DEBUG] Reading file model from commons-codec:commons-codec:1.11
+[DEBUG] Reading file model from org.apache.commons:commons-parent:42
+[DEBUG] Reading file model from org.apache:apache:18
+[DEBUG] Replacing repositories from commons-codec:commons-codec:jar:1.11
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Group rules file for remote repository sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, already updated during this session
+[DEBUG] /.meta/prefixes.txt was not found in https://oss.sonatype.org/content/repositories/snapshots during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Group rules file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from com.fasterxml.jackson:jackson-base:2.18.2
+[DEBUG] Reading file model from com.fasterxml.jackson:jackson-bom:2.18.2
+[DEBUG] Reading file model from com.fasterxml.jackson:jackson-parent:2.18.1
+[DEBUG] Reading file model from com.fasterxml:oss-parent:61
+[DEBUG] Dependency collection stats {ConflictMarker.analyzeTime=290732, ConflictMarker.markTime=177792, ConflictMarker.nodeCount=76, ConflictIdSorter.graphTime=212082, ConflictIdSorter.topsortTime=129541, ConflictIdSorter.conflictIdCount=32, ConflictIdSorter.conflictIdCycleCount=0, ConflictResolver.totalTime=2293891, ConflictResolver.conflictItemCount=32, BfDependencyCollector.collectTime=499046468, BfDependencyCollector.transformTime=4339400}
+[DEBUG] com.google.cloud.artifactregistry:artifactregistry-maven-wagon:jar:2.2.5
+[DEBUG] +- com.google.cloud.artifactregistry:artifactregistry-auth-common:jar:2.2.5 [runtime]
+[DEBUG] |  +- com.google.http-client:google-http-client-jackson2:jar:1.46.3 [runtime]
+[DEBUG] |  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.18.2 [runtime]
+[DEBUG] |  \- org.slf4j:slf4j-api:jar:2.0.17 [runtime]
+[DEBUG] +- org.apache.maven.wagon:wagon-http-shared:jar:3.5.3 [runtime]
+[DEBUG] |  +- org.apache.httpcomponents:httpclient:jar:4.5.14 [runtime]
+[DEBUG] |  |  \- commons-codec:commons-codec:jar:1.15 [runtime]
+[DEBUG] |  +- org.apache.httpcomponents:httpcore:jar:4.4.16 [runtime]
+[DEBUG] |  +- org.codehaus.plexus:plexus-utils:jar:3.3.1 [runtime]
+[DEBUG] |  \- org.apache.maven.wagon:wagon-provider-api:jar:3.5.3 [runtime]
+[DEBUG] +- org.apache.maven:maven-plugin-api:jar:3.9.9 [runtime]
+[DEBUG] |  +- org.apache.maven:maven-model:jar:3.9.9 [runtime]
+[DEBUG] |  +- org.apache.maven:maven-artifact:jar:3.9.9 [runtime]
+[DEBUG] |  +- org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.9.0.M3 [runtime]
+[DEBUG] |  |  +- org.eclipse.sisu:org.eclipse.sisu.inject:jar:0.9.0.M3 [runtime]
+[DEBUG] |  |  +- org.codehaus.plexus:plexus-component-annotations:jar:2.1.0 [runtime]
+[DEBUG] |  |  \- org.codehaus.plexus:plexus-xml:jar:3.0.1 [runtime]
+[DEBUG] |  \- org.codehaus.plexus:plexus-classworlds:jar:2.8.0 [runtime]
+[DEBUG] +- com.google.http-client:google-http-client:jar:1.46.3 [runtime]
+[DEBUG] |  +- io.grpc:grpc-context:jar:1.70.0 [runtime]
+[DEBUG] |  |  \- io.grpc:grpc-api:jar:1.70.0 [runtime]
+[DEBUG] |  +- io.opencensus:opencensus-api:jar:0.31.1 [runtime]
+[DEBUG] |  \- io.opencensus:opencensus-contrib-http-util:jar:0.31.1 [runtime]
+[DEBUG] +- com.google.auth:google-auth-library-oauth2-http:jar:1.33.1 [runtime]
+[DEBUG] |  +- com.google.auto.value:auto-value-annotations:jar:1.11.0 [runtime]
+[DEBUG] |  +- com.google.auth:google-auth-library-credentials:jar:1.33.1 [runtime]
+[DEBUG] |  +- com.google.http-client:google-http-client-gson:jar:1.46.2 [runtime]
+[DEBUG] |  \- com.google.code.gson:gson:jar:2.12.1 [runtime]
+[DEBUG] \- com.google.guava:guava:jar:33.4.6-jre [runtime]
+[DEBUG]    +- com.google.guava:failureaccess:jar:1.0.3 [runtime]
+[DEBUG]    \- org.jspecify:jspecify:jar:1.0.0 [runtime]
+[DEBUG] Populating class realm coreExtension>com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5
+[DEBUG]   Included com.google.cloud.artifactregistry:artifactregistry-maven-wagon located at /home/mariusz/.m2/repository/com/google/cloud/artifactregistry/artifactregistry-maven-wagon/2.2.5/artifactregistry-maven-wagon-2.2.5.jar
+[DEBUG]   Included com.google.cloud.artifactregistry:artifactregistry-auth-common located at /home/mariusz/.m2/repository/com/google/cloud/artifactregistry/artifactregistry-auth-common/2.2.5/artifactregistry-auth-common-2.2.5.jar
+[DEBUG]   Included org.apache.maven.wagon:wagon-http-shared located at /home/mariusz/.m2/repository/org/apache/maven/wagon/wagon-http-shared/3.5.3/wagon-http-shared-3.5.3.jar
+[DEBUG]   Included com.google.http-client:google-http-client located at /home/mariusz/.m2/repository/com/google/http-client/google-http-client/1.46.3/google-http-client-1.46.3.jar
+[DEBUG]   Included com.google.auth:google-auth-library-oauth2-http located at /home/mariusz/.m2/repository/com/google/auth/google-auth-library-oauth2-http/1.33.1/google-auth-library-oauth2-http-1.33.1.jar
+[DEBUG]   Included com.google.guava:guava located at /home/mariusz/.m2/repository/com/google/guava/guava/33.4.6-jre/guava-33.4.6-jre.jar
+[DEBUG]   Included com.google.http-client:google-http-client-jackson2 located at /home/mariusz/.m2/repository/com/google/http-client/google-http-client-jackson2/1.46.3/google-http-client-jackson2-1.46.3.jar
+[DEBUG]   Included org.apache.httpcomponents:httpclient located at /home/mariusz/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar
+[DEBUG]   Included org.apache.httpcomponents:httpcore located at /home/mariusz/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar
+[DEBUG]   Included org.codehaus.plexus:plexus-utils located at /home/mariusz/.m2/repository/org/codehaus/plexus/plexus-utils/3.3.1/plexus-utils-3.3.1.jar
+[DEBUG]   Included io.grpc:grpc-context located at /home/mariusz/.m2/repository/io/grpc/grpc-context/1.70.0/grpc-context-1.70.0.jar
+[DEBUG]   Included io.opencensus:opencensus-api located at /home/mariusz/.m2/repository/io/opencensus/opencensus-api/0.31.1/opencensus-api-0.31.1.jar
+[DEBUG]   Included io.opencensus:opencensus-contrib-http-util located at /home/mariusz/.m2/repository/io/opencensus/opencensus-contrib-http-util/0.31.1/opencensus-contrib-http-util-0.31.1.jar
+[DEBUG]   Included com.google.auto.value:auto-value-annotations located at /home/mariusz/.m2/repository/com/google/auto/value/auto-value-annotations/1.11.0/auto-value-annotations-1.11.0.jar
+[DEBUG]   Included com.google.auth:google-auth-library-credentials located at /home/mariusz/.m2/repository/com/google/auth/google-auth-library-credentials/1.33.1/google-auth-library-credentials-1.33.1.jar
+[DEBUG]   Included com.google.http-client:google-http-client-gson located at /home/mariusz/.m2/repository/com/google/http-client/google-http-client-gson/1.46.2/google-http-client-gson-1.46.2.jar
+[DEBUG]   Included com.google.code.gson:gson located at /home/mariusz/.m2/repository/com/google/code/gson/gson/2.12.1/gson-2.12.1.jar
+[DEBUG]   Included com.google.guava:failureaccess located at /home/mariusz/.m2/repository/com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar
+[DEBUG]   Included org.jspecify:jspecify located at /home/mariusz/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar
+[DEBUG]   Included com.fasterxml.jackson.core:jackson-core located at /home/mariusz/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.2/jackson-core-2.18.2.jar
+[DEBUG]   Included commons-codec:commons-codec located at /home/mariusz/.m2/repository/commons-codec/commons-codec/1.15/commons-codec-1.15.jar
+[DEBUG]   Included org.eclipse.sisu:org.eclipse.sisu.inject located at /home/mariusz/.m2/repository/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.jar
+[DEBUG]   Included org.codehaus.plexus:plexus-component-annotations located at /home/mariusz/.m2/repository/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.jar
+[DEBUG]   Included org.codehaus.plexus:plexus-xml located at /home/mariusz/.m2/repository/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar
+[DEBUG]   Included io.grpc:grpc-api located at /home/mariusz/.m2/repository/io/grpc/grpc-api/1.70.0/grpc-api-1.70.0.jar
+[DEBUG] Shutting down adapter factory; available factories [file-lock, rwlock-local, semaphore-local, noop]; available name mappers [discriminating, file-gav, file-hgav, file-static, gav, static]
+[DEBUG] Shutting down 'file-lock' factory
+[DEBUG] Shutting down 'rwlock-local' factory
+[DEBUG] Shutting down 'semaphore-local' factory
+[DEBUG] Shutting down 'noop' factory
+[DEBUG] Populating class realm 'maven.ext'
+[DEBUG] Created adapter factory; available factories [file-lock, rwlock-local, semaphore-local, noop]; available name mappers [discriminating, file-gav, file-hgav, file-static, gav, static]
+[DEBUG] Created new class realm maven.api
+[DEBUG] Importing foreign packages into class realm maven.api
+[DEBUG]   Imported: jakarta.annotation.* < maven.ext
+[DEBUG]   Imported: jakarta.inject.* < maven.ext
+[DEBUG]   Imported: javax.annotation.* < maven.ext
+[DEBUG]   Imported: javax.annotation.security.* < maven.ext
+[DEBUG]   Imported: javax.inject.* < maven.ext
+[DEBUG]   Imported: org.apache.maven.* < maven.ext
+[DEBUG]   Imported: org.apache.maven.api < maven.ext
+[DEBUG]   Imported: org.apache.maven.artifact < maven.ext
+[DEBUG]   Imported: org.apache.maven.classrealm < maven.ext
+[DEBUG]   Imported: org.apache.maven.cli < maven.ext
+[DEBUG]   Imported: org.apache.maven.configuration < maven.ext
+[DEBUG]   Imported: org.apache.maven.exception < maven.ext
+[DEBUG]   Imported: org.apache.maven.execution < maven.ext
+[DEBUG]   Imported: org.apache.maven.execution.scope < maven.ext
+[DEBUG]   Imported: org.apache.maven.feature < maven.ext
+[DEBUG]   Imported: org.apache.maven.graph < maven.ext
+[DEBUG]   Imported: org.apache.maven.lifecycle < maven.ext
+[DEBUG]   Imported: org.apache.maven.model < maven.ext
+[DEBUG]   Imported: org.apache.maven.monitor < maven.ext
+[DEBUG]   Imported: org.apache.maven.plugin < maven.ext
+[DEBUG]   Imported: org.apache.maven.profiles < maven.ext
+[DEBUG]   Imported: org.apache.maven.project < maven.ext
+[DEBUG]   Imported: org.apache.maven.reporting < maven.ext
+[DEBUG]   Imported: org.apache.maven.repository < maven.ext
+[DEBUG]   Imported: org.apache.maven.rtinfo.* < maven.ext
+[DEBUG]   Imported: org.apache.maven.settings < maven.ext
+[DEBUG]   Imported: org.apache.maven.toolchain < maven.ext
+[DEBUG]   Imported: org.apache.maven.usability < maven.ext
+[DEBUG]   Imported: org.apache.maven.wagon.* < maven.ext
+[DEBUG]   Imported: org.apache.maven.wagon.authentication < maven.ext
+[DEBUG]   Imported: org.apache.maven.wagon.authorization < maven.ext
+[DEBUG]   Imported: org.apache.maven.wagon.events < maven.ext
+[DEBUG]   Imported: org.apache.maven.wagon.observers < maven.ext
+[DEBUG]   Imported: org.apache.maven.wagon.proxy < maven.ext
+[DEBUG]   Imported: org.apache.maven.wagon.repository < maven.ext
+[DEBUG]   Imported: org.apache.maven.wagon.resource < maven.ext
+[DEBUG]   Imported: org.codehaus.classworlds < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.* < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.classworlds < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.component < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.components.interactivity < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.configuration < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.container < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.context < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.lifecycle < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.logging < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.personality < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.util.xml.Xpp3Dom < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.util.xml.Xpp3DomBuilder < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.util.xml.pull.XmlPullParser < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.util.xml.pull.XmlPullParserException < maven.ext
+[DEBUG]   Imported: org.codehaus.plexus.util.xml.pull.XmlSerializer < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.* < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.artifact < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.collection < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.deployment < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.graph < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.impl < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.installation < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.internal.impl < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.metadata < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.repository < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.resolution < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.spi < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.transfer < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.transform < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.util < maven.ext
+[DEBUG]   Imported: org.eclipse.aether.version < maven.ext
+[DEBUG]   Imported: org.fusesource.jansi.Ansi < maven.ext
+[DEBUG]   Imported: org.slf4j.* < maven.ext
+[DEBUG]   Imported: org.slf4j.event.* < maven.ext
+[DEBUG]   Imported: org.slf4j.helpers.* < maven.ext
+[DEBUG]   Imported: org.slf4j.spi.* < maven.ext
+[DEBUG] Populating class realm maven.api
+[DEBUG] Created new class realm maven.api.v4
+[DEBUG] Importing foreign packages into class realm maven.api.v4
+[DEBUG]   Imported: org.apache.maven.api < maven.ext
+[DEBUG]   Imported: org.slf4j < maven.ext
+[DEBUG] Populating class realm maven.api.v4
+[INFO] Error stacktraces are turned on.
+[DEBUG] Message scheme: plain
+[DEBUG] Reading installation settings from '/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/conf/settings.xml'
+[DEBUG] Reading project settings from '/home/mariusz/git/auth/.mvn/settings.xml'
+[DEBUG] Reading user settings from '/home/mariusz/.m2/settings.xml'
+[DEBUG] Reading installation toolchains from '/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/conf/toolchains.xml'
+[DEBUG] Reading user toolchains from '/home/mariusz/.m2/toolchains.xml'
+[DEBUG] Using local repository at /home/mariusz/.m2/repository
+[DEBUG] Using manager EnhancedLocalRepositoryManager with priority 10.0 for /home/mariusz/.m2/repository
+[INFO] Scanning for projects...
+[DEBUG] [1][general] PhasingExecutor created.
+[DEBUG] Reading file model from /home/mariusz/git/auth/pom.xml
+[DEBUG] [1][close] Closing PhasingExecutor. Active tasks: 0
+[DEBUG] [1][close] All tasks completed. Shutting down executor.
+[DEBUG] [1][close] PhasingExecutor closed. Total completed tasks: 0
+[DEBUG] [2][general] PhasingExecutor created.
+[DEBUG] [2][task] Task submitted. Active tasks: 1
+[DEBUG] [2][close] Closing PhasingExecutor. Active tasks: 1
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][task] Task executing. Active tasks: 1
+[DEBUG] Merging repositories from com.devskiller:auth:jar:1.3-SNAPSHOT
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+central (https://repo1.maven.org/maven2, default, releases)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+[DEBUG] Creating adapter using nameMapper 'file-gav' and factory 'file-lock'
+[DEBUG] Group rules file for remote repository google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63 (https://maven-central.storage-download.googleapis.com/maven2, default, releases) not available
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
+[DEBUG] Loaded prefixes for remote repository google-maven-central-copy from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63.txt'
+[INFO] Loaded 23257 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63.txt)
+[DEBUG] Group rules file for remote repository google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases) not available
+[DEBUG] Group rules file for remote repository central (https://repo1.maven.org/maven2, default, releases) not available
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
+[DEBUG] Loaded prefixes for remote repository central from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-central.txt'
+[INFO] Loaded 23261 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[DEBUG] Group rules file for remote repository artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
+[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
+[DEBUG] Group rules file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
+[DEBUG] Group rules file for remote repository artifact-registry-snapshots-3aafd0d46c78bc81d16517878441c9e22f3dec16 (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots) not available
+[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-snapshots-3aafd0d46c78bc81d16517878441c9e22f3dec16 has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots) not available
+[DEBUG] Group rules file for remote repository artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots) not available
+[DEBUG] Group rules file for remote repository shibboleth-releases-5d99c0486312ae43e4bc39d107c6522d62203c00 (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots) not available
+[DEBUG] Using transporter JdkTransporter with priority 10.0 for https://build.shibboleth.net/nexus/content/repositories/releases/
+[DEBUG] Using connector BasicRepositoryConnector with priority 0.0 for https://build.shibboleth.net/nexus/content/repositories/releases/
+[DEBUG] Final pipeline: offline( rrf( basic( shibboleth-releases-5d99c0486312ae43e4bc39d107c6522d62203c00 (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots) ) ) )
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] Writing tracking file '/home/mariusz/.m2/repository/.meta/resolver-status.properties'
+[WARNING] Could not transfer metadata /.meta/prefixes.txt from/to shibboleth-releases-5d99c0486312ae43e4bc39d107c6522d62203c00 (https://build.shibboleth.net/nexus/content/repositories/releases/): Checksum validation failed, no checksums available
+org.eclipse.aether.transfer.MetadataTransferException: Could not transfer metadata /.meta/prefixes.txt from/to shibboleth-releases-5d99c0486312ae43e4bc39d107c6522d62203c00 (https://build.shibboleth.net/nexus/content/repositories/releases/): Checksum validation failed, no checksums available
+    at org.eclipse.aether.connector.basic.MetadataTransportListener.transferFailed(MetadataTransportListener.java:44)
+    at org.eclipse.aether.connector.basic.BasicRepositoryConnector$TaskRunner.run(BasicRepositoryConnector.java:466)
+    at org.eclipse.aether.connector.basic.BasicRepositoryConnector.get(BasicRepositoryConnector.java:244)
+    at org.eclipse.aether.internal.impl.filter.FilteringRepositoryConnector.get(FilteringRepositoryConnector.java:95)
+    at org.eclipse.aether.internal.impl.offline.OfflineRepositoryConnector.get(OfflineRepositoryConnector.java:82)
+    at org.eclipse.aether.internal.impl.DefaultMetadataResolver$ResolveTask.run(DefaultMetadataResolver.java:522)
+    at org.eclipse.aether.util.concurrency.RunnableErrorForwarder.lambda$wrap$0(RunnableErrorForwarder.java:66)
+    at org.eclipse.aether.util.concurrency.SmartExecutor$Direct.submit(SmartExecutor.java:56)
+    at org.eclipse.aether.internal.impl.DefaultMetadataResolver.resolve(DefaultMetadataResolver.java:320)
+    at org.eclipse.aether.internal.impl.DefaultMetadataResolver.resolveMetadata(DefaultMetadataResolver.java:149)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.lambda$resolvePrefixesFromRemoteRepository$4(PrefixesRemoteRepositoryFilterSource.java:297)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.ongoingUpdatesGuard(PrefixesRemoteRepositoryFilterSource.java:214)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.resolvePrefixesFromRemoteRepository(PrefixesRemoteRepositoryFilterSource.java:313)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.loadPrefixTree(PrefixesRemoteRepositoryFilterSource.java:229)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.lambda$cachePrefixTree$1(PrefixesRemoteRepositoryFilterSource.java:207)
+    at java.util.concurrent.ConcurrentHashMap.computeIfAbsent(ConcurrentHashMap.java:1735)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.lambda$cachePrefixTree$2(PrefixesRemoteRepositoryFilterSource.java:206)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.ongoingUpdatesGuard(PrefixesRemoteRepositoryFilterSource.java:214)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.cachePrefixTree(PrefixesRemoteRepositoryFilterSource.java:204)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.access$200(PrefixesRemoteRepositoryFilterSource.java:80)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource$PrefixesFilter.acceptPrefix(PrefixesRemoteRepositoryFilterSource.java:351)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource$PrefixesFilter.acceptArtifact(PrefixesRemoteRepositoryFilterSource.java:334)
+    at org.eclipse.aether.internal.impl.filter.DefaultRemoteRepositoryFilterManager$Participants.lambda$acceptArtifact$0(DefaultRemoteRepositoryFilterManager.java:93)
+    at java.util.stream.Collectors.lambda$uniqKeysMapAccumulator$0(Collectors.java:182)
+    at java.util.stream.ReduceOps$3ReducingSink.accept(ReduceOps.java:169)
+    at java.util.Collections$UnmodifiableMap$UnmodifiableEntrySet.lambda$entryConsumer$0(Collections.java:1785)
+    at java.util.HashMap$EntrySpliterator.forEachRemaining(HashMap.java:1859)
+    at java.util.Collections$UnmodifiableMap$UnmodifiableEntrySet$UnmodifiableEntrySetSpliterator.forEachRemaining(Collections.java:1810)
+    at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+    at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+    at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921)
+    at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+    at java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:723)
+    at org.eclipse.aether.internal.impl.filter.DefaultRemoteRepositoryFilterManager$Participants.acceptArtifact(DefaultRemoteRepositoryFilterManager.java:92)
+    at org.eclipse.aether.internal.impl.DefaultArtifactResolver.resolve(DefaultArtifactResolver.java:262)
+    at org.eclipse.aether.internal.impl.DefaultArtifactResolver.resolveArtifacts(DefaultArtifactResolver.java:201)
+    at org.eclipse.aether.internal.impl.DefaultRepositorySystem.resolveArtifacts(DefaultRepositorySystem.java:229)
+    at org.apache.maven.impl.DefaultArtifactResolver.lambda$doResolve$0(DefaultArtifactResolver.java:111)
+    at org.apache.maven.impl.cache.AbstractRequestCache.requests(AbstractRequestCache.java:122)
+    at org.apache.maven.impl.AbstractSession.requests(AbstractSession.java:177)
+    at org.apache.maven.impl.DefaultArtifactResolver.doResolve(DefaultArtifactResolver.java:106)
+    at org.apache.maven.impl.cache.CachingSupplier.apply(CachingSupplier.java:50)
+    at org.apache.maven.impl.cache.AbstractRequestCache.request(AbstractRequestCache.java:63)
+    at org.apache.maven.impl.AbstractSession.request(AbstractSession.java:171)
+    at org.apache.maven.impl.DefaultArtifactResolver.resolve(DefaultArtifactResolver.java:65)
+    at org.apache.maven.api.services.ArtifactResolver.resolve(ArtifactResolver.java:76)
+    at org.apache.maven.impl.AbstractSession.resolveArtifact(AbstractSession.java:689)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.getPath(DefaultModelResolver.java:179)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.doResolveModel(DefaultModelResolver.java:152)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.lambda$resolveModel$0(DefaultModelResolver.java:114)
+    at org.apache.maven.impl.cache.CachingSupplier.apply(CachingSupplier.java:50)
+    at org.apache.maven.impl.cache.AbstractRequestCache.request(AbstractRequestCache.java:63)
+    at org.apache.maven.impl.AbstractSession.request(AbstractSession.java:171)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.resolveModel(DefaultModelResolver.java:114)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.resolveModel(DefaultModelResolver.java:63)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.resolveAndReadParentExternally(DefaultModelBuilder.java:1237)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.resolveParent(DefaultModelBuilder.java:1057)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.readParent(DefaultModelBuilder.java:1012)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.readEffectiveModel(DefaultModelBuilder.java:1355)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.buildEffectiveModel(DefaultModelBuilder.java:931)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.lambda$buildBuildPom$6(DefaultModelBuilder.java:782)
+    at org.apache.maven.impl.util.PhasingExecutor.lambda$execute$0(PhasingExecutor.java:80)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+    at java.lang.Thread.run(Thread.java:1516)
+Caused by: org.eclipse.aether.transfer.ChecksumFailureException: Checksum validation failed, no checksums available
+    at org.eclipse.aether.internal.impl.AbstractChecksumPolicy.onNoMoreChecksums(AbstractChecksumPolicy.java:63)
+    at org.eclipse.aether.connector.basic.ChecksumValidator.validate(ChecksumValidator.java:117)
+    at org.eclipse.aether.connector.basic.BasicRepositoryConnector$GetTaskRunner.runTask(BasicRepositoryConnector.java:534)
+    at org.eclipse.aether.connector.basic.BasicRepositoryConnector$TaskRunner.run(BasicRepositoryConnector.java:463)
+    at org.eclipse.aether.connector.basic.BasicRepositoryConnector.get(BasicRepositoryConnector.java:244)
+    at org.eclipse.aether.internal.impl.filter.FilteringRepositoryConnector.get(FilteringRepositoryConnector.java:95)
+    at org.eclipse.aether.internal.impl.offline.OfflineRepositoryConnector.get(OfflineRepositoryConnector.java:82)
+    at org.eclipse.aether.internal.impl.DefaultMetadataResolver$ResolveTask.run(DefaultMetadataResolver.java:522)
+    at org.eclipse.aether.util.concurrency.RunnableErrorForwarder.lambda$wrap$0(RunnableErrorForwarder.java:66)
+    at org.eclipse.aether.util.concurrency.SmartExecutor$Direct.submit(SmartExecutor.java:56)
+    at org.eclipse.aether.internal.impl.DefaultMetadataResolver.resolve(DefaultMetadataResolver.java:320)
+    at org.eclipse.aether.internal.impl.DefaultMetadataResolver.resolveMetadata(DefaultMetadataResolver.java:149)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.lambda$resolvePrefixesFromRemoteRepository$4(PrefixesRemoteRepositoryFilterSource.java:297)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.ongoingUpdatesGuard(PrefixesRemoteRepositoryFilterSource.java:214)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.resolvePrefixesFromRemoteRepository(PrefixesRemoteRepositoryFilterSource.java:313)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.loadPrefixTree(PrefixesRemoteRepositoryFilterSource.java:229)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.lambda$cachePrefixTree$1(PrefixesRemoteRepositoryFilterSource.java:207)
+    at java.util.concurrent.ConcurrentHashMap.computeIfAbsent(ConcurrentHashMap.java:1735)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.lambda$cachePrefixTree$2(PrefixesRemoteRepositoryFilterSource.java:206)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.ongoingUpdatesGuard(PrefixesRemoteRepositoryFilterSource.java:214)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.cachePrefixTree(PrefixesRemoteRepositoryFilterSource.java:204)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource.access$200(PrefixesRemoteRepositoryFilterSource.java:80)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource$PrefixesFilter.acceptPrefix(PrefixesRemoteRepositoryFilterSource.java:351)
+    at org.eclipse.aether.internal.impl.filter.PrefixesRemoteRepositoryFilterSource$PrefixesFilter.acceptArtifact(PrefixesRemoteRepositoryFilterSource.java:334)
+    at org.eclipse.aether.internal.impl.filter.DefaultRemoteRepositoryFilterManager$Participants.lambda$acceptArtifact$0(DefaultRemoteRepositoryFilterManager.java:93)
+    at java.util.stream.Collectors.lambda$uniqKeysMapAccumulator$0(Collectors.java:182)
+    at java.util.stream.ReduceOps$3ReducingSink.accept(ReduceOps.java:169)
+    at java.util.Collections$UnmodifiableMap$UnmodifiableEntrySet.lambda$entryConsumer$0(Collections.java:1785)
+    at java.util.HashMap$EntrySpliterator.forEachRemaining(HashMap.java:1859)
+    at java.util.Collections$UnmodifiableMap$UnmodifiableEntrySet$UnmodifiableEntrySetSpliterator.forEachRemaining(Collections.java:1810)
+    at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570)
+    at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560)
+    at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921)
+    at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265)
+    at java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:723)
+    at org.eclipse.aether.internal.impl.filter.DefaultRemoteRepositoryFilterManager$Participants.acceptArtifact(DefaultRemoteRepositoryFilterManager.java:92)
+    at org.eclipse.aether.internal.impl.DefaultArtifactResolver.resolve(DefaultArtifactResolver.java:262)
+    at org.eclipse.aether.internal.impl.DefaultArtifactResolver.resolveArtifacts(DefaultArtifactResolver.java:201)
+    at org.eclipse.aether.internal.impl.DefaultRepositorySystem.resolveArtifacts(DefaultRepositorySystem.java:229)
+    at org.apache.maven.impl.DefaultArtifactResolver.lambda$doResolve$0(DefaultArtifactResolver.java:111)
+    at org.apache.maven.impl.cache.AbstractRequestCache.requests(AbstractRequestCache.java:122)
+    at org.apache.maven.impl.AbstractSession.requests(AbstractSession.java:177)
+    at org.apache.maven.impl.DefaultArtifactResolver.doResolve(DefaultArtifactResolver.java:106)
+    at org.apache.maven.impl.cache.CachingSupplier.apply(CachingSupplier.java:50)
+    at org.apache.maven.impl.cache.AbstractRequestCache.request(AbstractRequestCache.java:63)
+    at org.apache.maven.impl.AbstractSession.request(AbstractSession.java:171)
+    at org.apache.maven.impl.DefaultArtifactResolver.resolve(DefaultArtifactResolver.java:65)
+    at org.apache.maven.api.services.ArtifactResolver.resolve(ArtifactResolver.java:76)
+    at org.apache.maven.impl.AbstractSession.resolveArtifact(AbstractSession.java:689)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.getPath(DefaultModelResolver.java:179)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.doResolveModel(DefaultModelResolver.java:152)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.lambda$resolveModel$0(DefaultModelResolver.java:114)
+    at org.apache.maven.impl.cache.CachingSupplier.apply(CachingSupplier.java:50)
+    at org.apache.maven.impl.cache.AbstractRequestCache.request(AbstractRequestCache.java:63)
+    at org.apache.maven.impl.AbstractSession.request(AbstractSession.java:171)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.resolveModel(DefaultModelResolver.java:114)
+    at org.apache.maven.impl.resolver.DefaultModelResolver.resolveModel(DefaultModelResolver.java:63)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.resolveAndReadParentExternally(DefaultModelBuilder.java:1237)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.resolveParent(DefaultModelBuilder.java:1057)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.readParent(DefaultModelBuilder.java:1012)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.readEffectiveModel(DefaultModelBuilder.java:1355)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.buildEffectiveModel(DefaultModelBuilder.java:931)
+    at org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState.lambda$buildBuildPom$6(DefaultModelBuilder.java:782)
+    at org.apache.maven.impl.util.PhasingExecutor.lambda$execute$0(PhasingExecutor.java:80)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+    at java.lang.Thread.run(Thread.java:1516)
+[DEBUG] Prefix file for remote repository shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots) not available
+[DEBUG] Group rules file for remote repository shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots) not available
+[DEBUG] Reading file model from org.springframework.boot:spring-boot-starter-parent:4.1.0
+[DEBUG] Reading file model from org.springframework.boot:spring-boot-dependencies:4.1.0
+[DEBUG] Extension realms for project com.devskiller:auth:jar:1.3-SNAPSHOT: (none)
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-dependencies:2025.1.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-dependencies-parent:5.0.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-commons-dependencies:5.0.2
+[DEBUG] Reading file model from com.squareup.okhttp3:okhttp-bom:4.12.0
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-netflix-dependencies:5.0.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-stream-dependencies:5.0.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-task-dependencies:5.0.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-circuitbreaker-dependencies:5.0.2
+[DEBUG] Reading file model from io.github.resilience4j:resilience4j-bom:2.3.0
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-config-dependencies:5.0.4
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-function-dependencies:5.0.3
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-gateway-dependencies:5.0.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-consul-dependencies:5.0.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-vault-dependencies:5.0.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-zookeeper-dependencies:5.0.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-bus-dependencies:5.0.2
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-contract-dependencies:5.0.3
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-openfeign-dependencies:5.0.2
+[DEBUG] Reading file model from io.github.openfeign:feign-bom:13.6.1
+[DEBUG] Reading file model from org.springframework.cloud:spring-cloud-kubernetes-dependencies:5.0.2
+[DEBUG] Reading file model from io.fabric8:kubernetes-client-bom:7.4.1
+[DEBUG] Reading file model from com.google.cloud:spring-cloud-gcp-dependencies:7.3.1
+[DEBUG] Reading file model from com.google.cloud:libraries-bom:26.68.0
+[DEBUG] Reading file model from com.google.protobuf:protobuf-bom:4.29.4
+[DEBUG] Reading file model from com.google.cloud:first-party-dependencies:3.52.1
+[DEBUG] Reading file model from com.google.cloud:google-cloud-shared-config:1.16.1
+[DEBUG] Reading file model from com.google.cloud:native-image-shared-config:1.16.1
+[DEBUG] Reading file model from com.google.api:gapic-generator-java-bom:2.62.1
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] Reading file model from com.google.api:gapic-generator-java-pom-parent:2.62.1
+[DEBUG] Merging repositories from com.google.api:gapic-generator-java-pom-parent:pom:2.62.1
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+central (https://repo1.maven.org/maven2, default, releases)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
+[DEBUG] Group rules file for remote repository maven-central-de66ab544dabb92499170649134bc3bd0ea8afac (https://repo1.maven.org/maven2, default, releases+snapshots) not available
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
+[DEBUG] Loaded prefixes for remote repository maven-central from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-maven-central-de66ab544dabb92499170649134bc3bd0ea8afac.txt'
+[INFO] Loaded 23261 auto-discovered prefixes for remote repository maven-central (prefixes-maven-central-de66ab544dabb92499170649134bc3bd0ea8afac.txt)
+[DEBUG] Group rules file for remote repository maven-central (https://repo1.maven.org/maven2, default, releases+snapshots) not available
+[DEBUG] Replacing repositories from com.google.api:gapic-generator-java-bom:pom:2.62.1
+    central (https://repo1.maven.org/maven2, default, releases)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots)
+    maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
+[DEBUG] Group rules file for remote repository google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388 (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots) not available
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
+[DEBUG] Loaded prefixes for remote repository google-maven-central-copy from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388.txt'
+[INFO] Loaded 23257 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388.txt)
+[DEBUG] Group rules file for remote repository google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots) not available
+[DEBUG] Reading file model from com.google.auth:google-auth-library-bom:1.39.0
+[DEBUG] Reading file model from com.google.http-client:google-http-client-bom:1.47.1
+[DEBUG] Reading file model from com.google.guava:guava-bom:33.4.0-jre
+[DEBUG] Reading file model from org.sonatype.oss:oss-parent:9
+[DEBUG] Replacing repositories from com.google.guava:guava-bom:pom:33.4.0-jre
+    central (https://repo1.maven.org/maven2, default, releases)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots)
+    maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+[DEBUG] Reading file model from com.google.protobuf:protobuf-bom:3.25.8
+[DEBUG] Reading file model from io.grpc:grpc-bom:1.71.0
+[DEBUG] Reading file model from com.google.api:gax-bom:2.70.1
+[DEBUG] Reading file model from com.google.cloud:google-cloud-core-bom:2.60.1
+[DEBUG] Replacing repositories from com.google.cloud:google-cloud-core-bom:pom:2.60.1
+    central (https://repo1.maven.org/maven2, default, releases)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots)
+    maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
+[DEBUG] Reading file model from com.google.oauth-client:google-oauth-client-bom:1.39.0
+[DEBUG] Reading file model from com.google.api-client:google-api-client-bom:2.7.2
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bom:0.249.0
+[DEBUG] Reading file model from com.google.cloud:gapic-libraries-bom:1.68.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-pom-parent:1.68.0
+[DEBUG] Merging repositories from com.google.cloud:google-cloud-pom-parent:pom:1.68.0
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+central (https://repo1.maven.org/maven2, default, releases)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
+[DEBUG] Reading file model from com.google.cloud:sdk-platform-java-config:3.52.1
+[DEBUG] Replacing repositories from com.google.cloud:gapic-libraries-bom:pom:1.68.0
+    central (https://repo1.maven.org/maven2, default, releases)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots)
+    maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
+[DEBUG] Reading file model from com.google.analytics:google-analytics-admin-bom:0.84.0
+[DEBUG] Reading file model from com.google.analytics:google-analytics-data-bom:0.85.0
+[DEBUG] Reading file model from com.google.area120:google-area120-tables-bom:0.78.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-accessapproval-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-advisorynotifications-bom:0.63.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-aiplatform-bom:3.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-alloydb-bom:0.63.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-alloydb-connectors-bom:0.52.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-analyticshub-bom:0.71.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-api-gateway-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-apigee-connect-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-apigee-registry-bom:0.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-apihub-bom:0.27.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-apikeys-bom:0.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-appengine-admin-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-apphub-bom:0.38.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-artifact-registry-bom:1.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-asset-bom:3.78.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-assured-workloads-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-automl-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-backupdr-bom:0.33.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bare-metal-solution-bom:0.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-batch-bom:0.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-beyondcorp-appconnections-bom:0.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-beyondcorp-appconnectors-bom:0.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-beyondcorp-appgateways-bom:0.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-beyondcorp-clientconnectorservices-bom:0.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-beyondcorp-clientgateways-bom:0.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-biglake-bom:0.62.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bigquery-data-exchange-bom:2.69.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bigqueryconnection-bom:2.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bigquerydatapolicy-bom:0.71.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bigquerydatatransfer-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bigquerymigration-bom:0.77.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bigqueryreservation-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-billing-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-billingbudgets-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-binary-authorization-bom:1.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-build-bom:3.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-certificate-manager-bom:0.77.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-channel-bom:3.78.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-chat-bom:0.38.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-chronicle-bom:0.12.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-cloudcommerceconsumerprocurement-bom:0.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-cloudcontrolspartner-bom:0.38.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-cloudquotas-bom:0.42.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-cloudsecuritycompliance-bom:0.1.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-cloudsupport-bom:0.58.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-compute-bom:1.84.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-confidentialcomputing-bom:0.60.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-configdelivery-bom:0.8.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-connectgateway-bom:0.26.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-contact-center-insights-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-container-bom:2.77.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-containeranalysis-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-contentwarehouse-bom:0.70.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-data-fusion-bom:1.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-datacatalog-bom:1.80.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-dataflow-bom:0.78.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-dataform-bom:0.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-datalabeling-bom:0.194.0
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] Reading file model from com.google.cloud:google-cloud-datalineage-bom:0.66.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-dataplex-bom:1.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-dataproc-bom:4.71.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-dataproc-metastore-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-datastream-bom:1.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-deploy-bom:1.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-developerconnect-bom:0.31.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-devicestreaming-bom:0.14.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-dialogflow-bom:4.80.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-dialogflow-cx-bom:0.85.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-discoveryengine-bom:0.70.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-distributedcloudedge-bom:0.71.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-dlp-bom:3.78.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-dms-bom:2.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-document-ai-bom:2.78.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-domains-bom:1.71.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-edgenetwork-bom:0.42.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-enterpriseknowledgegraph-bom:0.70.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-errorreporting-bom:0.195.0-beta
+[DEBUG] Reading file model from com.google.cloud:google-cloud-essential-contacts-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-eventarc-bom:1.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-eventarc-publishing-bom:0.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-filestore-bom:1.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-financialservices-bom:0.15.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-functions-bom:2.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-gdchardwaremanagement-bom:0.29.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-geminidataanalytics-bom:0.2.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-gke-backup-bom:0.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-gke-connect-gateway-bom:0.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-gke-multi-cloud-bom:0.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-gkehub-bom:1.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-gsuite-addons-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-iamcredentials-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-iap-bom:0.30.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-ids-bom:1.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-infra-manager-bom:0.51.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-iot-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-kms-bom:2.77.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-kmsinventory-bom:0.63.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-language-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-licensemanager-bom:0.7.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-life-sciences-bom:0.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-live-stream-bom:0.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-lustre-bom:0.14.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-maintenance-bom:0.8.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-managed-identities-bom:1.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-managedkafka-bom:0.30.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-mediatranslation-bom:0.80.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-meet-bom:0.41.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-memcache-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-migrationcenter-bom:0.56.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-modelarmor-bom:0.15.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-monitoring-bom:3.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-monitoring-dashboard-bom:2.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-monitoring-metricsscope-bom:0.68.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-netapp-bom:0.53.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-network-management-bom:1.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-network-security-bom:0.77.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-networkconnectivity-bom:1.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-networkservices-bom:0.30.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-notebooks-bom:1.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-optimization-bom:1.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-oracledatabase-bom:0.23.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-orchestration-airflow-bom:1.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-orgpolicy-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-os-config-bom:2.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-os-login-bom:2.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-parallelstore-bom:0.37.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-parametermanager-bom:0.18.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-phishingprotection-bom:0.105.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-policy-troubleshooter-bom:1.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-policysimulator-bom:0.53.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-private-catalog-bom:0.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-privilegedaccessmanager-bom:0.28.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-profiler-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-publicca-bom:0.71.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-rapidmigrationassessment-bom:0.57.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-recaptchaenterprise-bom:3.71.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-recommendations-ai-bom:0.81.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-recommender-bom:2.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-redis-bom:2.77.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-redis-cluster-bom:0.46.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-resourcemanager-bom:1.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-retail-bom:2.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-run-bom:0.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-saasservicemgmt-bom:0.4.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-scheduler-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-secretmanager-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-securesourcemanager-bom:0.44.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-security-private-ca-bom:2.76.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-securitycenter-bom:2.82.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-securitycenter-settings-bom:0.77.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-securitycentermanagement-bom:0.42.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-securityposture-bom:0.39.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-service-control-bom:1.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-service-management-bom:3.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-service-usage-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-servicedirectory-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-servicehealth-bom:0.41.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-shell-bom:2.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-spanneradapter-bom:0.10.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-speech-bom:4.69.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-storage-transfer-bom:1.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-storagebatchoperations-bom:0.14.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-storageinsights-bom:0.59.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-talent-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-tasks-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-telcoautomation-bom:0.44.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-texttospeech-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-tpu-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-trace-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-translate-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-valkey-bom:0.20.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-vertexai-bom:1.34.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-video-intelligence-bom:2.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-video-stitcher-bom:0.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-video-transcoder-bom:1.73.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-vision-bom:3.72.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-visionai-bom:0.31.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-vmmigration-bom:1.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-vmwareengine-bom:0.68.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-vpcaccess-bom:2.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-webrisk-bom:2.73.0
+[DEBUG] [2][close] Waiting for 1 active tasks to complete.
+[DEBUG] Reading file model from com.google.cloud:google-cloud-websecurityscanner-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-workflow-executions-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-workflows-bom:2.74.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-workspaceevents-bom:0.38.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-workstations-bom:0.62.0
+[DEBUG] Reading file model from com.google.cloud:google-iam-admin-bom:3.69.0
+[DEBUG] Reading file model from com.google.cloud:google-iam-policy-bom:1.72.0
+[DEBUG] Reading file model from com.google.cloud:google-identity-accesscontextmanager-bom:1.75.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bigquerystorage-bom:3.17.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-bigtable-bom:2.66.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-datastore-bom:2.32.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-firestore-bom:3.33.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-logging-bom:3.23.4
+[DEBUG] Reading file model from com.google.cloud:google-cloud-pubsub-bom:1.141.4
+[DEBUG] Reading file model from com.google.cloud:google-cloud-pubsublite-bom:1.15.15
+[DEBUG] Reading file model from com.google.cloud:google-cloud-spanner-bom:6.100.0
+[DEBUG] Reading file model from com.google.cloud:google-cloud-storage-bom:2.57.0
+[DEBUG] Reading file model from org.springframework.ai:spring-ai-bom:2.0.0
+[DEBUG] Reading file model from org.apache.activemq:activemq-bom:6.2.6
+[DEBUG] Reading file model from org.apache.artemis:artemis-bom:2.53.0
+[DEBUG] Reading file model from org.apache.artemis:artemis-project:2.53.0
+[DEBUG] Reading file model from org.apache:apache:37
+[DEBUG] Reading file model from org.assertj:assertj-bom:3.27.7
+[DEBUG] Reading file model from io.zipkin.reporter2:zipkin-reporter-bom:3.5.3
+[DEBUG] Reading file model from io.zipkin.brave:brave-bom:6.3.1
+[DEBUG] Reading file model from org.apache.cassandra:java-driver-bom:4.19.3
+[DEBUG] Reading file model from org.apache.groovy:groovy-bom:5.0.6
+[DEBUG] Reading file model from io.grpc:grpc-bom:1.80.0
+[DEBUG] Reading file model from org.infinispan:infinispan-bom:16.1.4
+[DEBUG] Reading file model from com.fasterxml.jackson:jackson-bom:2.21.4
+[DEBUG] Merging repositories from [inherited]:jackson-bom:pom:2.21.4
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+central (https://repo1.maven.org/maven2, default, releases)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots)
+[DEBUG] Group rules file for remote repository central-snapshots-352bfcd0a19f69feab0d695da3597248f399af75 (https://central.sonatype.com/repository/maven-snapshots, default, snapshots) not available
+[DEBUG] /.meta/prefixes.txt was not found in https://central.sonatype.com/repository/maven-snapshots during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of central-snapshots-352bfcd0a19f69feab0d695da3597248f399af75 has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots) not available
+[DEBUG] Group rules file for remote repository central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots) not available
+[DEBUG] Reading file model from com.fasterxml.jackson:jackson-parent:2.21
+[DEBUG] Reading file model from com.fasterxml:oss-parent:75
+[DEBUG] Reading file model from tools.jackson:jackson-bom:3.1.4
+[DEBUG] Merging repositories from tools.jackson:jackson-bom:pom:3.1.4
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+central (https://repo1.maven.org/maven2, default, releases)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots)
+[DEBUG] Reading file model from com.fasterxml:oss-parent:79
+[DEBUG] Reading file model from org.glassfish.jersey:jersey-bom:4.0.2
+[DEBUG] Reading file model from org.eclipse.ee4j:project:1.0.9
+[DEBUG] Reading file model from org.eclipse.jetty.ee11:jetty-ee11-bom:12.1.10
+[DEBUG] Reading file model from org.eclipse.jetty:jetty-bom:12.1.10
+[DEBUG] Reading file model from org.jooq:jooq-bom:3.20.8
+[DEBUG] Reading file model from org.junit:junit-bom:6.0.3
+[DEBUG] Reading file model from org.jetbrains.kotlin:kotlin-bom:2.3.21
+[DEBUG] Reading file model from org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.2
+[DEBUG] Reading file model from org.jetbrains.kotlinx:kotlinx-serialization-bom:1.11.0
+[DEBUG] Reading file model from org.apache.logging.log4j:log4j-bom:2.25.4
+[DEBUG] Reading file model from io.micrometer:micrometer-bom:1.17.0
+[DEBUG] Reading file model from io.micrometer:micrometer-tracing-bom:1.7.0
+[DEBUG] Reading file model from org.mockito:mockito-bom:5.23.0
+[DEBUG] Reading file model from org.mongodb:mongodb-driver-bom:5.8.0
+[DEBUG] Reading file model from org.neo4j.driver:neo4j-java-driver-bom:6.1.0
+[DEBUG] Reading file model from org.neo4j.bolt:neo4j-bolt-connection-bom:11.0.2
+[DEBUG] Reading file model from io.netty:netty-bom:4.2.15.Final
+[DEBUG] Reading file model from org.sonatype.oss:oss-parent:7
+[DEBUG] Replacing repositories from io.netty:netty-bom:pom:4.2.15.Final
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+    central (https://repo1.maven.org/maven2, default, releases)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+[DEBUG] Reading file model from io.opentelemetry:opentelemetry-bom:1.62.0
+[DEBUG] Reading file model from io.prometheus:prometheus-metrics-bom:1.5.1
+[DEBUG] Reading file model from io.prometheus:client_java_parent:1.5.1
+[DEBUG] Reading file model from io.prometheus:simpleclient_bom:0.16.0
+[DEBUG] Reading file model from io.prometheus:parent:0.16.0
+[DEBUG] Reading file model from org.apache.pulsar:pulsar-bom:4.2.2
+[DEBUG] Reading file model from org.apache:apache:35
+[DEBUG] Reading file model from com.google.protobuf:protobuf-bom:4.34.2
+[DEBUG] Reading file model from com.querydsl:querydsl-bom:5.1.0
+[DEBUG] Reading file model from io.projectreactor:reactor-bom:2025.0.6
+[DEBUG] Reading file model from io.rsocket:rsocket-bom:1.1.5
+[DEBUG] Reading file model from org.seleniumhq.selenium:selenium-bom:4.43.0
+[DEBUG] Reading file model from org.springframework.amqp:spring-amqp-bom:4.1.0
+[DEBUG] Reading file model from org.springframework.batch:spring-batch-bom:6.0.4
+[DEBUG] Reading file model from org.springframework.data:spring-data-bom:2026.0.0
+[DEBUG] Reading file model from org.springframework:spring-framework-bom:7.0.8
+[DEBUG] Reading file model from org.springframework.integration:spring-integration-bom:7.1.0
+[DEBUG] Reading file model from org.springframework.pulsar:spring-pulsar-bom:2.0.6
+[DEBUG] Reading file model from org.springframework.restdocs:spring-restdocs-bom:4.0.1
+[DEBUG] Reading file model from org.springframework.security:spring-security-bom:7.1.0
+[DEBUG] Reading file model from org.springframework.session:spring-session-bom:4.1.0
+[DEBUG] Reading file model from org.springframework.ws:spring-ws-bom:5.0.2
+[DEBUG] Reading file model from org.testcontainers:testcontainers-bom:2.0.5
+[DEBUG] [2][task] Task completed. Active tasks: 0
+[DEBUG] [2][task] Last task completed. Initiating executor shutdown.
+[DEBUG] [2][close] All tasks completed. Shutting down executor.
+[DEBUG] [2][close] PhasingExecutor closed. Total completed tasks: 1
+[DEBUG] Merging repositories from [inherited]:spring-boot-starter-parent:pom:[inherited]
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+central (https://repo1.maven.org/maven2, default, releases)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+[DEBUG] Merging repositories from [inherited]:jackson-bom:pom:2.21.4
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+central (https://repo1.maven.org/maven2, default, releases)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots)
+[DEBUG] Merging repositories from tools.jackson:jackson-bom:pom:3.1.4
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+central (https://repo1.maven.org/maven2, default, releases)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots)
+[DEBUG] Reading file model from org.jooq:jooq-bom:3.21.5
+[DEBUG] Replacing repositories from io.netty:netty-bom:pom:4.2.15.Final
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+    central (https://repo1.maven.org/maven2, default, releases)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+[DEBUG] Replacing repositories from org.springframework.boot:spring-boot-dependencies:pom:4.1.0
+    google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
+    central (https://repo1.maven.org/maven2, default, releases)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+[WARNING] 
+[WARNING] 36 problems were encountered while building the effective model for 'com.devskiller:auth:jar:1.3-SNAPSHOT' (use -e to see details)
+[WARNING] Ignored POM import for: io.grpc:grpc-all:jar:1.80.0@compile as already imported io.grpc:grpc-all:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-alts:jar:1.80.0@compile as already imported io.grpc:grpc-alts:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-api:jar:1.80.0@compile as already imported io.grpc:grpc-api:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-auth:jar:1.80.0@compile as already imported io.grpc:grpc-auth:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-benchmarks:jar:1.80.0@compile as already imported io.grpc:grpc-benchmarks:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-census:jar:1.80.0@compile as already imported io.grpc:grpc-census:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-context:jar:1.80.0@compile as already imported io.grpc:grpc-context:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-context-override-opentelemetry:jar:1.80.0@compile as already imported io.grpc:grpc-context-override-opentelemetry:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-core:jar:1.80.0@compile as already imported io.grpc:grpc-core:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-gcp-csm-observability:jar:1.80.0@compile as already imported io.grpc:grpc-gcp-csm-observability:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-gcp-observability:jar:1.80.0@compile as already imported io.grpc:grpc-gcp-observability:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-googleapis:jar:1.80.0@compile as already imported io.grpc:grpc-googleapis:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-grpclb:jar:1.80.0@compile as already imported io.grpc:grpc-grpclb:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-inprocess:jar:1.80.0@compile as already imported io.grpc:grpc-inprocess:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-interop-testing:jar:1.80.0@compile as already imported io.grpc:grpc-interop-testing:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-netty:jar:1.80.0@compile as already imported io.grpc:grpc-netty:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-netty-shaded:jar:1.80.0@compile as already imported io.grpc:grpc-netty-shaded:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-okhttp:jar:1.80.0@compile as already imported io.grpc:grpc-okhttp:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-opentelemetry:jar:1.80.0@compile as already imported io.grpc:grpc-opentelemetry:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-protobuf:jar:1.80.0@compile as already imported io.grpc:grpc-protobuf:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-protobuf-lite:jar:1.80.0@compile as already imported io.grpc:grpc-protobuf-lite:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-rls:jar:1.80.0@compile as already imported io.grpc:grpc-rls:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-s2a:jar:1.80.0@compile as already imported io.grpc:grpc-s2a:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-services:jar:1.80.0@compile as already imported io.grpc:grpc-services:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-servlet:jar:1.80.0@compile as already imported io.grpc:grpc-servlet:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-servlet-jakarta:jar:1.80.0@compile as already imported io.grpc:grpc-servlet-jakarta:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-stub:jar:1.80.0@compile as already imported io.grpc:grpc-stub:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-testing:jar:1.80.0@compile as already imported io.grpc:grpc-testing:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-testing-proto:jar:1.80.0@compile as already imported io.grpc:grpc-testing-proto:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-util:jar:1.80.0@compile as already imported io.grpc:grpc-util:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:grpc-xds:jar:1.80.0@compile as already imported io.grpc:grpc-xds:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.grpc:protoc-gen-grpc-java:pom:1.80.0@compile as already imported io.grpc:protoc-gen-grpc-java:pom:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: io.opentelemetry:opentelemetry-api:jar:1.62.0@compile as already imported io.opentelemetry:opentelemetry-api:jar:1.47.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: com.google.protobuf:protobuf-java:jar:4.34.2@compile as already imported com.google.protobuf:protobuf-java:jar:4.29.4@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: com.google.protobuf:protobuf-java-util:jar:4.34.2@compile as already imported com.google.protobuf:protobuf-java-util:jar:4.29.4@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] Ignored POM import for: com.google.protobuf:protobuf-kotlin:jar:4.34.2@compile as already imported com.google.protobuf:protobuf-kotlin:jar:4.29.4@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
+[WARNING] 
+[WARNING] Total model problems reported: 36
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[DEBUG] Resolving plugin prefix checkstyle from [org.apache.maven.plugins, org.codehaus.mojo]
+[DEBUG] Could not find metadata org.springframework.boot/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Group rules file for remote repository devskiller-plugins-virtual-7d212acefdfdf6dbbc838fa0c78806d1df14b678 (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots) not available
+[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of devskiller-plugins-virtual-7d212acefdfdf6dbbc838fa0c78806d1df14b678 has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots) not available
+[DEBUG] Group rules file for remote repository devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots) not available
+[DEBUG] Skipped remote request for org.springframework.boot/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Group rules file for remote repository artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
+[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
+[DEBUG] Group rules file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
+[DEBUG] org.springframework.boot/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Group rules file for remote repository central (https://repo.maven.apache.org/maven2, default, releases) not available
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
+[DEBUG] Loaded prefixes for remote repository central from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-central.txt'
+[INFO] Loaded 23261 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[DEBUG] Skipped remote request for org.springframework.boot/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.jacoco/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.jacoco/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.jacoco/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.jacoco/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.springframework.cloud/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.springframework.cloud/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.springframework.cloud/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.springframework.cloud/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata com.github.eirslett/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for com.github.eirslett/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] com.github.eirslett/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for com.github.eirslett/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.liquibase/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.liquibase/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.liquibase/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.liquibase/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata cz.habarta.typescript-generator/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for cz.habarta.typescript-generator/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] cz.habarta.typescript-generator/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for cz.habarta.typescript-generator/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.testcontainers/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.testcontainers/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.testcontainers/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.testcontainers/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.cyclonedx/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.cyclonedx/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.cyclonedx/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.cyclonedx/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.flywaydb/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.flywaydb/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.flywaydb/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.flywaydb/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata io.github.git-commit-id/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for io.github.git-commit-id/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] io.github.git-commit-id/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for io.github.git-commit-id/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Skipped remote request for org.jooq/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.jooq/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.jooq/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.jetbrains.kotlin/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.jetbrains.kotlin/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.jetbrains.kotlin/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.jetbrains.kotlin/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.graalvm.buildtools/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.graalvm.buildtools/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.graalvm.buildtools/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.graalvm.buildtools/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata io.github.ascopes/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for io.github.ascopes/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] io.github.ascopes/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for io.github.ascopes/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.eclipse.m2e/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of devskiller-plugins-virtual has elapsed or updates are forced
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in https://repo.maven.apache.org/maven2 during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of central has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.apache.maven.plugins/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.apache.maven.plugins/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.apache.maven.plugins/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.codehaus.mojo/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.codehaus.mojo/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.codehaus.mojo/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.codehaus.mojo/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Resolved plugin prefix checkstyle to org.apache.maven.plugins:maven-checkstyle-plugin from repository devskiller-plugins-virtual
+[DEBUG] Reading file model from org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0
+[DEBUG] Reading file model from org.apache.maven.plugins:maven-plugins:43
+[DEBUG] Reading file model from org.apache.maven:maven-parent:43
+[DEBUG] Merging repositories from org.apache.maven:maven-parent:pom:43
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+central (https://repo.maven.apache.org/maven2, default, releases)
+apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Group rules file for remote repository apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515 (https://repository.apache.org/snapshots, default, snapshots) not available
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
+[DEBUG] Loaded prefixes for remote repository apache.snapshots from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt'
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
+[DEBUG] Group rules file for remote repository apache.snapshots (https://repository.apache.org/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from org.apache:apache:33
+[DEBUG] Replacing repositories from org.apache.maven.plugins:maven-checkstyle-plugin:maven-plugin:3.6.0
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Reading file model from org.junit:junit-bom:5.10.3
+[DEBUG] === REACTOR BUILD PLAN ================================================
+[DEBUG] Project: com.devskiller:auth:jar:1.3-SNAPSHOT
+[DEBUG] Tasks:   [checkstyle:check]
+[DEBUG] Style:   Regular
+[DEBUG] =======================================================================
+[INFO] 
+[INFO] ------------------------< com.devskiller:auth >-------------------------
+[INFO] Building auth 1.3-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[DEBUG] Resolving plugin prefix checkstyle from [org.apache.maven.plugins, org.codehaus.mojo]
+[DEBUG] Could not find metadata org.springframework.boot/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.springframework.boot/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.springframework.boot/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.springframework.boot/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.jacoco/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.jacoco/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.jacoco/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.jacoco/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.springframework.cloud/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.springframework.cloud/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.springframework.cloud/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.springframework.cloud/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata com.github.eirslett/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for com.github.eirslett/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] com.github.eirslett/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for com.github.eirslett/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.liquibase/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.liquibase/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.liquibase/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.liquibase/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata cz.habarta.typescript-generator/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for cz.habarta.typescript-generator/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] cz.habarta.typescript-generator/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for cz.habarta.typescript-generator/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.testcontainers/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.testcontainers/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.testcontainers/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.testcontainers/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.cyclonedx/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.cyclonedx/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.cyclonedx/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.cyclonedx/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.flywaydb/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.flywaydb/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.flywaydb/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.flywaydb/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata io.github.git-commit-id/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for io.github.git-commit-id/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] io.github.git-commit-id/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for io.github.git-commit-id/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Skipped remote request for org.jooq/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.jooq/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.jooq/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.jetbrains.kotlin/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.jetbrains.kotlin/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.jetbrains.kotlin/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.jetbrains.kotlin/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.graalvm.buildtools/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.graalvm.buildtools/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.graalvm.buildtools/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.graalvm.buildtools/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata io.github.ascopes/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for io.github.ascopes/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] io.github.ascopes/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for io.github.ascopes/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.eclipse.m2e/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of devskiller-plugins-virtual has elapsed or updates are forced
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in https://repo.maven.apache.org/maven2 during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of central has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.apache.maven.plugins/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.apache.maven.plugins/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.apache.maven.plugins/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Could not find metadata org.codehaus.mojo/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Skipped remote request for org.codehaus.mojo/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] org.codehaus.mojo/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Skipped remote request for org.codehaus.mojo/maven-metadata.xml, locally cached metadata up-to-date
+[DEBUG] Resolved plugin prefix checkstyle to org.apache.maven.plugins:maven-checkstyle-plugin from repository devskiller-plugins-virtual
+[DEBUG] Lifecycle clean -> [clean]
+[DEBUG] Lifecycle default -> [all, each, validate, initialize, build, sources, resources, compile, ready, package, verify, unit-test, test-sources, test-resources, test-compile, test, integration-test, install, deploy]
+[DEBUG] Lifecycle site -> [site, site-deploy]
+[DEBUG] === PROJECT BUILD PLAN ================================================
+[DEBUG] Project:       com.devskiller:auth:1.3-SNAPSHOT
+[DEBUG] Dependencies (collect): []
+[DEBUG] Dependencies (resolve): []
+[DEBUG] Repositories (dependencies): [google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases), central (https://repo1.maven.org/maven2, default, releases), artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases), artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots), shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)]
+[DEBUG] Repositories (plugins)     : [devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots), artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases), central (https://repo.maven.apache.org/maven2, default, releases)]
+[DEBUG] -----------------------------------------------------------------------
+[DEBUG] Goal:          org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check (default-cli)
+[DEBUG] Style:         Regular
+[DEBUG] Configuration: <configuration>
+  <cacheFile default-value="${project.build.directory}/checkstyle-cachefile" />
+  <checkstyleRulesHeader default-value="&lt;?xml version=&quot;1.0&quot;?>&#xa;&lt;!DOCTYPE module PUBLIC &quot;-//Checkstyle//DTD Checkstyle Configuration 1.3//EN&quot;&#xa;        &quot;https://checkstyle.org/dtds/configuration_1_3.dtd&quot;>&#xa;" />
+  <configLocation default-value="sun_checks.xml">checkstyle.xml</configLocation>
+  <consoleOutput default-value="false">${checkstyle.consoleOutput}</consoleOutput>
+  <excludeGeneratedSources default-value="false">${checkstyle.excludeGeneratedSources}</excludeGeneratedSources>
+  <excludes>${checkstyle.excludes}</excludes>
+  <failOnViolation default-value="true">${checkstyle.failOnViolation}</failOnViolation>
+  <failsOnError default-value="false" />
+  <headerLocation default-value="LICENSE.txt">${checkstyle.header.file}</headerLocation>
+  <includeResources default-value="true">${checkstyle.includeResources}</includeResources>
+  <includeTestResources default-value="true">${checkstyle.includeTestResources}</includeTestResources>
+  <includeTestSourceDirectory default-value="false" />
+  <includes default-value="**\/*.java">${checkstyle.includes}</includes>
+  <inputEncoding default-value="${project.build.sourceEncoding}">${encoding}</inputEncoding>
+  <logViolationCountToConsole default-value="true">${checkstyle.logViolationCount}</logViolationCountToConsole>
+  <logViolationsToConsole default-value="true">${checkstyle.console}</logViolationsToConsole>
+  <maxAllowedViolations default-value="0">${checkstyle.maxAllowedViolations}</maxAllowedViolations>
+  <omitIgnoredModules default-value="false" />
+  <outputFile default-value="${project.build.directory}/checkstyle-result.xml">${checkstyle.output.file}</outputFile>
+  <outputFileFormat default-value="xml">${checkstyle.output.format}</outputFileFormat>
+  <plugin default-value="${plugin}" />
+  <project default-value="${project}" />
+  <propertiesLocation>${checkstyle.properties.location}</propertiesLocation>
+  <resourceExcludes>${checkstyle.resourceExcludes}</resourceExcludes>
+  <resourceIncludes default-value="**/*.properties">${checkstyle.resourceIncludes}</resourceIncludes>
+  <resources default-value="${project.resources}" />
+  <rulesFiles default-value="${project.build.directory}/checkstyle-rules.xml">${checkstyle.output.rules.file}</rulesFiles>
+  <skip default-value="false">${checkstyle.skip}</skip>
+  <skipExec default-value="false">${checkstyle.skipExec}</skipExec>
+  <sourceDirectories>
+    <sourceDirectory>/home/mariusz/git/auth/src/main/java</sourceDirectory>
+  </sourceDirectories>
+  <suppressionsFileExpression default-value="checkstyle.suppressions.file">${checkstyle.suppression.expression}</suppressionsFileExpression>
+  <suppressionsLocation>${checkstyle.suppressions.location}</suppressionsLocation>
+  <testResources default-value="${project.testResources}" />
+  <violationIgnore>${checkstyle.violation.ignore}</violationIgnore>
+  <violationSeverity default-value="error">${checkstyle.violationSeverity}</violationSeverity>
+</configuration>
+[DEBUG] =======================================================================
+[INFO] 
+[INFO] --- checkstyle:3.6.0:check (default-cli) @ auth ---
+[DEBUG] Replacing repositories from org.apache.maven.plugins:maven-checkstyle-plugin:maven-plugin:3.6.0
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Collector skip mode enabled: versionless (key function GACE)
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-sink-api:2.0.0
+[DEBUG] Reading file model from org.apache.maven.reporting:maven-reporting-impl:4.0.0
+[DEBUG] Reading file model from com.puppycrawl.tools:checkstyle:13.3.0
+[DEBUG] Reading file model from org.apache.maven.reporting:maven-reporting-api:4.0.0
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-core:2.0.0
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia:2.0.0
+[DEBUG] Reading file model from org.apache.maven.shared:maven-shared-components:43
+[DEBUG] Reading file model from org.junit:junit-bom:5.11.1
+[DEBUG] Reading file model from org.junit:junit-bom:5.11.2
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-integration-tools:2.0.0
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-sitetools:2.0.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-component-annotations:2.2.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-resources:1.3.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-utils:4.0.1
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-containers:2.2.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:16
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:17
+[DEBUG] Replacing repositories from com.puppycrawl.tools:checkstyle:jar:13.3.0
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-xml:3.0.1
+[DEBUG] Group rules file for remote repository sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:18
+[DEBUG] /.meta/prefixes.txt was not found in https://oss.sonatype.org/content/repositories/snapshots during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Group rules file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from org.junit:junit-bom:5.10.1
+[DEBUG] Reading file model from org.junit:junit-bom:5.10.2
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-i18n:1.0-beta-10
+[DEBUG] Reading file model from org.slf4j:slf4j-api:1.7.36
+[DEBUG] Reading file model from org.apache.commons:commons-lang3:3.17.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-components:1.1.12
+[DEBUG] Reading file model from javax.xml.bind:jaxb-api:2.3.1
+[DEBUG] Reading file model from info.picocli:picocli:4.7.7
+[DEBUG] Reading file model from org.slf4j:slf4j-parent:1.7.36
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:1.0.10
+[DEBUG] Reading file model from javax.xml.bind:jaxb-api-parent:2.3.1
+[DEBUG] Reading file model from org.antlr:antlr4-runtime:4.13.2
+[DEBUG] Reading file model from org.apache.commons:commons-parent:73
+[DEBUG] Reading file model from net.java:jvnet-parent:5
+[DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for codehaus.snapshots (http://snapshots.repository.codehaus.org).
+[DEBUG] Replacing repositories from org.codehaus.plexus:plexus-i18n:jar:1.0-beta-10
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+    maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+[DEBUG] Reading file model from org.antlr:antlr4-master:4.13.2
+[DEBUG] Reading file model from commons-beanutils:commons-beanutils:1.11.0
+[DEBUG] Reading file model from com.google.guava:guava:33.5.0-jre
+[DEBUG] Replacing repositories from javax.xml.bind:jaxb-api:jar:2.3.1
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+    jvnet-nexus-releases (https://maven.java.net/content/repositories/releases/, default, releases)
+[DEBUG] Reading file model from com.google.guava:guava-parent:33.5.0-jre
+[DEBUG] Reading file model from org.reflections:reflections:0.10.2
+[DEBUG] Reading file model from org.apache.commons:commons-parent:84
+[DEBUG] Reading file model from org.slf4j:slf4j-api:2.0.17
+[DEBUG] Reading file model from org.slf4j:slf4j-parent:2.0.17
+[DEBUG] Reading file model from org.slf4j:slf4j-simple:2.0.17
+[DEBUG] Reading file model from net.sf.saxon:Saxon-HE:12.9
+[DEBUG] Reading file model from org.slf4j:slf4j-bom:2.0.17
+[DEBUG] Reading file model from org.apache:apache:34
+[DEBUG] Reading file model from org.junit:junit-bom:5.11.0
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-core:1.12.0
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-module-xdoc:1.12.0
+[DEBUG] Reading file model from org.apache.maven.shared:maven-shared-utils:3.4.2
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-site-model:2.0.0
+[DEBUG] Reading file model from org.apache.maven.shared:maven-shared-components:39
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia:1.12.0
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-modules:1.12.0
+[DEBUG] Reading file model from org.apache.maven:maven-parent:39
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-site-renderer:2.0.0
+[DEBUG] Reading file model from org.junit:junit-bom:5.12.2
+[DEBUG] Reading file model from org.apache.maven:maven-parent:34
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-module-apt:2.0.0
+[DEBUG] Reading file model from org.apache:apache:29
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-modules:2.0.0
+[DEBUG] Reading file model from org.apache:apache:23
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-module-xdoc:2.0.0
+[DEBUG] Reading file model from org.apache.maven:maven-archiver:3.6.2
+[DEBUG] Reading file model from org.apache.maven.resolver:maven-resolver-api:1.4.1
+[DEBUG] Replacing repositories from org.apache.maven.doxia:doxia-core:jar:1.12.0
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Reading file model from org.eclipse.sisu:org.eclipse.sisu.plexus:0.9.0.M3
+[DEBUG] Replacing repositories from org.apache.maven.doxia:doxia-module-xdoc:jar:1.12.0
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Reading file model from org.apache.maven.shared:maven-shared-components:41
+[DEBUG] Reading file model from org.apache.maven.resolver:maven-resolver:1.4.1
+[DEBUG] Reading file model from javax.inject:javax.inject:1
+[DEBUG] Reading file model from commons-io:commons-io:2.17.0
+[DEBUG] Reading file model from org.eclipse.sisu:sisu-inject:0.9.0.M3
+[DEBUG] Reading file model from org.apache.maven:maven-parent:41
+[DEBUG] Reading file model from org.apache.maven:maven-parent:33
+[DEBUG] Reading file model from org.apache.commons:commons-text:1.12.0
+[DEBUG] Reading file model from org.apache.commons:commons-parent:74
+[DEBUG] Replacing repositories from org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.9.0.M3
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+[DEBUG] Reading file model from org.apache:apache:31
+[DEBUG] Reading file model from org.apache.commons:commons-parent:69
+[DEBUG] Reading file model from org.apache:apache:21
+[DEBUG] Group rules file for remote repository sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-interpolation:1.27
+[DEBUG] Using transporter JdkTransporter with priority 10.0 for https://oss.sonatype.org/content/repositories/snapshots
+[DEBUG] Using connector BasicRepositoryConnector with priority 0.0 for https://oss.sonatype.org/content/repositories/snapshots
+[DEBUG] Final pipeline: offline( rrf( basic( sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) ) ) )
+[DEBUG] Reading file model from com.google.guava:failureaccess:1.0.3
+[DEBUG] Reading file model from com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+[DEBUG] Reading file model from com.google.guava:guava-parent:33.4.0-android
+[DEBUG] Reading file model from com.google.guava:guava-parent:26.0-android
+[DEBUG] Reading file model from org.jspecify:jspecify:1.0.0
+[DEBUG] Reading file model from com.google.errorprone:error_prone_annotations:2.41.0
+[DEBUG] Reading file model from com.google.j2objc:j2objc-annotations:3.1
+[DEBUG] Reading file model from com.google.errorprone:error_prone_parent:2.41.0
+[DEBUG] Reading file model from org.javassist:javassist:3.28.0-GA
+[DEBUG] Reading file model from com.google.code.findbugs:jsr305:3.0.2
+[DEBUG] Reading file model from org.slf4j:slf4j-api:1.7.32
+[DEBUG] Reading file model from org.xmlresolver:xmlresolver:5.3.3
+[DEBUG] Reading file model from org.slf4j:slf4j-parent:1.7.32
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-sink-api:1.12.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-component-annotations:2.1.0
+[DEBUG] Replacing repositories from org.apache.maven.doxia:doxia-sink-api:jar:1.12.0
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-containers:2.1.0
+[DEBUG] Reading file model from commons-io:commons-io:2.11.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:5.1
+[DEBUG] Reading file model from org.apache.commons:commons-parent:52
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-skin-model:2.0.0
+[DEBUG] Reading file model from org.apache.maven.doxia:doxia-module-xhtml5:2.0.0
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-velocity:2.2.0
+[DEBUG] Reading file model from org.junit:junit-bom:5.7.2
+[DEBUG] Reading file model from org.codehaus.plexus:plexus:19
+[DEBUG] Reading file model from org.apache.velocity:velocity-engine-core:2.4
+[DEBUG] Reading file model from org.apache.velocity:velocity-engine-parent:2.4
+[DEBUG] Reading file model from org.apache.velocity.tools:velocity-tools-generic:3.1
+[DEBUG] Reading file model from org.apache.velocity:velocity-master:7
+[DEBUG] Reading file model from org.apache.velocity.tools:velocity-tools-parent:3.1
+[DEBUG] Reading file model from org.apache.velocity:velocity-master:4
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-archiver:4.9.2
+[DEBUG] Writing tracking file '/home/mariusz/.m2/repository/.meta/resolver-status.properties'
+[DEBUG] Could not find metadata /.meta/prefixes.txt in sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots)
+[DEBUG] Prefix file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Group rules file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
+[DEBUG] Reading file model from org.eclipse.sisu:org.eclipse.sisu.inject:0.9.0.M3
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-classworlds:2.6.0
+[DEBUG] Group rules file for remote repository jvnet-nexus-releases-a5d540dd75d8efce5a7e6a5ccab82bab11416135 (https://maven.java.net/content/repositories/releases/, default, releases) not available
+[DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
+[DEBUG] Loaded prefixes for remote repository jvnet-nexus-releases from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-jvnet-nexus-releases-a5d540dd75d8efce5a7e6a5ccab82bab11416135.txt'
+[INFO] Loaded 22459 auto-discovered prefixes for remote repository jvnet-nexus-releases (prefixes-jvnet-nexus-releases-a5d540dd75d8efce5a7e6a5ccab82bab11416135.txt)
+[DEBUG] Group rules file for remote repository jvnet-nexus-releases (https://maven.java.net/content/repositories/releases/, default, releases) not available
+[DEBUG] Reading file model from javax.activation:javax.activation-api:1.2.0
+[DEBUG] Reading file model from commons-collections:commons-collections:3.2.2
+[DEBUG] Reading file model from com.sun.activation:all:1.2.0
+[DEBUG] Reading file model from org.apache.commons:commons-parent:39
+[DEBUG] Reading file model from net.java:jvnet-parent:1
+[DEBUG] Reading file model from org.apache:apache:16
+[DEBUG] Replacing repositories from javax.activation:javax.activation-api:jar:1.2.0
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+    jvnet-nexus-releases (https://maven.java.net/content/repositories/releases/, default, releases)
+    jvnet-nexus-snapshots (https://maven.java.net/content/repositories/snapshots, default, snapshots)
+[DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for apache.snapshots (http://repository.apache.org/snapshots).
+[DEBUG] Replacing repositories from commons-collections:commons-collections:jar:3.2.2
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+    maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+[DEBUG] Reading file model from commons-beanutils:commons-beanutils:1.9.4
+[DEBUG] Reading file model from org.apache.velocity:velocity-engine-core:2.3
+[DEBUG] Reading file model from org.apache.commons:commons-lang3:3.10
+[DEBUG] Reading file model from com.github.cliftonlabs:json-simple:3.0.2
+[DEBUG] Reading file model from org.apache.commons:commons-digester3:3.2
+[DEBUG] Reading file model from org.apache.velocity:velocity-engine-parent:2.3
+[DEBUG] Reading file model from org.apache.commons:commons-parent:47
+[DEBUG] Reading file model from org.apache.commons:commons-parent:22
+[DEBUG] Reading file model from org.codehaus.plexus:plexus-io:3.4.2
+[DEBUG] Reading file model from org.apache.commons:commons-parent:50
+[DEBUG] Reading file model from org.apache:apache:19
+[DEBUG] Reading file model from org.apache:apache:9
+[DEBUG] Reading file model from commons-io:commons-io:2.15.1
+[DEBUG] Reading file model from org.apache.commons:commons-compress:1.26.1
+[DEBUG] Reading file model from org.apache.commons:commons-parent:65
+[DEBUG] Reading file model from org.apache.commons:commons-parent:66
+[DEBUG] Replacing repositories from org.apache.commons:commons-digester3:jar:3.2
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+[DEBUG] Reading file model from commons-codec:commons-codec:1.16.1
+[DEBUG] Reading file model from org.iq80.snappy:snappy:0.4
+[DEBUG] Reading file model from org.tukaani:xz:1.9
+[DEBUG] Replacing repositories from org.iq80.snappy:snappy:jar:0.4
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
+    sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
+[DEBUG] Reading file model from com.github.luben:zstd-jni:1.5.5-11
+[DEBUG] Group rules file for remote repository maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked) not available
+[DEBUG] Reading file model from commons-beanutils:commons-beanutils:1.8.3
+[DEBUG] Reading file model from commons-logging:commons-logging:1.1.1
+[DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for maven-default-http-blocker (http://0.0.0.0/).
+[DEBUG] Group rules file for remote repository maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked) not available
+[DEBUG] Reading file model from org.apache.commons:commons-parent:14
+[DEBUG] Reading file model from org.apache.commons:commons-lang3:3.14.0
+[DEBUG] Reading file model from org.apache.commons:commons-parent:5
+[DEBUG] Reading file model from org.apache:apache:4
+[DEBUG] Reading file model from org.apache:apache:7
+[DEBUG] Reading file model from org.apache.commons:commons-parent:64
+[DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for apache.snapshots (http://people.apache.org/repo/m2-snapshot-repository).
+[DEBUG] Replacing repositories from commons-logging:commons-logging:jar:1.1.1
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+[DEBUG] Replacing repositories from commons-beanutils:commons-beanutils:jar:1.8.3
+    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    central (https://repo.maven.apache.org/maven2, default, releases)
+    maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
+[DEBUG] Reading file model from org.apache:apache:30
+[DEBUG] Reading file model from org.junit:junit-bom:5.10.0
+[DEBUG] Dependency collection stats {ConflictMarker.analyzeTime=295832, ConflictMarker.markTime=225643, ConflictMarker.nodeCount=177, ConflictIdSorter.graphTime=90320, ConflictIdSorter.topsortTime=41281, ConflictIdSorter.conflictIdCount=62, ConflictIdSorter.conflictIdCycleCount=0, ConflictResolver.totalTime=1371312, ConflictResolver.conflictItemCount=62, BfDependencyCollector.collectTime=247614237, BfDependencyCollector.transformTime=2076029}
+[DEBUG] org.apache.maven.plugins:maven-checkstyle-plugin:jar:3.6.0
+[DEBUG] +- com.puppycrawl.tools:checkstyle:jar:13.3.0 [runtime]
+[DEBUG] |  +- info.picocli:picocli:jar:4.7.7 [runtime]
+[DEBUG] |  +- org.antlr:antlr4-runtime:jar:4.13.2 [runtime]
+[DEBUG] |  +- commons-beanutils:commons-beanutils:jar:1.11.0 [compile]
+[DEBUG] |  |  \- commons-collections:commons-collections:jar:3.2.2 [compile]
+[DEBUG] |  +- com.google.guava:guava:jar:33.5.0-jre [runtime]
+[DEBUG] |  |  +- com.google.guava:failureaccess:jar:1.0.3 [runtime]
+[DEBUG] |  |  +- com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava [runtime]
+[DEBUG] |  |  +- org.jspecify:jspecify:jar:1.0.0 [runtime]
+[DEBUG] |  |  +- com.google.errorprone:error_prone_annotations:jar:2.41.0 [runtime]
+[DEBUG] |  |  \- com.google.j2objc:j2objc-annotations:jar:3.1 [runtime]
+[DEBUG] |  +- org.reflections:reflections:jar:0.10.2 [runtime]
+[DEBUG] |  |  +- org.javassist:javassist:jar:3.28.0-GA [runtime]
+[DEBUG] |  |  \- com.google.code.findbugs:jsr305:jar:3.0.2 [runtime]
+[DEBUG] |  +- org.slf4j:slf4j-simple:jar:2.0.17 [runtime]
+[DEBUG] |  +- net.sf.saxon:Saxon-HE:jar:12.9 [runtime]
+[DEBUG] |  |  +- org.xmlresolver:xmlresolver:jar:5.3.3 [runtime]
+[DEBUG] |  |  \- org.xmlresolver:xmlresolver:jar:data:5.3.3 [runtime]
+[DEBUG] |  \- org.apache.maven.doxia:doxia-module-xdoc:jar:1.12.0 [runtime]
+[DEBUG] +- org.apache.maven.reporting:maven-reporting-api:jar:4.0.0 [compile]
+[DEBUG] +- org.apache.maven.reporting:maven-reporting-impl:jar:4.0.0 [compile]
+[DEBUG] |  +- org.apache.maven.shared:maven-shared-utils:jar:3.4.2 [compile]
+[DEBUG] |  +- org.apache.maven.doxia:doxia-site-model:jar:2.0.0 [compile]
+[DEBUG] |  +- org.apache.maven.doxia:doxia-site-renderer:jar:2.0.0 [compile]
+[DEBUG] |  |  +- org.apache.maven.doxia:doxia-skin-model:jar:2.0.0 [compile]
+[DEBUG] |  |  +- org.apache.maven.doxia:doxia-module-xhtml5:jar:2.0.0 [compile]
+[DEBUG] |  |  +- org.codehaus.plexus:plexus-velocity:jar:2.2.0 [compile]
+[DEBUG] |  |  +- org.apache.velocity:velocity-engine-core:jar:2.4 [compile]
+[DEBUG] |  |  \- org.apache.velocity.tools:velocity-tools-generic:jar:3.1 [compile]
+[DEBUG] |  |     +- org.apache.commons:commons-digester3:jar:3.2 [compile]
+[DEBUG] |  |     |  \- commons-logging:commons-logging:jar:1.1.1 [compile]
+[DEBUG] |  |     \- com.github.cliftonlabs:json-simple:jar:3.0.2 [compile]
+[DEBUG] |  +- org.apache.maven.doxia:doxia-module-apt:jar:2.0.0 [runtime]
+[DEBUG] |  +- org.apache.maven:maven-archiver:jar:3.6.2 [compile]
+[DEBUG] |  |  \- org.codehaus.plexus:plexus-archiver:jar:4.9.2 [compile]
+[DEBUG] |  |     +- org.codehaus.plexus:plexus-io:jar:3.4.2 [compile]
+[DEBUG] |  |     +- org.apache.commons:commons-compress:jar:1.26.1 [compile]
+[DEBUG] |  |     +- commons-codec:commons-codec:jar:1.16.1 [compile]
+[DEBUG] |  |     +- org.iq80.snappy:snappy:jar:0.4 [compile]
+[DEBUG] |  |     +- org.tukaani:xz:jar:1.9 [runtime]
+[DEBUG] |  |     \- com.github.luben:zstd-jni:jar:1.5.5-11 [runtime]
+[DEBUG] |  +- org.apache.maven.resolver:maven-resolver-api:jar:1.4.1 [compile]
+[DEBUG] |  \- org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.9.0.M3 [compile]
+[DEBUG] |     +- org.eclipse.sisu:org.eclipse.sisu.inject:jar:0.9.0.M3 [compile]
+[DEBUG] |     \- org.codehaus.plexus:plexus-classworlds:jar:2.6.0 [compile]
+[DEBUG] +- org.apache.maven.doxia:doxia-sink-api:jar:2.0.0 [compile]
+[DEBUG] +- org.apache.maven.doxia:doxia-core:jar:2.0.0 [compile]
+[DEBUG] |  +- javax.inject:javax.inject:jar:1 [compile]
+[DEBUG] |  +- commons-io:commons-io:jar:2.17.0 [compile]
+[DEBUG] |  \- org.apache.commons:commons-text:jar:1.12.0 [compile]
+[DEBUG] +- org.apache.maven.doxia:doxia-integration-tools:jar:2.0.0 [compile]
+[DEBUG] |  \- org.codehaus.plexus:plexus-interpolation:jar:1.27 [compile]
+[DEBUG] +- org.codehaus.plexus:plexus-component-annotations:jar:2.2.0 [compile]
+[DEBUG] +- org.codehaus.plexus:plexus-resources:jar:1.3.0 [compile]
+[DEBUG] +- org.codehaus.plexus:plexus-utils:jar:4.0.1 [compile]
+[DEBUG] +- org.codehaus.plexus:plexus-xml:jar:3.0.1 [compile]
+[DEBUG] +- org.codehaus.plexus:plexus-i18n:jar:1.0-beta-10 [compile]
+[DEBUG] +- org.slf4j:slf4j-api:jar:1.7.36 [compile]
+[DEBUG] +- org.apache.commons:commons-lang3:jar:3.17.0 [compile]
+[DEBUG] \- javax.xml.bind:jaxb-api:jar:2.3.1 [compile]
+[DEBUG]    \- javax.activation:javax.activation-api:jar:1.2.0 [compile]
+[DEBUG]   Excluded: org.slf4j:slf4j-api:jar:1.7.36
+[DEBUG]   Excluded: org.apache.maven.resolver:maven-resolver-api:jar:1.4.1
+[DEBUG]   Excluded: org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.9.0.M3
+[DEBUG]   Excluded: javax.inject:javax.inject:jar:1
+[DEBUG]   Excluded: org.codehaus.plexus:plexus-classworlds:jar:2.6.0
+[DEBUG] Created new class realm plugin>org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0
+[DEBUG] Importing foreign packages into class realm plugin>org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0
+[DEBUG]   Imported:  < maven.api
+[DEBUG] Populating class realm plugin>org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0
+[DEBUG]   Included: org.apache.maven.plugins:maven-checkstyle-plugin:jar:3.6.0
+[DEBUG]   Included: com.puppycrawl.tools:checkstyle:jar:13.3.0
+[DEBUG]   Included: org.apache.maven.reporting:maven-reporting-api:jar:4.0.0
+[DEBUG]   Included: org.apache.maven.reporting:maven-reporting-impl:jar:4.0.0
+[DEBUG]   Included: org.apache.maven.doxia:doxia-sink-api:jar:2.0.0
+[DEBUG]   Included: org.apache.maven.doxia:doxia-core:jar:2.0.0
+[DEBUG]   Included: org.apache.maven.doxia:doxia-integration-tools:jar:2.0.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-component-annotations:jar:2.2.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-resources:jar:1.3.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-utils:jar:4.0.1
+[DEBUG]   Included: org.codehaus.plexus:plexus-xml:jar:3.0.1
+[DEBUG]   Included: org.codehaus.plexus:plexus-i18n:jar:1.0-beta-10
+[DEBUG]   Included: org.apache.commons:commons-lang3:jar:3.17.0
+[DEBUG]   Included: javax.xml.bind:jaxb-api:jar:2.3.1
+[DEBUG]   Included: info.picocli:picocli:jar:4.7.7
+[DEBUG]   Included: org.antlr:antlr4-runtime:jar:4.13.2
+[DEBUG]   Included: commons-beanutils:commons-beanutils:jar:1.11.0
+[DEBUG]   Included: com.google.guava:guava:jar:33.5.0-jre
+[DEBUG]   Included: org.reflections:reflections:jar:0.10.2
+[DEBUG]   Included: org.slf4j:slf4j-simple:jar:2.0.17
+[DEBUG]   Included: net.sf.saxon:Saxon-HE:jar:12.9
+[DEBUG]   Included: org.apache.maven.doxia:doxia-module-xdoc:jar:1.12.0
+[DEBUG]   Included: org.apache.maven.shared:maven-shared-utils:jar:3.4.2
+[DEBUG]   Included: org.apache.maven.doxia:doxia-site-model:jar:2.0.0
+[DEBUG]   Included: org.apache.maven.doxia:doxia-site-renderer:jar:2.0.0
+[DEBUG]   Included: org.apache.maven.doxia:doxia-module-apt:jar:2.0.0
+[DEBUG]   Included: org.apache.maven:maven-archiver:jar:3.6.2
+[DEBUG]   Included: commons-io:commons-io:jar:2.17.0
+[DEBUG]   Included: org.apache.commons:commons-text:jar:1.12.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-interpolation:jar:1.27
+[DEBUG]   Included: javax.activation:javax.activation-api:jar:1.2.0
+[DEBUG]   Included: commons-collections:commons-collections:jar:3.2.2
+[DEBUG]   Included: com.google.guava:failureaccess:jar:1.0.3
+[DEBUG]   Included: com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava
+[DEBUG]   Included: org.jspecify:jspecify:jar:1.0.0
+[DEBUG]   Included: com.google.errorprone:error_prone_annotations:jar:2.41.0
+[DEBUG]   Included: com.google.j2objc:j2objc-annotations:jar:3.1
+[DEBUG]   Included: org.javassist:javassist:jar:3.28.0-GA
+[DEBUG]   Included: com.google.code.findbugs:jsr305:jar:3.0.2
+[DEBUG]   Included: org.xmlresolver:xmlresolver:jar:5.3.3
+[DEBUG]   Included: org.xmlresolver:xmlresolver:jar:data:5.3.3
+[DEBUG]   Included: org.apache.maven.doxia:doxia-skin-model:jar:2.0.0
+[DEBUG]   Included: org.apache.maven.doxia:doxia-module-xhtml5:jar:2.0.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-velocity:jar:2.2.0
+[DEBUG]   Included: org.apache.velocity:velocity-engine-core:jar:2.4
+[DEBUG]   Included: org.apache.velocity.tools:velocity-tools-generic:jar:3.1
+[DEBUG]   Included: org.codehaus.plexus:plexus-archiver:jar:4.9.2
+[DEBUG]   Included: org.eclipse.sisu:org.eclipse.sisu.inject:jar:0.9.0.M3
+[DEBUG]   Included: org.apache.commons:commons-digester3:jar:3.2
+[DEBUG]   Included: com.github.cliftonlabs:json-simple:jar:3.0.2
+[DEBUG]   Included: org.codehaus.plexus:plexus-io:jar:3.4.2
+[DEBUG]   Included: org.apache.commons:commons-compress:jar:1.26.1
+[DEBUG]   Included: commons-codec:commons-codec:jar:1.16.1
+[DEBUG]   Included: org.iq80.snappy:snappy:jar:0.4
+[DEBUG]   Included: org.tukaani:xz:jar:1.9
+[DEBUG]   Included: com.github.luben:zstd-jni:jar:1.5.5-11
+[DEBUG]   Included: commons-logging:commons-logging:jar:1.1.1
+[DEBUG] Loading mojo org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check from plugin realm ClassRealm[plugin>org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0, parent: jdk.internal.loader.ClassLoaders$AppClassLoader@5bc2b487]
+[DEBUG] Configuring mojo execution 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check:default-cli' with basic configurator -->
+[DEBUG]   (f) cacheFile = /home/mariusz/git/auth/target/checkstyle-cachefile
+[DEBUG]   (f) checkstyleRulesHeader = <?xml version="1.0"?>
+<!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+[DEBUG]   (f) configLocation = checkstyle.xml
+[DEBUG]   (f) consoleOutput = false
+[DEBUG]   (f) excludeGeneratedSources = false
+[DEBUG]   (f) failOnViolation = true
+[DEBUG]   (f) failsOnError = false
+[DEBUG]   (f) headerLocation = LICENSE.txt
+[DEBUG]   (f) includeResources = true
+[DEBUG]   (f) includeTestResources = true
+[DEBUG]   (f) includeTestSourceDirectory = false
+[DEBUG]   (f) includes = **\/*.java
+[DEBUG]   (f) inputEncoding = UTF-8
+[DEBUG]   (f) logViolationCountToConsole = true
+[DEBUG]   (f) logViolationsToConsole = true
+[DEBUG]   (f) maxAllowedViolations = 0
+[DEBUG]   (f) omitIgnoredModules = false
+[DEBUG]   (f) outputFile = /home/mariusz/git/auth/target/checkstyle-result.xml
+[DEBUG]   (f) outputFileFormat = xml
+[DEBUG]   (f) plugin = Component Descriptor: role: 'org.apache.maven.plugin.Mojo', implementation: 'org.apache.maven.plugins.checkstyle.CheckstyleViolationCheckMojo', role hint: 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check'
+role: 'org.apache.maven.plugin.Mojo', implementation: 'org.apache.maven.plugins.checkstyle.CheckstyleReport', role hint: 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:checkstyle'
+role: 'org.apache.maven.plugin.Mojo', implementation: 'org.apache.maven.plugins.checkstyle.CheckstyleAggregateReport', role hint: 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:checkstyle-aggregate'
+role: 'org.apache.maven.plugin.Mojo', implementation: 'org.apache.maven.plugins.maven_checkstyle_plugin.HelpMojo', role hint: 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:help'
+---
+[DEBUG]   (f) project = MavenProject: com.devskiller:auth:1.3-SNAPSHOT @ /home/mariusz/git/auth/pom.xml
+[DEBUG]   (f) resourceIncludes = **/*.properties
+[DEBUG]   (f) resources = [Resource {targetPath: null, filtering: true, FileSet {directory: /home/mariusz/git/auth/src/main/resources, PatternSet [includes: {**/application*.yml, **/application*.yaml, **/application*.properties}, excludes: {}]}}, Resource {targetPath: null, filtering: false, FileSet {directory: /home/mariusz/git/auth/src/main/resources, PatternSet [includes: {}, excludes: {**/application*.yml, **/application*.yaml, **/application*.properties}]}}]
+[DEBUG]   (f) rulesFiles = /home/mariusz/git/auth/target/checkstyle-rules.xml
+[DEBUG]   (f) skip = false
+[DEBUG]   (f) skipExec = false
+[DEBUG]   (f) sourceDirectories = [/home/mariusz/git/auth/src/main/java]
+[DEBUG]   (f) suppressionsFileExpression = checkstyle.suppressions.file
+[DEBUG]   (f) testResources = [Resource {targetPath: null, filtering: false, FileSet {directory: /home/mariusz/git/auth/src/test/resources, PatternSet [includes: {}, excludes: {}]}}]
+[DEBUG]   (f) violationSeverity = error
+[DEBUG] -- end configuration --
+[DEBUG] executeCheckstyle start headerLocation : LICENSE.txt
+[DEBUG] JarResourceLoader : trying to load 'jar:file:/home/mariusz/.m2/repository/com/puppycrawl/tools/checkstyle/13.3.0/checkstyle-13.3.0.jar'
+[DEBUG] Added 918 source files found in '/home/mariusz/git/auth/src/main/java'.
+[DEBUG] Added 1 resource files found in '/home/mariusz/git/auth/src/main/resources'.
+[DEBUG] Added 1 resource files found in '/home/mariusz/git/auth/src/main/resources'.
+[DEBUG] Added 2 resource files found in '/home/mariusz/git/auth/src/test/resources'.
+[DEBUG] Added 921 files to process.
+[DEBUG] request.getConfigLocation() checkstyle.xml
+[DEBUG] The resource 'checkstyle.xml' was found as '/home/mariusz/git/auth/checkstyle.xml'
+[DEBUG] headerLocation LICENSE.txt
+[DEBUG] The resource 'LICENSE.txt' was not found with resourceLoader org.codehaus.plexus.resource.loader.FileResourceLoader.
+[DEBUG] The resource 'LICENSE.txt' was not found with resourceLoader org.codehaus.plexus.resource.loader.JarResourceLoader.
+[DEBUG] URLResourceLoader: No valid URL 'LICENSE.txt'
+[DEBUG] URLResourceLoader: No valid URL 'LICENSE.txt'
+[DEBUG] The resource 'LICENSE.txt' was not found with resourceLoader org.codehaus.plexus.resource.loader.URLResourceLoader.
+[DEBUG] Unable to process header location: LICENSE.txt
+[DEBUG] Checkstyle will throw exception if ${checkstyle.header.file} is used
+[DEBUG] Added '/home/mariusz/git/auth/src/main/resources' as a source directory.
+[DEBUG] Added '/home/mariusz/git/auth/src/main/resources' as a source directory.
+[INFO] You have 0 Checkstyle violations.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.001 s
+[INFO] Finished at: 2026-07-16T20:51:05+02:00
+[INFO] ------------------------------------------------------------------------
+[DEBUG] Shutting down adapter factory; available factories [file-lock, rwlock-local, semaphore-local, noop]; available name mappers [discriminating, file-gav, file-hgav, file-static, gav, static]
+[DEBUG] Shutting down 'file-lock' factory
+[DEBUG] Shutting down 'rwlock-local' factory
+[DEBUG] Shutting down 'semaphore-local' factory
+[DEBUG] Shutting down 'noop' factory

@@ -19,6 +19,7 @@ use std::path::{Path, PathBuf};
 const INFO_TAG: &str = "[INFO]";
 const ERROR_TAG: &str = "[ERROR]";
 const WARNING_TAG: &str = "[WARNING]";
+const DEBUG_TAG: &str = "[DEBUG]";
 
 const MAX_FAILURES_PER_SOURCE: usize = 10;
 
@@ -118,6 +119,9 @@ const MVN_ENV_BANNER_PREFIXES: &[&str] = &[
     "Java version:",
     "Default locale:",
     "OS name:",
+    // `-X` extends the banner with these two (untagged, like the rest).
+    "Command line:",
+    "Terminal: ",
 ];
 
 lazy_static! {
@@ -140,6 +144,11 @@ const BARE_PLUGIN_WARNING_PREFIXES: &[&str] = &[
 /// Expects a raw (non-trimmed) line or a trimmed line — both work.
 fn is_mvn_startup_noise(line: &str) -> bool {
     let t = line.trim_start();
+
+    // `-X` diagnostic chatter — the tee log keeps the raw output.
+    if t.starts_with(DEBUG_TAG) {
+        return true;
+    }
 
     // mvnd / maven 3.9+ extension-loader progress
     if PREFIX_LOAD_RE.is_match(t) {
@@ -359,24 +368,94 @@ pub fn run_clean(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32>
 }
 
 pub fn run_dep_tree(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
-    run_simple_goal(
+    run_dep_goal(
         binary,
         "dependency:tree",
         "dep_tree",
         filter_mvn_dep_tree,
+        DepSpillHint::FullTree,
         args,
         verbose,
     )
 }
 
 pub fn run_dep_list(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32> {
-    run_simple_goal(
+    run_dep_goal(
         binary,
         "dependency:list",
         "dep_list",
         filter_mvn_dep_list,
+        DepSpillHint::Tail,
         args,
         verbose,
+    )
+}
+
+/// How a spilled dependency digest file is referenced from the inline text.
+#[derive(Clone, Copy)]
+enum DepSpillHint {
+    /// `[full dependency tree: <path>]` — inline is a depth-1 subset, not a
+    /// prefix of the file.
+    FullTree,
+    /// `[see remaining: tail -n +N <path>]` — inline is a strict prefix of
+    /// the file.
+    Tail,
+}
+
+/// Runner for dependency goals whose filter may spill oversized output into
+/// a tee digest file. Below the spill threshold this behaves exactly like
+/// `run_simple_goal`; above it the full filtered content is written next to
+/// the tee log and the inline text carries a reference line. If tee is
+/// disabled or the write fails, the full filtered content is emitted inline
+/// — the output must never degrade.
+#[allow(clippy::too_many_arguments)]
+fn run_dep_goal(
+    binary: MvnBinary,
+    goal: &str,
+    tee_slug: &str,
+    filter: fn(&str) -> DepFiltered,
+    hint: DepSpillHint,
+    args: &[String],
+    verbose: u8,
+) -> Result<i32> {
+    let mut cmd = mvn_command(binary);
+    cmd.arg(goal);
+    for arg in args {
+        cmd.arg(arg);
+    }
+
+    if verbose > 0 {
+        eprintln!("Running: {binary} {goal} {}", args.join(" "));
+    }
+
+    let (tool_name, tee_label) = mvn_labels(binary, goal, tee_slug);
+    let digest_slug = format!("{tee_label}_full");
+    runner::run_filtered(
+        cmd,
+        &tool_name,
+        &args.join(" "),
+        move |raw: &str| {
+            let filtered = filter(raw);
+            let Some(full) = filtered.spill else {
+                return filtered.text;
+            };
+            let reference = match hint {
+                DepSpillHint::FullTree => {
+                    crate::core::tee::force_tee_display(&full, &digest_slug)
+                        .map(|path| format!("[full dependency tree: {path}]"))
+                }
+                DepSpillHint::Tail => crate::core::tee::force_tee_tail_hint(
+                    &full,
+                    &digest_slug,
+                    DEP_SPILL_MAX_INLINE_LINES + 1,
+                ),
+            };
+            match reference {
+                Some(reference) => format!("{}\n{reference}", filtered.text),
+                None => full,
+            }
+        },
+        runner::RunOptions::with_tee(&tee_label),
     )
 }
 
@@ -2292,8 +2371,22 @@ fn filter_mvn_clean(output: &str) -> String {
 fn filter_mvn_checkstyle(output: &str) -> String {
     let clean = strip_ansi(output);
     let mut result: Vec<String> = Vec::new();
+    // `-X` debug blocks and `[WARNING]` headers spill untagged continuation
+    // lines (repository listings, mojo config dumps, transfer-failure stack
+    // traces) — swallow those until the next `[INFO]`/`[ERROR]` line. The
+    // headers themselves are already dropped, so their context goes with
+    // them. Violation lines are matched before the swallow, so audit output
+    // is never at risk.
+    let mut swallow_untagged = false;
 
     for raw in clean.lines() {
+        let tagged = raw.trim_start();
+        if tagged.starts_with(DEBUG_TAG) || tagged.starts_with(WARNING_TAG) {
+            swallow_untagged = true;
+        } else if tagged.starts_with(INFO_TAG) || tagged.starts_with(ERROR_TAG) {
+            swallow_untagged = false;
+        }
+
         // Drop cross-cutting startup noise first
         if is_mvn_startup_noise(raw) {
             continue;
@@ -2376,6 +2469,12 @@ fn filter_mvn_checkstyle(output: &str) -> String {
             continue;
         }
 
+        // Untagged continuation of a dropped `[DEBUG]`/`[WARNING]` block —
+        // noise, not signal.
+        if swallow_untagged {
+            continue;
+        }
+
         // Anything else (e.g., unexpected bare errors not matching the rule
         // regex) — keep, in the spirit of the fallback principle.
         result.push(line.to_string());
@@ -2392,15 +2491,72 @@ fn filter_mvn_checkstyle(output: &str) -> String {
 // Line filter for mvn dependency:tree output
 // ---------------------------------------------------------------------------
 
+/// Kept-line budget before large `dependency:tree`/`dependency:list` output
+/// spills its full filtered content into a tee digest file (mirrors the
+/// `*_classes.log` pattern). ~200 kept lines covers a mid-size single-module
+/// tree; bare reactor-wide runs (thousands of verbatim rows) reference the
+/// file instead of flooding the context.
+const DEP_SPILL_MAX_INLINE_LINES: usize = 200;
+
+/// Filtered dependency-goal output: the inline text plus, for oversized
+/// runs, the full filtered content destined for a tee digest file.
+pub(crate) struct DepFiltered {
+    pub(crate) text: String,
+    /// Full filtered output; `None` -> everything already fits inline.
+    pub(crate) spill: Option<String>,
+}
+
+#[cfg(test)]
+impl DepFiltered {
+    /// Full filtered content — the spilled digest when oversized, the inline
+    /// text otherwise. Test-only: fidelity assertions target what the agent
+    /// can ultimately reach, inline or via the digest file.
+    fn full(&self) -> &str {
+        self.spill.as_deref().unwrap_or(&self.text)
+    }
+}
+
+/// True for a tree glyph row after prefix strip: `+- x`, `\- x`, and their
+/// `|  `/space-indented continuations at any depth.
+fn dep_tree_is_tree_row(stripped: &str) -> bool {
+    let rest = stripped.trim_start_matches(['|', ' ']);
+    rest.starts_with("+- ") || rest.starts_with("\\- ")
+}
+
+/// True when a kept tree row sits at depth 1 — the glyph follows the
+/// `[INFO] ` prefix directly, with no continuation columns. Works on the raw
+/// line: `strip_maven_prefix` trims leading whitespace, which would make
+/// space-indented rows under a last (`\- `) branch look like depth 1.
+fn dep_tree_is_depth1_row(line: &str) -> bool {
+    line.strip_prefix(INFO_TAG)
+        .and_then(|rest| rest.strip_prefix(' '))
+        .is_some_and(|rest| rest.starts_with("+- ") || rest.starts_with("\\- "))
+}
+
+/// True for a module root coordinate row after prefix strip:
+/// `group:artifact:packaging:version[:classifier]` — a bare coordinate with
+/// no whitespace, unlike every prose `[INFO]` line.
+fn dep_tree_is_root_row(stripped: &str) -> bool {
+    !stripped.is_empty()
+        && !stripped.contains(char::is_whitespace)
+        && stripped.matches(':').count() >= 3
+}
+
 /// Filter `mvn dependency:tree` output into a faithful, prefix-preserving
 /// SUBSET of Maven's own lines — no invented grouping, no transitive
-/// collapse, no stripped `(version managed from …)` annotations. The tree
-/// rows (root, `+- `, `\- `, `|  ` continuations), `[ERROR]` lines (capped at
-/// 20), and the `BUILD SUCCESS`/`BUILD FAILURE` line are kept verbatim
-/// (prefix intact); everything else — startup/download noise, separator
-/// banners, `Total time:`/`Finished at:`, and `omitted for duplicate` repeats
-/// — is dropped as a whole line.
-fn filter_mvn_dep_tree(output: &str) -> String {
+/// collapse, no stripped `(version managed from …)` annotations. Kept rows:
+/// module root coordinates, tree glyph rows (`+- `, `\- `, `|  `
+/// continuations), `[ERROR]` lines (capped at 20), and the
+/// `BUILD SUCCESS`/`BUILD FAILURE` line — all verbatim, prefix intact.
+/// Everything else (startup/download noise, reactor order/summary, Build
+/// Time Profiler epilogue, `omitted for duplicate` repeats) is dropped as a
+/// whole line; the tee log keeps the raw output.
+///
+/// When the kept rows exceed `DEP_SPILL_MAX_INLINE_LINES` (bare reactor-wide
+/// runs), the inline text keeps only the module roots and their direct
+/// (depth-1) dependencies — still a verbatim native subset — and the full
+/// filtered tree is returned as `spill` for the digest file.
+fn filter_mvn_dep_tree(output: &str) -> DepFiltered {
     let clean = strip_ansi(output);
     let mut result: Vec<String> = Vec::new();
     let mut error_count = 0usize;
@@ -2420,16 +2576,9 @@ fn filter_mvn_dep_tree(output: &str) -> String {
             continue;
         }
 
-        if trimmed.starts_with(WARNING_TAG) {
-            continue;
-        }
-
         if !trimmed.starts_with(INFO_TAG) {
-            // Bare (untagged) startup/JVM noise — never a tree line.
-            continue;
-        }
-
-        if is_maven_boilerplate(trimmed) {
+            // Bare (untagged) startup/JVM noise and `[WARNING]` chatter —
+            // never a tree line.
             continue;
         }
 
@@ -2440,34 +2589,39 @@ fn filter_mvn_dep_tree(output: &str) -> String {
             continue;
         }
 
-        if stripped.is_empty()
-            || stripped.starts_with("Scanning ")
-            || stripped.starts_with("Building ")
-            || stripped.starts_with("Loaded ")
-            || stripped.starts_with("Downloading")
-            || stripped.starts_with("Downloaded")
-            || stripped.starts_with("Progress")
-            || stripped.contains("from pom.xml")
-            || stripped.starts_with("Total time:")
-            || stripped.starts_with("Finished at:")
-            || stripped.starts_with("---")
-        {
-            continue;
-        }
-
         if stripped.contains("omitted for duplicate") {
             continue;
         }
 
-        // Actual dependency-tree row — keep verbatim, `[INFO]` prefix intact.
-        result.push(trimmed.to_string());
+        if dep_tree_is_tree_row(stripped) || dep_tree_is_root_row(stripped) {
+            result.push(trimmed.to_string());
+        }
     }
 
     if result.is_empty() {
-        return "[INFO] BUILD SUCCESS".to_string();
+        return DepFiltered {
+            text: "[INFO] BUILD SUCCESS".to_string(),
+            spill: None,
+        };
     }
 
-    result.join("\n")
+    if result.len() <= DEP_SPILL_MAX_INLINE_LINES {
+        return DepFiltered {
+            text: result.join("\n"),
+            spill: None,
+        };
+    }
+
+    let inline: Vec<&str> = result
+        .iter()
+        .map(String::as_str)
+        .filter(|l| !dep_tree_is_tree_row(strip_maven_prefix(l)) || dep_tree_is_depth1_row(l))
+        .collect();
+
+    DepFiltered {
+        text: inline.join("\n"),
+        spill: Some(result.join("\n")),
+    }
 }
 
 /// Returns true when `trimmed` (the un-prefix-stripped `[INFO]` line) looks
@@ -2502,7 +2656,13 @@ fn dep_list_is_resolved_entry(trimmed: &str) -> bool {
 /// header, every resolved coordinate line, `[ERROR]` lines (capped at 20),
 /// and the `BUILD SUCCESS`/`BUILD FAILURE` line are kept verbatim (prefix
 /// intact); everything else is dropped as a whole line.
-fn filter_mvn_dep_list(output: &str) -> String {
+///
+/// When the kept lines exceed `DEP_SPILL_MAX_INLINE_LINES` (bare
+/// reactor-wide runs), the inline text keeps the first
+/// `DEP_SPILL_MAX_INLINE_LINES` lines (plus the trailing BUILD line) and the
+/// full filtered list is returned as `spill` for the digest file — the
+/// inline text is a strict prefix of the file, so a `tail -n +N` hint works.
+fn filter_mvn_dep_list(output: &str) -> DepFiltered {
     let clean = strip_ansi(output);
     let mut result: Vec<String> = Vec::new();
     let mut error_count = 0usize;
@@ -2554,10 +2714,36 @@ fn filter_mvn_dep_list(output: &str) -> String {
     }
 
     if result.is_empty() {
-        return "[INFO] BUILD SUCCESS".to_string();
+        return DepFiltered {
+            text: "[INFO] BUILD SUCCESS".to_string(),
+            spill: None,
+        };
     }
 
-    result.join("\n")
+    if result.len() <= DEP_SPILL_MAX_INLINE_LINES {
+        return DepFiltered {
+            text: result.join("\n"),
+            spill: None,
+        };
+    }
+
+    let mut inline: Vec<&str> = result[..DEP_SPILL_MAX_INLINE_LINES]
+        .iter()
+        .map(String::as_str)
+        .collect();
+    // The BUILD line lands past the cut on reactor runs — re-append it so the
+    // inline summary still answers "did it succeed".
+    for line in &result[DEP_SPILL_MAX_INLINE_LINES..] {
+        let stripped = strip_maven_prefix(line);
+        if stripped.contains("BUILD SUCCESS") || stripped.contains("BUILD FAILURE") {
+            inline.push(line);
+        }
+    }
+
+    DepFiltered {
+        text: inline.join("\n"),
+        spill: Some(result.join("\n")),
+    }
 }
 
 #[cfg(test)]
@@ -3191,7 +3377,7 @@ mod tests {
     #[test]
     fn test_dep_tree_simple() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_simple.txt");
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).text;
         assert!(
             output.contains("[INFO] com.example:my-app:jar:1.0.0"),
             "should contain root artifact verbatim, got: {}",
@@ -3222,7 +3408,7 @@ mod tests {
     #[test]
     fn test_dep_tree_conflicts() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_conflicts.txt");
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).text;
         assert!(
             output.contains("omitted for conflict with 2.18.3"),
             "should keep conflict info, got: {}",
@@ -3237,7 +3423,7 @@ mod tests {
     #[test]
     fn test_dep_tree_beacon_strips_duplicates() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_beacon.txt");
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).text;
         assert!(
             !output.contains("omitted for duplicate"),
             "should strip all 'omitted for duplicate' lines"
@@ -3255,7 +3441,7 @@ mod tests {
     #[test]
     fn test_dep_tree_beacon_keeps_version_managed_verbatim() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_beacon.txt");
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).full().to_string();
         assert!(
             output.contains("version managed from"),
             "'version managed' annotations are native Maven content — keep verbatim, do not strip"
@@ -3265,7 +3451,7 @@ mod tests {
     #[test]
     fn test_dep_tree_beacon_savings() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_beacon.txt");
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).text;
 
         let input_tokens = count_tokens(input);
         let output_tokens = count_tokens(&output);
@@ -3283,7 +3469,7 @@ mod tests {
     #[test]
     fn test_dep_tree_simple_savings() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_simple.txt");
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).text;
 
         let input_tokens = count_tokens(input);
         let output_tokens = count_tokens(&output);
@@ -3300,7 +3486,7 @@ mod tests {
 
     #[test]
     fn test_dep_tree_empty() {
-        let output = filter_mvn_dep_tree("");
+        let output = filter_mvn_dep_tree("").text;
         assert_eq!(output, "[INFO] BUILD SUCCESS");
     }
 
@@ -3310,7 +3496,7 @@ mod tests {
     fn dep_list_is_verbatim_native_subset() {
         // reuse the existing dep:list fixture the current tests include_str! (mvn_dependency_list_auth.txt)
         let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
-        let out = filter_mvn_dep_list(input);
+        let out = filter_mvn_dep_list(input).full().to_string();
         assert!(!out.contains("mvn dependency:list:"), "synthetic headline leaked:\n{out}");
         assert!(!out.contains(" unique deps"), "invented count leaked:\n{out}");
         // no invented per-scope group header like "compile (5):"
@@ -3323,15 +3509,147 @@ mod tests {
 
     #[test]
     fn dep_tree_empty_is_native_build_line() {
-        assert_eq!(filter_mvn_dep_tree("[INFO] BUILD SUCCESS\n"), "[INFO] BUILD SUCCESS");
+        assert_eq!(filter_mvn_dep_tree("[INFO] BUILD SUCCESS\n").text, "[INFO] BUILD SUCCESS");
     }
 
     #[test]
     fn dep_tree_keeps_transitive_lines_verbatim() {
         let input = "[INFO] com.example:root:jar:1.0\n[INFO] +- org.a:b:jar:2.0:compile\n[INFO] |  \\- org.c:d:jar:3.0:compile\n[INFO] BUILD SUCCESS\n";
-        let out = filter_mvn_dep_tree(input);
+        let out = filter_mvn_dep_tree(input).full().to_string();
         assert!(out.contains("[INFO] |  \\- org.c:d:jar:3.0:compile"), "transitive line must survive verbatim:\n{out}");
         assert!(!out.contains("transitive)"), "must NOT collapse into an invented (N transitive) count:\n{out}");
+    }
+
+    // --- dependency:tree spill (bare reactor-wide runs) ---
+
+    #[test]
+    fn dep_tree_reactor_spills_depth1_inline() {
+        let input = include_str!("../../../tests/fixtures/mvn_dep_tree_reactor_skiller.txt");
+        let out = filter_mvn_dep_tree(input);
+
+        let spill = out.spill.as_deref().expect("reactor-wide tree must spill");
+
+        // Inline: every module root + its direct deps + BUILD line.
+        assert!(
+            out.text.contains("[INFO] com.devskiller.skiller:data:jar:1.2-SNAPSHOT"),
+            "module roots must stay inline:\n{}",
+            out.text
+        );
+        assert!(
+            out.text
+                .contains("[INFO] +- org.postgresql:postgresql:jar:42.7.3:compile"),
+            "depth-1 deps must stay inline:\n{}",
+            out.text
+        );
+        assert!(
+            out.text.contains("[INFO] BUILD SUCCESS"),
+            "BUILD line must stay inline"
+        );
+        assert!(
+            !out.text.contains("istack-commons-runtime"),
+            "transitive-only deps must move to the digest file"
+        );
+        assert!(
+            !out.text.contains("micrometer-commons"),
+            "space-indented rows under a last (`\\- `) branch are still \
+             transitive — they must not masquerade as depth 1"
+        );
+
+        // Digest: the complete verbatim tree, transitive rows included.
+        assert!(
+            spill.contains("istack-commons-runtime"),
+            "digest must keep transitive rows verbatim"
+        );
+        assert!(
+            spill.contains("[INFO] com.devskiller.skiller:data:jar:1.2-SNAPSHOT"),
+            "digest must contain the full tree, roots included"
+        );
+
+        // Neither surface carries reactor/profiler noise.
+        for noise in [
+            "Reactor Build Order",
+            "Reactor Summary",
+            "Build Time Profiler",
+            "ForkTime",
+            "Project discovery time",
+            "Total time:",
+        ] {
+            assert!(
+                !spill.contains(noise),
+                "noise '{noise}' leaked into digest:\n{spill}"
+            );
+        }
+    }
+
+    #[test]
+    fn dep_tree_reactor_inline_snapshot() {
+        let input = include_str!("../../../tests/fixtures/mvn_dep_tree_reactor_skiller.txt");
+        let out = filter_mvn_dep_tree(input);
+        insta::assert_snapshot!(out.text);
+    }
+
+    #[test]
+    fn dep_tree_reactor_inline_savings() {
+        let input = include_str!("../../../tests/fixtures/mvn_dep_tree_reactor_skiller.txt");
+        let out = filter_mvn_dep_tree(input);
+
+        let input_tokens = count_tokens(input);
+        let output_tokens = count_tokens(&out.text);
+        let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
+
+        // The documented dep:tree fidelity exception applies to the digest
+        // file, not the inline text — a spilled reactor run must cut the
+        // context cost hard.
+        assert!(
+            savings >= 85.0,
+            "reactor dep:tree inline: expected >=85% savings, got {:.1}% ({} -> {} tokens)",
+            savings,
+            input_tokens,
+            output_tokens,
+        );
+    }
+
+    #[test]
+    fn dep_tree_small_run_does_not_spill() {
+        let input = include_str!("../../../tests/fixtures/mvn_dep_tree_beacon.txt");
+        let out = filter_mvn_dep_tree(input);
+        assert!(
+            out.spill.is_none(),
+            "single-module tree fits inline — no digest"
+        );
+        assert!(
+            out.text.contains("version managed from"),
+            "small trees keep transitive annotations inline"
+        );
+    }
+
+    #[test]
+    fn dep_list_reactor_spills_with_prefix_inline() {
+        let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
+        let out = filter_mvn_dep_list(input);
+
+        let spill = out.spill.as_deref().expect("reactor-wide list must spill");
+
+        let inline_lines: Vec<&str> = out.text.lines().collect();
+        // Inline = first DEP_SPILL_MAX_INLINE_LINES kept lines + BUILD line.
+        assert_eq!(inline_lines.len(), DEP_SPILL_MAX_INLINE_LINES + 1);
+        assert!(
+            inline_lines
+                .last()
+                .expect("inline not empty")
+                .contains("BUILD SUCCESS"),
+            "trailing BUILD line must be re-appended past the cut:\n{}",
+            out.text
+        );
+        // The inline body (sans re-appended BUILD line) is a strict prefix of
+        // the digest — the `tail -n +N` hint must line up.
+        let spill_lines: Vec<&str> = spill.lines().collect();
+        assert_eq!(
+            &spill_lines[..DEP_SPILL_MAX_INLINE_LINES],
+            &inline_lines[..DEP_SPILL_MAX_INLINE_LINES],
+            "inline must be a strict prefix of the digest"
+        );
+        assert!(spill_lines.len() > inline_lines.len());
     }
 
     // --- dependency:list ---
@@ -3339,14 +3657,14 @@ mod tests {
     #[test]
     fn test_dep_list_snapshot() {
         let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
-        let output = filter_mvn_dep_list(input);
+        let output = filter_mvn_dep_list(input).text;
         insta::assert_snapshot!(output);
     }
 
     #[test]
     fn test_dep_list_savings() {
         let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
-        let output = filter_mvn_dep_list(input);
+        let output = filter_mvn_dep_list(input).text;
 
         let input_tokens = count_tokens(input);
         let output_tokens = count_tokens(&output);
@@ -3367,7 +3685,7 @@ mod tests {
     #[test]
     fn test_dep_list_keeps_resolved_lines_verbatim_no_grouping() {
         let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
-        let output = filter_mvn_dep_list(input);
+        let output = filter_mvn_dep_list(input).full().to_string();
 
         // No invented per-scope group headers (e.g. "[INFO] compile (5):") —
         // note real coordinate lines legitimately contain "compile (optional)"
@@ -3399,13 +3717,13 @@ mod tests {
 
     #[test]
     fn test_dep_list_empty() {
-        let output = filter_mvn_dep_list("");
+        let output = filter_mvn_dep_list("").text;
         assert_eq!(output, "[INFO] BUILD SUCCESS");
     }
 
     #[test]
     fn test_dep_list_malformed_passthrough_no_panic() {
-        let output = filter_mvn_dep_list("not valid maven output\nrandom text\n");
+        let output = filter_mvn_dep_list("not valid maven output\nrandom text\n").text;
         assert!(!output.is_empty());
     }
 
@@ -3415,7 +3733,7 @@ mod tests {
                      [ERROR] Failed to execute goal on project app: Could not resolve dependencies\n\
                      [INFO] BUILD FAILURE\n\
                      [INFO] Total time:  1.2 s\n";
-        let output = filter_mvn_dep_list(input);
+        let output = filter_mvn_dep_list(input).text;
         assert!(output.contains("Could not resolve dependencies"));
         assert!(output.contains("BUILD FAILURE"));
     }
@@ -3426,7 +3744,7 @@ mod tests {
                       \x1b[34;1m[INFO]\x1b[0m +- org.junit:junit:jar:5.0:test\n\
                       \x1b[34;1m[INFO]\x1b[0m |  \\- org.hamcrest:hamcrest:jar:2.0:test\n\
                       \x1b[34;1m[INFO]\x1b[0m \\- com.google:guava:jar:33.0:compile";
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).text;
         assert!(
             !output.contains("\x1b["),
             "output should not contain ANSI escape codes"
@@ -3448,7 +3766,7 @@ mod tests {
     #[test]
     fn test_dep_tree_large_keeps_transitive_verbatim() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_large.txt");
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).text;
 
         // Should show root artifact, verbatim with its [INFO] prefix
         assert!(
@@ -3493,7 +3811,7 @@ mod tests {
         // NOTE: threshold is 20%, not 80% (name kept for git-blame continuity —
         // see the fidelity-decision comment below for why).
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_large.txt");
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).text;
 
         let input_tokens = count_tokens(input);
         let output_tokens = count_tokens(&output);
@@ -3513,7 +3831,7 @@ mod tests {
     #[test]
     fn snapshot_dep_tree_beacon() {
         let input = include_str!("../../../tests/fixtures/mvn_dep_tree_beacon.txt");
-        let output = filter_mvn_dep_tree(input);
+        let output = filter_mvn_dep_tree(input).text;
         insta::assert_snapshot!(output);
     }
 
@@ -3993,6 +4311,50 @@ mod tests {
     }
 
     // --- checkstyle filter tests ---
+
+    #[test]
+    fn checkstyle_debug_x_drops_debug_noise() {
+        let input = include_str!("../../../tests/fixtures/mvn_checkstyle_debug_x_auth.txt");
+        let output = filter_mvn_checkstyle(input);
+
+        assert!(
+            !output.contains("[DEBUG]"),
+            "-X [DEBUG] lines must be dropped (tee log keeps raw):\n{}",
+            &output[..output.len().min(2000)]
+        );
+        // Untagged continuation lines inside [DEBUG] blocks (repository
+        // listings, mojo config dumps) must go with them.
+        for noise in [
+            "central (https://repo.maven.apache.org",
+            "apache.snapshots (",
+            "maven-default-http-blocker",
+            "Command line:",
+            "Terminal: ",
+        ] {
+            assert!(
+                !output.contains(noise),
+                "-X untagged debug noise '{noise}' leaked:\n{output}"
+            );
+        }
+        // The real signal survives verbatim.
+        assert!(
+            output.contains("[INFO] You have 0 Checkstyle violations."),
+            "violation summary must survive:\n{output}"
+        );
+        assert!(output.contains("BUILD SUCCESS"));
+
+        let input_tokens = count_tokens(input);
+        let output_tokens = count_tokens(&output);
+        let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
+        assert!(
+            savings >= 95.0,
+            "checkstyle -X: expected >=95% savings, got {:.1}% ({} -> {})",
+            savings,
+            input_tokens,
+            output_tokens,
+        );
+        insta::assert_snapshot!(output);
+    }
 
     #[test]
     fn test_filter_checkstyle_clean() {
@@ -5544,4 +5906,3 @@ mod tests {
         assert!(!text.contains("classes:"), "old RTK ref leaked:\n{text}");
     }
 }
-
