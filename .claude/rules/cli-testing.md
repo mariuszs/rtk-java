@@ -125,12 +125,13 @@ pnpm list > tests/fixtures/pnpm_list_raw.txt
 | `gh pr view` | 87%+ | Remove ASCII art, verbose metadata |
 | `pnpm list` | 70%+ | Compact dependency tree |
 | `docker ps` | 60%+ | Essential fields only |
-| `mvn dependency:list` | 10%+ | Documented fidelity exception (2026-07-09): verbatim native subset keeps every resolved line — savings come only from boilerplate removal |
-| `mvn dependency:tree` (large/deep) | 20%+ | Documented fidelity exception (2026-07-09): transitive lines kept verbatim, no invented `(N transitive)` collapse — deep trees keep almost everything |
-| `mvn dependency:tree` (small trees) | 60%+ | Boilerplate-heavy small trees still compress normally |
+| `mvn dependency:list` (≤200 kept lines) | 10%+ | Documented fidelity exception (2026-07-09): verbatim native subset keeps every resolved line — savings come only from boilerplate removal |
+| `mvn dependency:list` (>200 kept lines) | — | Spills to tee digest file (2026-07-16): inline = first 200 lines + BUILD line + `tail -n +N` hint; full verbatim list in the digest |
+| `mvn dependency:tree` (>200 kept lines) | 85%+ inline | Spills to tee digest file (2026-07-16): inline = module roots + depth-1 deps + `[full dependency tree: <path>]`; full verbatim tree (fidelity exception) lives in the digest |
+| `mvn dependency:tree` (small trees) | 60%+ | Boilerplate-heavy small trees still compress normally; ≤200 kept lines stay fully inline, transitive lines verbatim, no invented `(N transitive)` collapse |
 
 **Release blocker**: If savings drop below 60% for any filter, investigate and fix before merge —
-except `mvn dependency:list`/`dependency:tree` on large/deep inputs, which are a documented
+except `mvn dependency:list`/`dependency:tree` below the spill threshold, which are a documented
 fidelity exception (see thresholds above); `guard::never_worse` remains their hard floor.
 
 ## Cross-Platform Testing (🔴 Critical)
