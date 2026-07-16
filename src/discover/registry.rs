@@ -503,6 +503,12 @@ pub fn rewrite_command(
         return None;
     }
 
+    // `bash -c '<script>'` wrappers hide the real command inside a quoted
+    // word — unwrap literal single-quoted scripts and rewrite the inside.
+    if let Some(rewritten) = rewrite_shell_dash_c(trimmed, excluded, transparent_prefixes) {
+        return Some(rewritten);
+    }
+
     let compiled = compile_exclude_patterns(excluded);
     let normalized_prefixes = normalize_transparent_prefixes(transparent_prefixes);
 
@@ -519,6 +525,60 @@ pub fn rewrite_command(
     }
 
     rewrite_compound(trimmed, &compiled, &normalized_prefixes)
+}
+
+/// Unwrap a `bash -c '<script>'` wrapper (also `sh`/`zsh`, `-lc` variant)
+/// and rewrite the script through the normal pipeline, re-embedding the
+/// result in the same wrapper. Deliberately narrow:
+///
+/// - the script must be ONE literal single-quoted word — no `'\''` escapes,
+///   no double quotes (expansion), nothing after the closing quote;
+/// - the inner script must pass the same attestability gate the hook applies
+///   to top-level commands (the outer command hides substitutions and file
+///   redirects inside the quoted word, so the gate must re-run on the
+///   script itself);
+/// - the rewritten script must not introduce a single quote (it never does —
+///   guarded anyway, since re-embedding would break quoting).
+///
+/// Returns `None` (passthrough) whenever any condition fails.
+fn rewrite_shell_dash_c(
+    cmd: &str,
+    excluded: &[String],
+    transparent_prefixes: &[String],
+) -> Option<String> {
+    let mut words = cmd.split_whitespace();
+    let shell = words.next()?;
+    if !matches!(shell, "bash" | "sh" | "zsh") {
+        return None;
+    }
+    let flag = words.next()?;
+    if !matches!(flag, "-c" | "-lc") {
+        return None;
+    }
+
+    let after_shell = cmd[shell.len()..].trim_start();
+    let after_flag = after_shell.strip_prefix(flag)?;
+    if !after_flag.starts_with(char::is_whitespace) {
+        return None;
+    }
+    let script = after_flag.trim_start();
+
+    // `cmd` arrives trimmed, so the closing quote must be the last byte.
+    let inner = script.strip_prefix('\'')?.strip_suffix('\'')?;
+    if inner.trim().is_empty() || inner.contains('\'') {
+        return None;
+    }
+
+    if crate::discover::lexer::contains_unattestable_construct(inner) {
+        return None;
+    }
+
+    let rewritten = rewrite_command(inner, excluded, transparent_prefixes)?;
+    if rewritten.contains('\'') {
+        return None;
+    }
+
+    Some(format!("{shell} {flag} '{rewritten}'"))
 }
 
 /// True when the rewritten segment invokes `rtk mvn`, possibly behind a
@@ -1589,6 +1649,93 @@ mod tests {
         assert_eq!(
             rewrite_command_no_prefixes("./mvnw test | tail -f", &[]),
             Some("rtk mvn test | tail -f".into())
+        );
+    }
+
+    // --- `bash -c '<script>'` unwrap ---
+
+    #[test]
+    fn test_bash_c_single_quoted_mvn_rewritten() {
+        assert_eq!(
+            rewrite_command_no_prefixes(
+                "bash -c './mvnw clean test -Dskip.npm 2>&1 | tail -3'",
+                &[]
+            ),
+            Some("bash -c 'rtk mvn clean test -Dskip.npm 2>&1'".into())
+        );
+    }
+
+    #[test]
+    fn test_bash_c_sdkman_prefix_shape_rewritten() {
+        // Dominant real-world shape observed in Claude Code sessions.
+        assert_eq!(
+            rewrite_command_no_prefixes(
+                "bash -c 'source ~/.sdkman/bin/sdkman-init.sh && sdk env >/dev/null && ./mvnw test -pl data -am 2>&1 | tail -10'",
+                &[]
+            ),
+            Some(
+                "bash -c 'source ~/.sdkman/bin/sdkman-init.sh && sdk env >/dev/null && rtk mvn test -pl data -am 2>&1'"
+                    .into()
+            )
+        );
+    }
+
+    #[test]
+    fn test_bash_lc_variant_rewritten() {
+        assert_eq!(
+            rewrite_command_no_prefixes("bash -lc 'git status'", &[]),
+            Some("bash -lc 'rtk git status'".into())
+        );
+    }
+
+    #[test]
+    fn test_sh_c_inner_without_equivalent_passthrough() {
+        assert_eq!(rewrite_command_no_prefixes("sh -c 'echo hello'", &[]), None);
+    }
+
+    #[test]
+    fn test_bash_c_escaped_single_quote_passthrough() {
+        // `'\''` escaping means the script is NOT one literal single-quoted
+        // string — re-embedding a rewrite could change semantics.
+        assert_eq!(
+            rewrite_command_no_prefixes(r"bash -c 'git status; echo '\''hi'\'''", &[]),
+            None
+        );
+    }
+
+    #[test]
+    fn test_bash_c_trailing_arg_passthrough() {
+        assert_eq!(
+            rewrite_command_no_prefixes("bash -c 'git status' extra-arg", &[]),
+            None
+        );
+    }
+
+    #[test]
+    fn test_bash_c_file_redirect_inside_passthrough() {
+        assert_eq!(
+            rewrite_command_no_prefixes("bash -c 'git log > /tmp/out.txt'", &[]),
+            None
+        );
+    }
+
+    #[test]
+    fn test_bash_c_substitution_inside_passthrough() {
+        // Outer command is attestable (the `$(` sits in single quotes), so
+        // the unwrap path must run the lexer gate on the inner script itself.
+        assert_eq!(
+            rewrite_command_no_prefixes("bash -c 'git log $(date)'", &[]),
+            None
+        );
+    }
+
+    #[test]
+    fn test_bash_c_double_quoted_script_passthrough() {
+        // Double quotes allow expansion — only literal single-quoted scripts
+        // are unwrapped.
+        assert_eq!(
+            rewrite_command_no_prefixes("bash -c \"git status\"", &[]),
+            None
         );
     }
 
