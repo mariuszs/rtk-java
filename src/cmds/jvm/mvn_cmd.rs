@@ -513,6 +513,11 @@ lazy_static! {
     /// Start of the trailing reactor/build footer.
     static ref BUILD_FOOTER_RE: Regex =
         Regex::new(r"(BUILD SUCCESS|BUILD FAILURE|Reactor Summary)").unwrap();
+    /// Single-quoted spans in codegen plugin chatter (echoed class names).
+    static ref QUOTED_SPAN_RE: Regex = Regex::new(r"'[^']*'").unwrap();
+    /// Failure keywords on word boundaries — `RestError` must not match.
+    static ref SEGMENT_ERRORISH_RE: Regex =
+        Regex::new(r"(?i)\b(err|errors?|fail|failed|failures?)\b").unwrap();
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1793,6 +1798,16 @@ fn filter_mvn_compile(output: &str) -> String {
     // stream arbitrary tool output — often on bare stderr with no [INFO]
     // prefix — that no line-level pattern list can keep up with.
     let mut in_noisy_segment = false;
+    // Inside the maven-buildtime-profiler epilogue ("Maven Build Time
+    // Profiler Summary"): a pure-[INFO] timing block whose body lines
+    // ("37 ms : compile", "Plugins in lifecycle Phases:", "ForkTime: 0")
+    // carry no per-line signature to pattern-match on. Suppressed until
+    // the first non-[INFO] line (usually the [ERROR] help block).
+    let mut in_profiler_summary = false;
+    // javac prints unprefixed source context (code line + caret) after a
+    // `[WARNING] path:[l,c] …` diagnostic. The header is dropped, so its
+    // context must go too — orphaned code fragments read as garbage.
+    let mut swallow_warning_context = false;
     let mut result = String::with_capacity(clean.len() / 4);
 
     let push = |dst: &mut String, line: &str| {
@@ -1805,6 +1820,18 @@ fn filter_mvn_compile(output: &str) -> String {
     for raw in clean.lines() {
         let line = raw.trim();
         let stripped = strip_maven_prefix(line);
+
+        if in_profiler_summary {
+            if line.is_empty() || line.starts_with(INFO_TAG) {
+                continue;
+            }
+            in_profiler_summary = false;
+            // fall through — first non-[INFO] line gets normal handling
+        }
+        if stripped.contains("Maven Build Time Profiler Summary") {
+            in_profiler_summary = true;
+            continue;
+        }
 
         if let Some(caps) = PLUGIN_MARKER_RE.captures(line) {
             let plugin = caps.get(1).map_or("", |m| m.as_str());
@@ -1863,6 +1890,14 @@ fn filter_mvn_compile(output: &str) -> String {
 
         if let Some(short) = shorten_unknown_phase_error(stripped) {
             push(&mut result, &short);
+            continue;
+        }
+
+        if line.starts_with(WARNING_TAG) {
+            swallow_warning_context = true;
+        } else if line.starts_with(INFO_TAG) || line.starts_with(ERROR_TAG) {
+            swallow_warning_context = false;
+        } else if swallow_warning_context && !line.is_empty() {
             continue;
         }
 
@@ -1939,6 +1974,10 @@ fn format_reactor_summary(modules: &[(&str, &str)]) -> Option<String> {
 const INFO_NOISE_PATTERNS: &[&str] = &[
     "---",
     "===",
+    // maven-buildtime-profiler extension banner + summary header; the
+    // timing block body is handled by the profiler-summary state in
+    // filter_mvn_compile (its lines are indistinguishable plain [INFO]).
+    "Maven Build Time Profiler",
     "Building ",
     "Downloading ",
     "Downloaded ",
@@ -1960,6 +1999,9 @@ const INFO_NOISE_PATTERNS: &[&str] = &[
     "Installing commit-msg hook",
     // maven-compiler-plugin trivia that precedes the actual compile step
     "Changes detected - recompiling",
+    // javac per-file notes — advisory, repeated for every affected file
+    "unchecked or unsafe operations",
+    "Recompile with -Xlint",
     // artifactregistry-maven-wagon chatter — can be dozens of ~300-char
     // lines per build about cached artifacts not matching the current
     // remote-repo set. Non-actionable; the build still proceeds.
@@ -2065,19 +2107,26 @@ fn is_noisy_codegen_plugin(plugin: &str) -> bool {
     matches!(plugin, "exec" | "exec-maven-plugin" | "frontend" | "frontend-maven-plugin")
         || plugin.contains("jooq")
         || plugin.contains("liquibase")
+        // cz.habarta typescript-generator streams unprefixed "Loading
+        // class …"/"Parsing '…'" stdout for every scanned type — 100+
+        // lines per run on eval. Maven 4 markers shorten the plugin name
+        // to "typescript-generator", Maven 3 uses the full artifactId.
+        || plugin.contains("typescript-generator")
 }
 
 /// Within a suppressed codegen/exec segment, keep only lines that indicate a
 /// failure — Maven `[ERROR]`s, npm/webpack error output, non-zero exits.
+///
+/// Error keywords match on word boundaries, and single-quoted spans are
+/// blanked first: codegen plugins echo class names verbatim (typescript-
+/// generator's `Parsing 'com.example.RestError'`), and a substring match
+/// would keep every type whose name happens to contain "Error".
 fn is_errorish_segment_line(line: &str, stripped: &str) -> bool {
-    line.starts_with(ERROR_TAG)
-        || stripped.contains("ERR!")
-        || stripped.contains("error")
-        || stripped.contains("Error")
-        || stripped.contains("ERROR")
-        || stripped.contains("Failed")
-        || stripped.contains("failed")
-        || TOTAL_TIME_RE.is_match(stripped)
+    if line.starts_with(ERROR_TAG) || TOTAL_TIME_RE.is_match(stripped) {
+        return true;
+    }
+    let unquoted = QUOTED_SPAN_RE.replace_all(stripped, "'…'");
+    SEGMENT_ERRORISH_RE.is_match(&unquoted)
 }
 
 /// Collapse Maven's `Unknown lifecycle phase "x"` error to its first
@@ -2611,6 +2660,42 @@ mod tests {
         // own `<<< FAILURE!` markers instead of the old "N. " numbering).
         let enumerated = output.lines().filter(|l| l.ends_with("<<< FAILURE!")).count();
         assert_eq!(enumerated, 2, "expected exactly 2 enumerated failures in: {output}");
+        let savings = 100.0
+            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 85.0, "expected ≥85%, got {:.1}%", savings);
+    }
+
+    #[test]
+    fn test_compilefail_strips_tsgen_chatter_and_profiler() {
+        // eval project (Maven 4): test-compile fails after typescript-generator
+        // ran in process-classes. The plugin streams unprefixed stdout
+        // ("Running TypeScriptGenerator", "Loading class …", "Parsing '…'")
+        // and the Build Time Profiler extension appends [INFO] timing blocks.
+        // Usage analysis (2026-07-16) showed ~130 of 150 output lines were
+        // this noise while the agent only needed the javac error.
+        let input = include_str!("../../../tests/fixtures/mvn_test_compilefail_eval.txt");
+        let output = filter_mvn_test(input);
+        // typescript-generator chatter gone
+        assert!(!output.contains("Running TypeScriptGenerator"), "got: {output}");
+        assert!(!output.contains("Loading class"), "got: {output}");
+        assert!(!output.contains("Parsing '"), "got: {output}");
+        // Build Time Profiler blocks gone
+        assert!(!output.contains("Build Time Profiler"), "got: {output}");
+        assert!(!output.contains("Lifecycle Phase summary"), "got: {output}");
+        assert!(!output.contains("ForkTime"), "got: {output}");
+        assert!(!output.contains("ms : compile"), "got: {output}");
+        // the actual failure survives, javac location deduped to one copy
+        assert!(output.contains("BUILD FAILURE"), "got: {output}");
+        assert_eq!(
+            output.matches("VideoRecorderTest.java:[25,35] cannot find symbol").count(),
+            1,
+            "javac error missing or duplicated: {output}"
+        );
+        assert!(
+            output.contains("Failed to execute goal") && output.contains("Compilation failure"),
+            "cause line missing: {output}"
+        );
+        insta::assert_snapshot!(output);
         let savings = 100.0
             - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 85.0, "expected ≥85%, got {:.1}%", savings);
