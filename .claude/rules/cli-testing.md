@@ -125,14 +125,36 @@ pnpm list > tests/fixtures/pnpm_list_raw.txt
 | `gh pr view` | 87%+ | Remove ASCII art, verbose metadata |
 | `pnpm list` | 70%+ | Compact dependency tree |
 | `docker ps` | 60%+ | Essential fields only |
-| `mvn dependency:list` (≤200 kept lines) | 10%+ | Documented fidelity exception (2026-07-09): verbatim native subset keeps every resolved line — savings come only from boilerplate removal |
-| `mvn dependency:list` (>200 kept lines) | — | Spills to tee digest file (2026-07-16): inline = first 200 lines + BUILD line + `tail -n +N` hint; full verbatim list in the digest |
-| `mvn dependency:tree` (>200 kept lines) | 85%+ inline | Spills to tee digest file (2026-07-16): inline = module roots + depth-1 deps + `[full dependency tree: <path>]`; full verbatim tree (fidelity exception) lives in the digest |
-| `mvn dependency:tree` (small trees) | 60%+ | Boilerplate-heavy small trees still compress normally; ≤200 kept lines stay fully inline, transitive lines verbatim, no invented `(N transitive)` collapse |
+| `mvn dependency:list` | 10%+ | Documented fidelity exception (2026-07-09): verbatim native subset keeps every resolved line — savings come only from boilerplate removal |
+| `mvn dependency:tree` (small trees) | 60%+ | Boilerplate-heavy small trees still compress normally; transitive lines verbatim, no invented `(N transitive)` collapse |
+| `mvn dependency:tree` / `:list` (reactor-wide) | 0% (never worse) | Fidelity exception (2026-07-23): full filtered output stays inline. Both raw and filtered exceed the host truncation limit, so the bill is identical — but the truncated window now holds a dense verbatim subset instead of download noise |
+
+### Measure savings against the truncation limit, not raw output
+
+The host agent truncates a tool result before the model sees it
+(`DEFAULT_AGENT_OUTPUT_LIMIT`, 30k chars; override with
+`RTK_AGENT_OUTPUT_LIMIT`). Characters past that point were never going to be
+billed, so counting them as "saved" is a counterfactual — it was worth ~12
+points of phantom savings across the mvn fixture set, and far more on
+individual oversized runs. `tracking::billable_tokens` caps **both** sides;
+new savings assertions should do the same.
+
+**Corollary — never spill to a digest file to buy an inline saving.** A digest
+the agent opens is billed at full price plus an extra turn. Measured on
+`mvn_dep_tree_reactor_skiller.txt`, the removed `dependency:tree` spill showed
+a 41.6% inline saving but cost ~8x raw whenever the digest was actually read.
+Let the host's truncation be the backstop instead.
+
+Audit any time filters change:
+
+```bash
+cargo test truncation_audit -- --ignored --nocapture
+RTK_AUDIT_LIMIT=10000 cargo test truncation_audit -- --ignored --nocapture
+```
 
 **Release blocker**: If savings drop below 60% for any filter, investigate and fix before merge —
-except `mvn dependency:list`/`dependency:tree` below the spill threshold, which are a documented
-fidelity exception (see thresholds above); `guard::never_worse` remains their hard floor.
+except the `mvn dependency:*` rows above, which are a documented fidelity exception.
+`guard::never_worse` and the `truncation_audit` billable-token invariant remain their hard floor.
 
 ## Cross-Platform Testing (🔴 Critical)
 

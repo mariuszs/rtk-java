@@ -5751,3 +5751,131 @@ mod tests {
         assert!(!text.contains("classes:"), "old RTK ref leaked:\n{text}");
     }
 }
+
+/// Truncation-aware savings audit over every mvn fixture.
+///
+/// `rtk gain` historically measured savings against the full raw output. That
+/// baseline is a counterfactual: the host agent truncates a tool result before
+/// the model ever sees it, so characters past the limit were never going to be
+/// billed and cannot be "saved". This module re-scores every fixture against
+/// `min(raw, limit)` — the honest baseline — so a filter change that only
+/// looks good on paper is visible.
+///
+/// Reporting run (prints the per-fixture table):
+/// ```text
+/// cargo test truncation_audit -- --ignored --nocapture
+/// RTK_AUDIT_LIMIT=10000 cargo test truncation_audit -- --ignored --nocapture
+/// ```
+#[cfg(test)]
+mod truncation_audit {
+    use super::*;
+    use crate::core::tracking::billable_tokens_with_limit;
+    use std::fs;
+    use std::path::Path;
+
+    fn limit() -> usize {
+        std::env::var("RTK_AUDIT_LIMIT")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(crate::core::tracking::DEFAULT_AGENT_OUTPUT_LIMIT)
+    }
+
+    /// Route a fixture to the filter the dispatcher would pick for its goal.
+    fn apply(name: &str, raw: &str) -> Option<(&'static str, String)> {
+        let out = if name.starts_with("mvn_dep_tree_") {
+            ("dependency:tree", filter_mvn_dep_tree(raw))
+        } else if name.starts_with("mvn_dependency_list_") {
+            ("dependency:list", filter_mvn_dep_list(raw))
+        } else if name.starts_with("mvn_checkstyle_") {
+            ("checkstyle", filter_mvn_checkstyle(raw))
+        } else if name.starts_with("mvn_clean_") {
+            ("clean", filter_mvn_clean(raw))
+        } else if name.starts_with("mvn_compile_") {
+            ("compile", filter_mvn_compile(raw))
+        } else if name.starts_with("mvn_multi_") {
+            ("multi-goal", filter_mvn_multi(raw, "clean verify"))
+        } else if name.starts_with("mvn_verify_") {
+            ("verify", filter_mvn_tests_with_goal(raw, "verify", &[]))
+        } else if name.starts_with("mvn_test_") || name.starts_with("mvn4_test_") {
+            ("test", filter_mvn_tests_with_goal(raw, "test", &[]))
+        } else if name.starts_with("mvn_") {
+            // edge cases: no_pom, locale, quiet_fail, unknown_phase, ...
+            ("misc", filter_mvn_tests_with_goal(raw, "test", &[]))
+        } else {
+            return None;
+        };
+        Some(out)
+    }
+
+    #[test]
+    #[ignore = "reporting tool — run explicitly with --ignored --nocapture"]
+    fn truncation_audit() {
+        let lim = limit();
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+
+        let mut names: Vec<String> = fs::read_dir(&dir)
+            .expect("fixtures dir must exist")
+            .filter_map(Result::ok)
+            .map(|e| e.file_name().to_string_lossy().into_owned())
+            .filter(|n| n.ends_with(".txt"))
+            .collect();
+        names.sort();
+
+        let mut rows: Vec<(String, &'static str, usize, usize)> = Vec::new();
+        for name in names {
+            let Ok(raw) = fs::read_to_string(dir.join(&name)) else {
+                continue;
+            };
+            let Some((goal, filtered)) = apply(&name, &raw) else {
+                continue;
+            };
+            rows.push((name, goal, raw.len(), filtered.len()));
+        }
+        rows.sort_by(|a, b| b.2.cmp(&a.2));
+
+        // OLD%    — the inflated baseline: full raw output, uncapped.
+        // HONEST% — what the agent's bill actually changes by: both sides
+        //           capped at the limit, because the host truncates rtk's
+        //           output exactly as it truncates Maven's.
+        println!("\n=== mvn truncation-aware savings audit (limit={lim} chars) ===");
+        println!("FIXTURE\tGOAL\tRAW\tFILTERED\tBILL_RAW\tBILL_OUT\tOLD%\tHONEST%");
+        let (mut sum_bill_raw, mut sum_bill_out) = (0usize, 0usize);
+        let (mut sum_raw, mut sum_filtered) = (0usize, 0usize);
+        for (name, goal, raw_len, filtered_len) in &rows {
+            let raw = fs::read_to_string(dir.join(name)).expect("fixture re-read");
+            let (_, filtered) = apply(name, &raw).expect("routed above");
+            let bill_raw = billable_tokens_with_limit(&raw, lim);
+            let bill_out = billable_tokens_with_limit(&filtered, lim);
+
+            // The one hard invariant: filtering must never cost the agent
+            // MORE than not filtering, measured the way it is billed.
+            assert!(
+                bill_out <= bill_raw,
+                "{name} ({goal}): filtered output is billed more than raw \
+                 ({bill_out} vs {bill_raw} tokens, limit {lim})"
+            );
+
+            let old = 100.0 - (*filtered_len as f64 / *raw_len as f64 * 100.0);
+            let honest = 100.0 - (bill_out as f64 / bill_raw as f64 * 100.0);
+            println!(
+                "{name}\t{goal}\t{raw_len}\t{filtered_len}\t{bill_raw}\t{bill_out}\t{old:.1}\t{honest:.1}"
+            );
+
+            sum_bill_raw += bill_raw;
+            sum_bill_out += bill_out;
+            sum_raw += raw_len;
+            sum_filtered += filtered_len;
+        }
+
+        println!(
+            "\nTOTAL chars raw={sum_raw} filtered={sum_filtered}\n\
+             TOTAL billable tokens raw={sum_bill_raw} filtered={sum_bill_out}\n\
+             TOTAL old savings = {:.1}%   truncation-aware = {:.1}%\n\
+             fixtures over the truncation limit: {}/{}",
+            100.0 - (sum_filtered as f64 / sum_raw as f64 * 100.0),
+            100.0 - (sum_bill_out as f64 / sum_bill_raw as f64 * 100.0),
+            rows.iter().filter(|r| r.2 > lim).count(),
+            rows.len(),
+        );
+    }
+}
