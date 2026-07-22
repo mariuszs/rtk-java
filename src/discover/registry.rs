@@ -3214,24 +3214,18 @@ mod tests {
             );
         }
 
-        // Script invocations keep their real script: generic npm/pnpm/npx
-        // rewrite (the script body is unknown — fidelity over savings).
-        assert_eq!(
-            rewrite_command_no_prefixes("npm run lint", &[]),
-            Some("rtk npm run lint".into())
-        );
-        assert_eq!(
-            rewrite_command_no_prefixes("npm run eslint", &[]),
-            Some("rtk npm run eslint".into())
-        );
+        // Script invocations keep their real script. The npm/npx rules were
+        // removed once measurement showed they saved ~0%, so these no longer
+        // rewrite at all — which still satisfies the original requirement:
+        // the script body is unknown, so it must not be hijacked into a
+        // specific filter.
+        assert_eq!(rewrite_command_no_prefixes("npm run lint", &[]), None);
+        assert_eq!(rewrite_command_no_prefixes("npm run eslint", &[]), None);
         assert_eq!(
             rewrite_command_no_prefixes("pnpm run lint", &[]),
             Some("rtk pnpm run lint".into())
         );
-        assert_eq!(
-            rewrite_command_no_prefixes("npx lint", &[]),
-            Some("rtk npx lint".into())
-        );
+        assert_eq!(rewrite_command_no_prefixes("npx lint", &[]), None);
 
         // Ambiguous shorthand (script vs binary) and a bare script name get
         // no rewrite at all — passthrough is never wrong.
@@ -3545,37 +3539,35 @@ mod tests {
         }
     }
 
+    /// npm no longer has a rewrite rule — measured at 0.8% savings over 716
+    /// real runs, against a declared 70%.
     #[test]
-    fn test_rewrite_npm_bare_subcommand() {
-        let commands = vec!["exec", "run", "run-script", "x"];
-        for command in commands {
+    fn test_rewrite_npm_bare_subcommand_not_rewritten() {
+        for command in ["exec", "run", "run-script", "x"] {
             assert_eq!(
                 rewrite_command_no_prefixes(format!("npm {command}").as_str(), &[]),
-                Some(format!("rtk npm {command}")),
-                "Failed for bare command: npm {}",
-                command
+                None,
+                "npm {command} must stay raw"
             );
         }
     }
 
     #[test]
     fn test_rewrite_npm_with_args() {
-        assert_eq!(
-            rewrite_command_no_prefixes("npm run test", &[]),
-            Some("rtk npm run test".to_string()),
-        );
+        // Generic npm invocations stay raw...
+        assert_eq!(rewrite_command_no_prefixes("npm run test", &[]), None);
+        // ...but a wrapped tool with its own filter still routes to it.
         assert_eq!(
             rewrite_command_no_prefixes("npm exec vitest", &[]),
             Some("rtk vitest".to_string()),
         );
     }
 
+    /// npx no longer has a rewrite rule — 0.3% savings over 190 real runs,
+    /// 63% of them byte-identical.
     #[test]
-    fn test_rewrite_npx() {
-        assert_eq!(
-            rewrite_command_no_prefixes("npx svgo", &[]),
-            Some("rtk npx svgo".to_string()),
-        );
+    fn test_rewrite_npx_not_rewritten() {
+        assert_eq!(rewrite_command_no_prefixes("npx svgo", &[]), None);
     }
 
     // --- Gradle ---
@@ -3936,18 +3928,21 @@ mod tests {
     }
 
     #[test]
-    fn test_rewrite_empty_excludes_rewrites_curl() {
+    fn test_rewrite_empty_excludes_rewrites_wget() {
+        // Was curl, which no longer has a rewrite rule; wget still does, so
+        // the exclude mechanism stays under test.
         let excluded: Vec<String> = vec![];
-        assert!(rewrite_command_no_prefixes("curl https://api.example.com", &excluded).is_some());
+        assert!(rewrite_command_no_prefixes("wget https://api.example.com", &excluded).is_some());
     }
 
     #[test]
     fn test_rewrite_compound_partial_exclude() {
-        // curl excluded but git still rewrites
-        let excluded = vec!["curl".to_string()];
+        // wget excluded but git still rewrites (was curl, which no longer has
+        // a rule at all — the assertion would have held for the wrong reason)
+        let excluded = vec!["wget".to_string()];
         assert_eq!(
-            rewrite_command_no_prefixes("git status && curl https://api.example.com", &excluded),
-            Some("rtk git status && curl https://api.example.com".into())
+            rewrite_command_no_prefixes("git status && wget https://api.example.com", &excluded),
+            Some("rtk git status && wget https://api.example.com".into())
         );
     }
 
@@ -3980,8 +3975,8 @@ mod tests {
 
     #[test]
     fn test_exclude_invalid_regex_fallback() {
-        let excluded = vec!["curl[".to_string()];
-        assert!(rewrite_command_no_prefixes("curl http://example.com", &excluded).is_some());
+        let excluded = vec!["wget[".to_string()];
+        assert!(rewrite_command_no_prefixes("wget http://example.com", &excluded).is_some());
     }
 
     #[test]

@@ -75,24 +75,12 @@ pub const RULES: &[RtkRule] = &[
         subcmd_savings: &[],
         subcmd_status: &[],
     },
-    RtkRule {
-        pattern: r"^npm\s+(exec|run|run-script|rum|urn|x)(\s|$)",
-        rtk_cmd: "rtk npm",
-        rewrite_prefixes: &["npm"],
-        category: "PackageManager",
-        savings_pct: 70.0,
-        subcmd_savings: &[],
-        subcmd_status: &[],
-    },
-    RtkRule {
-        pattern: r"^npx\s+",
-        rtk_cmd: "rtk npx",
-        rewrite_prefixes: &["npx"],
-        category: "PackageManager",
-        savings_pct: 70.0,
-        subcmd_savings: &[],
-        subcmd_status: &[],
-    },
+    // npm / npx: no rewrite rule on purpose. Measured over 906 real runs,
+    // routing them through rtk saved 0.8% and 0.3% respectively against a
+    // truncation-aware baseline — 63% of npx runs came back byte-identical.
+    // The declared 70% was never observed. A rewrite that gains nothing still
+    // costs a hop and risks losing output, so these stay raw. `rtk npm` /
+    // `rtk npx` remain available when invoked explicitly.
     RtkRule {
         pattern: r"^(cat|head|tail)\s+",
         rtk_cmd: "rtk read",
@@ -138,6 +126,10 @@ pub const RULES: &[RtkRule] = &[
         subcmd_savings: &[],
         subcmd_status: &[],
     },
+    // tsc: kept, but see `cmds::js::tsc_cmd` — the filter used to inflate its
+    // own output. Post-fix it is roughly neutral (tsc's native output is
+    // already minimal), so this rule earns its place through tee-based raw
+    // recovery rather than compression.
     RtkRule {
         pattern: r"^((p?np(m|x)|p?npm\s+(exec|run|run-script)|npm\s+(rum|urn|x)|pnpm\s+dlx)\s+)?tsc(\s|$)",
         rtk_cmd: "rtk tsc",
@@ -418,15 +410,10 @@ pub const RULES: &[RtkRule] = &[
         subcmd_savings: &[],
         subcmd_status: &[],
     },
-    RtkRule {
-        pattern: r"^curl\s+",
-        rtk_cmd: "rtk curl",
-        rewrite_prefixes: &["curl"],
-        category: "Network",
-        savings_pct: 70.0,
-        subcmd_savings: &[],
-        subcmd_status: &[],
-    },
+    // curl: no rewrite rule on purpose. Over 911 real runs it saved 164
+    // tokens in total (0.0%), with 739 of them byte-identical — API responses
+    // are not compressible without losing the payload the caller asked for.
+    // `rtk curl` remains available when invoked explicitly.
     RtkRule {
         pattern: r"^wget\s+",
         rtk_cmd: "rtk wget",
