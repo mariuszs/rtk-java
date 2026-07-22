@@ -60,6 +60,8 @@ impl TscHandler {
 
 impl BlockHandler for TscHandler {
     fn should_skip(&mut self, line: &str) -> bool {
+        // Dropped from the stream, then re-emitted verbatim by
+        // `format_summary` so it lands last, exactly where tsc puts it.
         line.starts_with("Found ")
     }
 
@@ -78,29 +80,17 @@ impl BlockHandler for TscHandler {
         line.starts_with("  ") || line.starts_with('\t')
     }
 
-    fn format_summary(&self, _exit_code: i32, _raw: &str) -> Option<String> {
-        if self.error_count == 0 {
-            return Some("TypeScript: No errors found\n".to_string());
-        }
-
-        let mut result = format!(
-            "TypeScript: {} errors in {} files\n",
-            self.error_count,
-            self.files.len()
-        );
-
-        if self.code_counts.len() > 1 {
-            let mut counts: Vec<_> = self.code_counts.iter().collect();
-            counts.sort_by(|a, b| b.1.cmp(a.1));
-            let codes_str: Vec<String> = counts
-                .iter()
-                .take(5)
-                .map(|(code, count)| format!("{} ({}x)", code, count))
-                .collect();
-            result.push_str(&format!("Top codes: {}\n", codes_str.join(", ")));
-        }
-
-        Some(result)
+    /// Echo tsc's own `Found N errors in M files.` line, never a synthetic
+    /// one. tsc already states the count in a native, grep-friendly format,
+    /// and a clean run states nothing at all — inventing a headline there
+    /// turned 0 chars of raw output into 28 chars of rtk output, which is how
+    /// this filter measured -2.4% savings over 196 real runs. Echoing a line
+    /// that came from `raw` cannot inflate the output.
+    fn format_summary(&self, _exit_code: i32, raw: &str) -> Option<String> {
+        raw.lines()
+            .rev()
+            .find(|line| line.starts_with("Found "))
+            .map(|line| format!("{line}\n"))
     }
 }
 
@@ -310,8 +300,25 @@ Found 3 errors in 2 files.
         let result = run_block_filter(&mut f, input, 1);
         assert!(result.contains("TS2322"), "got: {}", result);
         assert!(result.contains("TS2345"), "got: {}", result);
-        assert!(result.contains("3 errors in 2 files"), "got: {}", result);
-        assert!(!result.contains("Found 3"), "got: {}", result);
+        // tsc's own summary is kept verbatim; rtk does not synthesize its own.
+        assert!(result.contains("Found 3 errors in 2 files"), "got: {}", result);
+        assert!(
+            !result.contains("TypeScript: 3 errors"),
+            "synthetic headline must be gone: {result}"
+        );
+    }
+
+    /// The measured pathology: 118 of 196 real `tsc --noEmit` runs produced
+    /// 0 chars of raw output (clean typecheck prints nothing) and 28 chars of
+    /// rtk output — pure inflation, no signal added.
+    #[test]
+    fn test_tsc_stream_clean_run_emits_nothing() {
+        let mut f = BlockStreamFilter::new(TscHandler::new());
+        let result = run_block_filter(&mut f, "", 0);
+        assert!(
+            result.trim().is_empty(),
+            "clean run must emit nothing, got: {result:?}"
+        );
     }
 
     #[test]
@@ -319,7 +326,33 @@ Found 3 errors in 2 files.
         let input = "Found 0 errors. Watching for file changes.\n";
         let mut f = BlockStreamFilter::new(TscHandler::new());
         let result = run_block_filter(&mut f, input, 0);
-        assert!(result.contains("No errors found"), "got: {}", result);
+        // tsc's own line survives; nothing synthetic replaces it.
+        assert!(result.contains("Found 0 errors"), "got: {}", result);
+        assert!(
+            !result.contains("TypeScript: No errors found"),
+            "synthetic headline must be gone: {result}"
+        );
+    }
+
+    /// Whatever the input, the streamed output must never be larger than the
+    /// raw it replaces — the invariant the real-usage audit measured at -2.4%.
+    #[test]
+    fn test_tsc_stream_never_inflates() {
+        for input in [
+            "",
+            "Found 0 errors. Watching for file changes.\n",
+            "src/a.ts(1,1): error TS2322: Type 'string' is not assignable.\nFound 1 error in 1 file.\n",
+        ] {
+            let mut f = BlockStreamFilter::new(TscHandler::new());
+            let exit = i32::from(input.contains("error TS"));
+            let result = run_block_filter(&mut f, input, exit);
+            assert!(
+                result.len() <= input.len(),
+                "inflated {} -> {} chars for input {input:?}",
+                input.len(),
+                result.len()
+            );
+        }
     }
 
     #[test]
