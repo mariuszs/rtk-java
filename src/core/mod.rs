@@ -7,6 +7,9 @@ pub mod display_helpers;
 pub mod filter;
 pub mod guard;
 pub mod runner;
+/// Test-only: re-scores `history.db` against the truncation limit.
+#[cfg(test)]
+pub mod savings_audit;
 pub mod stream;
 pub mod tee;
 pub mod telemetry;
