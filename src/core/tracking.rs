@@ -1286,6 +1286,48 @@ pub fn estimate_tokens(text: &str) -> usize {
     (text.len() as f64 / 4.0).ceil() as usize
 }
 
+/// Characters of a single tool result the host agent will actually bill for.
+///
+/// Claude Code truncates command output before the model ever sees it, so
+/// characters past this point were never going to reach the context window.
+/// Counting them as "saved" is a counterfactual that does not exist: it
+/// inflates every savings figure by the size of the tail the agent would have
+/// discarded anyway. All baselines are therefore capped here.
+///
+/// Override with `RTK_AGENT_OUTPUT_LIMIT`; `0` disables the cap and restores
+/// the raw (uncapped) baseline.
+pub const DEFAULT_AGENT_OUTPUT_LIMIT: usize = 30_000;
+
+/// Effective truncation limit, honouring `RTK_AGENT_OUTPUT_LIMIT`.
+pub fn agent_output_limit() -> usize {
+    std::env::var("RTK_AGENT_OUTPUT_LIMIT")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(DEFAULT_AGENT_OUTPUT_LIMIT)
+}
+
+/// Tokens the host agent would actually have been billed for `text`.
+///
+/// Same heuristic as [`estimate_tokens`], but over the portion that survives
+/// the agent's own truncation — the honest baseline for savings arithmetic.
+pub fn billable_tokens(text: &str) -> usize {
+    billable_tokens_with_limit(text, agent_output_limit())
+}
+
+/// [`billable_tokens`] with an explicit limit — deterministic, for tests and
+/// for callers that know their host's limit.
+pub fn billable_tokens_with_limit(text: &str, limit: usize) -> usize {
+    if limit == 0 || text.len() <= limit {
+        return estimate_tokens(text);
+    }
+    // Cut on a char boundary; slicing mid-codepoint would panic.
+    let mut end = limit;
+    while end > 0 && !text.is_char_boundary(end) {
+        end -= 1;
+    }
+    estimate_tokens(&text[..end])
+}
+
 /// Helper struct for timing command execution
 /// Helper for timing command execution and tracking results.
 ///
@@ -1355,8 +1397,11 @@ impl TimedExecution {
     /// ```
     pub fn track(&self, original_cmd: &str, rtk_cmd: &str, input: &str, output: &str) {
         let elapsed_ms = self.start.elapsed().as_millis() as u64;
-        let input_tokens = estimate_tokens(input);
-        let output_tokens = estimate_tokens(output);
+        // Both sides capped at the agent's truncation limit: the baseline is
+        // what the agent would have been billed, not the full raw output it
+        // would never have received.
+        let input_tokens = billable_tokens(input);
+        let output_tokens = billable_tokens(output);
 
         if let Ok(tracker) = Tracker::new() {
             let _ = tracker.record(
@@ -1431,6 +1476,54 @@ mod tests {
         assert_eq!(estimate_tokens("abcde"), 2); // 5 chars = ceil(1.25) = 2
         assert_eq!(estimate_tokens("a"), 1); // 1 char = ceil(0.25) = 1
         assert_eq!(estimate_tokens("12345678"), 2); // 8 chars = 2 tokens
+    }
+
+    // 1b. billable_tokens — baseline capped at the agent's truncation limit
+    #[test]
+    fn test_billable_tokens_below_limit_matches_estimate() {
+        let text = "a".repeat(1000);
+        assert_eq!(
+            billable_tokens_with_limit(&text, 30_000),
+            estimate_tokens(&text)
+        );
+    }
+
+    #[test]
+    fn test_billable_tokens_caps_at_limit() {
+        // 120k chars of raw output; the agent only ever sees the first 30k.
+        let text = "a".repeat(120_000);
+        assert_eq!(billable_tokens_with_limit(&text, 30_000), 30_000 / 4);
+        assert_eq!(estimate_tokens(&text), 30_000, "sanity: uncapped is 4x");
+    }
+
+    #[test]
+    fn test_billable_tokens_zero_limit_disables_cap() {
+        let text = "a".repeat(120_000);
+        assert_eq!(billable_tokens_with_limit(&text, 0), estimate_tokens(&text));
+    }
+
+    #[test]
+    fn test_billable_tokens_utf8_boundary() {
+        // Multi-byte chars straddling the cut point must not panic.
+        let text = "ą".repeat(100); // 2 bytes each
+        for limit in 1..=200 {
+            let _ = billable_tokens_with_limit(&text, limit);
+        }
+    }
+
+    #[test]
+    fn test_savings_pct_uses_capped_baseline() {
+        // 200k raw -> 6k filtered. Uncapped this reads as 97% saved; against
+        // what the agent would actually have been billed it is 80%.
+        let raw = "a".repeat(200_000);
+        let filtered = "b".repeat(6_000);
+        let input = billable_tokens_with_limit(&raw, 30_000);
+        let output = billable_tokens_with_limit(&filtered, 30_000);
+        let pct = (input.saturating_sub(output) as f64 / input as f64) * 100.0;
+        assert!(
+            (pct - 80.0).abs() < 0.5,
+            "expected ~80% against capped baseline, got {pct:.1}%"
+        );
     }
 
     // 2. args_display — format OsString vec
