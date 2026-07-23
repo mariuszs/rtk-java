@@ -969,6 +969,13 @@ fn rewrite_segment_inner(
     }
 
     if cmd_part.starts_with("head -") || cmd_part.starts_with("tail ") {
+        // This fast path runs before the classify_command exclusion check
+        // below, so it has to consult exclude_commands itself — otherwise
+        // `exclude_commands = ["head", "tail"]` is silently ignored and plain
+        // file reads get summarized by `rtk read`.
+        if is_excluded(cmd_part, excluded) {
+            return None;
+        }
         return rewrite_line_range(cmd_part).map(|r| format!("{}{}", r, redirect_suffix));
     }
 
@@ -3924,6 +3931,35 @@ mod tests {
         assert_eq!(
             rewrite_command_no_prefixes("git status", &excluded),
             Some("rtk git status".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_excludes_head() {
+        // The head/tail fast path must honor exclude_commands like every other
+        // rewrite — otherwise `rtk read` silently summarizes plain file reads.
+        let excluded = vec!["head".to_string()];
+        assert_eq!(
+            rewrite_command_no_prefixes("head -20 README.md", &excluded),
+            None
+        );
+    }
+
+    #[test]
+    fn test_rewrite_excludes_tail() {
+        let excluded = vec!["tail".to_string()];
+        assert_eq!(
+            rewrite_command_no_prefixes("tail -n 5 app.log", &excluded),
+            None
+        );
+    }
+
+    #[test]
+    fn test_rewrite_head_still_rewrites_when_not_excluded() {
+        let excluded = vec!["cat".to_string()];
+        assert_eq!(
+            rewrite_command_no_prefixes("head -20 README.md", &excluded),
+            Some("rtk read README.md --max-lines 20".into())
         );
     }
 
