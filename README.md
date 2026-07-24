@@ -1,23 +1,12 @@
-<p align="center">
-  <img src="https://avatars.githubusercontent.com/u/258253854?v=4" alt="rtk-java" width="500">
-</p>
+# rtk-java
 
-<p align="center">
-  <strong>rtk for Java teams — the RTK fork with first-class Maven support</strong>
-</p>
+**rtk for Java teams — the RTK fork with first-class Maven support**
 
-<p align="center">
-  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0"></a>
-  <a href="https://github.com/rtk-ai/rtk"><img src="https://img.shields.io/badge/fork%20of-rtk--ai%2Frtk-informational" alt="Fork of rtk-ai/rtk"></a>
-  <img src="https://img.shields.io/badge/mvn%20test-−99%25%20tokens-success" alt="mvn test token savings">
-</p>
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Fork of rtk-ai/rtk](https://img.shields.io/badge/fork%20of-rtk--ai%2Frtk-informational)](https://github.com/rtk-ai/rtk)
+![mvn test token savings](https://img.shields.io/badge/mvn%20test-−99%25%20tokens-success)
 
-<p align="center">
-  <a href="#java--maven">Java / Maven</a> &bull;
-  <a href="#installation">Install</a> &bull;
-  <a href="#why-this-fork">Why this fork</a> &bull;
-  <a href="#relationship-to-upstream">Upstream</a>
-</p>
+[Java / Maven](#java--maven) · [Install](#installation) · [Why this fork](#why-this-fork) · [Upstream](#relationship-to-upstream)
 
 ---
 
