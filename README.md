@@ -1,113 +1,93 @@
-<p align="center">
-  <img src="https://avatars.githubusercontent.com/u/258253854?v=4" alt="RTK - Rust Token Killer" width="500">
-</p>
+# rtk-java
 
-<p align="center">
-  <strong>High-performance CLI proxy that cuts up to 90% of the bash output your agent reads</strong>
-</p>
+**rtk for Java teams — the RTK fork with first-class Maven support**
 
-<p align="center">
-  <a href="https://github.com/rtk-ai/rtk/actions"><img src="https://github.com/rtk-ai/rtk/workflows/Security%20Check/badge.svg" alt="CI"></a>
-  <a href="https://github.com/rtk-ai/rtk/releases"><img src="https://img.shields.io/github/v/release/rtk-ai/rtk" alt="Release"></a>
-  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache 2.0"></a>
-  <a href="https://discord.gg/RySmvNF5kF"><img src="https://img.shields.io/discord/1470188214710046894?label=Discord&logo=discord" alt="Discord"></a>
-  <a href="https://formulae.brew.sh/formula/rtk"><img src="https://img.shields.io/homebrew/v/rtk" alt="Homebrew"></a>
-</p>
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Fork of rtk-ai/rtk](https://img.shields.io/badge/fork%20of-rtk--ai%2Frtk-informational)](https://github.com/rtk-ai/rtk)
+![mvn test token savings](https://img.shields.io/badge/mvn%20test-−99%25%20tokens-success)
 
-<p align="center">
-  <a href="https://www.rtk-ai.app">Website</a> &bull;
-  <a href="#installation">Install</a> &bull;
-  <a href="https://www.rtk-ai.app/guide/troubleshooting">Troubleshooting</a> &bull;
-  <a href="docs/contributing/ARCHITECTURE.md">Architecture</a> &bull;
-  <a href="https://discord.gg/RySmvNF5kF">Discord</a>
-</p>
-
-<p align="center">
-  <a href="README.md">English</a> &bull;
-  <a href="README_fr.md">Francais</a> &bull;
-  <a href="README_zh.md">中文</a> &bull;
-  <a href="README_ja.md">日本語</a> &bull;
-  <a href="README_ko.md">한국어</a> &bull;
-  <a href="README_es.md">Espanol</a> &bull;
-  <a href="README_pt.md">Português</a>
-</p>
+[Java / Maven](#java--maven) · [Install](#installation) · [Why this fork](#why-this-fork) · [Upstream](#relationship-to-upstream)
 
 ---
 
-rtk filters and compresses command outputs before they reach your LLM context. Single Rust binary, 100+ supported commands, <10ms overhead.
+rtk filters and compresses command outputs before they reach your LLM context.
+Single Rust binary, 100+ supported commands, <10ms overhead.
 
-## What RTK Does
+**This fork is the Java/Maven build.** Everything upstream rtk does, plus a Maven
+filter that turns a 1,500-line `mvn verify` into a couple of dozen lines — and,
+when tests fail, reads the Surefire/Failsafe XML reports to hand your agent the
+actual stack trace and the captured logs instead of a summary line.
 
-RTK intercepts shell commands and compresses their output before your agent reads it.
+> Looking for the general-purpose tool? Use [rtk-ai/rtk](https://github.com/rtk-ai/rtk).
+> Working in a Maven codebase with Claude Code / Copilot / Cursor? Use this one.
 
-| Operation | What RTK does to the output |
-|-----------|-----------------------------|
-| `ls` / `tree` | Tree format with file counts instead of one line per entry |
-| `cat` / `read` | Smart file reading: signatures and structure over full bodies |
-| `grep` / `rg` | Truncates long lines, groups matches by file |
-| `git status` | Compact stat format, grouped by state |
-| `git diff` | Reduced context, headers stripped |
-| `git log` | Hash, author and subject only |
-| `git add/commit/push` | Confirmation line instead of full progress output |
-| `cargo test` / `npm test` | Failures only, passing tests collapsed to a count |
-| `mvn test` / `mvn verify` | Failures only, enriched from the Surefire XML reports |
-| `ruff check` | Grouped by rule and file |
-| `pytest` | Failures only, traceback trimmed |
-| `go test` | NDJSON parsed, failures only |
-| `docker ps` | Essential fields only |
+## Why this fork
 
-## How Savings Work
+Java build output is uniquely hostile to an LLM context window: multi-module
+reactors, plugin chatter, download progress — and, worst of all, a failing test
+whose stack trace is not in stdout at all, only in `target/surefire-reports/*.xml`.
+Upstream rtk ships a Maven filter covering `test`, `compile` and `package`. This
+fork takes it much further.
 
-RTK cuts **up to 90% of the bash output** your agent reads. That is what RTK measures, and it is not the same as cutting your bill by 90%.
+| | Upstream `rtk` | `rtk-java` |
+|---|---|---|
+| Goals filtered | `test`, `compile`, `package`/`install`/`verify`/`deploy` | + `clean`, `checkstyle:check`, `dependency:tree`, `dependency:list`, `integration-test`, `surefire:`/`failsafe:` goals |
+| Multi-goal chains (`mvn clean verify`) | filtered as one blob by the first goal | split per plugin boundary, each segment gets its own filter |
+| Failure detail | whatever Maven printed to stdout | **Surefire/Failsafe XML enrichment**: real stack traces, captured stdout/stderr, per-suite stats |
+| Passing runs | one summary line | per-class breakdown + full digest on disk via tee |
+| Maven Daemon | not supported | `rtk mvnd <goal>`, tracked separately in `rtk gain` |
+| `mvn -q` | passed through | stripped automatically — rtk gets full output and compresses it itself |
+| `spring-boot:run`, `quarkus:dev` | — | streaming passthrough, safe for long-running goals |
 
-Bash output is **one contributor to input tokens**, alongside your prompt, the system prompt and conversation history. Input tokens are in turn **only part of the bill**, which also counts output tokens. The reduction dilutes at every step.
+Everything else — git, gh, cargo, npm, pytest, docker, kubectl, the hook system,
+`rtk gain` analytics — is upstream rtk, kept in sync.
 
-The token counts RTK reports are estimated as `bytes / 4` — RTK ships no tokenizer, so the **percentages are reliable but the absolute token numbers are approximate**.
+## Token Savings
 
-> Full explanation: [How RTK Savings Work](docs/guide/resources/savings-explained.md)
+Per-goal ratios rtk applies for Maven (source: `src/discover/rules.rs`, backed by
+savings assertions in `cargo test --all` against real fixtures in `tests/fixtures/mvn_*.txt`):
+
+| Goal | Savings |
+|------|---------|
+| `mvn test` | -99% |
+| `mvn verify` | -95% |
+| `mvn clean` | -95% |
+| `mvn checkstyle:check` | -90% |
+| `mvn compile` / `test-compile` | -85% |
+| `mvn dependency:list` | -80% |
+| `mvn dependency:tree` | -70% |
+
+The rest of the toolchain keeps upstream's 60-90% range: `git status` -80%,
+`git diff` -75%, `grep` -80%, `cat`/`read` -70%, `docker ps` -80%. In a Maven
+codebase the build commands dominate, so a working session lands around -85%.
 
 ## Installation
 
-### Homebrew (recommended)
-
 ```bash
-brew install rtk
+cargo install --git https://github.com/mariuszs/rtk-java
 ```
 
-### Quick Install (Linux/macOS)
+The binary is still called `rtk`, so every hook, alias and doc from upstream works
+unchanged. If you already have upstream rtk installed, this replaces it.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
-```
-
-> Installs to `~/.local/bin`. Add to PATH if needed:
-> ```bash
-> echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc  # or ~/.zshrc
-> ```
-
-### Cargo
-
-```bash
-cargo install --git https://github.com/rtk-ai/rtk
-```
-
-### Pre-built Binaries
-
-Download from [releases](https://github.com/rtk-ai/rtk/releases):
-- macOS: `rtk-x86_64-apple-darwin.tar.gz` / `rtk-aarch64-apple-darwin.tar.gz`
-- Linux: `rtk-x86_64-unknown-linux-musl.tar.gz` / `rtk-aarch64-unknown-linux-gnu.tar.gz`
-- Windows: `rtk-x86_64-pc-windows-msvc.zip`
-
-> **Windows users**: Extract the zip and place `rtk.exe` somewhere in your PATH (e.g. `C:\Users\<you>\.local\bin`). Run RTK from **Command Prompt**, **PowerShell**, or **Windows Terminal** — do not double-click the `.exe` (it will flash and close). The full hook system works natively on Windows (and in [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)). See [Windows setup](#windows) below for details.
+> Homebrew, `install.sh` and the prebuilt release archives publish **upstream**
+> rtk, which does not contain the Java work — install from git.
 
 ### Verify Installation
 
 ```bash
-rtk --version   # Should show "rtk 0.28.2"
-rtk gain        # Should show the savings dashboard
+rtk --version    # rtk 0.43.0 or newer
+rtk mvn --help   # Maven filter present?
+rtk mvnd --help  # Maven Daemon support present? (fork-only — proves you have this build)
+rtk gain         # Token savings stats
 ```
 
-> **Name collision warning**: Another project named "rtk" (Rust Type Kit) exists on crates.io. If `rtk gain` fails, you have the wrong package. Use `cargo install --git` above instead.
+> **Name collision warning**: Another project named "rtk" (Rust Type Kit) exists on
+> crates.io. If `rtk gain` fails, you have the wrong package. Use `cargo install --git` above.
+
+> **Windows**: use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) — the
+> auto-rewrite hook needs a Unix shell. On native Windows the filters work but commands
+> are not rewritten automatically. See [Windows setup](#windows) below.
 
 ## Quick Start
 
@@ -121,10 +101,8 @@ rtk init -g --agent windsurf    # Windsurf
 rtk init --agent cline          # Cline / Roo Code
 rtk init --agent kilocode       # Kilo Code
 rtk init --agent antigravity    # Google Antigravity
-rtk init --agent kimi           # Kimi AI
 rtk init -g --agent pi          # Pi
 rtk init --agent hermes         # Hermes
-rtk init -g --agent droid       # Factory Droid
 
 # 2. Restart your AI tool, then test
 git status  # Automatically rewritten to rtk git status
@@ -134,6 +112,84 @@ Hook-based agents rewrite Bash commands (e.g., `git status` -> `rtk git status`)
 
 **Important:** the hook only runs on Bash tool calls. Claude Code built-in tools like `Read`, `Grep`, and `Glob` do not pass through the Bash hook, so they are not auto-rewritten. To get RTK's compact output for those workflows, use shell commands (`cat`/`head`/`tail`, `rg`/`grep`, `find`) or call `rtk read`, `rtk grep`, or `rtk find` directly.
 
+## Java / Maven
+
+### Goals
+
+```bash
+rtk mvn test                     # state-machine parser (Preamble → Testing → Summary), -97…99%
+rtk mvn verify                   # surefire + failsafe merged into one summary
+rtk mvn clean                    # "mvn clean: deleted /path/target (1.4 s)"
+rtk mvn compile                  # also test-compile, process-classes
+rtk mvn checkstyle:check         # path:line:col [Rule] message + violation count
+rtk mvn dependency:tree          # duplicates and managed-version annotations dropped
+rtk mvn dependency:list
+rtk mvn clean verify             # multi-goal chain: per-segment filters
+rtk mvn clean test-compile checkstyle:check
+rtk mvn spring-boot:run          # unknown / long-running goal → streaming passthrough
+rtk mvnd test                    # Maven Daemon, same filters, tracked separately
+rtk proxy mvn test               # bypass: full raw output
+```
+
+`mvn`, `./mvnw` and `mvnw.cmd` are auto-detected; `rtk mvnd` always calls the daemon
+binary. `package`, `install`, `deploy` and `integration-test` run through the test
+filter (with XML enrichment) under their own goal name. Zero goals (`mvn -version`,
+`mvn --help`) pass through untouched.
+
+### Stack traces from Surefire/Failsafe XML
+
+When a test fails, Maven's stdout gives you a class name and a count. rtk reads
+`target/surefire-reports/TEST-*.xml` and `target/failsafe-reports/*.xml` after the
+build and appends what the agent actually needs:
+
+- **Full stack trace per failure** — framework frames collapsed, root cause and the
+  whole `Caused by:` chain preserved (up to 50 lines per trace).
+- **Captured stdout/stderr of the failing tests only** — 2,000 chars per test,
+  10,000 total.
+- **Report counters** in the footer: `(reports: N surefire, M failsafe, K stale files skipped)`.
+
+Application frames are told apart from framework frames using the `groupId` from your
+`pom.xml` (project groupId → parent groupId → no filtering as fallback). Reports older
+than the current run are skipped by mtime, so a stale `target/` never leaks into the output.
+
+### Green runs are not silent
+
+A passing run reports a per-class breakdown plus a Maven-native aggregate line, and
+writes the full class digest to disk (tee) referenced from the summary — so an agent
+can grep the familiar `Tests run: … Failures: … Errors: … Skipped: …` patterns without
+re-running the build. Skipped test names and reactor module names are carried through
+from the XML.
+
+### "0 tests executed" is treated as a red flag
+
+If Maven reports no tests and there are no Surefire reports to back that up, rtk says
+so instead of printing a cheerful summary:
+
+```
+mvn test: 0 tests executed — surefire detected no tests.
+Check pom.xml (surefire plugin configuration) or run: rtk proxy mvn test
+```
+
+### Noise the compile filter removes
+
+Download progress, `[INFO]` scaffolding, JVM/native-access warnings, Reactor Build
+Order, jOOQ codegen, Liquibase, npm/React builds nested in the Maven build,
+typescript-generator, artifactregistry-maven-wagon and GCP auth chatter,
+enforcer/githook/compiler plugin boilerplate, and duplicated `javac` error locations
+(each error is reported once). A failing multi-module reactor collapses to
+`Reactor: N modules — M SUCCESS, K FAILURE (module, …)`.
+
+### Agent integration details
+
+- `-q` / `--quiet` is stripped from filtered runs so rtk sees the full output and does
+  the compression itself.
+- Command rewriting handles Maven options before the goal (`mvn -T1C clean verify`),
+  transparent prefixes (`timeout`, `nice`), single-quoted `bash -c` wrappers, and drops
+  trailing `| tail -n` / `| head -n` pipes the agent adds out of habit.
+- `rtk discover` knows per-goal savings; `rtk gain` tracks `mvn` and `mvnd` separately.
+- Gradle Wrapper (`rtk gradlew`) is inherited from upstream: build / test / connectedTest
+  / lint / dependencies.
+
 ## How It Works
 
 ```
@@ -141,7 +197,7 @@ Hook-based agents rewrite Bash commands (e.g., `git status` -> `rtk git status`)
 
   Claude  --git status-->  shell  -->  git         Claude  --git status-->  RTK  -->  git
     ^                                   |            ^                      |          |
-    |         full raw output           |            |  compact output      | filter   |
+    |        ~2,000 tokens (raw)        |            |   ~200 tokens        | filter   |
     +-----------------------------------+            +------- (filtered) ---+----------+
 ```
 
@@ -154,11 +210,9 @@ Four strategies applied per command type:
 
 ## Commands
 
-> Percentages below are **reductions in bash output**, not reductions in your bill. See [How Savings Work](#how-savings-work).
-
 ### Files
 ```bash
-rtk ls .                        # Compact directory tree
+rtk ls .                        # Token-optimized directory tree
 rtk read file.rs                # Smart file reading
 rtk read file.rs -l aggressive  # Signatures only (strips bodies)
 rtk smart file.rs               # 2-line heuristic code summary
@@ -196,11 +250,8 @@ rtk go test                     # Go tests (NDJSON, -90%)
 rtk cargo test                  # Cargo tests (-90%)
 rtk rake test                   # Ruby minitest (-90%)
 rtk rspec                       # RSpec tests (JSON, -60%+)
-rtk mvn test                    # Maven tests (-99%)
+rtk mvn test                    # Maven tests (-99%) — see [Java / Maven](#java--maven)
 rtk mvn verify                  # Maven verify — surefire + failsafe XML enrichment
-rtk mvn clean                   # Maven clean — one-line summary (-95%)
-rtk mvn clean test-compile checkstyle:check  # Multi-goal: per-goal filter, BUILD signal always preserved
-rtk mvn clean verify            # Multi-goal: XML enrichment applies; -q auto-dropped
 rtk mvnd test                   # Maven Daemon tests (same filter, same savings)
 rtk err <cmd>                   # Filter errors only from any command
 rtk test <cmd>                  # Generic test wrapper - failures only (-90%)
@@ -218,17 +269,17 @@ rtk cargo clippy                # Cargo clippy (-80%)
 rtk ruff check                  # Python linting (JSON, -80%)
 rtk golangci-lint run           # Go linting (JSON, -85%)
 rtk rubocop                     # Ruby linting (JSON, -60%+)
-rtk mvn build                   # Maven build (-90%)
-rtk mvn dependency:tree         # Maven dependency tree (-60%+)
+rtk mvn compile                 # Maven compile (-85%)
+rtk mvn checkstyle:check        # Checkstyle violations (-90%)
+rtk mvn dependency:tree         # Maven dependency tree (-70%)
+rtk gradlew build               # Gradle build (-80%)
 rtk sbt test                    # ScalaTest output (-90%)
 rtk sbt compile                 # Compilation errors only (-75%)
-rtk sbt run                     # Strip SBT preamble noise
 ```
 
 ### Package Managers
 ```bash
 rtk pnpm list                   # Compact dependency tree
-rtk uv run pytest               # Preserve uv env, keep program output
 rtk pip list                    # Python packages (auto-detect uv)
 rtk pip outdated                # Outdated packages
 rtk bundle install              # Ruby gems (strip Using lines)
@@ -299,7 +350,7 @@ rtk session                     # Show RTK adoption across recent sessions
 ## Global Flags
 
 ```bash
--u, --ultra-compact    # ASCII icons, inline format (further output reduction)
+-u, --ultra-compact    # ASCII icons, inline format (extra token savings)
 -v, --verbose          # Increase verbosity (-v, -vv, -vvv)
 ```
 
@@ -307,7 +358,7 @@ rtk session                     # Show RTK adoption across recent sessions
 
 **Directory listing:**
 ```
-# ls -la (45 lines)                     # rtk ls (12 lines)
+# ls -la (45 lines, ~800 tokens)        # rtk ls (12 lines, ~150 tokens)
 drwxr-xr-x  15 user staff 480 ...       my-project/
 -rw-r--r--   1 user staff 1234 ...       +-- src/ (8 files)
 ...                                      |   +-- main.rs
@@ -316,7 +367,7 @@ drwxr-xr-x  15 user staff 480 ...       my-project/
 
 **Git operations:**
 ```
-# git push (15 lines)                    # rtk git push (1 line)
+# git push (15 lines, ~200 tokens)       # rtk git push (1 line, ~10 tokens)
 Enumerating objects: 5, done.             ok main
 Counting objects: 100% (5/5), done.
 Delta compression using up to 8 threads
@@ -336,7 +387,7 @@ test utils::test_format ... ok              test_overflow: panic at utils.rs:18
 
 The most effective way to use rtk. The hook transparently intercepts Bash commands and rewrites them to rtk equivalents before execution.
 
-**Result**: 100% rtk adoption across all conversations and subagents, with no per-command context overhead.
+**Result**: 100% rtk adoption across all conversations and subagents, zero token overhead.
 
 **Scope note:** this only applies to Bash tool calls. Claude Code built-in tools such as `Read`, `Grep`, and `Glob` bypass the hook, so use shell commands or explicit `rtk` commands when you want RTK filtering there.
 
@@ -354,47 +405,48 @@ After install, **restart Claude Code**.
 
 ## Windows
 
-RTK works fully on native Windows. Since **v0.37.2** the auto-rewrite hook runs as a **native binary command** (`rtk hook claude`) — no Unix shell, bash, or jq required — so commands are rewritten transparently on Command Prompt, PowerShell, and Windows Terminal, just like on Linux and macOS.
+RTK works on Windows with some limitations. The auto-rewrite hook (`rtk-rewrite.sh`) requires a Unix shell, so on native Windows RTK falls back to **CLAUDE.md injection mode** — your AI assistant receives RTK instructions but commands are not rewritten automatically.
 
-### Native Windows
+### Recommended: WSL (full support)
 
-```powershell
-# 1. Download and extract rtk-x86_64-pc-windows-msvc.zip from releases
-# 2. Add rtk.exe to your PATH (e.g. C:\Users\<you>\.local\bin)
-# 3. Initialize — installs the native binary hook
-rtk init -g
-```
-
-**Upgrading from an older install?** If you set RTK up before v0.37.2 you may still have the legacy `rtk-rewrite.sh` shell hook (which does need a Unix shell). Re-run `rtk init -g` to migrate to the native binary hook.
-
-**Prerequisites**: some filters shell out to [ripgrep](https://github.com/BurntSushi/ripgrep) (`rg`). Install it and keep it on your PATH (e.g. `winget install BurntSushi.ripgrep.MSVC`) to avoid `Binary 'rg' not found on PATH` warnings.
-
-**Important**: Do not double-click `rtk.exe` — it is a CLI tool that prints usage and exits immediately. Always run it from a terminal (Command Prompt, PowerShell, or Windows Terminal).
-
-### WSL
-
-[WSL](https://learn.microsoft.com/en-us/windows/wsl/install) also works and behaves exactly like Linux:
+For the best experience, use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows Subsystem for Linux). Inside WSL, RTK works exactly like Linux — full hook support, auto-rewrite, everything:
 
 ```bash
 # Inside WSL
-curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+cargo install --git https://github.com/mariuszs/rtk-java
 rtk init -g
 ```
 
-| Feature | Native Windows | WSL |
-|---------|----------------|-----|
+### Native Windows (limited support)
+
+On native Windows (cmd.exe / PowerShell), RTK filters work but the hook does not auto-rewrite commands:
+
+```powershell
+# 1. Build from source (this fork publishes no prebuilt binaries)
+cargo install --git https://github.com/mariuszs/rtk-java
+# 2. Initialize (falls back to CLAUDE.md injection)
+rtk init -g
+# 3. Use rtk explicitly
+rtk mvn test
+rtk git status
+```
+
+**Important**: Do not double-click `rtk.exe` — it is a CLI tool that prints usage and exits immediately. Always run it from a terminal (Command Prompt, PowerShell, or Windows Terminal).
+
+| Feature | WSL | Native Windows |
+|---------|-----|----------------|
 | Filters (cargo, git, etc.) | Full | Full |
-| Auto-rewrite hook | Yes (native binary) | Yes |
-| `rtk init -g` | Hook mode | Hook mode |
+| Auto-rewrite hook | Yes | No (CLAUDE.md fallback) |
+| `rtk init -g` | Hook mode | CLAUDE.md mode |
 | `rtk gain` / analytics | Full | Full |
 
 ## Supported AI Tools
 
-RTK supports 15 AI coding tools. Each integration rewrites shell commands to `rtk` equivalents, reducing the bash output the agent reads where the agent supports command interception.
+RTK supports 14 AI coding tools. Each integration rewrites shell commands to `rtk` equivalents for 60-90% token savings where the agent supports command interception.
 
 | Tool | Install | Method |
 |------|---------|--------|
-| **Claude Code** | `rtk init -g` | PreToolUse hook (native binary) |
+| **Claude Code** | `rtk init -g` | PreToolUse hook (bash) |
 | **GitHub Copilot (VS Code)** | `rtk init -g --copilot` | PreToolUse hook — transparent rewrite |
 | **GitHub Copilot CLI** | `rtk init -g --copilot` | PreToolUse deny-with-suggestion (CLI limitation) |
 | **Cursor** | `rtk init -g --agent cursor` | preToolUse hook (hooks.json) |
@@ -409,8 +461,6 @@ RTK supports 15 AI coding tools. Each integration rewrites shell commands to `rt
 | **Mistral Vibe** | Planned ([#800](https://github.com/rtk-ai/rtk/issues/800)) | Blocked on upstream |
 | **Kilo Code** | `rtk init --agent kilocode` | .kilocode/rules/rtk-rules.md (project-scoped) |
 | **Google Antigravity** | `rtk init --agent antigravity` | .agents/rules/antigravity-rtk-rules.md (project-scoped) |
-| **Kimi AI** | `rtk init --agent kimi` | AGENTS.md (project-scoped) |
-| **Factory Droid** | `rtk init -g --agent droid` (or per-project) | PreToolUse hook in `~/.factory/hooks.json` (matcher `Execute`) |
 
 For per-agent setup details, override controls, and graceful degradation, see the [Supported Agents guide](https://www.rtk-ai.app/guide/getting-started/supported-agents). The Hermes plugin source and tests live in `hooks/hermes/`; installed Hermes runtime files still live under `~/.hermes/plugins/rtk-rewrite/`.
 
@@ -446,7 +496,8 @@ brew uninstall rtk           # If installed via Homebrew
 
 ## Documentation
 
-- **[rtk-ai.app/guide](https://www.rtk-ai.app/guide)** — full user guide (installation, supported agents, what gets optimized, analytics, configuration, troubleshooting)
+- **[src/cmds/jvm/README.md](src/cmds/jvm/README.md)** — Maven filter internals: goal routing, XML enrichment, application-package detection
+- **[rtk-ai.app/guide](https://www.rtk-ai.app/guide)** — upstream user guide (supported agents, analytics, configuration, troubleshooting — applies to this fork too)
 - **[INSTALL.md](INSTALL.md)** — detailed installation reference
 - **[ARCHITECTURE.md](docs/contributing/ARCHITECTURE.md)** — system design and technical decisions
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — contribution guide
@@ -462,14 +513,14 @@ RTK can collect **anonymous, aggregate usage metrics** once per day. Telemetry i
 |----------|------|-----|
 | Identity | Salted device hash (SHA-256, not reversible) | Count unique installations without tracking individuals |
 | Environment | RTK version, OS, architecture, install method | Know which platforms to support and test |
-| Usage volume | Command count (24h), total commands, estimated tokens saved (24h/30d/total) | Measure adoption and value delivered |
-| Quality | Top 5 passthrough commands (0% reduction), parse failure count, commands with <30% reduction | Identify missing filters and weak ones to improve |
+| Usage volume | Command count (24h), total commands, tokens saved (24h/30d/total) | Measure adoption and value delivered |
+| Quality | Top 5 passthrough commands (0% savings), parse failure count, commands with <30% savings | Identify missing filters and weak ones to improve |
 | Ecosystem | Command category distribution (e.g. git 45%, cargo 20%, js 15%) | Prioritize filter development for popular ecosystems |
 | Retention | Days since first use, active days in last 30 | Understand engagement and detect churn |
 | Adoption | AI agent hook type (claude/gemini/codex), custom TOML filter count | Track integration coverage and DSL adoption |
 | Configuration | Whether config.toml exists, number of excluded commands, project count | Understand user maturity and customization patterns |
 | Features | Usage counts for meta-commands (gain, discover, proxy, verify) | Know which RTK features are valued vs unused |
-| Economics | Estimated USD value, derived from the estimated tokens saved and a fixed internal constant | Quantify the value RTK provides to users |
+| Economics | Estimated USD savings (based on API token pricing) | Quantify the value RTK provides to users |
 
 All data is **aggregate counts or anonymized command names** (first 3 words, no arguments). Top commands report only tool names (e.g. "git", "cargo"), never full command lines.
 
@@ -488,44 +539,30 @@ rtk telemetry forget     # Withdraw consent + delete all local data + request se
 export RTK_TELEMETRY_DISABLED=1   # Blocks telemetry regardless of consent
 ```
 
-## Star History
+## Relationship to upstream
 
-<a href="https://www.star-history.com/?repos=rtk-ai%2Frtk&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=rtk-ai/rtk&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=rtk-ai/rtk&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=rtk-ai/rtk&type=date&legend=top-left" />
- </picture>
-</a>
+`rtk-java` tracks [rtk-ai/rtk](https://github.com/rtk-ai/rtk) `master` and merges it in
+regularly. The Maven work is developed here first and upstreamed as PRs — parts of it
+(the base `mvn` module) have already landed upstream.
 
-## StarMapper
+Beyond Maven, this fork carries fixes not yet released upstream: `find` falls back to raw
+output on unsupported flags, `rtk lint` no longer hijacks `npm run` scripts, `tsc` stopped
+inflating its own output with a synthetic summary, `curl`/`npm`/`npx` are no longer
+rewritten, `grep` context separators are faithful to real `grep`, and several UTF-8
+boundary panics in analytics were fixed.
 
-<a href="https://starmapper.bruniaux.com/rtk-ai/rtk">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://starmapper.bruniaux.com/api/map-image/rtk-ai/rtk?theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://starmapper.bruniaux.com/api/map-image/rtk-ai/rtk?theme=light" />
-    <img alt="StarMapper" src="https://starmapper.bruniaux.com/api/map-image/rtk-ai/rtk" />
-  </picture>
-</a>
+## Credits
 
-## Core team
-
-- **Patrick Szymkowiak** — Founder
-  [GitHub](https://github.com/pszymkowiak) · [LinkedIn](https://www.linkedin.com/in/patrick-szymkowiak/)
-- **Florian Bruniaux** — Core contributor
-  [GitHub](https://github.com/FlorianBruniaux) · [LinkedIn](https://www.linkedin.com/in/florian-bruniaux-43408b83/)
-- **Adrien Eppling** — Core contributor
-  [GitHub](https://github.com/aeppling) · [LinkedIn](https://www.linkedin.com/in/adrien-eppling/)
-- **Nicolas Le Cam** — Core contributor
-  [Github](https://github.com/kush) · [LinkedIn](https://www.linkedin.com/in/nicolas-le-cam-386387160/)
-- **Takayuki Maeda** — Core contributor
-  [GitHub](https://github.com/TaKO8Ki) · [LinkedIn](https://www.linkedin.com/in/tako8ki/)
+Upstream rtk is built by the [rtk-ai](https://github.com/rtk-ai/rtk) core team —
+Patrick Szymkowiak (founder), Florian Bruniaux, Adrien Eppling, Nicolas Le Cam and
+Takayuki Maeda. This fork exists on top of their work; all upstream credit belongs
+to them.
 
 ## Contributing
 
-Contributions welcome! Please open an issue or PR on [GitHub](https://github.com/rtk-ai/rtk).
-
-Join the community on [Discord](https://discord.gg/RySmvNF5kF).
+Issues and PRs about Java/Maven filtering are welcome [here](https://github.com/mariuszs/rtk-java/issues).
+Anything else is better filed [upstream](https://github.com/rtk-ai/rtk), where the
+upstream community and its [Discord](https://discord.gg/RySmvNF5kF) live.
 
 ## License
 
