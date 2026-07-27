@@ -731,6 +731,14 @@ fn compose_multi(parts: &MultiParts, _goals_header: &str) -> String {
 /// reports written after the run started, and a piped filter never saw the run
 /// start — it cannot tell this run's reports from the previous run's. Piping a
 /// saved log (`cat build.log | rtk pipe`) would misattribute them outright.
+///
+/// So this is strictly the weaker path, and it stays opt-in: **never add a
+/// rewrite rule that routes a `mvn` invocation here.** Without XML this loses
+/// the `<system-out>` captured for failing tests (invisible on the console under
+/// `redirectTestOutputToFile`), the per-suite footer, and the "no reports found"
+/// diagnostic — and piped `-q` output has no plugin markers, so it degrades to
+/// verbatim passthrough. Where the command can be rewritten at all, `rtk mvn`
+/// can run it; this exists only for a pipe that already exists.
 pub fn filter_mvn_piped(raw: &str) -> String {
     filter_mvn_multi(raw, "")
 }
