@@ -31,6 +31,7 @@ pub fn resolve_filter(name: &str) -> Option<fn(&str) -> String> {
         "pest" | "paratest" | "php-test" => {
             Some(crate::cmds::php::test_output::filter_test_runner_output)
         }
+        "mvn" | "mvnd" | "maven" => Some(crate::cmds::jvm::mvn_cmd::filter_mvn_piped),
         "ecs" => Some(crate::cmds::php::ecs_cmd::filter_ecs_output),
         "phpstan" => Some(phpstan_wrapper),
         "pint" => Some(pint_wrapper),
@@ -179,6 +180,13 @@ pub fn auto_detect_filter(input: &str) -> fn(&str) -> String {
         return crate::cmds::python::pytest_cmd::filter_pytest_output;
     }
 
+    // Maven always opens with this line, and nothing else does. Checked before
+    // the generic `file:line:` heuristic below, which a plugin coordinate line
+    // could otherwise drag into the grep filter.
+    if first_1k.contains("[INFO] Scanning for projects") {
+        return crate::cmds::jvm::mvn_cmd::filter_mvn_piped;
+    }
+
     let first_trimmed = first_1k.trim_start();
 
     // phpunit banner: "PHPUnit X.Y.Z by Sebastian Bergmann and contributors."
@@ -264,8 +272,8 @@ pub fn run(filter_name: Option<&str>, passthrough: bool) -> Result<()> {
             anyhow::anyhow!(
                 "Unknown filter '{}'. Available: cargo-test, pytest, go-test, go-build, \
                  tsc, vitest, grep, rg, find, fd, git-log, git-diff, git-status, \
-                 log, mypy, ruff-check, ruff-format, prettier, phpunit, pest, \
-                 paratest, php-test, ecs, phpstan, pint",
+                 log, mypy, ruff-check, ruff-format, prettier, mvn, mvnd, maven, \
+                 phpunit, pest, paratest, php-test, ecs, phpstan, pint",
                 name
             )
         })?,
@@ -281,6 +289,52 @@ pub fn run(filter_name: Option<&str>, passthrough: bool) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_resolve_filter_mvn() {
+        assert!(resolve_filter("mvn").is_some());
+        assert!(resolve_filter("mvnd").is_some());
+        assert!(resolve_filter("maven").is_some());
+    }
+
+    #[test]
+    fn test_auto_detect_mvn_banner() {
+        // Upstream stopped rewriting non-final pipeline stages, so `mvn test |
+        // …` reaches the agent raw. `rtk pipe` is the remaining way to compress
+        // it, and it has to recognize Maven without an explicit -f.
+        let input = include_str!("../../../tests/fixtures/mvn_multi_clean_verify_fail.txt");
+        let out = auto_detect_filter(input)(input);
+        assert!(out.len() < input.len(), "expected compression, out={}", out);
+        assert!(out.contains("BUILD FAILURE"), "lost the build verdict");
+    }
+
+    #[test]
+    fn test_auto_detect_mvn_not_misrouted_to_grep() {
+        // Plugin coordinate lines (`maven-clean-plugin:3.2.0:clean`) look close
+        // enough to `file:line:content` that the generic grep heuristic could
+        // claim Maven output if the banner check ran after it.
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
+        let detected = auto_detect_filter(input)(input);
+        let explicit = resolve_filter("mvn").expect("mvn filter must exist")(input);
+        assert_eq!(detected, explicit, "banner must win over the grep heuristic");
+    }
+
+    #[test]
+    fn test_mvn_pipe_token_savings() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
+        let out = resolve_filter("mvn").expect("mvn filter must exist")(input);
+        let savings = 100.0 - (count_tokens(&out) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 60.0, "expected ≥60% savings, got {:.1}%", savings);
+    }
+
+    #[test]
+    fn test_mvn_pipe_passes_through_non_maven_input() {
+        // Degraded input (no plugin markers, no build footer) must never be
+        // swallowed — the same contract the buffered mvn filter honours.
+        let input = "just some text\nwith no maven structure at all\n";
+        let out = resolve_filter("mvn").expect("mvn filter must exist")(input);
+        assert_eq!(out, input);
+    }
 
     #[test]
     fn test_auto_detect_phpunit_banner() {

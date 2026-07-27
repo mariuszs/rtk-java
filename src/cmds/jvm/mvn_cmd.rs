@@ -723,9 +723,20 @@ fn compose_multi(parts: &MultiParts, _goals_header: &str) -> String {
     out.trim_end().to_string()
 }
 
+/// Entry point for `rtk pipe --filter mvn`: compress Maven output arriving on
+/// stdin. Splits by plugin boundary like a multi-goal run, which also covers
+/// single-goal output (one segment).
+///
+/// No Surefire/Failsafe XML enrichment, unlike `rtk mvn`: enrichment only counts
+/// reports written after the run started, and a piped filter never saw the run
+/// start — it cannot tell this run's reports from the previous run's. Piping a
+/// saved log (`cat build.log | rtk pipe`) would misattribute them outright.
+pub fn filter_mvn_piped(raw: &str) -> String {
+    filter_mvn_multi(raw, "")
+}
+
 /// Pure multi-goal filter (no XML enrichment) — snapshot-tested directly.
 /// run_multi_goal (later task) wraps this and adds enrichment on the test portion.
-#[allow(dead_code)]
 fn filter_mvn_multi(raw: &str, goals_header: &str) -> String {
     // Degraded-input fallback: no markers AND no build footer → never swallow.
     if !PLUGIN_MARKER_RE.is_match(raw) && !BUILD_FOOTER_RE.is_match(raw) {

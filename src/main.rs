@@ -646,7 +646,7 @@ enum Commands {
 
     /// Read stdin, apply filter, print filtered output (Unix pipe mode)
     Pipe {
-        /// Filter name (cargo-test, pytest, phpunit, phpstan, pint, grep, find, git-log, etc.)
+        /// Filter name (cargo-test, pytest, mvn, phpunit, phpstan, pint, grep, find, git-log, etc.)
         #[arg(short, long)]
         filter: Option<String>,
 
