@@ -147,6 +147,18 @@ pub fn run(
             eprintln!();
         }
 
+        let untrusted_filters = crate::hooks::trust::untrusted_active_filter_count();
+        if untrusted_filters > 0 {
+            eprintln!(
+                "{}",
+                format!(
+                    "[rtk] {untrusted_filters} untrusted custom filter(s) not applied — run `rtk trust`"
+                )
+                .yellow()
+            );
+            eprintln!();
+        }
+
         if !summary.by_command.is_empty() {
             // added: styled section header
             println!("{}", styled("By Command", true));
