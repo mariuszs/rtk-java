@@ -522,6 +522,14 @@ lazy_static! {
     /// Start of the trailing reactor/build footer.
     static ref BUILD_FOOTER_RE: Regex =
         Regex::new(r"(BUILD SUCCESS|BUILD FAILURE|Reactor Summary)").unwrap();
+    /// JUL-format plugin log lines (`INFO: Reading resource: …` from
+    /// liquibase et al.) — java.util.logging levels with a bare `LEVEL: `
+    /// prefix, no Maven bracket. Under `mvn -q` the `[INFO] --- plugin ---`
+    /// markers are suppressed, so the noisy-segment state never engages and
+    /// these must be dropped line-wise. `SEVERE:` (error level) is NOT
+    /// matched and stays.
+    static ref JUL_LOG_LINE_RE: Regex =
+        Regex::new(r"^(?:FINEST|FINER|FINE|CONFIG|INFO|WARNING):\s").unwrap();
     /// Single-quoted spans in codegen plugin chatter (echoed class names).
     static ref QUOTED_SPAN_RE: Regex = Regex::new(r"'[^']*'").unwrap();
     /// Failure keywords on word boundaries — `RestError` must not match.
@@ -1967,7 +1975,34 @@ fn filter_mvn_compile(output: &str) -> String {
         return "[INFO] BUILD SUCCESS".to_string();
     }
 
-    result
+    cap_compile_success_lines(&clean, result)
+}
+
+/// Safety net for the hook's dropped trailing `| tail -N`: on BUILD SUCCESS,
+/// an unknown plugin flooding lines the pattern lists don't recognize must
+/// not bill thousands of retained lines — keep the head and elide the rest
+/// with a prefix-preserving count (same idiom as `... +N more failures`).
+/// Failures are never capped: every retained error line is signal.
+const COMPILE_SUCCESS_LINE_CAP: usize = 60;
+const COMPILE_SUCCESS_HEAD_LINES: usize = 40;
+
+fn cap_compile_success_lines(clean: &str, result: String) -> String {
+    if clean.contains("BUILD FAILURE") || !clean.contains("BUILD SUCCESS") {
+        return result;
+    }
+    let total = result.lines().count();
+    if total <= COMPILE_SUCCESS_LINE_CAP {
+        return result;
+    }
+    let head: Vec<&str> = result.lines().take(COMPILE_SUCCESS_HEAD_LINES).collect();
+    let mut capped = head.join("\n");
+    write!(&mut capped, "\n[INFO]   ... +{} more lines", total - head.len()).ok();
+    if !head.iter().any(|l| l.contains("BUILD SUCCESS")) {
+        // The native build line was past the cap — re-emit it so grep for
+        // `BUILD` keeps working on the capped subset.
+        capped.push_str("\n[INFO] BUILD SUCCESS");
+    }
+    capped
 }
 
 /// Render a one-line reactor summary naming failed modules. Returns `None`
@@ -2234,6 +2269,10 @@ fn should_keep_compile_line(line: &str) -> bool {
     }
 
     if line.starts_with(WARNING_TAG) {
+        return false;
+    }
+
+    if JUL_LOG_LINE_RE.is_match(line) {
         return false;
     }
 
@@ -3781,6 +3820,106 @@ mod tests {
             output_tokens,
             output,
         );
+    }
+
+    #[test]
+    fn test_compile_quiet_liquibase_jul_flood() {
+        // Real `mvn -q compile` from the map repo: -q strips the
+        // `[INFO] --- plugin ---` markers, so the noisy-segment suppression
+        // never engages and ~1900 JUL-format `INFO:` liquibase lines used to
+        // stream through untouched (148KB on a BUILD SUCCESS).
+        let input =
+            include_str!("../../../tests/fixtures/mvn_compile_quiet_liquibase_jul_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        assert!(
+            output.contains("BUILD SUCCESS"),
+            "should keep BUILD SUCCESS, got:\n{output}"
+        );
+        assert!(
+            !output.lines().any(|l| l.trim_start().starts_with("INFO: ")),
+            "JUL INFO: plugin log lines must be dropped, got:\n{output}"
+        );
+        assert!(
+            !output.lines().any(|l| l.trim_start().starts_with("WARNING: ")),
+            "JUL/JVM WARNING: lines must be dropped, got:\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_compile_quiet_liquibase_jul_savings() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_compile_quiet_liquibase_jul_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        let input_tokens = count_tokens(input);
+        let output_tokens = count_tokens(&output);
+        let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
+
+        assert!(
+            savings >= 90.0,
+            "mvn -q compile liquibase JUL: expected >=90% savings, got {:.1}% ({} -> {} tokens)\nOutput:\n{}",
+            savings,
+            input_tokens,
+            output_tokens,
+            output,
+        );
+    }
+
+    #[test]
+    fn test_compile_quiet_liquibase_jul_snapshot() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_compile_quiet_liquibase_jul_raw.txt");
+        insta::assert_snapshot!(filter_mvn_compile(input));
+    }
+
+    #[test]
+    fn test_compile_success_output_capped() {
+        // Safety net for the dropped `| tail -N` rewrite: even when an
+        // unknown plugin floods lines the pattern lists don't recognize, a
+        // BUILD SUCCESS run must not bill thousands of lines. Shape mimics
+        // the real liquibase diagnostic that legitimately survives filtering.
+        let flood: String = (0..500)
+            .map(|i| {
+                format!(
+                    "db/changelog/db.changelog-master.yaml : Foreign Key \"FK{i}\" does not exist\n"
+                )
+            })
+            .collect();
+        let input = format!("[INFO] BUILD SUCCESS\n{flood}");
+        let output = filter_mvn_compile(&input);
+
+        assert!(
+            output.lines().count() <= 60,
+            "success output must be capped, got {} lines",
+            output.lines().count()
+        );
+        assert!(
+            output.contains("BUILD SUCCESS"),
+            "BUILD SUCCESS must survive the cap, got:\n{output}"
+        );
+        assert!(
+            output.contains("... +"),
+            "elision line must report suppressed line count, got:\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_compile_failure_output_not_capped() {
+        // The cap is success-only: on BUILD FAILURE every retained error
+        // line is signal and must not be elided.
+        let errors: String = (0..120)
+            .map(|i| format!("[ERROR] /src/Foo{i}.java:[{i},5] cannot find symbol\n"))
+            .collect();
+        let input = format!("{errors}[INFO] BUILD FAILURE\n");
+        let output = filter_mvn_compile(&input);
+
+        assert!(
+            output.lines().count() > 100,
+            "failure output must keep all distinct errors, got {} lines:\n{output}",
+            output.lines().count()
+        );
+        assert!(!output.contains("... +"), "no elision on failure:\n{output}");
     }
 
     #[test]

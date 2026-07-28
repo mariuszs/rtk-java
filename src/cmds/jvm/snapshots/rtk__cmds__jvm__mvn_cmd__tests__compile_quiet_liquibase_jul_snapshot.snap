@@ -1,0 +1,23 @@
+---
+source: src/cmds/jvm/mvn_cmd.rs
+expression: filter_mvn_compile(input)
+---
+[INFO] Ignoring source directory /home/mariusz/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
+[INFO] NOTHING TO DO: There is nothing to do. If this is unexpected, review the above logs for more details.
+[INFO] Ignoring source directory /home/mariusz/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
+[INFO] NOTHING TO DO: There is nothing to do. If this is unexpected, review the above logs for more details.
+[INFO] BUILD SUCCESS
+⚠️ Your config has 1 warning.
+Found redocly.yaml and using 'openapi' options
+Prerendering docs
+🎉 bundled successfully in: dist/public/docs.html (372 KiB) [⏱ 3ms].
+╔═══════════════════════════════════════════════════════╗
+║                                                       ║
+║  A new version of Redocly CLI (2.41.0) is available.  ║
+║  Update now: `npm i -g @redocly/cli@latest`.          ║
+║  Changelog: https://redocly.com/docs/cli/changelog/   ║
+║                                                       ║
+╚═══════════════════════════════════════════════════════╝
+⚠️ Your config has 1 warning.
+bundling public/openapi.yaml using configuration for api 'public'...
+📦 Created a bundle for public/openapi.yaml at dist/public/openapi.yaml 39ms.

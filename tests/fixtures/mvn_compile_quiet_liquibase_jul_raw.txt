@@ -1,0 +1,479 @@
+[INFO] Ignoring source directory /home/mariusz/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
+[INFO] NOTHING TO DO: There is nothing to do. If this is unexpected, review the above logs for more details.
+[INFO] Ignoring source directory /home/mariusz/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
+[INFO] NOTHING TO DO: There is nothing to do. If this is unexpected, review the above logs for more details.
+[INFO] BUILD SUCCESS
+WARNING: Final field _cipher in class org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher has been mutated reflectively by class org.eclipse.sisu.bean.BeanPropertyField in unnamed module @475e586c (file:/home/mariusz/.m2/wrapper/dists/apache-maven-3.9.9/3477a4f1/lib/org.eclipse.sisu.inject-0.9.0.M3.jar)
+WARNING: Use --enable-final-field-mutation=ALL-UNNAMED to avoid a warning
+WARNING: Mutating final fields will be blocked in a future release unless final field mutation is enabled
+INFO: Set default schema name to public
+INFO: Successfully acquired change log lock
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1676044540.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1676534648.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1676536004.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1678195545.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1678365576.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1678966693.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1679070478.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1679070479.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1679070481.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1679071293.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1679434633.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1680682001.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1680771246.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1680856402.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1680861708.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1681731356.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1681736494.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1682611225.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1685717671.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1686311380.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1688991477.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1689847881.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1690458987.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1691414249.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1691585070.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1691742302.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1694430776.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1694503156.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1695642519.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1695731013.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1696251900.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1696347950.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1697027879.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1697637971.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1698240537.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1698317234.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1698325222.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1698326737.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1699274457.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1700052169.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1700155494.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1700156643.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1700218325.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1700226796.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1700836525.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1700858340.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1701122290.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1701158212.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1701177318.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1701960326.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1702035646.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1702460788.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1702556526.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1702902819.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1703683055.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1703699399.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1703781641.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1703849226.yaml
+INFO: Reading resource: db/changelog/2023/db.changelog.2023-1703870458.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1705317236.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1705926021.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1706182121.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1706195834.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1706256750.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1706697179.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1707223893.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1707410493.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1707493941.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1707830306.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1708008531.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1708422200.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1708454777.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1709200711.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1709213392.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1709556890.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1709911879.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1709923081.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1710259200.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1710433870.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1710927463.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1711036819.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1711110668.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1711715137.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1712304293.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1713285723.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1713346975.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1713523458.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1714133198.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1714996790.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1714996791.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1715761133.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1715849097.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1715942283.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1716917525.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1717516827.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1717761934.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1718015897.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1718349690.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1718808860.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1718809358.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1718964674.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1719574677.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1719586424.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1719924987.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1719942876.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1720692840.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1721251702.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1721812560.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1721826965.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1722608689.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1725003540.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1725355522.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1726056101.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1726518816.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1726834127.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1729178570.yaml
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1730111045.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1731687408.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1731687771.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1731925006.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1732818215.sql
+INFO: Reading resource: db/changelog/2024/db.changelog.2024-1733702901.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1739269449.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1739367628.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1739369065.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1740498747.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1740744962.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1742294248.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1742305605.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1742457875.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1742471432.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1742836022.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1743169969.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1744277967.yaml
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1744370736.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1744617643.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1744788106.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1744982944.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1745308085.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1745413931.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1745659800.yaml
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1745704200.yaml
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1745913016.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1747400960.yaml
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1747575185.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1747615296.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1747828945.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1750261347.yaml
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1754321736.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1761497215.yaml
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1762259381.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1762714866.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1762989605.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1765037192.yaml
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1765139416.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1765217136.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1765967609.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1765974132.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1765997667.sql
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1766417998.yaml
+INFO: Reading resource: db/changelog/2025/db.changelog.2025-1768833823.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-05-15-1-create-job-position-test-mapping.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-05-15-2-create-job-position-rating.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-05-15-auto-seniority.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-05-19-1-jpr-source-in-current-index.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-05-20-1-jpr-structure-snapshot.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-06-19-1-talentmetrics.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1769811386.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1769955259.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1770415056.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1770462571.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1770746444.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1770749813.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1770798484.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1770929066.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1770994197.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1771266335.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1771283200.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1771330761.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1771589128.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1771589344.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1771589939.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1771786113.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1771787905.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1772462168.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1772486450.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1773866026.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1775112964.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1775567239.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1776528140.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1777637969.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1777898424.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1778414401.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1778414402.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1778414403.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1778414404.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1778500000.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1778746905.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1779094619.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1779135520.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1779211192.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1779367368.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1780870237-scheduler-readmodel.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1781000000-api-key-company-uuid.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1781345614-outbox-fairness-index.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1781360295-skillset-skill-uuid-index.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1781784907-drop-effective-skill-rated-value.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-1781800000-api-key-service-user-uuid.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-action-item-module.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-add-activity-types-to-plugin-configuration.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-automation-run-dedupe-scope-gin-index.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-child-workflow-support.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-foundation.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-path-definition-and-step.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-path-fix-company-isolation.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-path-nested-path.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-path-step-action.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice2-enrollment.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice3-assignment-dashboard.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice4-activity-files.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice5-scorm.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice6-enrollment-progress.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice7-activity-types-cleanup.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice7-enrollment-pending-uniqueness.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice7c-enrollment-attendance-status.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice8-activity-enrollment-policy.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9-duration-rework.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9a-assignment-group.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9b-assignment-group-activity.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9c-participant-source.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9d-enrollment-group-id-and-policy.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9e-enrollment-idempotency-partial-unique.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9f-backfill-assignments-into-groups.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9g-assignment-group-version.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9j-assignment-group-modified-on.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9k-collapse-activity-into-group.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9l-drop-assignment-group-activity-table.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-slice9m-enrollment-drop-reason.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-task-group.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-task-group2-versioning.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-trainer-list-reshape.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-training-enrollment-mode-nullable.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-z-activity-workflow-binding.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-dac-zz-catalog-visible.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-missing-skill-ratings-action-index.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-performance-review-cycle.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-performance-review-instance.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-performance-review-updates.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-review-cycle-participant-sources.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-review-cycle-preparation-status.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-review-instance-workflow-uuid-index.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-service-account.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-survey-module.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-survey-preview.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-survey-sections.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-survey-translations.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-survey-translations2-contract.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-survey-type-and-scoring.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-survey-type-repeatable-group.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-survey-type-skill-selection.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-task-completion-audit-columns.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-task-completion-open-context-index.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1778414405-backfill-dac-categories.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1780004884-dac-skillcheck-attempt.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1780152455-survey-subject-edition.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1780246479-dac-calendar-sync.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1780401922-dac-edition-coordinators.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1781175843-dac-multiselect-categories.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1781512015-custom-dashboards.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1781512016-dashboard-default-language.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1781512017-system-dashboard.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1784823172-dac-edition-status-sweep.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1784930101-dac-scorm-progress-measure.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-1785169227-spring-batch-job-instance-seq.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-add-dictionary-managed-by.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-iter2-add-reconciliation-step-type.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-iter2-add-skill-classification-question-type.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-iter2-create-development-plan-reconciliation.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-iter2-localize-classification-option-label.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-step-type-registry-dac-binding-seeds.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-workflow-definition-cloned-from-template.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-z-workflow-definition-purpose.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-zz-dac-activity-richtext.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-zz-dac-activity-search-ts.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-zz-dac-edition-richtext.sql
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-zzz-media-asset.yaml
+INFO: Reading resource: db/changelog/2026/db.changelog.2026-zzzz-dev-8102-drop-attendance-nudge-sent-at.sql
+INFO: Creating database history table with name: public.databasechangelog
+INFO: Reading from public.databasechangelog
+INFO: Using deploymentId: 5244787607
+INFO: Reading from public.databasechangelog
+INFO: Primary key added to databasechangelog (id)
+INFO: ChangeSet db/changelog/db.changelog-master.yaml::master-1::maciek ran successfully in 6ms
+INFO: Table company created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-12::system ran successfully in 3ms
+INFO: Table company_career_path created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-13::system ran successfully in 2ms
+INFO: Table company_career_path_item created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-14::system ran successfully in 2ms
+INFO: Table company_promotion_category created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-15::system ran successfully in 3ms
+INFO: Table company_promotion_config created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-16::system ran successfully in 2ms
+INFO: Table devskiller_connection created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-17::system ran successfully in 2ms
+INFO: Table evaluation created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-18::system ran successfully in 3ms
+INFO: Table evaluation_skill created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-19::system ran successfully in 2ms
+INFO: Table evaluation_task created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-20::system ran successfully in 2ms
+INFO: Table evaluation_task_skill created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-21::system ran successfully in 2ms
+INFO: Table evaluations created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-22::system ran successfully in 2ms
+INFO: Table exams created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-23::system ran successfully in 2ms
+INFO: Table goal created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-24::system ran successfully in 2ms
+INFO: Table goal_definition created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-25::system ran successfully in 2ms
+INFO: Table job_position created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-26::system ran successfully in 2ms
+INFO: Table job_position_feeder created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-27::system ran successfully in 3ms
+INFO: Table job_position_skills_goal created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-29::system ran successfully in 2ms
+INFO: Table job_position_skills_goal_definition created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-30::system ran successfully in 1ms
+INFO: Table job_position_skillset_mapping created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-31::system ran successfully in 2ms
+INFO: Table job_position_tag created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-32::system ran successfully in 2ms
+INFO: Table learning_marker_history created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-33::system ran successfully in 2ms
+INFO: Table learning_material created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-34::system ran successfully in 3ms
+INFO: Table learning_material_company_vote_snapshot created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-35::system ran successfully in 3ms
+INFO: Table learning_material_person_vote_snapshot created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-36::system ran successfully in 2ms
+INFO: Table learning_material_skill_ids created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-37::system ran successfully in 1ms
+INFO: Table mail_template created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-38::system ran successfully in 2ms
+INFO: Table message_to_send created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-39::system ran successfully in 2ms
+INFO: Table notification_to_send created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-40::system ran successfully in 2ms
+INFO: Table onboarding created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-41::system ran successfully in 2ms
+INFO: Table onboarding_session created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-42::system ran successfully in 1ms
+INFO: Table onboarding_skillset created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-43::system ran successfully in 1ms
+INFO: Table onboarding_tracking created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-44::system ran successfully in 1ms
+INFO: Table permission created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-45::system ran successfully in 1ms
+INFO: Table person created
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-46::system ran successfully in 6ms
+INFO: Table person_career_path created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-47::system ran successfully in 2ms
+INFO: Table person_custom_fields created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-48::system ran successfully in 1ms
+INFO: Table person_learning_markers created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-51::system ran successfully in 1ms
+INFO: Table person_position_change created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-52::system ran successfully in 2ms
+INFO: Table person_promotion created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-53::system ran successfully in 2ms
+INFO: Table person_promotion_category created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-54::system ran successfully in 1ms
+INFO: Table person_promotion_sent_notification created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-55::system ran successfully in 1ms
+INFO: Table person_promotion_status_change created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-56::system ran successfully in 1ms
+INFO: Table person_roles created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-57::system ran successfully in 2ms
+INFO: Table person_scheduled_anonymization created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-58::system ran successfully in 1ms
+INFO: Table person_skill_custom_fields created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-59::system ran successfully in 2ms
+INFO: Table person_skill_rating created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-61::system ran successfully in 2ms
+INFO: Table person_skill_snapshot created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-62::system ran successfully in 1ms
+INFO: Table person_skill_snapshot_rating_value created
+INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-63::system ran successfully in 2ms
+INFO: Index idx_system_dashboard_module_removed created
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1781512017-system-dashboard.yaml::2026-system-dashboard-1::marek ran successfully in 2ms
+INFO: Custom SQL executed
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1781512017-system-dashboard.yaml::2026-system-dashboard-2::marek ran successfully in 0ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1784823172-dac-edition-status-sweep.sql::dac-edition-status-sweep-1::marek ran successfully in 0ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1784823172-dac-edition-status-sweep.sql::dac-edition-status-sweep-2::marek ran successfully in 0ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1784823172-dac-edition-status-sweep.sql::dac-edition-status-sweep-3::marek ran successfully in 0ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1784823172-dac-edition-status-sweep.sql::dac-edition-status-sweep-4::marek ran successfully in 0ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1784823172-dac-edition-status-sweep.sql::dac-edition-status-sweep-5::marek ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1784823172-dac-edition-status-sweep.sql::dac-edition-status-sweep-6::marek ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1784930101-dac-scorm-progress-measure.sql::dac-scorm-progress-measure-1::kuba ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1785169227-spring-batch-job-instance-seq.yaml::1785169227-1::mariusz ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-add-dictionary-managed-by.sql::add-dictionary-managed-by-1::marek ran successfully in 2ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-iter2-add-reconciliation-step-type.sql::add-reconciliation-step-type-1::marek ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-iter2-add-skill-classification-question-type.sql::add-skill-classification-type-1::marek ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-iter2-create-development-plan-reconciliation.sql::create-development-plan-reconciliation-1::marek ran successfully in 3ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-iter2-localize-classification-option-label.sql::1778007437-1::marek ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-step-type-registry-dac-binding-seeds.sql::step-type-registry-dac-activity-step-seed::kuba ran successfully in 0ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-step-type-registry-dac-binding-seeds.sql::step-type-registry-await-rating-session-seed::kuba ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-step-type-registry-dac-binding-seeds.sql::step-type-registry-task-seed::kuba ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-workflow-definition-cloned-from-template.sql::workflow-definition-cloned-from-template-1::kuba ran successfully in 1ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-workflow-definition-purpose.sql::workflow-definition-purpose-1::kuba ran successfully in 0ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-zz-dac-activity-richtext.sql::dac-richtext-1::marek ran successfully in 4ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-zz-dac-activity-search-ts.sql::dac-activity-search-ts-1::mariusz ran successfully in 5ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-zz-dac-edition-richtext.sql::dac-edition-richtext-1::marek ran successfully in 2ms
+INFO: Table media_asset created
+INFO: Unique constraint added to media_asset(company_uuid, blob_path)
+INFO: Index idx_media_asset_gallery created
+INFO: Index idx_media_asset_owner created
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-zzz-media-asset.yaml::2026-media-asset-1::marek ran successfully in 2ms
+INFO: Custom SQL executed
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-zzzz-dev-8102-drop-attendance-nudge-sent-at.sql::dev-8102-drop-attendance-nudge-sent-at::marek ran successfully in 0ms
+INFO: UPDATE SUMMARY
+INFO: Run:                        733
+INFO: Previously run:               0
+INFO: Filtered out:                 0
+INFO: -------------------------------
+INFO: Total change sets:          733
+INFO: Update summary generated
+INFO: Update command completed successfully.
+INFO: Successfully released change log lock
+INFO: Successfully released change log lock
+INFO: Command execution complete
+⚠️ Your config has 1 warning.
+Found redocly.yaml and using 'openapi' options
+Prerendering docs
+🎉 bundled successfully in: dist/public/docs.html (372 KiB) [⏱ 3ms].
+╔═══════════════════════════════════════════════════════╗
+║                                                       ║
+║  A new version of Redocly CLI (2.41.0) is available.  ║
+║  Update now: `npm i -g @redocly/cli@latest`.          ║
+║  Changelog: https://redocly.com/docs/cli/changelog/   ║
+║                                                       ║
+╚═══════════════════════════════════════════════════════╝
+⚠️ Your config has 1 warning.
+bundling public/openapi.yaml using configuration for api 'public'...
+📦 Created a bundle for public/openapi.yaml at dist/public/openapi.yaml 39ms.
