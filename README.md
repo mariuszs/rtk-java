@@ -186,6 +186,11 @@ enforcer/githook/compiler plugin boilerplate, and duplicated `javac` error locat
 - Command rewriting handles Maven options before the goal (`mvn -T1C clean verify`),
   transparent prefixes (`timeout`, `nice`), single-quoted `bash -c` wrappers, and drops
   trailing `| tail -n` / `| head -n` pipes the agent adds out of habit.
+- A `| grep` stage is left alone on purpose: only the grep is rewritten, never the Maven
+  command, because filtering first would change which lines the grep can match. So
+  `mvn test | grep …` is faithful to raw Maven — but it bypasses the XML enrichment
+  above, and the `Caused by:` chain it recovers is not in stdout to be matched. Run
+  Maven plain unless you specifically want raw stdout.
 - `rtk discover` knows per-goal savings; `rtk gain` tracks `mvn` and `mvnd` separately.
 - Gradle Wrapper (`rtk gradlew`) is inherited from upstream: build / test / connectedTest
   / lint / dependencies.
