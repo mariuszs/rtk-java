@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.devskiller.selfie.domain.CandidateServiceSpec" time="7.972" tests="1" errors="1" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="17"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+  </properties>
+  <testcase name="should update candidate in devskiller" classname="com.devskiller.selfie.domain.CandidateServiceSpec" time="0.001">
+    <error message="Failed to load ApplicationContext for [WebMergedContextConfiguration@5137f7a6 testClass = com.devskiller.selfie.domain.CandidateServiceSpec, locations = [], classes = [com.devskiller.selfie.ReCertApplication], contextInitializerClasses = [], activeProfiles = [&quot;test&quot;], propertySourceLocations = [], propertySourceProperties = [&quot;org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true&quot;], contextCustomizers = [[ImportsContextCustomizer@2b1ad287 key = [org.springframework.cloud.contract.stubrunner.spring.StubRunnerConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.StubRunnerSpringCloudAutoConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.loadbalancer.SpringCloudLoadBalancerAutoConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.eureka.StubRunnerSpringCloudEurekaAutoConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.zookeeper.StubRunnerSpringCloudZookeeperAutoConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.consul.StubRunnerSpringCloudConsulAutoConfiguration, org.springframework.cloud.contract.verifier.messaging.stream.ContractVerifierStreamAutoConfiguration, org.springframework.cloud.contract.verifier.messaging.integration.ContractVerifierIntegrationConfiguration, org.springframework.cloud.contract.verifier.messaging.camel.ContractVerifierCamelConfiguration, org.springframework.cloud.contract.verifier.messaging.jms.ContractVerifierJmsConfiguration, org.springframework.cloud.contract.verifier.messaging.noop.NoOpContractVerifierAutoConfiguration]], org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@5e3d57c7, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@418c5a9c, org.springframework.boot.test.mock.mockito.MockitoContextCustomizer@a908d818, org.springframework.boot.test.web.client.TestRestTemplateContextCustomizer@7b8b43c7, org.springframework.boot.test.autoconfigure.actuate.observability.ObservabilityContextCustomizerFactory$DisableObservabilityContextCustomizer@1f, org.springframework.boot.test.autoconfigure.properties.PropertyMappingContextCustomizer@a4ab692, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverContextCustomizer@3f67593e, org.spockframework.spring.mock.SpockContextCustomizer@0, org.springframework.boot.test.context.SpringBootTestAnnotation@4e05661d], resourceBasePath = &quot;src/main/webapp&quot;, contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]" type="java.lang.IllegalStateException"><![CDATA[java.lang.IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@5137f7a6 testClass = com.devskiller.selfie.domain.CandidateServiceSpec, locations = [], classes = [com.devskiller.selfie.ReCertApplication], contextInitializerClasses = [], activeProfiles = ["test"], propertySourceLocations = [], propertySourceProperties = ["org.springframework.boot.test.context.SpringBootTestContextBootstrapper=true"], contextCustomizers = [[ImportsContextCustomizer@2b1ad287 key = [org.springframework.cloud.contract.stubrunner.spring.StubRunnerConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.StubRunnerSpringCloudAutoConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.loadbalancer.SpringCloudLoadBalancerAutoConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.eureka.StubRunnerSpringCloudEurekaAutoConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.zookeeper.StubRunnerSpringCloudZookeeperAutoConfiguration, org.springframework.cloud.contract.stubrunner.spring.cloud.consul.StubRunnerSpringCloudConsulAutoConfiguration, org.springframework.cloud.contract.verifier.messaging.stream.ContractVerifierStreamAutoConfiguration, org.springframework.cloud.contract.verifier.messaging.integration.ContractVerifierIntegrationConfiguration, org.springframework.cloud.contract.verifier.messaging.camel.ContractVerifierCamelConfiguration, org.springframework.cloud.contract.verifier.messaging.jms.ContractVerifierJmsConfiguration, org.springframework.cloud.contract.verifier.messaging.noop.NoOpContractVerifierAutoConfiguration]], org.springframework.boot.test.context.filter.ExcludeFilterContextCustomizer@5e3d57c7, org.springframework.boot.test.json.DuplicateJsonObjectContextCustomizerFactory$DuplicateJsonObjectContextCustomizer@418c5a9c, org.springframework.boot.test.mock.mockito.MockitoContextCustomizer@a908d818, org.springframework.boot.test.web.client.TestRestTemplateContextCustomizer@7b8b43c7, org.springframework.boot.test.autoconfigure.actuate.observability.ObservabilityContextCustomizerFactory$DisableObservabilityContextCustomizer@1f, org.springframework.boot.test.autoconfigure.properties.PropertyMappingContextCustomizer@a4ab692, org.springframework.boot.test.autoconfigure.web.servlet.WebDriverContextCustomizer@3f67593e, org.spockframework.spring.mock.SpockContextCustomizer@0, org.springframework.boot.test.context.SpringBootTestAnnotation@4e05661d], resourceBasePath = "src/main/webapp", contextLoader = org.springframework.boot.test.context.SpringBootContextLoader, parent = null]
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:143)
+	at org.springframework.test.context.support.DefaultTestContext.getApplicationContext(DefaultTestContext.java:127)
+	at org.springframework.test.context.web.ServletTestExecutionListener.setUpRequestContextIfNecessary(ServletTestExecutionListener.java:191)
+	at org.springframework.test.context.web.ServletTestExecutionListener.prepareTestInstance(ServletTestExecutionListener.java:130)
+	at org.springframework.test.context.TestContextManager.prepareTestInstance(TestContextManager.java:241)
+	at org.spockframework.spring.SpringTestContextManager.prepareTestInstance(SpringTestContextManager.java:56)
+	at org.spockframework.spring.SpringInterceptor.interceptInitializerMethod(SpringInterceptor.java:46)
+	at org.spockframework.runtime.extension.AbstractMethodInterceptor.intercept(AbstractMethodInterceptor.java:24)
+	at org.spockframework.runtime.extension.MethodInvocation.proceed(MethodInvocation.java:101)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$prepare$2(NodeTestTask.java:123)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.prepare(NodeTestTask.java:123)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:90)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.spockframework.runtime.model.MethodInfo.invoke(MethodInfo.java:156)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1511)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:147)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:127)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:90)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:55)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:102)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:54)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:86)
+	at org.junit.platform.launcher.core.DefaultLauncherSession$DelegatingLauncher.execute(DefaultLauncherSession.java:86)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:50)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'syncClientServerWrapper' defined in class path resource [de/flapdoodle/embed/mongo/spring/autoconfigure/EmbeddedMongoAutoConfiguration$SyncClientServerWrapperConfig.class]: rollback after error on transition to State(de.flapdoodle.embed.process.store.ExtractedFileSetStore), State(de.flapdoodle.embed.process.types.ProcessArguments), State(de.flapdoodle.embed.process.store.DownloadCache), State(de.flapdoodle.embed.process.config.store.Package), successful reached:
+  StateID{name=, type=class de.flapdoodle.embed.process.types.ProcessWorkingDir}=ProcessWorkingDir(/tmp/temp--501ffadd-44ac-48cc-ac13-9e8ac21800c5/workingDir3164874863478884781),
+  StateID{name=, type=class de.flapdoodle.embed.process.distribution.Distribution}=GenericFeatureAwareVersion{6.0.6}:Platform{operatingSystem=Linux, architecture=X86_64, distribution=Fedora},
+  StateID{name=, type=interface de.flapdoodle.embed.process.config.SupportConfig}=SupportConfig{name=mongod, supportUrl=https://github.com/flapdoodle-oss/de.flapdoodle.embed.mongo/issues, messageOnException=de.flapdoodle.embed.mongo.transitions.ProcessDefaults$$Lambda$2721/0x00007f1ef9246b70@13808cf6},
+  StateID{name=, type=class de.flapdoodle.embed.process.types.Name}=Name(mongod),
+  StateID{name=, type=class de.flapdoodle.embed.process.io.directories.PersistentDir}=ImmutablePersistentDir(/home/mariusz/.embedmongo),
+  StateID{name=, type=class de.flapdoodle.embed.mongo.types.DatabaseDir}=DatabaseDir(/tmp/temp--501ffadd-44ac-48cc-ac13-9e8ac21800c5/mongod-database958131375670536629),
+  StateID{name=, type=class de.flapdoodle.embed.process.io.directories.TempDir}=ImmutableTempDir(/tmp/temp--501ffadd-44ac-48cc-ac13-9e8ac21800c5),
+  StateID{name=, type=class de.flapdoodle.embed.mongo.types.DistributionBaseUrl}=DistributionBaseUrl(https://fastdl.mongodb.org),
+  StateID{name=, type=class de.flapdoodle.os.Platform}=Platform{operatingSystem=Linux, architecture=X86_64, distribution=Fedora},
+  StateID{name=, type=interface de.flapdoodle.embed.process.types.ProcessConfig}=ProcessConfig{daemonProcess=false, stopTimeoutInMillis=5000},
+  StateID{name=, type=class de.flapdoodle.embed.process.types.ProcessEnv}=ProcessEnv({}),
+  StateID{name=, type=interface de.flapdoodle.embed.process.io.ProcessOutput}=ProcessOutput{output=de.flapdoodle.embed.process.io.Slf4jStreamProcessor@a5810be, error=de.flapdoodle.embed.process.io.Slf4jStreamProcessor@5b863697, commands=de.flapdoodle.embed.process.io.NamedOutputStreamProcessor@2133814d},
+  StateID{name=, type=class de.flapdoodle.embed.mongo.types.SystemEnv}=SystemEnv({PATH=/home/mariusz/.sdkman/candidates/maven/current/bin:/home/mariusz/.cargo/bin:/home/mariusz/.sdkman/candidates/java/current/bin:/home/mariusz/.local/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin, LC_MEASUREMENT=pl_PL.UTF-8, INVOCATION_ID=31cc09dfcf24427888f1aba4ec3d51c2, XAUTHORITY=/run/user/1000/.mutter-Xwaylandauth.SJ7GZ2, VAULT_CACERT=/home/mariusz/.devskiller/vault-ca.pem, LC_TELEPHONE=pl_PL.UTF-8, XMODIFIERS=@im=ibus, GDMSESSION=gnome, XDG_DATA_DIRS=/home/mariusz/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/, LC_TIME=pl_PL.UTF-8, KITTY_INSTALLATION_DIR=/usr/lib64/kitty, DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus, XDG_CURRENT_DESKTOP=GNOME, JOURNAL_STREAM=9:33819, COLORTERM=truecolor, LC_PAPER=pl_PL.UTF-8, USERNAME=mariusz, SESSION_MANAGER=local/unix:@/tmp/.ICE-unix/2614,unix/unix:/tmp/.ICE-unix/2614, LOGNAME=mariusz, MANAGERPID=2510, PWD=/home/mariusz/git/devskiller/selfie, INFOPATH=/home/linuxbrew/.linuxbrew/share/info:/home/linuxbrew/.linuxbrew/share/info:, SYSTEMD_SLEEP_FREEZE_USER_SESSIONS=0, GJS_DEBUG_TOPICS=JS ERROR;JS LOG, SHELL=/usr/bin/fish, VAULT_ADDR=https://vault.devskiller.tech:8200/, LC_ADDRESS=pl_PL.UTF-8, TERMINFO=/usr/lib64/kitty/terminfo, GIO_LAUNCHED_DESKTOP_FILE=/usr/share/applications/kitty.desktop, OLDPWD=/home/mariusz/git/devskiller/selfie, HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar, DEBUGINFOD_IMA_CERT_PATH=/etc/keys/ima, DEBUGINFOD_URLS=https://debuginfod.fedoraproject.org/, SYSTEMD_EXEC_PID=2679, GNOME_SETUP_DISPLAY=:1, XDG_SESSION_DESKTOP=gnome, SHLVL=1, MEMORY_PRESSURE_WRITE=c29tZSAyMDAwMDAgMjAwMDAwMAA=, LC_MONETARY=pl_PL.UTF-8, MANPATH=/home/linuxbrew/.linuxbrew/share/man:/home/linuxbrew/.linuxbrew/share/man:, QT_IM_MODULE=ibus, MEMORY_PRESSURE_WATCH=/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/session.slice/org.gnome.Shell@wayland.service/memory.pressure, TERM=xterm-kitty, LANG=en_US.UTF-8, HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew, MOZ_GMP_PATH=/usr/lib64/mozilla/plugins/gmp-gmpopenh264/system-installed, XDG_SESSION_TYPE=wayland, KITTY_PID=40693, DISPLAY=:0, WAYLAND_DISPLAY=wayland-0, KITTY_PUBLIC_KEY=1:XDrWeXCPU_d@*jPoI|`l$XsZl-gmZSN>+|uiP@5G, HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew, MAVEN_CMD_LINE_ARGS= test, _=/home/mariusz/.sdkman/candidates/java/17.0.12-tem/bin/java, XDG_SESSION_CLASS=user, GDM_LANG=en_US.UTF-8, DESKTOP_SESSION=gnome, MAVEN_PROJECTBASEDIR=/home/mariusz/git/devskiller/selfie, USER=mariusz, DESKTOP_STARTUP_ID=gnome-shell/kitty/2679-4-mariuszlaptop.fritz.box_TIME4436420, XDG_MENU_PREFIX=gnome-, GIO_LAUNCHED_DESKTOP_FILE_PID=40693, LC_NUMERIC=pl_PL.UTF-8, GJS_DEBUG_OUTPUT=stderr, SSH_AUTH_SOCK=/run/user/1000/keyring/ssh, EDITOR=/usr/bin/nano, XDG_RUNTIME_DIR=/run/user/1000, KITTY_WINDOW_ID=2, HOME=/home/mariusz}),
+  StateID{name=, type=interface de.flapdoodle.embed.process.io.progress.ProgressListener}=de.flapdoodle.embed.process.io.progress.Slf4jProgressListener@31ceb54b,
+  StateID{name=, type=class de.flapdoodle.embed.mongo.packageresolver.Command}=MongoD,
+  StateID{name=, type=interface de.flapdoodle.embed.process.distribution.Version}=GenericFeatureAwareVersion{6.0.6},
+  StateID{name=, type=class de.flapdoodle.embed.mongo.config.Net}=Net{bindIp=127.0.0.1, port=40305, isIpv6=false},
+  StateID{name=, type=class de.flapdoodle.embed.mongo.commands.MongodArguments}=MongodArguments{syncDelay=0, useDefaultSyncDelay=false, isVerbose=false, verbosityLevel=1, isQuiet=false, useNoPrealloc=true, useSmallFiles=true, useNoJournal=true, enableTextSearch=false, auth=false, master=false, isConfigServer=false, isShardServer=false, params={}, args={}}
+
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1770)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:598)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:326)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:324)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:200)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:942)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:608)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:734)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:436)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:312)
+	at org.springframework.boot.test.context.SpringBootContextLoader.lambda$loadContext$3(SpringBootContextLoader.java:137)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:58)
+	at org.springframework.util.function.ThrowingSupplier.get(ThrowingSupplier.java:46)
+	at org.springframework.boot.SpringApplication.withHook(SpringApplication.java:1406)
+	at org.springframework.boot.test.context.SpringBootContextLoader$ContextLoaderHook.run(SpringBootContextLoader.java:545)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:137)
+	at org.springframework.boot.test.context.SpringBootContextLoader.loadContext(SpringBootContextLoader.java:108)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContextInternal(DefaultCacheAwareContextLoaderDelegate.java:187)
+	at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:119)
+	... 52 more
+Caused by: java.lang.RuntimeException: rollback after error on transition to State(de.flapdoodle.embed.process.store.ExtractedFileSetStore), State(de.flapdoodle.embed.process.types.ProcessArguments), State(de.flapdoodle.embed.process.store.DownloadCache), State(de.flapdoodle.embed.process.config.store.Package), successful reached:
+  StateID{name=, type=class de.flapdoodle.embed.process.types.ProcessWorkingDir}=ProcessWorkingDir(/tmp/temp--501ffadd-44ac-48cc-ac13-9e8ac21800c5/workingDir3164874863478884781),
+  StateID{name=, type=class de.flapdoodle.embed.process.distribution.Distribution}=GenericFeatureAwareVersion{6.0.6}:Platform{operatingSystem=Linux, architecture=X86_64, distribution=Fedora},
+  StateID{name=, type=interface de.flapdoodle.embed.process.config.SupportConfig}=SupportConfig{name=mongod, supportUrl=https://github.com/flapdoodle-oss/de.flapdoodle.embed.mongo/issues, messageOnException=de.flapdoodle.embed.mongo.transitions.ProcessDefaults$$Lambda$2721/0x00007f1ef9246b70@13808cf6},
+  StateID{name=, type=class de.flapdoodle.embed.process.types.Name}=Name(mongod),
+  StateID{name=, type=class de.flapdoodle.embed.process.io.directories.PersistentDir}=ImmutablePersistentDir(/home/mariusz/.embedmongo),
+  StateID{name=, type=class de.flapdoodle.embed.mongo.types.DatabaseDir}=DatabaseDir(/tmp/temp--501ffadd-44ac-48cc-ac13-9e8ac21800c5/mongod-database958131375670536629),
+  StateID{name=, type=class de.flapdoodle.embed.process.io.directories.TempDir}=ImmutableTempDir(/tmp/temp--501ffadd-44ac-48cc-ac13-9e8ac21800c5),
+  StateID{name=, type=class de.flapdoodle.embed.mongo.types.DistributionBaseUrl}=DistributionBaseUrl(https://fastdl.mongodb.org),
+  StateID{name=, type=class de.flapdoodle.os.Platform}=Platform{operatingSystem=Linux, architecture=X86_64, distribution=Fedora},
+  StateID{name=, type=interface de.flapdoodle.embed.process.types.ProcessConfig}=ProcessConfig{daemonProcess=false, stopTimeoutInMillis=5000},
+  StateID{name=, type=class de.flapdoodle.embed.process.types.ProcessEnv}=ProcessEnv({}),
+  StateID{name=, type=interface de.flapdoodle.embed.process.io.ProcessOutput}=ProcessOutput{output=de.flapdoodle.embed.process.io.Slf4jStreamProcessor@a5810be, error=de.flapdoodle.embed.process.io.Slf4jStreamProcessor@5b863697, commands=de.flapdoodle.embed.process.io.NamedOutputStreamProcessor@2133814d},
+  StateID{name=, type=class de.flapdoodle.embed.mongo.types.SystemEnv}=SystemEnv({PATH=/home/mariusz/.sdkman/candidates/maven/current/bin:/home/mariusz/.cargo/bin:/home/mariusz/.sdkman/candidates/java/current/bin:/home/mariusz/.local/bin:/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin, LC_MEASUREMENT=pl_PL.UTF-8, INVOCATION_ID=31cc09dfcf24427888f1aba4ec3d51c2, XAUTHORITY=/run/user/1000/.mutter-Xwaylandauth.SJ7GZ2, VAULT_CACERT=/home/mariusz/.devskiller/vault-ca.pem, LC_TELEPHONE=pl_PL.UTF-8, XMODIFIERS=@im=ibus, GDMSESSION=gnome, XDG_DATA_DIRS=/home/mariusz/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/, LC_TIME=pl_PL.UTF-8, KITTY_INSTALLATION_DIR=/usr/lib64/kitty, DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus, XDG_CURRENT_DESKTOP=GNOME, JOURNAL_STREAM=9:33819, COLORTERM=truecolor, LC_PAPER=pl_PL.UTF-8, USERNAME=mariusz, SESSION_MANAGER=local/unix:@/tmp/.ICE-unix/2614,unix/unix:/tmp/.ICE-unix/2614, LOGNAME=mariusz, MANAGERPID=2510, PWD=/home/mariusz/git/devskiller/selfie, INFOPATH=/home/linuxbrew/.linuxbrew/share/info:/home/linuxbrew/.linuxbrew/share/info:, SYSTEMD_SLEEP_FREEZE_USER_SESSIONS=0, GJS_DEBUG_TOPICS=JS ERROR;JS LOG, SHELL=/usr/bin/fish, VAULT_ADDR=https://vault.devskiller.tech:8200/, LC_ADDRESS=pl_PL.UTF-8, TERMINFO=/usr/lib64/kitty/terminfo, GIO_LAUNCHED_DESKTOP_FILE=/usr/share/applications/kitty.desktop, OLDPWD=/home/mariusz/git/devskiller/selfie, HOMEBREW_CELLAR=/home/linuxbrew/.linuxbrew/Cellar, DEBUGINFOD_IMA_CERT_PATH=/etc/keys/ima, DEBUGINFOD_URLS=https://debuginfod.fedoraproject.org/, SYSTEMD_EXEC_PID=2679, GNOME_SETUP_DISPLAY=:1, XDG_SESSION_DESKTOP=gnome, SHLVL=1, MEMORY_PRESSURE_WRITE=c29tZSAyMDAwMDAgMjAwMDAwMAA=, LC_MONETARY=pl_PL.UTF-8, MANPATH=/home/linuxbrew/.linuxbrew/share/man:/home/linuxbrew/.linuxbrew/share/man:, QT_IM_MODULE=ibus, MEMORY_PRESSURE_WATCH=/sys/fs/cgroup/user.slice/user-1000.slice/user@1000.service/session.slice/org.gnome.Shell@wayland.service/memory.pressure, TERM=xterm-kitty, LANG=en_US.UTF-8, HOMEBREW_PREFIX=/home/linuxbrew/.linuxbrew, MOZ_GMP_PATH=/usr/lib64/mozilla/plugins/gmp-gmpopenh264/system-installed, XDG_SESSION_TYPE=wayland, KITTY_PID=40693, DISPLAY=:0, WAYLAND_DISPLAY=wayland-0, KITTY_PUBLIC_KEY=1:XDrWeXCPU_d@*jPoI|`l$XsZl-gmZSN>+|uiP@5G, HOMEBREW_REPOSITORY=/home/linuxbrew/.linuxbrew/Homebrew, MAVEN_CMD_LINE_ARGS= test, _=/home/mariusz/.sdkman/candidates/java/17.0.12-tem/bin/java, XDG_SESSION_CLASS=user, GDM_LANG=en_US.UTF-8, DESKTOP_SESSION=gnome, MAVEN_PROJECTBASEDIR=/home/mariusz/git/devskiller/selfie, USER=mariusz, DESKTOP_STARTUP_ID=gnome-shell/kitty/2679-4-mariuszlaptop.fritz.box_TIME4436420, XDG_MENU_PREFIX=gnome-, GIO_LAUNCHED_DESKTOP_FILE_PID=40693, LC_NUMERIC=pl_PL.UTF-8, GJS_DEBUG_OUTPUT=stderr, SSH_AUTH_SOCK=/run/user/1000/keyring/ssh, EDITOR=/usr/bin/nano, XDG_RUNTIME_DIR=/run/user/1000, KITTY_WINDOW_ID=2, HOME=/home/mariusz}),
+  StateID{name=, type=interface de.flapdoodle.embed.process.io.progress.ProgressListener}=de.flapdoodle.embed.process.io.progress.Slf4jProgressListener@31ceb54b,
+  StateID{name=, type=class de.flapdoodle.embed.mongo.packageresolver.Command}=MongoD,
+  StateID{name=, type=interface de.flapdoodle.embed.process.distribution.Version}=GenericFeatureAwareVersion{6.0.6},
+  StateID{name=, type=class de.flapdoodle.embed.mongo.config.Net}=Net{bindIp=127.0.0.1, port=40305, isIpv6=false},
+  StateID{name=, type=class de.flapdoodle.embed.mongo.commands.MongodArguments}=MongodArguments{syncDelay=0, useDefaultSyncDelay=false, isVerbose=false, verbosityLevel=1, isQuiet=false, useNoPrealloc=true, useSmallFiles=true, useNoJournal=true, enableTextSearch=false, auth=false, master=false, isConfigServer=false, isShardServer=false, params={}, args={}}
+
+	at de.flapdoodle.reverse.TransitionWalker.initState(TransitionWalker.java:186)
+	at de.flapdoodle.reverse.TransitionWalker.initState(TransitionWalker.java:65)
+	at de.flapdoodle.embed.mongo.spring.autoconfigure.MongodWrapper.start(MongodWrapper.java:45)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeCustomInitMethod(AbstractAutowireCapableBeanFactory.java:1874)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1827)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1766)
+	... 73 more
+Caused by: java.lang.IllegalArgumentException: could not resolve package for GenericFeatureAwareVersion{6.0.6}:Platform{operatingSystem=Linux, architecture=X86_64, distribution=Fedora}
+--------------
+(os=Windows)
+  (os=Windows and bitSize=B64 and cpuType=X86) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+    url=/windows/mongodb-windows-x86_64-{version}.zip (ZIP(DEV))
+  (os=Windows and bitSize=B64 and cpuType=X86) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23)
+    url=/windows/mongodb-windows-x86_64-{version}.zip (ZIP)
+  (os=Windows and bitSize=B64 and cpuType=X86) and (4.2.5-4.2.24 or 4.2.0-4.2.3)
+    url=/win32/mongodb-win32-x86_64-2012plus-{version}.zip (ZIP)
+  (os=Windows and bitSize=B64 and cpuType=X86) and (4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.0-3.2.22 or 3.0.0-3.0.15)
+    url=/win32/mongodb-win32-x86_64-2008plus-ssl-{version}.zip (ZIP)
+  (os=Windows and bitSize=B64 and cpuType=X86) and (3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.0-3.2.22 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+    url=/win32/mongodb-win32-x86_64-2008plus-{version}.zip (ZIP)
+  (os=Windows and bitSize=B64 and cpuType=X86) and (3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.0-3.2.22 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+    url=/win32/mongodb-win32-x86_64-{version}.zip (ZIP)
+  (os=Windows and bitSize=B32 and cpuType=X86) and (3.5.5 or 3.3.1 or 3.2.0-3.2.22 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+    url=/win32/mongodb-win32-i386-{version}.zip (ZIP)
+(os=OS_X)
+  (os=OS_X and bitSize=B64 and cpuType=ARM) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1)
+    url=/osx/mongodb-macos-arm64-{version}.tgz (TGZ(DEV))
+  (os=OS_X and bitSize=B64 and cpuType=ARM) and (7.0.0 or 6.0.0-6.0.9)
+    url=/osx/mongodb-macos-arm64-{version}.tgz (TGZ)
+  (os=OS_X and bitSize=B64) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+    url=/osx/mongodb-macos-x86_64-{version}.tgz (TGZ(DEV))
+  (os=OS_X and bitSize=B64) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3)
+    url=/osx/mongodb-macos-x86_64-{version}.tgz (TGZ)
+  (os=OS_X and bitSize=B64) and (4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.0-3.2.22 or 3.0.4-3.0.15)
+    url=/osx/mongodb-osx-ssl-x86_64-{version}.tgz (TGZ)
+  (os=OS_X and bitSize=B64) and (3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.0-3.2.22 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+    url=/osx/mongodb-osx-x86_64-{version}.tgz (TGZ)
+(os=Linux)
+  (os=Linux and (version is any of Ubuntu_16_04, Ubuntu_16_10, Ubuntu_18_04, Ubuntu_18_10, Ubuntu_19_04, Ubuntu_19_10, Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1)
+      url=/linux/mongodb-linux-aarch64-ubuntu2204-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0 or 6.0.4-6.0.9)
+      url=/linux/mongodb-linux-aarch64-ubuntu2204-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1)
+      url=/linux/mongodb-linux-x86_64-ubuntu2204-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0 or 6.0.4-6.0.9)
+      url=/linux/mongodb-linux-x86_64-ubuntu2204-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-aarch64-ubuntu2004-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23)
+      url=/linux/mongodb-linux-aarch64-ubuntu2004-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-ubuntu2004-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23)
+      url=/linux/mongodb-linux-x86_64-ubuntu2004-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of Ubuntu_18_04, Ubuntu_18_10, Ubuntu_19_04, Ubuntu_19_10, Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0-rc2 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-aarch64-ubuntu1804-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of Ubuntu_18_04, Ubuntu_18_10, Ubuntu_19_04, Ubuntu_19_10, Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3)
+      url=/linux/mongodb-linux-aarch64-ubuntu1804-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of Ubuntu_18_04, Ubuntu_18_10, Ubuntu_19_04, Ubuntu_19_10, Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (7.0.0-rc2 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-ubuntu1804-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of Ubuntu_18_04, Ubuntu_18_10, Ubuntu_19_04, Ubuntu_19_10, Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3 or 4.0.1-4.0.28 or 3.6.20-3.6.23)
+      url=/linux/mongodb-linux-x86_64-ubuntu1804-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of Ubuntu_16_04, Ubuntu_16_10, Ubuntu_18_04, Ubuntu_18_10, Ubuntu_19_04, Ubuntu_19_10, Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.4.9-3.4.24 or 3.4.0-3.4.7)
+      url=/linux/mongodb-linux-arm64-ubuntu1604-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of Ubuntu_16_04, Ubuntu_16_10, Ubuntu_18_04, Ubuntu_18_10, Ubuntu_19_04, Ubuntu_19_10, Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-ubuntu1604-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of Ubuntu_16_04, Ubuntu_16_10, Ubuntu_18_04, Ubuntu_18_10, Ubuntu_19_04, Ubuntu_19_10, Ubuntu_20_04, Ubuntu_20_10, Ubuntu_21_04, Ubuntu_21_10, Ubuntu_22_04, Ubuntu_22_10, Ubuntu_23_04, Ubuntu_23_10)) and (4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3 or 4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.7-3.2.22)
+      url=/linux/mongodb-linux-x86_64-ubuntu1604-{version}.tgz (TGZ)
+  (os=Linux and (version is any of LINUX_MINT_19_0, LINUX_MINT_19_1, LINUX_MINT_19_2, LINUX_MINT_19_3, LINUX_MINT_20_0, LINUX_MINT_20_1, LINUX_MINT_20_2, LINUX_MINT_20_3, LINUX_MINT_21_0, LINUX_MINT_21_1, LINUX_MINT_21_2, LINUX_MINT_21_3))
+    use Ubuntu_18_04 for LINUX_MINT_19_0, LINUX_MINT_19_1, LINUX_MINT_19_2, LINUX_MINT_19_3 and Ubuntu_20_04 for LINUX_MINT_20_0, LINUX_MINT_20_1, LINUX_MINT_20_2, LINUX_MINT_20_3 and Ubuntu_22_04 for LINUX_MINT_21_0, LINUX_MINT_21_1, LINUX_MINT_21_2, LINUX_MINT_21_3
+  (os=Linux and (version is any of POP_OS_22_4))
+    use Ubuntu_22_04 for POP_OS_22_4
+  (os=Linux and (version is any of DEBIAN_9, DEBIAN_10, DEBIAN_11, DEBIAN_12))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of DEBIAN_11, DEBIAN_12)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1)
+      url=/linux/mongodb-linux-x86_64-debian11-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of DEBIAN_11, DEBIAN_12)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.8-5.0.20)
+      url=/linux/mongodb-linux-x86_64-debian11-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of DEBIAN_10, DEBIAN_11, DEBIAN_12)) and (7.0.0-rc2 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-debian10-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of DEBIAN_10, DEBIAN_11, DEBIAN_12)) and (6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.1-4.2.3)
+      url=/linux/mongodb-linux-x86_64-debian10-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of DEBIAN_9, DEBIAN_10, DEBIAN_11, DEBIAN_12)) and (5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-debian92-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of DEBIAN_9, DEBIAN_10, DEBIAN_11, DEBIAN_12)) and (5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3 or 4.0.0-4.0.28 or 3.6.5-3.6.23)
+      url=/linux/mongodb-linux-x86_64-debian92-{version}.tgz (TGZ)
+  (os=Linux and (version is any of CentOS_6, CentOS_7, CentOS_8, CentOS_9, Redhat_6, Redhat_7, Redhat_8, Redhat_9, Oracle_6, Oracle_7, Oracle_8, Oracle_9))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 6.0.9-rc1)
+      url=/linux/mongodb-linux-aarch64-rhel90-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0 or 6.0.7-6.0.9)
+      url=/linux/mongodb-linux-aarch64-rhel90-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1)
+      url=/linux/mongodb-linux-x86_64-rhel90-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0 or 6.0.4-6.0.9)
+      url=/linux/mongodb-linux-x86_64-rhel90-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of CentOS_8, Redhat_8, Oracle_8, CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-aarch64-rhel82-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of CentOS_8, Redhat_8, Oracle_8, CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.4-4.4.23)
+      url=/linux/mongodb-linux-aarch64-rhel82-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of CentOS_8, Redhat_8, Oracle_8, CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-rhel80-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of CentOS_8, Redhat_8, Oracle_8, CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.1-4.2.3 or 4.0.14-4.0.28 or 3.6.17-3.6.23 or 3.4.24)
+      url=/linux/mongodb-linux-x86_64-rhel80-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of CentOS_7, Redhat_7, Oracle_7, CentOS_8, Redhat_8, Oracle_8, CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-rhel70-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of CentOS_7, Redhat_7, Oracle_7, CentOS_8, Redhat_8, Oracle_8, CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3 or 4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.0-3.2.22 or 3.0.0-3.0.15)
+      url=/linux/mongodb-linux-x86_64-rhel70-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of CentOS_6, Redhat_6, Oracle_6, CentOS_7, Redhat_7, Oracle_7, CentOS_8, Redhat_8, Oracle_8, CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-rhel62-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of CentOS_6, Redhat_6, Oracle_6, CentOS_7, Redhat_7, Oracle_7, CentOS_8, Redhat_8, Oracle_8, CentOS_9, Redhat_9, Oracle_9, Fedora_38)) and (4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3 or 4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.0-3.2.22 or 3.0.0-3.0.15)
+      url=/linux/mongodb-linux-x86_64-rhel62-{version}.tgz (TGZ)
+  (os=Linux and (version is any of AmazonLinux, AmazonLinux2, AmazonLinux2023))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of AmazonLinux2023)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10)
+      url=/linux/mongodb-linux-aarch64-amazon2023-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of AmazonLinux2023)) and (7.0.0)
+      url=/linux/mongodb-linux-aarch64-amazon2023-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux2023)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10)
+      url=/linux/mongodb-linux-x86_64-amazon2023-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux2023)) and (7.0.0)
+      url=/linux/mongodb-linux-x86_64-amazon2023-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of AmazonLinux2)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-aarch64-amazon2-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of AmazonLinux2)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.4-4.4.23 or 4.2.13-4.2.24)
+      url=/linux/mongodb-linux-aarch64-amazon2-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux2)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-amazon2-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux2)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3 or 4.0.0-4.0.28 or 3.6.22-3.6.23)
+      url=/linux/mongodb-linux-x86_64-amazon2-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux)) and (5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-amazon-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux)) and (5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3 or 4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.0-3.2.22 or 3.0.0-3.0.15)
+      url=/linux/mongodb-linux-x86_64-amazon-{version}.tgz (TGZ)
+  (os=Linux)
+    (os=Linux and bitSize=B64 and cpuType=X86) and (4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.5.5 or 3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.3.1 or 3.2.0-3.2.22 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+      url=/linux/mongodb-linux-x86_64-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B32 and cpuType=X86) and (3.5.5 or 3.3.1 or 3.2.0-3.2.22 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+      url=/linux/mongodb-linux-i686-{version}.tgz (TGZ)
+  (os=Linux)
+    fallback to Ubuntu_20_04
+(os=Solaris)
+  (os=Solaris and bitSize=B64 and cpuType=X86) and (3.5.5 or 3.4.0-3.4.5 or 3.3.1 or 3.2.0-3.2.14 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+    url=/sunos5/mongodb-sunos5-x86_64-{version}.tgz (TGZ)
+
+	at de.flapdoodle.embed.mongo.packageresolver.PlatformPackageResolver.lambda$packageFor$0(PlatformPackageResolver.java:63)
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403)
+	at de.flapdoodle.embed.mongo.packageresolver.PlatformPackageResolver.packageFor(PlatformPackageResolver.java:57)
+	at de.flapdoodle.embed.mongo.transitions.PackageOfCommandDistribution.packageOf(PackageOfCommandDistribution.java:53)
+	at de.flapdoodle.embed.mongo.transitions.PackageOfCommandDistribution.result(PackageOfCommandDistribution.java:93)
+	at de.flapdoodle.reverse.TransitionWalker.resolve(TransitionWalker.java:58)
+	at de.flapdoodle.reverse.TransitionWalker.resolve(TransitionWalker.java:46)
+	at de.flapdoodle.reverse.TransitionWalker.initState(TransitionWalker.java:176)
+	... 78 more
+]]></error>
+    <system-out><![CDATA[ of AmazonLinux2023)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10)
+      url=/linux/mongodb-linux-aarch64-amazon2023-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of AmazonLinux2023)) and (7.0.0)
+      url=/linux/mongodb-linux-aarch64-amazon2023-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux2023)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10)
+      url=/linux/mongodb-linux-x86_64-amazon2023-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux2023)) and (7.0.0)
+      url=/linux/mongodb-linux-x86_64-amazon2023-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of AmazonLinux2)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-aarch64-amazon2-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=ARM and (version is any of AmazonLinux2)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.4-4.4.23 or 4.2.13-4.2.24)
+      url=/linux/mongodb-linux-aarch64-amazon2-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux2)) and (7.0.0-rc8 or 7.0.0-rc2 or 7.0.0-rc10 or 7.0.0-rc1 or 6.3.1-6.3.2 or 6.0.9-rc1 or 5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-amazon2-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux2)) and (7.0.0 or 6.0.0-6.0.9 or 5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3 or 4.0.0-4.0.28 or 3.6.22-3.6.23)
+      url=/linux/mongodb-linux-x86_64-amazon2-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux)) and (5.0.20-rc1 or 4.4.24-rc0)
+      url=/linux/mongodb-linux-x86_64-amazon-{version}.tgz (TGZ(DEV))
+    (os=Linux and bitSize=B64 and cpuType=X86 and (version is any of AmazonLinux)) and (5.0.0-5.0.20 or 4.4.0-4.4.23 or 4.2.5-4.2.24 or 4.2.0-4.2.3 or 4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.2.0-3.2.22 or 3.0.0-3.0.15)
+      url=/linux/mongodb-linux-x86_64-amazon-{version}.tgz (TGZ)
+  (os=Linux)
+    (os=Linux and bitSize=B64 and cpuType=X86) and (4.0.0-4.0.28 or 3.6.0-3.6.23 or 3.5.5 or 3.4.9-3.4.24 or 3.4.0-3.4.7 or 3.3.1 or 3.2.0-3.2.22 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+      url=/linux/mongodb-linux-x86_64-{version}.tgz (TGZ)
+    (os=Linux and bitSize=B32 and cpuType=X86) and (3.5.5 or 3.3.1 or 3.2.0-3.2.22 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+      url=/linux/mongodb-linux-i686-{version}.tgz (TGZ)
+  (os=Linux)
+    fallback to Ubuntu_20_04
+(os=Solaris)
+  (os=Solaris and bitSize=B64 and cpuType=X86) and (3.5.5 or 3.4.0-3.4.5 or 3.3.1 or 3.2.0-3.2.14 or 3.0.0-3.0.15 or 2.6.0-2.6.12)
+    url=/sunos5/mongodb-sunos5-x86_64-{version}.tgz (TGZ)
+
+	at de.flapdoodle.embed.mongo.packageresolver.PlatformPackageResolver.lambda$packageFor$0(PlatformPackageResolver.java:63) ~[de.flapdoodle.embed.mongo.packageresolver-4.9.0.jar:na]
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403) ~[na:na]
+	at de.flapdoodle.embed.mongo.packageresolver.PlatformPackageResolver.packageFor(PlatformPackageResolver.java:57) ~[de.flapdoodle.embed.mongo.packageresolver-4.9.0.jar:na]
+	at de.flapdoodle.embed.mongo.transitions.PackageOfCommandDistribution.packageOf(PackageOfCommandDistribution.java:53) ~[de.flapdoodle.embed.mongo-4.9.0.jar:na]
+	at de.flapdoodle.embed.mongo.transitions.PackageOfCommandDistribution.result(PackageOfCommandDistribution.java:93) ~[de.flapdoodle.embed.mongo-4.9.0.jar:na]
+	at de.flapdoodle.reverse.TransitionWalker.resolve(TransitionWalker.java:58) ~[de.flapdoodle.reverse-1.6.0.jar:na]
+	at de.flapdoodle.reverse.TransitionWalker.resolve(TransitionWalker.java:46) ~[de.flapdoodle.reverse-1.6.0.jar:na]
+	at de.flapdoodle.reverse.TransitionWalker.initState(TransitionWalker.java:176) ~[de.flapdoodle.reverse-1.6.0.jar:na]
+	... 96 common frames omitted
+
+]]></system-out>
+    <system-err><![CDATA[
+
+
+============================
+CONDITIONS EVALUATION REPORT
+============================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Negative matches:
+-----------------
+
+    None
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+
+
+
+============================
+CONDITIONS EVALUATION REPORT
+============================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Negative matches:
+-----------------
+
+    None
+
+
+Exclusions:
+-----------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    None
+
+
+
+]]></system-err>
+  </testcase>
+</testsuite>

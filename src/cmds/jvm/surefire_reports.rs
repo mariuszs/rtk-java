@@ -11,6 +11,10 @@ use std::time::SystemTime;
 
 pub const DEFAULT_STACK_TRACE_LINES: usize = 50;
 pub const DEFAULT_PER_TEST_OUTPUT_LIMIT: usize = 2000;
+/// Line budget for captured output, on top of the char limit. A Spring context
+/// failure dumps its `CONDITIONS EVALUATION REPORT` into `system-out`: short
+/// lines, so the char cap alone still lets ~70 of them through.
+pub const DEFAULT_PER_TEST_OUTPUT_LINES: usize = 12;
 const DEFAULT_TOTAL_OUTPUT_LIMIT: usize = 10_000;
 
 #[derive(Debug, Default, PartialEq)]
@@ -201,6 +205,22 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                     }
                 }
             }
+            // Surefire wraps a stack trace in `<![CDATA[…]]>` whenever it
+            // contains characters that would otherwise need escaping — which
+            // is most real traces (generics, `<init>`, `&`). quick-xml reports
+            // those as `CData`, never as `Text`, so without this arm every
+            // CDATA-wrapped report silently loses its trace and the failure is
+            // rendered from the `message` attribute alone.
+            Ok(Event::CData(t)) => {
+                if let Some(field) = capture {
+                    let text = String::from_utf8_lossy(&t);
+                    match field {
+                        CaptureField::StackTrace => stack_buf.push_str(&text),
+                        CaptureField::SystemOut => stdout_buf.push_str(&text),
+                        CaptureField::SystemErr => stderr_buf.push_str(&text),
+                    }
+                }
+            }
             Ok(Event::End(e)) => {
                 match local_name(e.name().as_ref()) {
                     b"failure" | b"error" => {
@@ -283,10 +303,45 @@ fn combine_test_output(stdout: &str, stderr: &str, per_test_limit: usize) -> Opt
         }
         combined.push_str(stderr);
     }
-    Some(truncate_test_output(&combined, per_test_limit))
+    Some(truncate_test_output(&collapse_blank_runs(&combined), per_test_limit))
+}
+
+/// Collapse runs of blank lines to a single one. Spring's
+/// `CONDITIONS EVALUATION REPORT`, dumped into `system-out` on every context
+/// load failure, is ~80 lines of which most are blank — the char cap alone
+/// lets it through as lines the agent still pays for.
+fn keep_last_lines(text: &str, max_lines: usize) -> String {
+    let lines: Vec<&str> = text.lines().collect();
+    if lines.len() <= max_lines {
+        return text.to_string();
+    }
+    let dropped = lines.len() - max_lines;
+    let mut out = format!("... ({dropped} lines truncated)\n");
+    out.push_str(&lines[dropped..].join("\n"));
+    out
+}
+
+fn collapse_blank_runs(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut blank_run = false;
+    for line in text.lines() {
+        if line.trim().is_empty() {
+            if blank_run {
+                continue;
+            }
+            blank_run = true;
+        } else {
+            blank_run = false;
+        }
+        out.push_str(line);
+        out.push('\n');
+    }
+    out.truncate(out.trim_end().len());
+    out
 }
 
 fn truncate_test_output(output: &str, max_chars: usize) -> String {
+    let output = &keep_last_lines(output, DEFAULT_PER_TEST_OUTPUT_LINES);
     let char_count = output.chars().count();
     if char_count <= max_chars {
         return output.to_string();
@@ -491,6 +546,67 @@ mod tests {
         assert_eq!(result.summary.failures, 0);
         assert_eq!(result.summary.errors, 0);
         assert!(result.failures.is_empty());
+    }
+
+    #[test]
+    fn parse_content_cdata_stack_trace_extracted() {
+        // Real report from a Spring context load failure. Surefire wraps the
+        // trace in CDATA, which quick-xml reports as `CData` and never as
+        // `Text` — without that arm the trace was silently dropped and the
+        // failure rendered from the `message` attribute alone. Every real
+        // report on disk uses CDATA; the hand-written fixtures do not, which
+        // is why the unit tests stayed green while the feature was dead.
+        let xml = include_str!(
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.devskiller.selfie.domain.CandidateServiceSpec.xml"
+        );
+        let result = parse_content(xml, &["com.devskiller".to_string()])
+            .expect("context failure testsuite parses");
+        assert_eq!(result.failures.len(), 1);
+        let f = &result.failures[0];
+
+        let trace = f
+            .stack_trace
+            .as_deref()
+            .expect("CDATA stack trace must be captured");
+        assert!(
+            trace.contains("Caused by:"),
+            "the Caused by chain must survive, got:\n{trace}"
+        );
+        assert!(
+            trace.contains("could not resolve package for GenericFeatureAwareVersion"),
+            "the ROOT cause is the line agents grep the tee log for, got:\n{trace}"
+        );
+        assert!(
+            trace.lines().count() <= DEFAULT_STACK_TRACE_LINES,
+            "framework collapsing must keep the trace short, got {} lines",
+            trace.lines().count()
+        );
+    }
+
+    #[test]
+    fn parse_content_cdata_captured_output_line_capped() {
+        // Enabling CDATA also switches on `system-out`, where Spring dumps its
+        // CONDITIONS EVALUATION REPORT: short lines, so the char cap alone let
+        // ~70 of them through.
+        let xml = include_str!(
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.devskiller.selfie.domain.CandidateServiceSpec.xml"
+        );
+        let result = parse_content(xml, &["com.devskiller".to_string()]).expect("parses");
+        let output = result.failures[0]
+            .test_output
+            .as_deref()
+            .expect("captured output present");
+        assert!(
+            output.lines().count() <= DEFAULT_PER_TEST_OUTPUT_LINES + 1,
+            "captured output must be line-capped, got {} lines:\n{output}",
+            output.lines().count()
+        );
+    }
+
+    #[test]
+    fn collapse_blank_runs_keeps_one_separator() {
+        let input = "alpha\n\n\n\nbeta\n\ngamma";
+        assert_eq!(super::collapse_blank_runs(input), "alpha\n\nbeta\n\ngamma");
     }
 
     #[test]
