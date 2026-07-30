@@ -530,6 +530,18 @@ lazy_static! {
     /// matched and stays.
     static ref JUL_LOG_LINE_RE: Regex =
         Regex::new(r"^(?:FINEST|FINER|FINE|CONFIG|INFO|WARNING):\s").unwrap();
+    /// Logback/SLF4J console lines from the application under test
+    /// (`2026-07-29 10:19:14.380  WARN [ , ] --- [main] c.d.Foo : msg`, the
+    /// Spring Boot default pattern with and without the tracing MDC field).
+    /// Same disease as `JUL_LOG_LINE_RE`: no Maven bracket, so under `mvn -q`
+    /// — where the `[INFO] --- plugin ---` markers that drive the noisy-segment
+    /// state are suppressed — a Spring Boot test run streams thousands of them
+    /// straight through. `ERROR`/`FATAL` are NOT matched and stay; the level
+    /// field is anchored so a correlation id like `[ERROR:08de5333-…]` in the
+    /// message body cannot promote a WARN line.
+    static ref LOGBACK_LOG_LINE_RE: Regex =
+        Regex::new(r"^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?:TRACE|DEBUG|INFO|WARN)\b")
+            .unwrap();
     /// Single-quoted spans in codegen plugin chatter (echoed class names).
     static ref QUOTED_SPAN_RE: Regex = Regex::new(r"'[^']*'").unwrap();
     /// Failure keywords on word boundaries — `RestError` must not match.
@@ -1975,19 +1987,27 @@ fn filter_mvn_compile(output: &str) -> String {
         return "[INFO] BUILD SUCCESS".to_string();
     }
 
-    cap_compile_success_lines(&clean, result)
+    cap_compile_lines(&clean, result)
 }
 
-/// Safety net for the hook's dropped trailing `| tail -N`: on BUILD SUCCESS,
-/// an unknown plugin flooding lines the pattern lists don't recognize must
-/// not bill thousands of retained lines — keep the head and elide the rest
-/// with a prefix-preserving count (same idiom as `... +N more failures`).
-/// Failures are never capped: every retained error line is signal.
+/// Safety net for the hook's dropped trailing `| tail -N`: an unknown plugin —
+/// or the application under test — flooding lines the pattern lists don't
+/// recognize must not bill thousands of retained lines. Both outcomes keep the
+/// head and elide the rest with a prefix-preserving count (same idiom as
+/// `... +N more failures`); failures get a far more generous budget because
+/// every retained error line is signal.
 const COMPILE_SUCCESS_LINE_CAP: usize = 60;
 const COMPILE_SUCCESS_HEAD_LINES: usize = 40;
+const COMPILE_FAILURE_LINE_CAP: usize = 200;
+const COMPILE_FAILURE_HEAD_LINES: usize = 160;
+/// How many elided footer lines may be re-emitted after the failure elision.
+const COMPILE_FAILURE_FOOTER_LINES: usize = 8;
 
-fn cap_compile_success_lines(clean: &str, result: String) -> String {
-    if clean.contains("BUILD FAILURE") || !clean.contains("BUILD SUCCESS") {
+fn cap_compile_lines(clean: &str, result: String) -> String {
+    if clean.contains("BUILD FAILURE") {
+        return cap_compile_failure_lines(result);
+    }
+    if !clean.contains("BUILD SUCCESS") {
         return result;
     }
     let total = result.lines().count();
@@ -2003,6 +2023,39 @@ fn cap_compile_success_lines(clean: &str, result: String) -> String {
         capped.push_str("\n[INFO] BUILD SUCCESS");
     }
     capped
+}
+
+/// Cap a failed build's retained lines. `stream.rs` hands the filter
+/// `stdout ++ stderr` (concatenated, not interleaved), so on an app-log-heavy
+/// run the build footer sits in the MIDDLE of the blob — exactly where the
+/// host's truncation window drops it, which is how a real `mvn verify -q` lost
+/// its `Failed to execute goal` cause. Elided footer lines are therefore
+/// re-emitted verbatim at the end, where head+tail truncation preserves them.
+fn cap_compile_failure_lines(result: String) -> String {
+    let total = result.lines().count();
+    if total <= COMPILE_FAILURE_LINE_CAP {
+        return result;
+    }
+    let head: Vec<&str> = result.lines().take(COMPILE_FAILURE_HEAD_LINES).collect();
+    let elided_footer: Vec<&str> = result
+        .lines()
+        .skip(COMPILE_FAILURE_HEAD_LINES)
+        .filter(|line| is_build_footer_line(line))
+        .take(COMPILE_FAILURE_FOOTER_LINES)
+        .collect();
+    let mut capped = head.join("\n");
+    write!(&mut capped, "\n[INFO]   ... +{} more lines", total - head.len()).ok();
+    for line in elided_footer {
+        capped.push('\n');
+        capped.push_str(line);
+    }
+    capped
+}
+
+/// The two lines that carry a failed build's verdict and its cause. Matched by
+/// substring so the `[INFO]`/`[ERROR]` prefix stays part of the re-emitted text.
+fn is_build_footer_line(line: &str) -> bool {
+    line.contains("BUILD FAILURE") || line.contains("Failed to execute goal")
 }
 
 /// Render a one-line reactor summary naming failed modules. Returns `None`
@@ -2272,7 +2325,7 @@ fn should_keep_compile_line(line: &str) -> bool {
         return false;
     }
 
-    if JUL_LOG_LINE_RE.is_match(line) {
+    if JUL_LOG_LINE_RE.is_match(line) || LOGBACK_LOG_LINE_RE.is_match(line) {
         return false;
     }
 
@@ -3905,9 +3958,10 @@ mod tests {
     }
 
     #[test]
-    fn test_compile_failure_output_not_capped() {
-        // The cap is success-only: on BUILD FAILURE every retained error
-        // line is signal and must not be elided.
+    fn test_compile_failure_output_not_capped_within_budget() {
+        // On BUILD FAILURE every retained error line is signal, so the budget
+        // is far more generous than the success cap — a realistic error block
+        // must come through whole.
         let errors: String = (0..120)
             .map(|i| format!("[ERROR] /src/Foo{i}.java:[{i},5] cannot find symbol\n"))
             .collect();
@@ -3920,6 +3974,113 @@ mod tests {
             output.lines().count()
         );
         assert!(!output.contains("... +"), "no elision on failure:\n{output}");
+    }
+
+    #[test]
+    fn test_compile_failure_cap_re_emits_build_footer() {
+        // `stream.rs` hands the filter `stdout ++ stderr`, so a stderr-heavy
+        // run puts the build footer in the MIDDLE of the blob — past the head
+        // cap and inside the host's truncated window. The verdict and its
+        // cause must be re-emitted after the elision.
+        let mut input = String::new();
+        for i in 0..300 {
+            input.push_str(&format!("[ERROR] /src/Foo{i}.java:[{i},5] cannot find symbol\n"));
+        }
+        input.push_str("[INFO] BUILD FAILURE\n");
+        input.push_str(
+            "[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.3.0:exec \
+             (bundle-install) on project api: Command execution failed.\n",
+        );
+        for i in 0..50 {
+            input.push_str(&format!("[ERROR] /src/Bar{i}.java:[{i},5] cannot find symbol\n"));
+        }
+        let output = filter_mvn_compile(&input);
+
+        assert!(
+            output.contains("... +"),
+            "elision line must report suppressed line count, got:\n{output}"
+        );
+        let tail: Vec<&str> = output.lines().rev().take(3).collect();
+        assert!(
+            tail.iter().any(|l| l.contains("BUILD FAILURE")),
+            "BUILD FAILURE must be re-emitted at the end, got tail:\n{tail:?}"
+        );
+        assert!(
+            tail.iter().any(|l| l.contains("Failed to execute goal")),
+            "the failure cause must be re-emitted at the end, got tail:\n{tail:?}"
+        );
+    }
+
+    #[test]
+    fn test_compile_quiet_springboot_logs_dropped() {
+        // Real `./mvnw verify -q` from the api repo (2026-07-29): `-q` gates
+        // the `T E S T S` marker, so the test filter falls back here — and the
+        // application's Logback console lines have no Maven bracket, so they
+        // used to stream through untouched. 7500/7500 billable tokens, and the
+        // host's mid-blob truncation ate the `Failed to execute goal` cause.
+        let input =
+            include_str!("../../../tests/fixtures/mvn_verify_quiet_springboot_logs_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        assert!(
+            !output.lines().any(|l| LOGBACK_LOG_LINE_RE.is_match(l)),
+            "Logback TRACE/DEBUG/INFO/WARN console lines must be dropped, got:\n{output}"
+        );
+        assert!(
+            output.contains("BUILD FAILURE"),
+            "the native verdict must survive, got:\n{output}"
+        );
+        assert!(
+            output.contains("Failed to execute goal"),
+            "the failure cause must survive, got:\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_compile_quiet_springboot_logs_savings() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_verify_quiet_springboot_logs_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        let input_tokens = tracking::billable_tokens(input);
+        let output_tokens = tracking::billable_tokens(&output);
+        let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
+
+        assert!(
+            savings >= 90.0,
+            "mvn -q verify Spring Boot logs: expected >=90% savings, got {:.1}% ({} -> {} tokens)\nOutput:\n{}",
+            savings,
+            input_tokens,
+            output_tokens,
+            output,
+        );
+    }
+
+    #[test]
+    fn test_logback_error_level_kept() {
+        // Only TRACE/DEBUG/INFO/WARN are noise — an app-level ERROR is the
+        // failure signal. A correlation id like `[ERROR:…]` in a WARN line's
+        // message body must NOT promote it.
+        let input = "\
+2026-07-29 10:19:14.426  WARN [ , ] --- [main] c.d.a.ExceptionController : [ERROR:08de5333] Unusual situation(code:404)
+2026-07-29 10:19:15.001 ERROR [ , ] --- [main] c.d.a.Boom : context load failed
+2026-07-29 10:19:15.002  INFO 12345 --- [main] c.d.a.Started : started in 3.1s
+[INFO] BUILD FAILURE
+";
+        let output = filter_mvn_compile(input);
+
+        assert!(
+            output.contains("context load failed"),
+            "ERROR-level app logs must be kept, got:\n{output}"
+        );
+        assert!(
+            !output.contains("Unusual situation"),
+            "a WARN line carrying an [ERROR:id] correlation id must still drop, got:\n{output}"
+        );
+        assert!(
+            !output.contains("started in 3.1s"),
+            "INFO without the tracing MDC field must drop too, got:\n{output}"
+        );
     }
 
     #[test]
