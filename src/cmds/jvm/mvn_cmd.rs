@@ -1370,15 +1370,24 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         if let Some(kind_label) = failure_kind_label(f) {
             writeln!(out, "[ERROR]     {kind_label}").ok();
         }
-        if let Some(trace) = &f.stack_trace {
-            for line in trace.lines() {
-                writeln!(out, "[ERROR]       {line}").ok();
+        // Spring's own words for a cascade: the context already failed for an
+        // earlier test in this run and it is "skipping repeated attempt". The
+        // trace and captured output are then a verbatim repeat of the first
+        // failure's — a Spring Boot suite routinely turns one broken context
+        // into a dozen of these. The name line still lands (agents grep it);
+        // only the repeated body is dropped, so every emitted line stays a
+        // native subset with no invented prose.
+        if !is_context_failure_cascade(f) {
+            if let Some(trace) = &f.stack_trace {
+                for line in trace.lines() {
+                    writeln!(out, "[ERROR]       {line}").ok();
+                }
             }
-        }
-        if let Some(output) = f.test_output.as_deref().filter(|s| !s.is_empty()) {
-            writeln!(out, "[ERROR]     captured output:").ok();
-            for line in output.lines() {
-                writeln!(out, "[ERROR]       {line}").ok();
+            if let Some(output) = f.test_output.as_deref().filter(|s| !s.is_empty()) {
+                writeln!(out, "[ERROR]     captured output:").ok();
+                for line in output.lines() {
+                    writeln!(out, "[ERROR]       {line}").ok();
+                }
             }
         }
         out.push('\n');
@@ -1391,6 +1400,15 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         )
         .ok();
     }
+}
+
+/// True for Spring's `ApplicationContext failure threshold (N) exceeded:
+/// skipping repeated attempt to load context …` — a follow-on of an earlier
+/// context load failure in the same run, carrying no new diagnostic.
+fn is_context_failure_cascade(f: &TestFailure) -> bool {
+    f.message
+        .as_deref()
+        .is_some_and(|m| m.contains("ApplicationContext failure threshold"))
 }
 
 fn failure_kind_label(f: &TestFailure) -> Option<String> {
@@ -5343,6 +5361,54 @@ mod tests {
     // same assertions), and with reports present it would duplicate
     // enrich_pass_small_run_inlines_classes_and_carries_digest /
     // enrich_pass_large_run_defers_to_digest. No unique invariant survives.
+
+    #[test]
+    fn render_failure_block_collapses_context_cascades() {
+        // One broken Spring context fails the first test and then turns every
+        // later test in the same class into an "ApplicationContext failure
+        // threshold (1) exceeded" repeat. Only the first carries a diagnostic;
+        // the rest must keep their name line and lose the repeated body.
+        let failure = |method: &str, message: &str| TestFailure {
+            test_class: "com.devskiller.app.GitServiceSpec".into(),
+            test_method: method.into(),
+            kind: FailureKind::Error,
+            message: Some(message.into()),
+            failure_type: Some("java.lang.IllegalStateException".into()),
+            stack_trace: Some(
+                "java.lang.IllegalStateException: Failed to load ApplicationContext\n\t... 53 framework frames omitted\nCaused by: java.lang.IllegalArgumentException: could not resolve package"
+                    .into(),
+            ),
+            test_output: Some("CONDITIONS EVALUATION REPORT".into()),
+        };
+        let failures = vec![
+            failure("should return url", "Failed to load ApplicationContext for [WebMergedContextConfiguration@3a3f3380 testClass = ...]"),
+            failure("should return url for tasks", "ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context for [WebMergedContextConfiguration@3a3f3380 ...]"),
+            failure("should fail when git returns 500", "ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context for [WebMergedContextConfiguration@3a3f3380 ...]"),
+        ];
+
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &failures);
+
+        assert_eq!(
+            out.matches("could not resolve package").count(),
+            1,
+            "the root cause must be rendered once, not per cascaded test:\n{out}"
+        );
+        assert_eq!(
+            out.matches("<<< FAILURE!").count(),
+            3,
+            "every failing test name must still be greppable:\n{out}"
+        );
+        assert!(
+            out.contains("ApplicationContext failure threshold (1) exceeded"),
+            "Spring's own cascade wording stays as the label:\n{out}"
+        );
+        assert_eq!(
+            out.matches("CONDITIONS EVALUATION REPORT").count(),
+            1,
+            "captured output must not repeat per cascade:\n{out}"
+        );
+    }
 
     #[test]
     fn snapshot_enriched_surefire_only() {
