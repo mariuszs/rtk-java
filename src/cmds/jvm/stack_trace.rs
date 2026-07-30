@@ -7,6 +7,32 @@
 const MAX_HEADER_LENGTH: usize = 200;
 const DEFAULT_ROOT_CAUSE_APP_FRAMES: usize = 10;
 
+/// Bare-text JVM runtime warnings that a forked test JVM (or Maven 4's own
+/// process) writes to stderr on every run: byte-buddy/Mockito dynamic-agent
+/// self-attach banners, JDK dynamic-agent-loading deprecation hints, and
+/// Maven 4 final-field-mutation warnings. No `[INFO]/[ERROR]` prefix, never
+/// actionable — and because stderr is concatenated after stdout they get
+/// appended verbatim even to otherwise-clean `BUILD SUCCESS` output.
+/// Matched by prefix on the already-trimmed line.
+const JVM_RUNTIME_NOISE_PREFIXES: &[&str] = &[
+    "WARNING: A Java agent has been loaded dynamically",
+    "WARNING: If a serviceability tool is",
+    "WARNING: Dynamic loading of agents will be disallowed",
+    "WARNING: Final field ",
+    "WARNING: Use --enable-final-field-mutation",
+    "WARNING: Mutating final fields will be blocked",
+    "Mockito is currently self-attaching",
+    "OpenJDK 64-Bit Server VM warning",
+];
+
+/// Returns true for per-JVM-launch warning boilerplate (dynamic agent
+/// loading, Mockito self-attach, Maven 4 final-field mutation). Shared by
+/// the mvn stdout filters and the surefire captured-output leash.
+pub(crate) fn is_jvm_runtime_noise(line: &str) -> bool {
+    let t = line.trim_start();
+    JVM_RUNTIME_NOISE_PREFIXES.iter().any(|p| t.starts_with(p))
+}
+
 #[derive(Debug, PartialEq)]
 struct Segment {
     header: String,

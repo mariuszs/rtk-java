@@ -286,6 +286,11 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
 }
 
 fn combine_test_output(stdout: &str, stderr: &str, per_test_limit: usize) -> Option<String> {
+    // Drop per-JVM-launch warning boilerplate (byte-buddy/Mockito agent
+    // banners) first: with the 12-line tail budget they would otherwise
+    // crowd out the content the agent actually needs.
+    let stdout = drop_jvm_runtime_noise(stdout);
+    let stderr = drop_jvm_runtime_noise(stderr);
     let stdout = stdout.trim();
     let stderr = stderr.trim();
     if stdout.is_empty() && stderr.is_empty() {
@@ -304,6 +309,22 @@ fn combine_test_output(stdout: &str, stderr: &str, per_test_limit: usize) -> Opt
         combined.push_str(stderr);
     }
     Some(truncate_test_output(&collapse_blank_runs(&combined), per_test_limit))
+}
+
+/// Remove bare-text JVM agent/self-attach warning lines from a captured
+/// output block. Returns the input unchanged (no reallocation churn beyond
+/// the single rebuild) when nothing matches.
+fn drop_jvm_runtime_noise(text: &str) -> String {
+    if !text
+        .lines()
+        .any(stack_trace::is_jvm_runtime_noise)
+    {
+        return text.to_string();
+    }
+    text.lines()
+        .filter(|l| !stack_trace::is_jvm_runtime_noise(l))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// Collapse runs of blank lines to a single one. Spring's
@@ -601,6 +622,45 @@ mod tests {
             "captured output must be line-capped, got {} lines:\n{output}",
             output.lines().count()
         );
+    }
+
+    #[test]
+    fn combine_output_drops_jvm_agent_noise() {
+        // byte-buddy/Mockito self-attach banners open every forked test JVM's
+        // stderr; with the 12-line tail budget they crowd out real content.
+        let stderr = "\
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK.
+WARNING: A Java agent has been loaded dynamically (/x/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+real stderr content the agent needs";
+        let out = super::combine_test_output("", stderr, 2000).expect("captured output");
+        assert!(out.contains("real stderr content"), "real line dropped: {out}");
+        assert!(
+            !out.contains("Mockito is currently self-attaching"),
+            "Mockito banner leaked: {out}"
+        );
+        assert!(
+            !out.contains("Java agent has been loaded"),
+            "agent-load warning leaked: {out}"
+        );
+        assert!(
+            !out.contains("serviceability tool"),
+            "serviceability hint leaked: {out}"
+        );
+    }
+
+    #[test]
+    fn combine_output_all_noise_yields_none_marker_free_stderr() {
+        // If stderr is nothing but agent noise, the [STDERR] marker must not
+        // appear for an effectively-empty block.
+        let stderr = "\
+WARNING: A Java agent has been loaded dynamically (/x/byte-buddy-agent.jar)
+WARNING: Dynamic loading of agents will be disallowed by default in a future release";
+        let out = super::combine_test_output("stdout line", stderr, 2000).expect("captured output");
+        assert!(out.contains("stdout line"));
+        assert!(!out.contains("[STDERR]"), "empty STDERR block leaked: {out}");
     }
 
     #[test]

@@ -4,6 +4,7 @@
 //! Preamble -> Testing -> Summary -> Done.
 //! Strips thousands of noise lines to compact failure reports (99%+ savings).
 
+use crate::cmds::jvm::stack_trace;
 use crate::cmds::jvm::surefire_reports::{self, FailureKind, SurefireResult, TestFailure, TestSummary};
 use crate::core::runner;
 use crate::core::tracking;
@@ -149,6 +150,11 @@ fn is_mvn_startup_noise(line: &str) -> bool {
         if t.starts_with(p) {
             return true;
         }
+    }
+
+    // Dynamic-agent / Mockito self-attach / Maven 4 final-field warnings
+    if stack_trace::is_jvm_runtime_noise(t) {
+        return true;
     }
 
     // `mvn -V` environment banner
@@ -4602,6 +4608,59 @@ mod tests {
             "mvn checkstyle clean (native): expected >=60% savings, got {:.1}%",
             savings
         );
+    }
+
+    #[test]
+    fn test_filter_checkstyle_drops_agent_and_final_field_warnings() {
+        // Real leak observed 2026-07-30: Maven 4.0.0-rc-5 on Java 25 appends
+        // final-field-mutation warnings after BUILD SUCCESS (stderr is
+        // concatenated after stdout), and byte-buddy/Mockito dynamic-agent
+        // warnings ride along on any goal that forks a test JVM. None of it
+        // is actionable; it was appended verbatim to every auth run.
+        let input = "\
+[INFO] You have 0 Checkstyle violations.
+[INFO] BUILD SUCCESS
+WARNING: A Java agent has been loaded dynamically (/home/x/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: Final field modelId in class org.apache.maven.api.model.InputSource has been mutated reflectively by class org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState in unnamed module @6dddd4d9 (file:/home/x/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/lib/maven-impl-4.0.0-rc-5.jar)
+WARNING: Use --enable-final-field-mutation=ALL-UNNAMED to avoid a warning
+WARNING: Mutating final fields will be blocked in a future release unless final field mutation is enabled
+";
+        let output = filter_mvn_checkstyle(input);
+
+        assert!(output.contains("0 Checkstyle violations"));
+        assert!(output.contains("BUILD SUCCESS"));
+        assert!(
+            !output.contains("WARNING:"),
+            "JVM/agent warnings leaked: {output}"
+        );
+        assert!(
+            !output.contains("Mockito"),
+            "Mockito self-attach banner leaked: {output}"
+        );
+    }
+
+    #[test]
+    fn test_should_keep_compile_line_drops_agent_warnings() {
+        // Same noise family on the compile path (shared is_mvn_startup_noise).
+        for line in [
+            "WARNING: A Java agent has been loaded dynamically (/x/byte-buddy-agent-1.17.8.jar)",
+            "WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning",
+            "WARNING: Dynamic loading of agents will be disallowed by default in a future release",
+            "WARNING: Final field modelId in class org.apache.maven.api.model.InputSource has been mutated reflectively by class X",
+            "WARNING: Use --enable-final-field-mutation=ALL-UNNAMED to avoid a warning",
+            "WARNING: Mutating final fields will be blocked in a future release unless final field mutation is enabled",
+            "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK.",
+            "OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended",
+        ] {
+            assert!(
+                !should_keep_compile_line(line),
+                "compile filter kept JVM/agent noise: {line}"
+            );
+        }
     }
 
     #[test]
