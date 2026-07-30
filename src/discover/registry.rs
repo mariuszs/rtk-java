@@ -2007,6 +2007,28 @@ mod tests {
     }
 
     #[test]
+    fn test_rewrite_mvnw_process_classes() {
+        // `process-classes` routes to the compile filter (COMPILE_LIKE_GOALS)
+        // but was missing from the rewrite alternation, so a real auth run
+        // shipped 6845 chars of `[INFO] [stdout] Parsing '…'` codegen chatter
+        // that the filter drops outright.
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw process-classes -Dskip.npm", &[]),
+            Some("rtk mvn process-classes -Dskip.npm".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_mvnw_test_compile() {
+        // Matches via `test\b` + the `-` word boundary rather than its own
+        // alternative — lock the behaviour in so a pattern edit cannot drop it.
+        assert_eq!(
+            rewrite_command_no_prefixes("./mvnw test-compile -q", &[]),
+            Some("rtk mvn test-compile -q".into())
+        );
+    }
+
+    #[test]
     fn test_mvn_pipe_with_grep_not_rewritten() {
         // Non-truncation stages change semantics, so the mvn drop rule does not
         // apply — and a non-final pipeline stage is never rewritten on its own,

@@ -756,7 +756,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^(?:\.\/?)?mvnw?\s+(?:\S+\s+)*(test|verify|compile|package|clean|install|integration-test|deploy|dependency:tree|checkstyle:check|checkstyle|failsafe:integration-test|failsafe:verify|surefire:test|dependency:list)\b",
+        pattern: r"^(?:\.\/?)?mvnw?\s+(?:\S+\s+)*(test|verify|compile|package|clean|install|integration-test|deploy|dependency:tree|checkstyle:check|checkstyle|failsafe:integration-test|failsafe:verify|surefire:test|dependency:list|process-classes)\b",
         rtk_cmd: "rtk mvn",
         rewrite_prefixes: &["mvn", "mvnw", "./mvnw"],
         category: "Build",
@@ -765,7 +765,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^mvnd\s+(?:\S+\s+)*(test|verify|compile|package|clean|install|integration-test|deploy|dependency:tree|checkstyle:check|checkstyle|failsafe:integration-test|failsafe:verify|surefire:test|dependency:list)\b",
+        pattern: r"^mvnd\s+(?:\S+\s+)*(test|verify|compile|package|clean|install|integration-test|deploy|dependency:tree|checkstyle:check|checkstyle|failsafe:integration-test|failsafe:verify|surefire:test|dependency:list|process-classes)\b",
         rtk_cmd: "rtk mvnd",
         rewrite_prefixes: &["mvnd"],
         category: "Build",
