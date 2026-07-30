@@ -9,12 +9,12 @@ use crate::core::runner;
 use crate::core::tracking;
 use crate::core::utils::{exit_code_from_status, resolved_command, strip_ansi, truncate};
 use anyhow::{Context, Result};
-use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashSet;
 use std::ffi::OsString;
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
+use std::sync::LazyLock;
 
 const INFO_TAG: &str = "[INFO]";
 const ERROR_TAG: &str = "[ERROR]";
@@ -23,17 +23,14 @@ const DEBUG_TAG: &str = "[DEBUG]";
 
 const MAX_FAILURES_PER_SOURCE: usize = 10;
 
-lazy_static! {
-    static ref TESTS_RUN_RE: Regex =
-        Regex::new(r"Tests run:\s*(\d+),\s*Failures:\s*(\d+),\s*Errors:\s*(\d+),\s*Skipped:\s*(\d+)")
-            .unwrap();
-    static ref FAILURE_HEADER_RE: Regex =
-        Regex::new(r"^\[ERROR\]\s+(\S+\.\S+)\s+--\s+Time elapsed:.*<<<\s+(FAILURE|ERROR)!")
-            .unwrap();
-    static ref TOTAL_TIME_RE: Regex =
-        Regex::new(r"Total time:\s+(.+)")
-            .unwrap();
-}
+static TESTS_RUN_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"Tests run:\s*(\d+),\s*Failures:\s*(\d+),\s*Errors:\s*(\d+),\s*Skipped:\s*(\d+)").unwrap()
+});
+static FAILURE_HEADER_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\[ERROR\]\s+(\S+\.\S+)\s+--\s+Time elapsed:.*<<<\s+(FAILURE|ERROR)!").unwrap()
+});
+static TOTAL_TIME_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"Total time:\s+(.+)").unwrap());
 
 /// Parse `Total time: <value>` from a Maven line already passed through
 /// `strip_maven_prefix`. Returns the trimmed value borrowed from the input.
@@ -43,58 +40,53 @@ fn parse_total_time(stripped: &str) -> Option<&str> {
         .and_then(|caps| caps.get(1).map(|m| m.as_str().trim()))
 }
 
-lazy_static! {
-    /// Code generator config params: `dialect                : POSTGRES_15`
-    /// Also matches parens/hyphens in keys: `interfaces (immutable) : false`
-    static ref CODEGEN_CONFIG_RE: Regex =
-        Regex::new(r"^[\w][\w\s()\-]*\s{2,}:(\s|$)")
-            .unwrap();
-    /// Frontend bundle size lines: `257.55 kB  build/static/js/main.js`
-    static ref BUNDLE_SIZE_RE: Regex =
-        Regex::new(r"^\d[\d.]*\s+[kKMG]?B\s")
-            .unwrap();
-    /// Reactor Build Order line, two accepted formats:
-    ///   - `<module name>   [pom|jar|war|ear]` (classic, verbose mode)
-    ///   - `<module name>   <version>`           (mvn 3.9.x default, where
-    ///                                            `<version>` starts with a digit)
-    /// Expects input already passed through `strip_maven_prefix`.
-    static ref REACTOR_BUILD_ORDER_RE: Regex =
-        Regex::new(r"^\S.*\s+(?:\[(?:pom|jar|war|ear)\]|\d\S*)\s*$")
-            .unwrap();
-    /// Reactor Summary per-module line:
-    /// `<module> ...... SUCCESS [  0.234 s]` (also FAILURE, SKIPPED).
-    /// Expects input already passed through `strip_maven_prefix`. Capture
-    /// groups: 1=name, 2=status. The trailing `[time]` segment is required
-    /// to match but not captured — we don't use per-module timing.
-    static ref REACTOR_SUMMARY_LINE_RE: Regex =
-        Regex::new(r"^(\S.*?)\s*\.{2,}\s*(SUCCESS|FAILURE|SKIPPED)\s*\[[^\]]*\]\s*$")
-            .unwrap();
-    /// Javac error location: `[ERROR] /path/File.java:[line,col] message`
-    /// Capture groups: 1=path, 2=line, 3=col. Used for error dedup.
-    static ref COMPILE_ERROR_LOCATION_RE: Regex =
-        Regex::new(r"^\[ERROR\]\s+(\S+?):\[(\d+),(\d+)\]")
-            .unwrap();
-    /// Javac context line attached to a previous error:
-    /// `[ERROR]   symbol:   ...`, `[ERROR]   location: ...`, required/found/reason.
-    static ref COMPILE_ERROR_CONTEXT_RE: Regex =
-        Regex::new(r"^\[ERROR\]\s+(?:symbol|location|required|found|reason):")
-            .unwrap();
-    /// Checkstyle violation lines:
-    /// `[ERROR] <path>:[<line>[,<col>]] (<category>) <Rule>: <msg>`
-    /// (also matches `[WARN]` severity for plugins configured with warn level).
-    static ref CHECKSTYLE_VIOLATION_RE: Regex =
-        Regex::new(r"^\[(?:ERROR|WARN)\] (.+?):\[(\d+)(?:,(\d+))?\] \(\w+\) (\w+): (.+)$")
-            .unwrap();
-    /// mvnd / maven 3.9+ extension-loader noise:
-    /// `[INFO] Loaded 22539 auto-discovered prefixes for remote repository central (...)`
-    static ref PREFIX_LOAD_RE: Regex =
-        Regex::new(r"Loaded\s+\d+\s+auto-discovered prefixes").unwrap();
-    /// maven-enforcer per-rule `passed` notification — one line per rule on
-    /// every successful build. Format: `Rule <n>: <fqcn> passed`. Expects
-    /// input already passed through `strip_maven_prefix`.
-    static ref ENFORCER_RULE_PASSED_RE: Regex =
-        Regex::new(r"^Rule \d+: \S+ passed").unwrap();
-}
+/// Code generator config params: `dialect                : POSTGRES_15`
+/// Also matches parens/hyphens in keys: `interfaces (immutable) : false`
+static CODEGEN_CONFIG_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[\w][\w\s()\-]*\s{2,}:(\s|$)").unwrap());
+/// Frontend bundle size lines: `257.55 kB  build/static/js/main.js`
+static BUNDLE_SIZE_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\d[\d.]*\s+[kKMG]?B\s").unwrap());
+/// Reactor Build Order line, two accepted formats:
+/// - `<module name>   [pom|jar|war|ear]` (classic, verbose mode)
+/// - `<module name>   <version>` (mvn 3.9.x default, where `<version>`
+///   starts with a digit)
+///
+/// Expects input already passed through `strip_maven_prefix`.
+static REACTOR_BUILD_ORDER_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\S.*\s+(?:\[(?:pom|jar|war|ear)\]|\d\S*)\s*$").unwrap());
+/// Reactor Summary per-module line:
+/// `<module> ...... SUCCESS [  0.234 s]` (also FAILURE, SKIPPED).
+/// Expects input already passed through `strip_maven_prefix`. Capture
+/// groups: 1=name, 2=status. The trailing `[time]` segment is required
+/// to match but not captured — we don't use per-module timing.
+static REACTOR_SUMMARY_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(\S.*?)\s*\.{2,}\s*(SUCCESS|FAILURE|SKIPPED)\s*\[[^\]]*\]\s*$").unwrap()
+});
+/// Javac error location: `[ERROR] /path/File.java:[line,col] message`
+/// Capture groups: 1=path, 2=line, 3=col. Used for error dedup.
+static COMPILE_ERROR_LOCATION_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\[ERROR\]\s+(\S+?):\[(\d+),(\d+)\]").unwrap());
+/// Javac context line attached to a previous error:
+/// `[ERROR]   symbol:   ...`, `[ERROR]   location: ...`, required/found/reason.
+static COMPILE_ERROR_CONTEXT_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\[ERROR\]\s+(?:symbol|location|required|found|reason):").unwrap()
+});
+/// Checkstyle violation lines:
+/// `[ERROR] <path>:[<line>[,<col>]] (<category>) <Rule>: <msg>`
+/// (also matches `[WARN]` severity for plugins configured with warn level).
+static CHECKSTYLE_VIOLATION_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\[(?:ERROR|WARN)\] (.+?):\[(\d+)(?:,(\d+))?\] \(\w+\) (\w+): (.+)$").unwrap()
+});
+/// mvnd / maven 3.9+ extension-loader noise:
+/// `[INFO] Loaded 22539 auto-discovered prefixes for remote repository central (...)`
+static PREFIX_LOAD_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"Loaded\s+\d+\s+auto-discovered prefixes").unwrap());
+/// maven-enforcer per-rule `passed` notification — one line per rule on
+/// every successful build. Format: `Rule <n>: <fqcn> passed`. Expects
+/// input already passed through `strip_maven_prefix`.
+static ENFORCER_RULE_PASSED_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^Rule \d+: \S+ passed").unwrap());
 
 /// JVM warning lines emitted by Java 24+ (restricted methods, native access,
 /// terminally-deprecated Unsafe). These have NO `[INFO]/[ERROR]/[WARNING]`
@@ -124,13 +116,10 @@ const MVN_ENV_BANNER_PREFIXES: &[&str] = &[
     "Terminal: ",
 ];
 
-lazy_static! {
-    /// java.util.logging header emitted by GCP libraries near end of build:
-    ///   `Apr 18, 2026 12:19:27 AM com.google.auth.oauth2.X warnY`
-    static ref JUL_LOG_HEADER_RE: Regex =
-        Regex::new(r"^\w{3} \d{1,2}, \d{4} \d{1,2}:\d{2}:\d{2} [AP]M ")
-            .unwrap();
-}
+/// java.util.logging header emitted by GCP libraries near end of build:
+///   `Apr 18, 2026 12:19:27 AM com.google.auth.oauth2.X warnY`
+static JUL_LOG_HEADER_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\w{3} \d{1,2}, \d{4} \d{1,2}:\d{2}:\d{2} [AP]M ").unwrap());
 
 /// Bare-text WARNING lines emitted by non-JVM libraries (artifactregistry-
 /// maven-wagon, google-auth-library, etc.) without any `[INFO]/[ERROR]`
@@ -515,39 +504,37 @@ fn chain_runs_tests(goals: &[String]) -> bool {
     })
 }
 
-lazy_static! {
-    /// `[INFO] --- <plugin>:<version>:<goal> (<exec>) @ <module> ---`
-    static ref PLUGIN_MARKER_RE: Regex =
-        Regex::new(r"^\[INFO\]\s+-{3,}\s+(\S+?):\S+:(\S+)\s+\(").unwrap();
-    /// Start of the trailing reactor/build footer.
-    static ref BUILD_FOOTER_RE: Regex =
-        Regex::new(r"(BUILD SUCCESS|BUILD FAILURE|Reactor Summary)").unwrap();
-    /// JUL-format plugin log lines (`INFO: Reading resource: …` from
-    /// liquibase et al.) — java.util.logging levels with a bare `LEVEL: `
-    /// prefix, no Maven bracket. Under `mvn -q` the `[INFO] --- plugin ---`
-    /// markers are suppressed, so the noisy-segment state never engages and
-    /// these must be dropped line-wise. `SEVERE:` (error level) is NOT
-    /// matched and stays.
-    static ref JUL_LOG_LINE_RE: Regex =
-        Regex::new(r"^(?:FINEST|FINER|FINE|CONFIG|INFO|WARNING):\s").unwrap();
-    /// Logback/SLF4J console lines from the application under test
-    /// (`2026-07-29 10:19:14.380  WARN [ , ] --- [main] c.d.Foo : msg`, the
-    /// Spring Boot default pattern with and without the tracing MDC field).
-    /// Same disease as `JUL_LOG_LINE_RE`: no Maven bracket, so under `mvn -q`
-    /// — where the `[INFO] --- plugin ---` markers that drive the noisy-segment
-    /// state are suppressed — a Spring Boot test run streams thousands of them
-    /// straight through. `ERROR`/`FATAL` are NOT matched and stay; the level
-    /// field is anchored so a correlation id like `[ERROR:08de5333-…]` in the
-    /// message body cannot promote a WARN line.
-    static ref LOGBACK_LOG_LINE_RE: Regex =
-        Regex::new(r"^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?:TRACE|DEBUG|INFO|WARN)\b")
-            .unwrap();
-    /// Single-quoted spans in codegen plugin chatter (echoed class names).
-    static ref QUOTED_SPAN_RE: Regex = Regex::new(r"'[^']*'").unwrap();
-    /// Failure keywords on word boundaries — `RestError` must not match.
-    static ref SEGMENT_ERRORISH_RE: Regex =
-        Regex::new(r"(?i)\b(err|errors?|fail|failed|failures?)\b").unwrap();
-}
+/// `[INFO] --- <plugin>:<version>:<goal> (<exec>) @ <module> ---`
+static PLUGIN_MARKER_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\[INFO\]\s+-{3,}\s+(\S+?):\S+:(\S+)\s+\(").unwrap());
+/// Start of the trailing reactor/build footer.
+static BUILD_FOOTER_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(BUILD SUCCESS|BUILD FAILURE|Reactor Summary)").unwrap());
+/// JUL-format plugin log lines (`INFO: Reading resource: …` from
+/// liquibase et al.) — java.util.logging levels with a bare `LEVEL: `
+/// prefix, no Maven bracket. Under `mvn -q` the `[INFO] --- plugin ---`
+/// markers are suppressed, so the noisy-segment state never engages and
+/// these must be dropped line-wise. `SEVERE:` (error level) is NOT
+/// matched and stays.
+static JUL_LOG_LINE_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(?:FINEST|FINER|FINE|CONFIG|INFO|WARNING):\s").unwrap());
+/// Logback/SLF4J console lines from the application under test
+/// (`2026-07-29 10:19:14.380  WARN [ , ] --- [main] c.d.Foo : msg`, the
+/// Spring Boot default pattern with and without the tracing MDC field).
+/// Same disease as `JUL_LOG_LINE_RE`: no Maven bracket, so under `mvn -q`
+/// — where the `[INFO] --- plugin ---` markers that drive the noisy-segment
+/// state are suppressed — a Spring Boot test run streams thousands of them
+/// straight through. `ERROR`/`FATAL` are NOT matched and stay; the level
+/// field is anchored so a correlation id like `[ERROR:08de5333-…]` in the
+/// message body cannot promote a WARN line.
+static LOGBACK_LOG_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?:TRACE|DEBUG|INFO|WARN)\b").unwrap()
+});
+/// Single-quoted spans in codegen plugin chatter (echoed class names).
+static QUOTED_SPAN_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"'[^']*'").unwrap());
+/// Failure keywords on word boundaries — `RestError` must not match.
+static SEGMENT_ERRORISH_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?i)\b(err|errors?|fail|failed|failures?)\b").unwrap());
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum SegmentKind {

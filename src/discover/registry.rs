@@ -1,9 +1,9 @@
 //! Matches shell commands against known RTK rewrite rules to decide how to handle them.
 
 use crate::core::utils::composer_bin_dirs;
-use lazy_static::lazy_static;
 use regex::{Regex, RegexSet};
 use std::path::Path;
+use std::sync::LazyLock;
 
 use super::lexer::{shell_split, split_on_operators, tokenize, ParsedToken, PipeKind, TokenKind};
 use super::rules::{IGNORED_EXACT, IGNORED_PREFIXES, RULES};
@@ -48,41 +48,48 @@ pub fn category_avg_tokens(category: &str, subcmd: &str) -> usize {
     }
 }
 
-lazy_static! {
-    static ref REGEX_SET: RegexSet =
-        RegexSet::new(RULES.iter().map(|r| r.pattern)).expect("invalid regex patterns");
-    static ref COMPILED: Vec<Regex> = RULES
+static REGEX_SET: LazyLock<RegexSet> = LazyLock::new(|| {
+    RegexSet::new(RULES.iter().map(|r| r.pattern)).expect("invalid regex patterns")
+});
+static COMPILED: LazyLock<Vec<Regex>> = LazyLock::new(|| {
+    RULES
         .iter()
         .map(|r| Regex::new(r.pattern).expect("invalid regex"))
-        .collect();
-    static ref ENV_PREFIX: Regex = {
-        let double_quoted = r#""(?:[^"\\]|\\.)*""#;
-        let single_quoted = r#"'(?:[^'\\]|\\.)*'"#;
-        let unquoted = r#"[^\s]*"#;
-        let env_value = format!("(?:{}|{}|{})", double_quoted, single_quoted, unquoted);
-        let env_assign = format!(r#"[A-Z_][A-Z0-9_]*={}"#, env_value);
-        Regex::new(&format!(r#"^(?:sudo\s+|env\s+|{}\s+)+"#, env_assign)).unwrap()
-    };
-    // Git global options that appear before the subcommand: -C <path>, -c <key=val>,
-    // --git-dir <dir>, --work-tree <dir>, and flag-only options (#163)
-    static ref GIT_GLOBAL_OPT: Regex =
-        Regex::new(r"^(?:(?:-C\s+\S+|-c\s+\S+|--git-dir(?:=\S+|\s+\S+)|--work-tree(?:=\S+|\s+\S+)|--no-pager|--no-optional-locks|--bare|--literal-pathspecs)\s+)+").unwrap();
-    // Issue #1362: each capture expects a SINGLE file argument (`\S+$`). Multi-file
-    // invocations like `head -3 a b c` fail to match so the segment is passed through
-    // to the native `head`/`tail` binary — which already handles multi-file with
-    // `==> name <==` banners that `rtk read --max-lines` cannot reproduce.
-    static ref HEAD_N: Regex = Regex::new(r"^head\s+-(\d+)\s+(\S+)$").unwrap();
-    static ref HEAD_LINES: Regex = Regex::new(r"^head\s+--lines=(\d+)\s+(\S+)$").unwrap();
-    static ref TAIL_N: Regex = Regex::new(r"^tail\s+-(\d+)\s+(\S+)$").unwrap();
-    static ref TAIL_N_SPACE: Regex = Regex::new(r"^tail\s+-n\s+(\d+)\s+(\S+)$").unwrap();
-    static ref TAIL_LINES_EQ: Regex = Regex::new(r"^tail\s+--lines=(\d+)\s+(\S+)$").unwrap();
-    static ref TAIL_LINES_SPACE: Regex = Regex::new(r"^tail\s+--lines\s+(\d+)\s+(\S+)$").unwrap();
-    // A pipe stage that only truncates its stdin to N lines. Deliberately
-    // excludes `-f`, `+N`, `-c` and file arguments — anything beyond plain
-    // numeric truncation keeps its semantics and must not be dropped.
-    static ref TRUNCATION_STAGE: Regex =
-        Regex::new(r"^(?:head|tail)\s+(?:-n\s*\d+|-\d+|--lines(?:=|\s+)\d+)$").unwrap();
-}
+        .collect()
+});
+static ENV_PREFIX: LazyLock<Regex> = LazyLock::new(|| {
+    let double_quoted = r#""(?:[^"\\]|\\.)*""#;
+    let single_quoted = r#"'(?:[^'\\]|\\.)*'"#;
+    let unquoted = r#"[^\s]*"#;
+    let env_value = format!("(?:{}|{}|{})", double_quoted, single_quoted, unquoted);
+    let env_assign = format!(r#"[A-Z_][A-Z0-9_]*={}"#, env_value);
+    Regex::new(&format!(r#"^(?:sudo\s+|env\s+|{}\s+)+"#, env_assign)).unwrap()
+});
+// Git global options that appear before the subcommand: -C <path>, -c <key=val>,
+// --git-dir <dir>, --work-tree <dir>, and flag-only options (#163)
+static GIT_GLOBAL_OPT: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(?:(?:-C\s+\S+|-c\s+\S+|--git-dir(?:=\S+|\s+\S+)|--work-tree(?:=\S+|\s+\S+)|--no-pager|--no-optional-locks|--bare|--literal-pathspecs)\s+)+").unwrap()
+});
+// Issue #1362: each capture expects a SINGLE file argument (`\S+$`). Multi-file
+// invocations like `head -3 a b c` fail to match so the segment is passed through
+// to the native `head`/`tail` binary — which already handles multi-file with
+// `==> name <==` banners that `rtk read --max-lines` cannot reproduce.
+static HEAD_N: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^head\s+-(\d+)\s+(\S+)$").unwrap());
+static HEAD_LINES: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^head\s+--lines=(\d+)\s+(\S+)$").unwrap());
+static TAIL_N: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^tail\s+-(\d+)\s+(\S+)$").unwrap());
+static TAIL_N_SPACE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^tail\s+-n\s+(\d+)\s+(\S+)$").unwrap());
+static TAIL_LINES_EQ: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^tail\s+--lines=(\d+)\s+(\S+)$").unwrap());
+static TAIL_LINES_SPACE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^tail\s+--lines\s+(\d+)\s+(\S+)$").unwrap());
+// A pipe stage that only truncates its stdin to N lines. Deliberately
+// excludes `-f`, `+N`, `-c` and file arguments — anything beyond plain
+// numeric truncation keeps its semantics and must not be dropped.
+static TRUNCATION_STAGE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(?:head|tail)\s+(?:-n\s*\d+|-\d+|--lines(?:=|\s+)\d+)$").unwrap()
+});
 
 const GOLANGCI_GLOBAL_OPT_WITH_VALUE: &[&str] = &[
     "-c",
@@ -524,17 +531,15 @@ fn strip_trailing_redirects(cmd: &str) -> (&str, &str) {
     (cmd_part, redir_part)
 }
 
-lazy_static! {
-    /// Matches a bash line-continuation: a backslash immediately followed by
-    /// `\n` or `\r\n`, *plus* any horizontal whitespace on the line before AND
-    /// after the break. This is what bash already collapses to a single space
-    /// before executing the command — rtk's hook matcher needs to do the same
-    /// so commands authored across multiple lines still hit the rewrite rules.
-    /// Consuming the trailing whitespace prevents double spaces in cases like
-    /// `git diff \<NL>HEAD~1`.
-    static ref LINE_CONTINUATION_RE: Regex =
-        Regex::new(r"(?m)[ \t\x0B\x0C]*\\\r?\n[ \t\x0B\x0C]*").unwrap();
-}
+/// Matches a bash line-continuation: a backslash immediately followed by
+/// `\n` or `\r\n`, *plus* any horizontal whitespace on the line before AND
+/// after the break. This is what bash already collapses to a single space
+/// before executing the command — rtk's hook matcher needs to do the same
+/// so commands authored across multiple lines still hit the rewrite rules.
+/// Consuming the trailing whitespace prevents double spaces in cases like
+/// `git diff \<NL>HEAD~1`.
+static LINE_CONTINUATION_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?m)[ \t\x0B\x0C]*\\\r?\n[ \t\x0B\x0C]*").unwrap());
 
 /// Replace every bash line continuation with a single space, mirroring what
 /// bash does before dispatching the command. Returns a borrowed `&str` when the
@@ -932,10 +937,9 @@ fn rewrite_line_range(cmd: &str) -> Option<String> {
     None
 }
 
-lazy_static! {
-    /// GNU timeout DURATION token: integer/decimal with optional s/m/h/d suffix.
-    static ref TIMEOUT_DURATION_RE: Regex = Regex::new(r"^\d+(\.\d+)?[smhd]?$").unwrap();
-}
+/// GNU timeout DURATION token: integer/decimal with optional s/m/h/d suffix.
+static TIMEOUT_DURATION_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\d+(\.\d+)?[smhd]?$").unwrap());
 
 /// Split a wrapper command that takes its own leading arguments before the
 /// wrapped command (`timeout [OPTS] DURATION cmd…`, `nice [-n N] cmd…`).
