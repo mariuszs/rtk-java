@@ -1355,6 +1355,10 @@ fn strip_text_failures_block(text_summary: &str) -> String {
 
 fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
     let shown = failures.iter().take(MAX_FAILURES_PER_SOURCE);
+    // Diagnostic-body identity -> name of the first test that rendered it.
+    // One broken dependency routinely fails many tests with the same cause;
+    // the repeated bodies were 74% of a real 7-failure render.
+    let mut seen_bodies: Vec<(String, String)> = Vec::new();
     for f in shown {
         // Maven's per-test marker — agents grep for `<<< FAILURE` / `FAILURE!`
         // to list failing test names. Every line keeps the `[ERROR]` prefix
@@ -1371,16 +1375,22 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         // only the repeated body is dropped, so every emitted line stays a
         // native subset with no invented prose.
         if !is_context_failure_cascade(f) {
-            if let Some(trace) = &f.stack_trace {
-                for line in trace.lines() {
-                    writeln!(out, "[ERROR]       {line}").ok();
+            let name = format!("{}.{}", f.test_class, f.test_method);
+            match failure_body_signature(f) {
+                Some(sig) => {
+                    if let Some((_, first)) =
+                        seen_bodies.iter().find(|(s, _)| *s == sig)
+                    {
+                        // Elision reference in the `... ` marker family —
+                        // the full body is above under the named test.
+                        writeln!(out, "[ERROR]       ... same failure as {first} above").ok();
+                        out.push('\n');
+                        continue;
+                    }
+                    seen_bodies.push((sig, name));
+                    render_failure_body(out, f);
                 }
-            }
-            if let Some(output) = f.test_output.as_deref().filter(|s| !s.is_empty()) {
-                writeln!(out, "[ERROR]     captured output:").ok();
-                for line in output.lines() {
-                    writeln!(out, "[ERROR]       {line}").ok();
-                }
+                None => render_failure_body(out, f),
             }
         }
         out.push('\n');
@@ -1393,6 +1403,75 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         )
         .ok();
     }
+}
+
+/// Render one failure's diagnostic body: enriched stack trace, then the
+/// captured-output block.
+fn render_failure_body(out: &mut String, f: &TestFailure) {
+    if let Some(trace) = &f.stack_trace {
+        for line in trace.lines() {
+            writeln!(out, "[ERROR]       {line}").ok();
+        }
+    }
+    if let Some(output) = f.test_output.as_deref().filter(|s| !s.is_empty()) {
+        writeln!(out, "[ERROR]     captured output:").ok();
+        for line in output.lines() {
+            writeln!(out, "[ERROR]       {line}").ok();
+        }
+    }
+}
+
+/// `... (N lines truncated)` / `... (N chars truncated)` markers inserted by
+/// the captured-output leash — the counts vary per test even when the
+/// underlying output is the same, so they are excluded from the signature.
+static OUTPUT_TRUNCATION_MARKER_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\.\.\. \(\d+ (?:lines|chars) truncated\)$").unwrap());
+
+/// A conservative identity for a failure's diagnostic body, used to render
+/// repeated bodies once. Built from the exception-chain message lines (top
+/// header, `Caused by:` headers, inline assertion detail) plus the captured
+/// output — with `at …` frames, frame-elision markers, and truncation
+/// counters excluded, since those vary per test even when the cause is the
+/// same. Returns None when the remaining identity is too weak to be safe
+/// (a bare exception type with no message and no chain — there the frames
+/// ARE the diagnostic, and different failures can share the type by
+/// coincidence).
+fn failure_body_signature(f: &TestFailure) -> Option<String> {
+    let mut sig = String::new();
+    if let Some(trace) = &f.stack_trace {
+        for line in trace.lines() {
+            let t = line.trim();
+            if t.is_empty() || t.starts_with("at ") || t.starts_with("... ") {
+                continue;
+            }
+            sig.push_str(t);
+            sig.push('\n');
+        }
+    }
+    let trace_lines = sig.lines().count();
+    if let Some(output) = f.test_output.as_deref() {
+        for line in output.lines() {
+            let t = line.trim();
+            if t.is_empty() || OUTPUT_TRUNCATION_MARKER_RE.is_match(t) {
+                continue;
+            }
+            sig.push_str(t);
+            sig.push('\n');
+        }
+    }
+    if sig.is_empty() {
+        return None;
+    }
+    // Weak identity: a single header line whose message part is empty
+    // ("java.lang.NullPointerException") and no captured output to anchor it.
+    if trace_lines <= 1 && sig.lines().count() <= 1 {
+        let first = sig.lines().next().unwrap_or("");
+        let msg = first.split_once(": ").map(|(_, m)| m.trim()).unwrap_or("");
+        if msg.is_empty() {
+            return None;
+        }
+    }
+    Some(sig)
 }
 
 /// True for Spring's `ApplicationContext failure threshold (N) exceeded:
@@ -5453,6 +5532,113 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             out.matches("CONDITIONS EVALUATION REPORT").count(),
             1,
             "captured output must not repeat per cascade:\n{out}"
+        );
+    }
+
+    #[test]
+    fn render_failure_block_dedups_identical_cause_bodies() {
+        // Real case 2026-07-30 (git/git Java 25 migration): 7 failures, one
+        // cause (`NoClassDefFoundError: PropertyNamingStrategy$…`) repeated
+        // 7x — bodies differed only in test-specific `at` frames and in the
+        // `... (N lines truncated)` counters, and were 74% of a 14.3k-char
+        // render. Identical diagnostic bodies must be rendered once; repeats
+        // keep their name line + label and an elision reference.
+        let failure = |method: &str, frame: &str, truncated: u32| TestFailure {
+            test_class: "com.devskiller.git.ContractVerifierTest".into(),
+            test_method: method.into(),
+            kind: FailureKind::Failure,
+            message: Some("Status expected:<201 CREATED> but was:<500 INTERNAL_SERVER_ERROR>".into()),
+            failure_type: Some("java.lang.AssertionError".into()),
+            stack_trace: Some(format!(
+                "java.lang.AssertionError: Status expected:<201 CREATED> but was:<500 INTERNAL_SERVER_ERROR>\n\tat com.devskiller.git.ContractVerifierTest.{frame}(ContractVerifierTest.java:42)\n\t... 6 framework frames omitted\nCaused by: java.lang.ClassNotFoundException: com.fasterxml.jackson.databind.PropertyNamingStrategy$PropertyNamingStrategyBase"
+            )),
+            test_output: Some(format!(
+                "... ({truncated} lines truncated)\n{{\n  \"error\" : \"Handler dispatch failed: java.lang.NoClassDefFoundError: com/fasterxml/jackson/databind/PropertyNamingStrategy$PropertyNamingStrategyBase\"\n}}"
+            )),
+        };
+        let failures = vec![
+            failure("validate_getTaskRepo", "validate_getTaskRepo", 372),
+            failure("validate_createTasksGitRepo", "validate_createTasksGitRepo", 194),
+            failure("validate_getCandidateRepo", "validate_getCandidateRepo", 194),
+        ];
+
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &failures);
+
+        assert_eq!(
+            out.matches("Caused by: java.lang.ClassNotFoundException").count(),
+            1,
+            "identical cause chain must render once, not per test:\n{out}"
+        );
+        assert_eq!(
+            out.matches("Handler dispatch failed").count(),
+            1,
+            "identical captured output must render once:\n{out}"
+        );
+        assert_eq!(
+            out.matches("<<< FAILURE!").count(),
+            3,
+            "every failing test name must still be greppable:\n{out}"
+        );
+        assert_eq!(
+            out.matches("... same failure as").count(),
+            2,
+            "repeats must carry an elision reference:\n{out}"
+        );
+        assert!(
+            out.contains("... same failure as com.devskiller.git.ContractVerifierTest.validate_getTaskRepo"),
+            "the reference must name the first occurrence:\n{out}"
+        );
+    }
+
+    #[test]
+    fn render_failure_block_keeps_distinct_and_weak_signature_bodies() {
+        let npe = |method: &str, frame_line: u32| TestFailure {
+            test_class: "com.devskiller.app.FooTest".into(),
+            test_method: method.into(),
+            kind: FailureKind::Error,
+            message: None,
+            failure_type: Some("java.lang.NullPointerException".into()),
+            stack_trace: Some(format!(
+                "java.lang.NullPointerException\n\tat com.devskiller.app.Foo.bar(Foo.java:{frame_line})"
+            )),
+            test_output: None,
+        };
+        // Same bare exception type, different frames — too weak an identity
+        // to collapse: the frame IS the diagnostic.
+        let failures = vec![npe("first", 10), npe("second", 99)];
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &failures);
+        assert!(
+            out.contains("Foo.java:10") && out.contains("Foo.java:99"),
+            "bare-type traces must both keep their frames:\n{out}"
+        );
+        assert!(
+            !out.contains("... same failure as"),
+            "weak signatures must not dedup:\n{out}"
+        );
+
+        // Different cause chains — never collapsed.
+        let distinct = |method: &str, cause: &str| TestFailure {
+            test_class: "com.devskiller.app.BarTest".into(),
+            test_method: method.into(),
+            kind: FailureKind::Error,
+            message: Some("boom".into()),
+            failure_type: Some("java.lang.IllegalStateException".into()),
+            stack_trace: Some(format!(
+                "java.lang.IllegalStateException: boom\nCaused by: {cause}"
+            )),
+            test_output: None,
+        };
+        let failures = vec![
+            distinct("first", "java.io.IOException: disk full"),
+            distinct("second", "java.net.ConnectException: refused"),
+        ];
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &failures);
+        assert!(
+            out.contains("disk full") && out.contains("refused"),
+            "distinct causes must both render:\n{out}"
         );
     }
 
