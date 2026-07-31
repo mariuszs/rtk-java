@@ -6,7 +6,9 @@
 use crate::cmds::jvm::stack_trace;
 use quick_xml::events::{BytesStart, Event};
 use quick_xml::Reader;
+use regex::Regex;
 use std::path::Path;
+use std::sync::LazyLock;
 use std::time::SystemTime;
 
 pub const DEFAULT_STACK_TRACE_LINES: usize = 50;
@@ -289,8 +291,8 @@ fn combine_test_output(stdout: &str, stderr: &str, per_test_limit: usize) -> Opt
     // Drop per-JVM-launch warning boilerplate (byte-buddy/Mockito agent
     // banners) first: with the 12-line tail budget they would otherwise
     // crowd out the content the agent actually needs.
-    let stdout = drop_jvm_runtime_noise(stdout);
-    let stderr = drop_jvm_runtime_noise(stderr);
+    let stdout = clean_captured(&drop_jvm_runtime_noise(stdout));
+    let stderr = clean_captured(&drop_jvm_runtime_noise(stderr));
     let stdout = stdout.trim();
     let stderr = stderr.trim();
     if stdout.is_empty() && stderr.is_empty() {
@@ -309,6 +311,42 @@ fn combine_test_output(stdout: &str, stderr: &str, per_test_limit: usize) -> Opt
         combined.push_str(stderr);
     }
     Some(truncate_test_output(&collapse_blank_runs(&combined), per_test_limit))
+}
+
+/// Console colour codes as they survive into a surefire report. Surefire
+/// escapes the ESC byte into the literal text `&amp#27;` — its own form, note
+/// the missing `;` after `amp` — so a Spring Boot log line arrives as
+/// `&amp#27;[35m2026-07-31 12:07:37.523&amp#27;[0;39m …`: nine bytes of noise
+/// per code, ~10 codes per line. Real ESC bytes and the well-formed `&#27;`
+/// spelling are matched too, since which one appears depends on the surefire
+/// version and on whether the report was written through CDATA.
+static CAPTURED_ANSI_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?:\x1b|&amp#27;|&#27;)\[[0-9;]*[A-Za-z]").unwrap());
+
+/// Application log lines at the two lowest levels inside captured output.
+/// Two console layouts show up in practice: Spring Boot's default
+/// (`2026-07-31 12:07:37.523 DEBUG [main] c.d.Foo : msg`) and Logback's stock
+/// pattern (`11:54:21.931 [main] DEBUG c.d.Foo - msg`), so the optional
+/// thread field is allowed on either side of the level. Only TRACE/DEBUG are
+/// dropped: with a 12-line budget an INFO or WARN line is routinely the one
+/// that explains the failure (`Cannot find requested user …`).
+static CAPTURED_DEBUG_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"^\s*(?:\d{4}-\d{2}-\d{2}[ T])?\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?:\[[^\]]*\]\s+)?(?:TRACE|DEBUG)\b",
+    )
+    .unwrap()
+});
+
+/// Strip console colour codes and drop TRACE/DEBUG log lines from a captured
+/// output block, so the tail budget is spent on lines that carry meaning.
+/// ANSI goes first: the level field is only findable once the colour codes
+/// wrapped around it are gone.
+fn clean_captured(text: &str) -> String {
+    let text = CAPTURED_ANSI_RE.replace_all(text, "");
+    text.lines()
+        .filter(|l| !CAPTURED_DEBUG_LINE_RE.is_match(l))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// Remove bare-text JVM agent/self-attach warning lines from a captured
@@ -622,6 +660,57 @@ mod tests {
             "captured output must be line-capped, got {} lines:\n{output}",
             output.lines().count()
         );
+    }
+
+    #[test]
+    fn captured_output_strips_surefire_escaped_ansi_and_debug() {
+        // Real `<system-out>` bytes from a skiller run (services module,
+        // 2026-07-31): Spring Boot logs to a colour console, and surefire
+        // escapes each ESC byte as the literal text `&amp#27;`. Rendered
+        // verbatim, one 4-test class spent 4282 of its 5432 output chars on
+        // this — DEBUG chatter wrapped in nine-byte colour codes — while the
+        // two lines that explain the failure sat just above the tail window.
+        let xml = include_str!(
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.devsc.answers.ExamFinishedReceiverTest.xml"
+        );
+        let result = parse_content(xml, &["com.devsc".to_string()]).expect("parses");
+        let output = result.failures[0]
+            .test_output
+            .as_deref()
+            .expect("captured output present");
+
+        assert!(
+            !output.contains("&amp#27;") && !output.contains('\u{1b}'),
+            "colour codes must not reach the agent:\n{output}"
+        );
+        assert!(
+            !output.contains("DEBUG"),
+            "DEBUG chatter must not spend the tail budget:\n{output}"
+        );
+        assert!(
+            output.contains("Ignoring answers from eval for TOKN-1234-ABCD"),
+            "the WARN line that explains the failure must survive:\n{output}"
+        );
+        assert!(
+            output.len() < 700,
+            "captured output should collapse to a few informative lines, got {} chars:\n{output}",
+            output.len()
+        );
+    }
+
+    #[test]
+    fn captured_output_keeps_info_and_warn_lines() {
+        // The auth counterpart: Logback's stock pattern puts the thread
+        // before the level. INFO/WARN carry the diagnosis (`Cannot find
+        // requested user …`) and must never be dropped with the DEBUG noise.
+        let stdout = "\
+11:54:21.900 [main] DEBUG c.d.auth.user.UserLookupService - loading user cache
+11:54:22.211 [main] INFO  c.d.a.u.p.PasswordResetService - Password reset requested. Email=test.user@no-encryptor.example.com
+11:54:22.212 [main] WARN  c.d.a.u.p.PasswordResetService - Cannot find requested user test.user@no-encryptor.example.com";
+        let out = super::combine_test_output(stdout, "", 2000).expect("captured output");
+        assert!(!out.contains("loading user cache"), "DEBUG kept: {out}");
+        assert!(out.contains("Password reset requested"), "INFO dropped: {out}");
+        assert!(out.contains("Cannot find requested user"), "WARN dropped: {out}");
     }
 
     #[test]
