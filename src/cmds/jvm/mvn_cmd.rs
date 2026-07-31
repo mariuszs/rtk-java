@@ -1879,7 +1879,22 @@ fn is_maven_boilerplate(line: &str) -> bool {
         return stripped.contains("There are test failures");
     }
 
+    // Plexus classworlds realm dump, printed under `[ERROR]` on any
+    // PluginContainerException: `realm =`, `strategy =`, one
+    // `urls[N] = file:/…jar` line per plugin-classpath entry, then the
+    // foreign-import footer. Measured on a real auth typescript-generator
+    // abort: 70 lines / ~9k chars, all of it below the one line that says
+    // what actually failed. The `urls[` case is a prefix, not a substring —
+    // a javac error quoting `urls[` in source would otherwise vanish.
+    if stripped.starts_with("urls[") && stripped.contains("] = ") {
+        return true;
+    }
+
     const BOILERPLATE_PATTERNS: &[&str] = &[
+        "realm =    plugin>",
+        "strategy = org.codehaus.plexus.classworlds",
+        "Number of foreign imports:",
+        "import: Entry[import ",
         "-> [Help",
         "http://cwiki.apache.org",
         "https://cwiki.apache.org",
@@ -4178,6 +4193,37 @@ mod tests {
         assert!(
             output.contains("BUILD FAILURE") && output.contains("Failed to execute goal"),
             "the native verdict and cause must survive, got:\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_compile_plugin_realm_dump_collapsed() {
+        // Real auth `./mvnw test-compile -Dskip.npm -q` (2026-07-31): the
+        // typescript-generator plugin aborted, and Plexus classworlds printed
+        // its whole realm under `[ERROR]` — 70 lines listing every jar on the
+        // plugin classpath. All of it sits below the single line that says
+        // what broke, and it is `[ERROR]`-prefixed, so it sailed past the
+        // compile filter untouched.
+        let input =
+            include_str!("../../../tests/fixtures/mvn_test_compile_plugin_realm_dump_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        assert!(
+            !output.contains("urls[") && !output.contains("classworlds"),
+            "the realm dump must be gone, got:\n{output}"
+        );
+        assert!(
+            output.contains("UnsupportedClassVersionError"),
+            "the actual cause must survive, got:\n{output}"
+        );
+        assert!(
+            output.contains("BUILD FAILURE"),
+            "the native verdict must survive, got:\n{output}"
+        );
+        let savings = 100.0 - (output.len() as f64 / input.len() as f64 * 100.0);
+        assert!(
+            savings >= 60.0,
+            "expected >=60% savings, got {savings:.1}%:\n{output}"
         );
     }
 
