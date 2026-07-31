@@ -2,7 +2,7 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: filter_mvn_dep_tree(input)
 ---
-[INFO] com.devskiller.skiller:skiller:pom:1.2-SNAPSHOT
+[INFO] com.example.skiller:skiller:pom:1.2-SNAPSHOT
 [INFO] +- net.logstash.logback:logstash-logback-encoder:jar:9.0:compile
 [INFO] |  \- tools.jackson.core:jackson-databind:jar:3.1.4:compile
 [INFO] |     +- com.fasterxml.jackson.core:jackson-annotations:jar:2.21:compile
@@ -104,7 +104,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO]    \- io.micrometer:micrometer-core:jar:1.17.0:compile
 [INFO]       +- io.micrometer:micrometer-commons:jar:1.17.0:compile
 [INFO]       \- org.hdrhistogram:HdrHistogram:jar:2.2.2:runtime
-[INFO] com.devskiller.skiller:spring-common:jar:1.2-SNAPSHOT
+[INFO] com.example.skiller:spring-common:jar:1.2-SNAPSHOT
 [INFO] +- ma.glasnost.orika:orika-core:jar:1.5.2:compile
 [INFO] |  +- com.thoughtworks.paranamer:paranamer:jar:2.8:compile
 [INFO] |  +- org.slf4j:slf4j-api:jar:2.0.18:compile
@@ -232,7 +232,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO]    +- io.github.openfeign:feign-core:jar:13.6.1:compile
 [INFO]    \- io.micrometer:micrometer-core:jar:1.17.0:compile
 [INFO]       \- org.hdrhistogram:HdrHistogram:jar:2.2.2:runtime
-[INFO] com.devskiller.skiller:data:jar:1.2-SNAPSHOT
+[INFO] com.example.skiller:data:jar:1.2-SNAPSHOT
 [INFO] +- org.postgresql:postgresql:jar:42.7.3:compile
 [INFO] |  \- org.checkerframework:checker-qual:jar:3.42.0:runtime
 [INFO] +- org.hibernate.orm:hibernate-processor:jar:7.4.1.Final:compile (optional)
@@ -277,7 +277,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |     |  +- com.esotericsoftware:reflectasm:jar:1.11.9:compile
 [INFO] |     |  \- com.esotericsoftware:minlog:jar:1.3.1:compile
 [INFO] |     \- org.jodd:jodd-util:jar:6.3.0:compile
-[INFO] +- com.devskiller.skiller:spring-common:jar:1.2-SNAPSHOT:compile
+[INFO] +- com.example.skiller:spring-common:jar:1.2-SNAPSHOT:compile
 [INFO] |  +- ma.glasnost.orika:orika-core:jar:1.5.2:compile
 [INFO] |  |  +- com.thoughtworks.paranamer:paranamer:jar:2.8:compile
 [INFO] |  |  +- com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:jar:1.4.2:compile
@@ -374,7 +374,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  \- org.springframework:spring-core:jar:7.0.8:compile
 [INFO] |     \- commons-logging:commons-logging:jar:1.3.6:compile
 [INFO] +- org.assertj:assertj-core:jar:3.27.7:test
-[INFO] +- com.devskiller.friendly-id:friendly-id:jar:2.0.0-SNAPSHOT:test
+[INFO] +- com.example.friendly-id:friendly-id:jar:2.0.0-SNAPSHOT:test
 [INFO] +- org.liquibase:liquibase-core:jar:4.25.0:test
 [INFO] |  +- com.opencsv:opencsv:jar:5.8:test
 [INFO] |  +- org.apache.commons:commons-text:jar:1.10.0:test
@@ -465,8 +465,8 @@ expression: filter_mvn_dep_tree(input)
 [INFO]    \- io.micrometer:micrometer-core:jar:1.17.0:compile
 [INFO]       +- io.micrometer:micrometer-commons:jar:1.17.0:compile
 [INFO]       \- org.hdrhistogram:HdrHistogram:jar:2.2.2:runtime
-[INFO] com.devskiller.skiller:ml:jar:1.2-SNAPSHOT
-[INFO] +- com.devskiller.skiller:data:jar:1.2-SNAPSHOT:compile
+[INFO] com.example.skiller:ml:jar:1.2-SNAPSHOT
+[INFO] +- com.example.skiller:data:jar:1.2-SNAPSHOT:compile
 [INFO] |  +- org.postgresql:postgresql:jar:42.7.11:compile
 [INFO] |  +- io.vavr:vavr:jar:0.10.4:compile
 [INFO] |  |  \- io.vavr:vavr-match:jar:0.10.4:compile
@@ -493,7 +493,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  |     |  +- com.esotericsoftware:reflectasm:jar:1.11.9:compile
 [INFO] |  |     |  \- com.esotericsoftware:minlog:jar:1.3.1:compile
 [INFO] |  |     \- org.jodd:jodd-util:jar:6.3.0:compile
-[INFO] |  +- com.devskiller.skiller:spring-common:jar:1.2-SNAPSHOT:compile
+[INFO] |  +- com.example.skiller:spring-common:jar:1.2-SNAPSHOT:compile
 [INFO] |  |  +- ma.glasnost.orika:orika-core:jar:1.5.2:compile
 [INFO] |  |  |  +- com.thoughtworks.paranamer:paranamer:jar:2.8:compile
 [INFO] |  |  |  +- com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:jar:1.4.2:compile
@@ -776,8 +776,8 @@ expression: filter_mvn_dep_tree(input)
 [INFO]    \- io.micrometer:micrometer-core:jar:1.17.0:compile
 [INFO]       +- io.micrometer:micrometer-commons:jar:1.17.0:compile
 [INFO]       \- org.hdrhistogram:HdrHistogram:jar:2.2.2:runtime
-[INFO] com.devskiller.skiller:services:jar:1.2-SNAPSHOT
-[INFO] +- com.devskiller.skiller:spring-common:jar:1.2-SNAPSHOT:compile
+[INFO] com.example.skiller:services:jar:1.2-SNAPSHOT
+[INFO] +- com.example.skiller:spring-common:jar:1.2-SNAPSHOT:compile
 [INFO] |  +- ma.glasnost.orika:orika-core:jar:1.5.2:compile
 [INFO] |  |  +- com.thoughtworks.paranamer:paranamer:jar:2.8:compile
 [INFO] |  |  +- com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:jar:1.4.2:compile
@@ -796,7 +796,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  \- com.github.growthbook:growthbook-sdk-java:jar:0.9.91:compile
 [INFO] |     +- org.jetbrains:annotations:jar:24.0.0:compile
 [INFO] |     \- com.squareup.okhttp3:okhttp-sse:jar:4.12.0:runtime
-[INFO] +- com.devskiller:toolkit:jar:1.3-62:compile
+[INFO] +- com.example:toolkit:jar:1.3-62:compile
 [INFO] |  +- org.slf4j:slf4j-api:jar:2.0.18:compile
 [INFO] |  +- com.nimbusds:nimbus-jose-jwt:jar:9.31:compile
 [INFO] |  |  \- com.github.stephenc.jcip:jcip-annotations:jar:1.0-1:compile
@@ -811,8 +811,8 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  +- io.github.resilience4j:resilience4j-retry:jar:2.4.0:compile
 [INFO] |  \- io.vavr:vavr:jar:0.10.4:compile
 [INFO] |     \- io.vavr:vavr-match:jar:0.10.4:compile
-[INFO] +- com.devskiller.friendly-id:friendly-id:jar:2.0.0-SNAPSHOT:compile
-[INFO] +- com.devskiller.skiller:data:jar:1.2-SNAPSHOT:compile
+[INFO] +- com.example.friendly-id:friendly-id:jar:2.0.0-SNAPSHOT:compile
+[INFO] +- com.example.skiller:data:jar:1.2-SNAPSHOT:compile
 [INFO] |  +- org.postgresql:postgresql:jar:42.7.11:compile
 [INFO] |  +- org.redisson:redisson-hibernate-7:jar:4.6.1:compile
 [INFO] |  +- jakarta.xml.bind:jakarta.xml.bind-api:jar:4.0.5:compile
@@ -855,7 +855,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  +- org.jooq.pro:jooq:jar:3.20.9:compile
 [INFO] |  |  \- io.r2dbc:r2dbc-spi:jar:1.0.0.RELEASE:compile
 [INFO] |  \- org.jooq.pro:jooq-postgres-extensions:jar:3.20.9:compile
-[INFO] +- com.devskiller.skiller:ml:jar:1.2-SNAPSHOT:compile
+[INFO] +- com.example.skiller:ml:jar:1.2-SNAPSHOT:compile
 [INFO] |  +- org.nd4j:nd4j-native-platform:jar:1.0.0-M2.1:compile
 [INFO] |  |  +- org.bytedeco:openblas-platform:jar:0.3.19-1.5.7:compile
 [INFO] |  |  |  +- org.bytedeco:javacpp-platform:jar:1.5.7:compile
@@ -1341,7 +1341,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  +- org.apache.commons:commons-math3:jar:3.6.1:compile
 [INFO] |  +- com.zaxxer:SparseBitSet:jar:1.2:compile
 [INFO] |  \- org.apache.logging.log4j:log4j-api:jar:2.25.4:compile
-[INFO] +- com.devskiller:git-client:jar:1.3-5:compile
+[INFO] +- com.example:git-client:jar:1.3-5:compile
 [INFO] |  +- io.zipkin.reporter2:zipkin-reporter-brave:jar:3.5.3:compile
 [INFO] |  |  \- io.zipkin.reporter2:zipkin-reporter:jar:3.5.3:compile
 [INFO] |  +- io.zipkin.brave:brave-instrumentation-httpclient:jar:6.3.1:compile
@@ -1351,7 +1351,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |     \- org.bouncycastle:bcutil-jdk15on:jar:1.69:compile
 [INFO] +- org.eclipse.jgit:org.eclipse.jgit:jar:6.6.1.202309021850-r:compile
 [INFO] |  \- com.googlecode.javaewah:JavaEWAH:jar:1.2.3:compile
-[INFO] +- com.devskiller.skiller:data:test-jar:tests:1.2-SNAPSHOT:test
+[INFO] +- com.example.skiller:data:test-jar:tests:1.2-SNAPSHOT:test
 [INFO] +- org.testcontainers:testcontainers-junit-jupiter:jar:2.0.5:test
 [INFO] +- org.testcontainers:testcontainers-postgresql:jar:2.0.5:test
 [INFO] |  \- org.testcontainers:testcontainers-jdbc:jar:2.0.5:test
@@ -1504,7 +1504,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.21.4:compile
 [INFO] +- io.vavr:vavr-jackson:jar:0.10.3:compile
 [INFO] +- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.21.4:compile
-[INFO] +- com.devskiller:workspace-manager:jar:stubs:1.3-16:test
+[INFO] +- com.example:workspace-manager:jar:stubs:1.3-16:test
 [INFO] +- org.springframework.cloud:spring-cloud-stream-test-binder:jar:5.0.2:test
 [INFO] |  \- org.springframework.cloud:spring-cloud-stream:jar:5.0.2:compile
 [INFO] |     \- org.springframework.boot:spring-boot-integration:jar:4.1.0:compile
@@ -1564,9 +1564,9 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |     +- org.springframework.boot:spring-boot-sql:jar:4.1.0:compile
 [INFO] |     \- org.springframework:spring-jdbc:jar:7.0.8:compile
 [INFO] \- io.github.openfeign:feign-micrometer:jar:13.6.1:compile
-[INFO] com.devskiller.skiller:integrations:jar:1.2-SNAPSHOT
-[INFO] +- com.devskiller.skiller:services:jar:1.2-SNAPSHOT:compile
-[INFO] |  +- com.devskiller.skiller:spring-common:jar:1.2-SNAPSHOT:compile
+[INFO] com.example.skiller:integrations:jar:1.2-SNAPSHOT
+[INFO] +- com.example.skiller:services:jar:1.2-SNAPSHOT:compile
+[INFO] |  +- com.example.skiller:spring-common:jar:1.2-SNAPSHOT:compile
 [INFO] |  |  +- ma.glasnost.orika:orika-core:jar:1.5.2:compile
 [INFO] |  |  |  +- com.thoughtworks.paranamer:paranamer:jar:2.8:compile
 [INFO] |  |  |  +- com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:jar:1.4.2:compile
@@ -1581,7 +1581,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  |  \- com.github.growthbook:growthbook-sdk-java:jar:0.9.91:compile
 [INFO] |  |     +- org.jetbrains:annotations:jar:24.0.0:compile
 [INFO] |  |     \- com.squareup.okhttp3:okhttp-sse:jar:4.12.0:runtime
-[INFO] |  +- com.devskiller:toolkit:jar:1.3-62:compile
+[INFO] |  +- com.example:toolkit:jar:1.3-62:compile
 [INFO] |  |  +- org.bouncycastle:bcprov-jdk18on:jar:1.82:compile
 [INFO] |  |  +- org.bouncycastle:bcpkix-jdk18on:jar:1.82:compile
 [INFO] |  |  |  \- org.bouncycastle:bcutil-jdk18on:jar:1.82:compile
@@ -1591,8 +1591,8 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  |  |  \- com.github.ulisesbocchio:jasypt-spring-boot:jar:3.0.5:compile
 [INFO] |  |  |     \- org.jasypt:jasypt:jar:1.9.3:compile
 [INFO] |  |  \- io.github.resilience4j:resilience4j-retry:jar:2.4.0:compile
-[INFO] |  +- com.devskiller.friendly-id:friendly-id:jar:2.0.0-SNAPSHOT:compile
-[INFO] |  +- com.devskiller.skiller:ml:jar:1.2-SNAPSHOT:compile
+[INFO] |  +- com.example.friendly-id:friendly-id:jar:2.0.0-SNAPSHOT:compile
+[INFO] |  +- com.example.skiller:ml:jar:1.2-SNAPSHOT:compile
 [INFO] |  |  +- org.nd4j:nd4j-native-platform:jar:1.0.0-M2.1:compile
 [INFO] |  |  |  +- org.bytedeco:openblas-platform:jar:0.3.19-1.5.7:compile
 [INFO] |  |  |  |  +- org.bytedeco:javacpp-platform:jar:1.5.7:compile
@@ -2035,7 +2035,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  |  +- org.apache.commons:commons-math3:jar:3.6.1:compile
 [INFO] |  |  +- com.zaxxer:SparseBitSet:jar:1.2:compile
 [INFO] |  |  \- org.apache.logging.log4j:log4j-api:jar:2.25.4:compile
-[INFO] |  +- com.devskiller:git-client:jar:1.3-5:compile
+[INFO] |  +- com.example:git-client:jar:1.3-5:compile
 [INFO] |  |  +- io.zipkin.reporter2:zipkin-reporter-brave:jar:3.5.3:compile
 [INFO] |  |  |  \- io.zipkin.reporter2:zipkin-reporter:jar:3.5.3:compile
 [INFO] |  |  +- io.zipkin.brave:brave-instrumentation-httpclient:jar:6.3.1:compile
@@ -2100,7 +2100,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.21.4:compile
 [INFO] |  +- io.vavr:vavr-jackson:jar:0.10.3:compile
 [INFO] |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.21.4:compile
-[INFO] +- com.devskiller.skiller:data:jar:1.2-SNAPSHOT:compile
+[INFO] +- com.example.skiller:data:jar:1.2-SNAPSHOT:compile
 [INFO] |  +- org.postgresql:postgresql:jar:42.7.11:compile
 [INFO] |  +- io.vavr:vavr:jar:0.10.4:compile
 [INFO] |  |  \- io.vavr:vavr-match:jar:0.10.4:compile
@@ -2288,7 +2288,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  \- com.tngtech.archunit:archunit-junit5-engine:jar:1.4.1:test
 [INFO] |     \- com.tngtech.archunit:archunit-junit5-engine-api:jar:1.4.1:test
 [INFO] |        \- org.junit.platform:junit-platform-engine:jar:6.0.1:test
-[INFO] +- com.devskiller.skiller:data:test-jar:tests:1.2-SNAPSHOT:test
+[INFO] +- com.example.skiller:data:test-jar:tests:1.2-SNAPSHOT:test
 [INFO] +- net.logstash.logback:logstash-logback-encoder:jar:9.0:compile
 [INFO] |  \- tools.jackson.core:jackson-databind:jar:3.1.4:compile
 [INFO] |     \- tools.jackson.core:jackson-core:jar:3.1.4:compile
@@ -2346,7 +2346,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO]    \- io.micrometer:micrometer-core:jar:1.17.0:compile
 [INFO]       +- io.micrometer:micrometer-commons:jar:1.17.0:compile
 [INFO]       \- org.hdrhistogram:HdrHistogram:jar:2.2.2:runtime
-[INFO] com.devskiller.skiller:webapp:jar:1.2-SNAPSHOT
+[INFO] com.example.skiller:webapp:jar:1.2-SNAPSHOT
 [INFO] +- com.zaxxer:HikariCP:jar:7.0.2:compile
 [INFO] |  \- org.slf4j:slf4j-api:jar:2.0.18:compile
 [INFO] +- org.springframework.boot:spring-boot-starter-security:jar:4.1.0:compile
@@ -2421,7 +2421,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  |  \- net.minidev:accessors-smart:jar:2.6.0:compile
 [INFO] |  \- com.nimbusds:lang-tag:jar:1.7:compile
 [INFO] +- jakarta.websocket:jakarta.websocket-api:jar:2.1.1:provided
-[INFO] +- com.devskiller.skiller:data:jar:1.2-SNAPSHOT:compile
+[INFO] +- com.example.skiller:data:jar:1.2-SNAPSHOT:compile
 [INFO] |  +- org.postgresql:postgresql:jar:42.7.11:compile
 [INFO] |  +- io.vavr:vavr:jar:0.10.4:compile
 [INFO] |  |  \- io.vavr:vavr-match:jar:0.10.4:compile
@@ -2447,7 +2447,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  |     |  +- com.esotericsoftware:reflectasm:jar:1.11.9:compile
 [INFO] |  |     |  \- com.esotericsoftware:minlog:jar:1.3.1:compile
 [INFO] |  |     \- org.jodd:jodd-util:jar:6.3.0:compile
-[INFO] |  +- com.devskiller.skiller:spring-common:jar:1.2-SNAPSHOT:compile
+[INFO] |  +- com.example.skiller:spring-common:jar:1.2-SNAPSHOT:compile
 [INFO] |  |  +- ma.glasnost.orika:orika-core:jar:1.5.2:compile
 [INFO] |  |  |  +- com.thoughtworks.paranamer:paranamer:jar:2.8:compile
 [INFO] |  |  |  +- com.googlecode.concurrentlinkedhashmap:concurrentlinkedhashmap-lru:jar:1.4.2:compile
@@ -2493,8 +2493,8 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  +- org.jooq.pro:jooq:jar:3.20.9:compile
 [INFO] |  |  \- io.r2dbc:r2dbc-spi:jar:1.0.0.RELEASE:compile
 [INFO] |  \- org.jooq.pro:jooq-postgres-extensions:jar:3.20.9:compile
-[INFO] +- com.devskiller.skiller:services:jar:1.2-SNAPSHOT:compile
-[INFO] |  +- com.devskiller:toolkit:jar:1.3-62:compile
+[INFO] +- com.example.skiller:services:jar:1.2-SNAPSHOT:compile
+[INFO] |  +- com.example:toolkit:jar:1.3-62:compile
 [INFO] |  |  +- org.bouncycastle:bcpkix-jdk18on:jar:1.82:compile
 [INFO] |  |  |  \- org.bouncycastle:bcutil-jdk18on:jar:1.82:compile
 [INFO] |  |  +- com.courier:courier-java:jar:3.3.0:compile
@@ -2502,8 +2502,8 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  |  +- com.github.ulisesbocchio:jasypt-spring-boot-starter:jar:3.0.5:compile
 [INFO] |  |  |  \- com.github.ulisesbocchio:jasypt-spring-boot:jar:3.0.5:compile
 [INFO] |  |  \- io.github.resilience4j:resilience4j-retry:jar:2.4.0:compile
-[INFO] |  +- com.devskiller.friendly-id:friendly-id:jar:2.0.0-SNAPSHOT:compile
-[INFO] |  +- com.devskiller.skiller:ml:jar:1.2-SNAPSHOT:compile
+[INFO] |  +- com.example.friendly-id:friendly-id:jar:2.0.0-SNAPSHOT:compile
+[INFO] |  +- com.example.skiller:ml:jar:1.2-SNAPSHOT:compile
 [INFO] |  |  +- org.nd4j:nd4j-native-platform:jar:1.0.0-M2.1:compile
 [INFO] |  |  |  +- org.bytedeco:openblas-platform:jar:0.3.19-1.5.7:compile
 [INFO] |  |  |  |  +- org.bytedeco:javacpp-platform:jar:1.5.7:compile
@@ -2924,7 +2924,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  |  +- org.apache.commons:commons-collections4:jar:4.4:compile
 [INFO] |  |  +- com.zaxxer:SparseBitSet:jar:1.2:compile
 [INFO] |  |  \- org.apache.logging.log4j:log4j-api:jar:2.25.4:compile
-[INFO] |  +- com.devskiller:git-client:jar:1.3-5:compile
+[INFO] |  +- com.example:git-client:jar:1.3-5:compile
 [INFO] |  |  +- io.zipkin.reporter2:zipkin-reporter-brave:jar:3.5.3:compile
 [INFO] |  |  |  \- io.zipkin.reporter2:zipkin-reporter:jar:3.5.3:compile
 [INFO] |  |  +- io.zipkin.brave:brave-instrumentation-httpclient:jar:6.3.1:compile
@@ -2984,7 +2984,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  +- jakarta.validation:jakarta.validation-api:jar:3.1.1:compile
 [INFO] |  +- io.vavr:vavr-jackson:jar:0.10.3:compile
 [INFO] |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.21.4:compile
-[INFO] +- com.devskiller.skiller:integrations:jar:1.2-SNAPSHOT:compile
+[INFO] +- com.example.skiller:integrations:jar:1.2-SNAPSHOT:compile
 [INFO] |  +- org.springframework.boot:spring-boot-starter-web:jar:4.1.0:compile
 [INFO] |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.21.4:compile
 [INFO] |  +- com.google.apis:google-api-services-cloudcommerceprocurement:jar:v1-rev20240602-2.0.0:compile
@@ -3006,7 +3006,7 @@ expression: filter_mvn_dep_tree(input)
 [INFO] |  \- com.googlecode.javaewah:JavaEWAH:jar:1.2.3:compile
 [INFO] +- org.assertj:assertj-core:jar:3.27.7:test
 [INFO] |  \- net.bytebuddy:byte-buddy:jar:1.18.10:compile
-[INFO] +- com.devskiller.skiller:data:test-jar:tests:1.2-SNAPSHOT:test
+[INFO] +- com.example.skiller:data:test-jar:tests:1.2-SNAPSHOT:test
 [INFO] +- org.springframework.cloud:spring-cloud-starter-contract-verifier:jar:5.0.3:test
 [INFO] |  +- org.springframework.cloud:spring-cloud-contract-verifier:jar:5.0.3:test
 [INFO] |  |  +- org.springframework.cloud:spring-cloud-contract-spec:jar:5.0.3:test

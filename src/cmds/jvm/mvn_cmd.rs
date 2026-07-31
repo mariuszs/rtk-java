@@ -3620,7 +3620,7 @@ mod tests {
         let out = filter_mvn_dep_tree(input);
 
         assert!(
-            out.contains("[INFO] com.devskiller.skiller:data:jar:1.2-SNAPSHOT"),
+            out.contains("[INFO] com.example.skiller:data:jar:1.2-SNAPSHOT"),
             "module roots must stay inline:\n{out}"
         );
         assert!(
@@ -5606,7 +5606,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // threshold (1) exceeded" repeat. Only the first carries a diagnostic;
         // the rest must keep their name line and lose the repeated body.
         let failure = |method: &str, message: &str| TestFailure {
-            test_class: "com.devskiller.app.GitServiceSpec".into(),
+            test_class: "com.example.app.GitServiceSpec".into(),
             test_method: method.into(),
             kind: FailureKind::Error,
             message: Some(message.into()),
@@ -5656,13 +5656,13 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // render. Identical diagnostic bodies must be rendered once; repeats
         // keep their name line + label and an elision reference.
         let failure = |method: &str, frame: &str, truncated: u32| TestFailure {
-            test_class: "com.devskiller.git.ContractVerifierTest".into(),
+            test_class: "com.example.git.ContractVerifierTest".into(),
             test_method: method.into(),
             kind: FailureKind::Failure,
             message: Some("Status expected:<201 CREATED> but was:<500 INTERNAL_SERVER_ERROR>".into()),
             failure_type: Some("java.lang.AssertionError".into()),
             stack_trace: Some(format!(
-                "java.lang.AssertionError: Status expected:<201 CREATED> but was:<500 INTERNAL_SERVER_ERROR>\n\tat com.devskiller.git.ContractVerifierTest.{frame}(ContractVerifierTest.java:42)\n\t... 6 framework frames omitted\nCaused by: java.lang.ClassNotFoundException: com.fasterxml.jackson.databind.PropertyNamingStrategy$PropertyNamingStrategyBase"
+                "java.lang.AssertionError: Status expected:<201 CREATED> but was:<500 INTERNAL_SERVER_ERROR>\n\tat com.example.git.ContractVerifierTest.{frame}(ContractVerifierTest.java:42)\n\t... 6 framework frames omitted\nCaused by: java.lang.ClassNotFoundException: com.fasterxml.jackson.databind.PropertyNamingStrategy$PropertyNamingStrategyBase"
             )),
             test_output: Some(format!(
                 "... ({truncated} lines truncated)\n{{\n  \"error\" : \"Handler dispatch failed: java.lang.NoClassDefFoundError: com/fasterxml/jackson/databind/PropertyNamingStrategy$PropertyNamingStrategyBase\"\n}}"
@@ -5698,7 +5698,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "repeats must carry an elision reference:\n{out}"
         );
         assert!(
-            out.contains("... same failure as com.devskiller.git.ContractVerifierTest.validate_getTaskRepo"),
+            out.contains("... same failure as com.example.git.ContractVerifierTest.validate_getTaskRepo"),
             "the reference must name the first occurrence:\n{out}"
         );
     }
@@ -5706,13 +5706,13 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
     #[test]
     fn render_failure_block_keeps_distinct_and_weak_signature_bodies() {
         let npe = |method: &str, frame_line: u32| TestFailure {
-            test_class: "com.devskiller.app.FooTest".into(),
+            test_class: "com.example.app.FooTest".into(),
             test_method: method.into(),
             kind: FailureKind::Error,
             message: None,
             failure_type: Some("java.lang.NullPointerException".into()),
             stack_trace: Some(format!(
-                "java.lang.NullPointerException\n\tat com.devskiller.app.Foo.bar(Foo.java:{frame_line})"
+                "java.lang.NullPointerException\n\tat com.example.app.Foo.bar(Foo.java:{frame_line})"
             )),
             test_output: None,
         };
@@ -5732,7 +5732,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
 
         // Different cause chains — never collapsed.
         let distinct = |method: &str, cause: &str| TestFailure {
-            test_class: "com.devskiller.app.BarTest".into(),
+            test_class: "com.example.app.BarTest".into(),
             test_method: method.into(),
             kind: FailureKind::Error,
             message: Some("boom".into()),

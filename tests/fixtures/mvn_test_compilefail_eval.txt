@@ -1,13 +1,13 @@
 [INFO] Maven Build Time Profiler started. (Version 0.2.0)
 [INFO] Scanning for projects...
 [INFO] 
-[INFO] ----------------------< com.devskiller.eval:eval >----------------------
+[INFO] ----------------------< com.example.eval:eval >----------------------
 [INFO] Building eval 0.0.1-SNAPSHOT
 [INFO]   from pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- jacoco:0.8.15:prepare-agent (prepare-agent) @ eval ---
-[INFO] argLine set to -javaagent:/home/mariusz/.m2/repository/org/jacoco/org.jacoco.agent/0.8.15/org.jacoco.agent-0.8.15-runtime.jar=destfile=/home/mariusz/git/eval/target/jacoco.exec
+[INFO] argLine set to -javaagent:/home/user/.m2/repository/org/jacoco/org.jacoco.agent/0.8.15/org.jacoco.agent-0.8.15-runtime.jar=destfile=/home/user/git/eval/target/jacoco.exec
 [INFO] 
 [INFO] --- resources:3.5.0:resources (default-resources) @ eval ---
 [INFO] Copying 1 resource from src/main/resources to target/classes
@@ -20,27 +20,27 @@ WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
 WARNING: sun.misc.Unsafe::objectFieldOffset has been called by lombok.permit.Permit
 WARNING: Please consider reporting this to the maintainers of class lombok.permit.Permit
 WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
-[WARNING] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/coding/runtimeinfo/ToolsDefinition.java:[15,1] Ambiguous: Jackson2 and Jackson3 exist; define which variant(s) you want in 'lombok.config'. See https://projectlombok.org/features/experimental/Jacksonized
-[WARNING] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/coding/runtimeinfo/ToolsDefinition.java:[43,9] Ambiguous: Jackson2 and Jackson3 exist; define which variant(s) you want in 'lombok.config'. See https://projectlombok.org/features/experimental/Jacksonized
-[WARNING] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/coding/runtimeinfo/ToolsDefinition.java:[59,9] Ambiguous: Jackson2 and Jackson3 exist; define which variant(s) you want in 'lombok.config'. See https://projectlombok.org/features/experimental/Jacksonized
-[WARNING] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/answers/activity/finish/AnswersFromEval.java:[25,1] Generating equals/hashCode implementation but without a call to superclass, even though this class does not extend java.lang.Object. If this is intentional, add '@EqualsAndHashCode(callSuper=false)' to your type.
-[WARNING] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/answers/MissingVideo.java:[7,1] Generating equals/hashCode implementation but without a call to superclass, even though this class does not extend java.lang.Object. If this is intentional, add '@EqualsAndHashCode(callSuper=false)' to your type.
-[WARNING] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/answers/MissingPhoto.java:[8,1] Generating equals/hashCode implementation but without a call to superclass, even though this class does not extend java.lang.Object. If this is intentional, add '@EqualsAndHashCode(callSuper=false)' to your type.
-[WARNING] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/workspaces/ProjectorIdeClient.java:[32,33] [removal] rootUri(@org.jspecify.annotations.Nullable java.lang.String) in org.springframework.boot.restclient.RestTemplateBuilder has been deprecated and marked for removal
+[WARNING] /home/user/git/eval/src/main/java/com/example/examer/coding/runtimeinfo/ToolsDefinition.java:[15,1] Ambiguous: Jackson2 and Jackson3 exist; define which variant(s) you want in 'lombok.config'. See https://projectlombok.org/features/experimental/Jacksonized
+[WARNING] /home/user/git/eval/src/main/java/com/example/examer/coding/runtimeinfo/ToolsDefinition.java:[43,9] Ambiguous: Jackson2 and Jackson3 exist; define which variant(s) you want in 'lombok.config'. See https://projectlombok.org/features/experimental/Jacksonized
+[WARNING] /home/user/git/eval/src/main/java/com/example/examer/coding/runtimeinfo/ToolsDefinition.java:[59,9] Ambiguous: Jackson2 and Jackson3 exist; define which variant(s) you want in 'lombok.config'. See https://projectlombok.org/features/experimental/Jacksonized
+[WARNING] /home/user/git/eval/src/main/java/com/example/examer/answers/activity/finish/AnswersFromEval.java:[25,1] Generating equals/hashCode implementation but without a call to superclass, even though this class does not extend java.lang.Object. If this is intentional, add '@EqualsAndHashCode(callSuper=false)' to your type.
+[WARNING] /home/user/git/eval/src/main/java/com/example/examer/answers/MissingVideo.java:[7,1] Generating equals/hashCode implementation but without a call to superclass, even though this class does not extend java.lang.Object. If this is intentional, add '@EqualsAndHashCode(callSuper=false)' to your type.
+[WARNING] /home/user/git/eval/src/main/java/com/example/examer/answers/MissingPhoto.java:[8,1] Generating equals/hashCode implementation but without a call to superclass, even though this class does not extend java.lang.Object. If this is intentional, add '@EqualsAndHashCode(callSuper=false)' to your type.
+[WARNING] /home/user/git/eval/src/main/java/com/example/examer/workspaces/ProjectorIdeClient.java:[32,33] [removal] rootUri(@org.jspecify.annotations.Nullable java.lang.String) in org.springframework.boot.restclient.RestTemplateBuilder has been deprecated and marked for removal
 				.rootUri(properties.getAddress().toString())
 				^
-[WARNING] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/api/ExamTime.java:[22,14] deprecated item is not annotated with @Deprecated
-[INFO] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/util/MessagePublisher.java: Some input files use or override a deprecated API.
-[INFO] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/util/MessagePublisher.java: Recompile with -Xlint:deprecation for details.
-[INFO] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/answers/firestore/Converters.java: Some input files use unchecked or unsafe operations.
-[INFO] /home/mariusz/git/eval/src/main/java/com/devskiller/examer/answers/firestore/Converters.java: Recompile with -Xlint:unchecked for details.
+[WARNING] /home/user/git/eval/src/main/java/com/example/examer/api/ExamTime.java:[22,14] deprecated item is not annotated with @Deprecated
+[INFO] /home/user/git/eval/src/main/java/com/example/examer/util/MessagePublisher.java: Some input files use or override a deprecated API.
+[INFO] /home/user/git/eval/src/main/java/com/example/examer/util/MessagePublisher.java: Recompile with -Xlint:deprecation for details.
+[INFO] /home/user/git/eval/src/main/java/com/example/examer/answers/firestore/Converters.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/user/git/eval/src/main/java/com/example/examer/answers/firestore/Converters.java: Recompile with -Xlint:unchecked for details.
 [INFO] 
 [INFO] --- typescript-generator:4.1.1:generate (generate) @ eval ---
 Running TypeScriptGenerator version 4.1.1
 Loading class org.checkerframework.checker.nullness.qual.Nullable
-Loading class com.devskiller.examer.model.AssignmentId
-Loading class com.devskiller.examer.model.ProjectFilePath
-Loading class com.devskiller.examer.model.Token
+Loading class com.example.examer.model.AssignmentId
+Loading class com.example.examer.model.ProjectFilePath
+Loading class com.example.examer.model.Token
 Loading class org.springframework.core.io.FileSystemResource
 Loading class java.net.URI
 Loading class java.net.URL
@@ -50,117 +50,117 @@ Loading class java.time.ZonedDateTime
 Loading class org.springframework.http.ResponseEntity
 Loading class reactor.core.publisher.Flux
 Loading class reactor.core.publisher.Mono
-Parsing Spring component: com.devskiller.examer.api.ExamController
-Parsing 'com.devskiller.examer.api.RestError'
-Parsing 'com.devskiller.examer.api.items.ChoiceTask'
-Parsing 'com.devskiller.examer.api.items.CodeGapTask'
-Parsing 'com.devskiller.examer.api.items.CodeReviewTask'
-Parsing 'com.devskiller.examer.api.items.EssayTask'
-Parsing 'com.devskiller.examer.api.items.AiInterviewTask'
-Parsing 'com.devskiller.examer.api.items.InputItem'
-Parsing 'com.devskiller.examer.api.items.KubernetesTask'
-Parsing 'com.devskiller.examer.api.items.programming.ProgrammingTask'
-Parsing 'com.devskiller.examer.api.items.salesforce.SalesforceScratchTask'
-Parsing 'com.devskiller.examer.api.items.SqlTask'
-Parsing 'com.devskiller.examer.api.items.TestIntroduction'
-Parsing 'com.devskiller.examer.api.items.VmTask'
-Parsing 'com.devskiller.examer.api.items.testing.TestingTask'
-Parsing Spring component: com.devskiller.examer.api.logging.LoggingController
-Parsing Spring component: com.devskiller.examer.coding.BuildController
-Parsing 'com.devskiller.examer.coding.BuildResult'
-Parsing Spring component: com.devskiller.examer.coding.ExamFileController
-Parsing Spring component: com.devskiller.examer.coding.ExamGitController
-Parsing Spring component: com.devskiller.examer.feedback.FeedbackController
-Parsing Spring component: com.devskiller.examer.interview.AiInterviewController
-Parsing 'com.devskiller.examer.interview.InterviewStreamEvent$Start'
-Parsing 'com.devskiller.examer.interview.InterviewStreamEvent$Delta'
-Parsing 'com.devskiller.examer.interview.InterviewStreamEvent$Error'
-Parsing Spring component: com.devskiller.examer.photos.AssetsController
-Parsing 'com.devskiller.examer.theme.Theme'
-Parsing Spring component: com.devskiller.examer.video.VideoController
-Parsing Spring component: com.devskiller.examer.video.VideoRecordingController
-Parsing 'com.devskiller.examer.api.SectionAnswers' used in 'ExamController.saveAnswers'
-Parsing 'com.devskiller.examer.api.ExitPageAnswers' used in 'ExamController.saveExitPageAnswers'
-Parsing 'com.devskiller.examer.ApiErrorType' used in 'RestError.errorType'
-Parsing 'com.devskiller.examer.api.ContentProvider' used in 'ChoiceTask.contentProvider'
-Parsing 'com.devskiller.examer.api.TaskType' used in 'ChoiceTask.type'
-Parsing 'com.devskiller.examer.api.items.Choice' used in 'ChoiceTask.choices'
-Parsing 'com.devskiller.examer.api.items.ExamItemType' used in 'ChoiceTask.itemType'
-Parsing 'com.devskiller.examer.api.items.ItemType' used in 'ChoiceTask.examItemType'
-Parsing 'com.devskiller.examer.api.items.Task' used in 'ChoiceTask.<superClass>'
-Parsing 'com.devskiller.examer.api.items.CodeGap' used in 'CodeGapTask.gaps'
-Parsing 'com.devskiller.examer.invitations.incoming.InputItemType' used in 'InputItem.inputType'
-Parsing 'com.devskiller.examer.api.items.WelcomeExitItem' used in 'InputItem.<interface>'
-Parsing 'com.devskiller.examer.api.items.programming.Git' used in 'ProgrammingTask.git'
-Parsing 'com.devskiller.examer.api.items.programming.Zip' used in 'ProgrammingTask.zip'
-Parsing 'com.devskiller.examer.api.items.programming.Jetb' used in 'ProgrammingTask.jetb'
-Parsing 'com.devskiller.examer.api.items.programming.SimpleWeb' used in 'ProgrammingTask.simpleWeb'
-Parsing 'com.devskiller.examer.api.ExamPartSummary' used in 'TestIntroduction.examSummary'
-Parsing 'com.devskiller.examer.api.items.StaticItemType' used in 'TestIntroduction.type'
-Parsing 'com.devskiller.examer.api.items.StaticItem' used in 'TestIntroduction.<superClass>'
-Parsing 'com.devskiller.examer.api.items.VmTask$Host' used in 'VmTask.host'
-Parsing 'com.devskiller.examer.api.items.testing.TestingInputField' used in 'TestingTask.inputFields'
-Parsing 'com.devskiller.examer.api.logging.PingResponseTimes' used in 'LoggingController.measurePing'
-Parsing 'com.devskiller.examer.api.logging.LogStatement' used in 'LoggingController.writeLog'
-Parsing 'com.devskiller.examer.workspaces.BuildStatus' used in 'BuildResult.buildStatus'
-Parsing 'com.devskiller.examer.coding.BuildResult$Detail' used in 'BuildResult.details'
-Parsing 'com.devskiller.examer.workspaces.SqlTestCaseResult' used in 'BuildResult.sqlResults'
-Parsing 'com.devskiller.examer.feedback.FeedbackRequest' used in 'FeedbackController.saveFeedback'
-Parsing 'com.devskiller.examer.interview.AiInterviewController$InterviewMessageRequest' used in 'AiInterviewController.message'
-Parsing 'com.devskiller.examer.interview.InterviewStreamEvent' used in 'Start.<interface>'
-Parsing 'com.devskiller.examer.interview.InterviewErrorCode' used in 'Error.code'
-Parsing 'com.devskiller.examer.api.ExamPage' used in 'ExamController.firstWelcomePage'
-Parsing 'com.devskiller.examer.answers.Answer' used in 'SectionAnswers.answers'
-Parsing 'com.devskiller.examer.api.SectionAnswers$BrowserInfo' used in 'SectionAnswers.browserInfo'
-Parsing 'com.devskiller.examer.model.Direction' used in 'SectionAnswers.direction'
-Parsing 'com.devskiller.examer.api.items.ExamItem' used in 'Task.<interface>'
-Parsing 'com.devskiller.examer.api.items.programming.ProgrammingMode' used in 'Git.<interface>'
-Parsing 'com.devskiller.examer.api.items.programming.Jetb$Readiness' used in 'Jetb.readiness'
-Parsing 'com.devskiller.examer.coding.ide.IdeType' used in 'Jetb.ideType'
-Parsing 'com.devskiller.examer.api.ItemsSummary' used in 'ExamPartSummary.items'
-Parsing 'com.devskiller.examer.api.items.testing.InputFieldType' used in 'TestingInputField.type'
-Parsing 'com.devskiller.examer.api.logging.Source' used in 'PingResponseTimes.source'
-Parsing 'com.devskiller.examer.api.logging.LogLevel' used in 'LogStatement.logLevel'
-Parsing 'com.devskiller.examer.workspaces.TestStatus' used in 'Detail.type'
-Parsing 'com.devskiller.examer.coding.fs.FileTree' used in 'ExamFileController.getFileTree'
-Parsing 'com.devskiller.examer.feedback.Grade' used in 'FeedbackRequest.grade'
-Parsing 'com.devskiller.examer.feedback.FeedbackCategory' used in 'FeedbackRequest.category'
-Parsing 'com.devskiller.examer.interview.InterviewTranscriptResponse' used in 'AiInterviewController.message'
-Parsing 'com.devskiller.examer.photos.AssetElement' used in 'AssetsController.uploadAsset'
-Parsing 'com.devskiller.examer.video.VideoConferenceDetails' used in 'VideoController.getVideoConferenceDetails'
-Parsing 'com.devskiller.examer.video.VideoMergeStatusDto' used in 'VideoRecordingController.getRecording'
-Parsing 'com.devskiller.examer.api.ExamSettings' used in 'ExamPage.settings'
-Parsing 'com.devskiller.examer.model.AssignmentSection' used in 'ExamPage.section'
-Parsing 'com.devskiller.examer.api.TocPage' used in 'ExamPage.tableOfContents'
-Parsing 'com.devskiller.examer.api.WelcomePage' used in 'ExamPage.<subClass>'
-Parsing 'com.devskiller.examer.api.FormalitiesPage' used in 'ExamPage.<subClass>'
-Parsing 'com.devskiller.examer.api.ExamExitPage' used in 'ExamPage.<subClass>'
-Parsing 'com.devskiller.examer.api.Assignment' used in 'ExamPage.<subClass>'
-Parsing 'com.devskiller.examer.answers.CodeReviewAnswer' used in 'Answer.<subClass>'
-Parsing 'com.devskiller.examer.answers.CodeGapAnswer' used in 'Answer.<subClass>'
-Parsing 'com.devskiller.examer.answers.EssayAnswer' used in 'Answer.<subClass>'
-Parsing 'com.devskiller.examer.answers.InputAnswer' used in 'Answer.<subClass>'
-Parsing 'com.devskiller.examer.answers.ChoiceAnswer' used in 'Answer.<subClass>'
-Parsing 'com.devskiller.examer.answers.AiInterviewAnswer' used in 'Answer.<subClass>'
-Parsing 'com.devskiller.examer.api.items.GenericTaskType' used in 'ItemsSummary.taskType'
-Parsing 'com.devskiller.examer.coding.fs.FileTreeNode' used in 'FileTree.children'
-Parsing 'com.devskiller.examer.interview.InterviewTranscriptResponse$TurnDto' used in 'InterviewTranscriptResponse.turns'
-Parsing 'com.devskiller.examer.api.ExamTime' used in 'ExamSettings.examTime'
-Parsing 'com.devskiller.examer.api.ExamRequirements' used in 'ExamSettings.requirements'
-Parsing 'com.devskiller.examer.api.ViewMode' used in 'ExamSettings.mode'
-Parsing 'com.devskiller.examer.api.Cobranding' used in 'ExamSettings.cobranding'
-Parsing 'com.devskiller.examer.api.TocPage$TocVisited' used in 'TocPage.visited'
-Parsing 'com.devskiller.examer.api.PageTime' used in 'Assignment.pageTime'
-Parsing 'com.devskiller.examer.model.Comment' used in 'CodeReviewAnswer.comments'
-Parsing 'com.devskiller.examer.answers.AiInterviewAnswer$InterviewTurn' used in 'AiInterviewAnswer.turns'
-Parsing 'com.devskiller.examer.coding.fs.FileTreeNode$FileNode' used in 'FileTreeNode.<subClass>'
-Parsing 'com.devskiller.examer.coding.fs.FileTreeNode$DirectoryNode' used in 'FileTreeNode.<subClass>'
-Parsing 'com.devskiller.examer.interview.InterviewTranscriptResponse$TurnChoiceDto' used in 'TurnDto.choices'
-Parsing 'com.devskiller.examer.api.ExamTimingModel' used in 'ExamTime.timingModel'
-Parsing 'com.devskiller.examer.model.CompanyLogoVariant' used in 'Cobranding.logos'
-Parsing 'com.devskiller.examer.answers.AiInterviewAnswer$InterviewRole' used in 'InterviewTurn.role'
-Parsing 'com.devskiller.examer.answers.AiInterviewAnswer$InterviewTurn$TurnChoice' used in 'InterviewTurn.choices'
-Writing declarations to: /home/mariusz/git/eval/src/main/resources/eval.d.ts
+Parsing Spring component: com.example.examer.api.ExamController
+Parsing 'com.example.examer.api.RestError'
+Parsing 'com.example.examer.api.items.ChoiceTask'
+Parsing 'com.example.examer.api.items.CodeGapTask'
+Parsing 'com.example.examer.api.items.CodeReviewTask'
+Parsing 'com.example.examer.api.items.EssayTask'
+Parsing 'com.example.examer.api.items.AiInterviewTask'
+Parsing 'com.example.examer.api.items.InputItem'
+Parsing 'com.example.examer.api.items.KubernetesTask'
+Parsing 'com.example.examer.api.items.programming.ProgrammingTask'
+Parsing 'com.example.examer.api.items.salesforce.SalesforceScratchTask'
+Parsing 'com.example.examer.api.items.SqlTask'
+Parsing 'com.example.examer.api.items.TestIntroduction'
+Parsing 'com.example.examer.api.items.VmTask'
+Parsing 'com.example.examer.api.items.testing.TestingTask'
+Parsing Spring component: com.example.examer.api.logging.LoggingController
+Parsing Spring component: com.example.examer.coding.BuildController
+Parsing 'com.example.examer.coding.BuildResult'
+Parsing Spring component: com.example.examer.coding.ExamFileController
+Parsing Spring component: com.example.examer.coding.ExamGitController
+Parsing Spring component: com.example.examer.feedback.FeedbackController
+Parsing Spring component: com.example.examer.interview.AiInterviewController
+Parsing 'com.example.examer.interview.InterviewStreamEvent$Start'
+Parsing 'com.example.examer.interview.InterviewStreamEvent$Delta'
+Parsing 'com.example.examer.interview.InterviewStreamEvent$Error'
+Parsing Spring component: com.example.examer.photos.AssetsController
+Parsing 'com.example.examer.theme.Theme'
+Parsing Spring component: com.example.examer.video.VideoController
+Parsing Spring component: com.example.examer.video.VideoRecordingController
+Parsing 'com.example.examer.api.SectionAnswers' used in 'ExamController.saveAnswers'
+Parsing 'com.example.examer.api.ExitPageAnswers' used in 'ExamController.saveExitPageAnswers'
+Parsing 'com.example.examer.ApiErrorType' used in 'RestError.errorType'
+Parsing 'com.example.examer.api.ContentProvider' used in 'ChoiceTask.contentProvider'
+Parsing 'com.example.examer.api.TaskType' used in 'ChoiceTask.type'
+Parsing 'com.example.examer.api.items.Choice' used in 'ChoiceTask.choices'
+Parsing 'com.example.examer.api.items.ExamItemType' used in 'ChoiceTask.itemType'
+Parsing 'com.example.examer.api.items.ItemType' used in 'ChoiceTask.examItemType'
+Parsing 'com.example.examer.api.items.Task' used in 'ChoiceTask.<superClass>'
+Parsing 'com.example.examer.api.items.CodeGap' used in 'CodeGapTask.gaps'
+Parsing 'com.example.examer.invitations.incoming.InputItemType' used in 'InputItem.inputType'
+Parsing 'com.example.examer.api.items.WelcomeExitItem' used in 'InputItem.<interface>'
+Parsing 'com.example.examer.api.items.programming.Git' used in 'ProgrammingTask.git'
+Parsing 'com.example.examer.api.items.programming.Zip' used in 'ProgrammingTask.zip'
+Parsing 'com.example.examer.api.items.programming.Jetb' used in 'ProgrammingTask.jetb'
+Parsing 'com.example.examer.api.items.programming.SimpleWeb' used in 'ProgrammingTask.simpleWeb'
+Parsing 'com.example.examer.api.ExamPartSummary' used in 'TestIntroduction.examSummary'
+Parsing 'com.example.examer.api.items.StaticItemType' used in 'TestIntroduction.type'
+Parsing 'com.example.examer.api.items.StaticItem' used in 'TestIntroduction.<superClass>'
+Parsing 'com.example.examer.api.items.VmTask$Host' used in 'VmTask.host'
+Parsing 'com.example.examer.api.items.testing.TestingInputField' used in 'TestingTask.inputFields'
+Parsing 'com.example.examer.api.logging.PingResponseTimes' used in 'LoggingController.measurePing'
+Parsing 'com.example.examer.api.logging.LogStatement' used in 'LoggingController.writeLog'
+Parsing 'com.example.examer.workspaces.BuildStatus' used in 'BuildResult.buildStatus'
+Parsing 'com.example.examer.coding.BuildResult$Detail' used in 'BuildResult.details'
+Parsing 'com.example.examer.workspaces.SqlTestCaseResult' used in 'BuildResult.sqlResults'
+Parsing 'com.example.examer.feedback.FeedbackRequest' used in 'FeedbackController.saveFeedback'
+Parsing 'com.example.examer.interview.AiInterviewController$InterviewMessageRequest' used in 'AiInterviewController.message'
+Parsing 'com.example.examer.interview.InterviewStreamEvent' used in 'Start.<interface>'
+Parsing 'com.example.examer.interview.InterviewErrorCode' used in 'Error.code'
+Parsing 'com.example.examer.api.ExamPage' used in 'ExamController.firstWelcomePage'
+Parsing 'com.example.examer.answers.Answer' used in 'SectionAnswers.answers'
+Parsing 'com.example.examer.api.SectionAnswers$BrowserInfo' used in 'SectionAnswers.browserInfo'
+Parsing 'com.example.examer.model.Direction' used in 'SectionAnswers.direction'
+Parsing 'com.example.examer.api.items.ExamItem' used in 'Task.<interface>'
+Parsing 'com.example.examer.api.items.programming.ProgrammingMode' used in 'Git.<interface>'
+Parsing 'com.example.examer.api.items.programming.Jetb$Readiness' used in 'Jetb.readiness'
+Parsing 'com.example.examer.coding.ide.IdeType' used in 'Jetb.ideType'
+Parsing 'com.example.examer.api.ItemsSummary' used in 'ExamPartSummary.items'
+Parsing 'com.example.examer.api.items.testing.InputFieldType' used in 'TestingInputField.type'
+Parsing 'com.example.examer.api.logging.Source' used in 'PingResponseTimes.source'
+Parsing 'com.example.examer.api.logging.LogLevel' used in 'LogStatement.logLevel'
+Parsing 'com.example.examer.workspaces.TestStatus' used in 'Detail.type'
+Parsing 'com.example.examer.coding.fs.FileTree' used in 'ExamFileController.getFileTree'
+Parsing 'com.example.examer.feedback.Grade' used in 'FeedbackRequest.grade'
+Parsing 'com.example.examer.feedback.FeedbackCategory' used in 'FeedbackRequest.category'
+Parsing 'com.example.examer.interview.InterviewTranscriptResponse' used in 'AiInterviewController.message'
+Parsing 'com.example.examer.photos.AssetElement' used in 'AssetsController.uploadAsset'
+Parsing 'com.example.examer.video.VideoConferenceDetails' used in 'VideoController.getVideoConferenceDetails'
+Parsing 'com.example.examer.video.VideoMergeStatusDto' used in 'VideoRecordingController.getRecording'
+Parsing 'com.example.examer.api.ExamSettings' used in 'ExamPage.settings'
+Parsing 'com.example.examer.model.AssignmentSection' used in 'ExamPage.section'
+Parsing 'com.example.examer.api.TocPage' used in 'ExamPage.tableOfContents'
+Parsing 'com.example.examer.api.WelcomePage' used in 'ExamPage.<subClass>'
+Parsing 'com.example.examer.api.FormalitiesPage' used in 'ExamPage.<subClass>'
+Parsing 'com.example.examer.api.ExamExitPage' used in 'ExamPage.<subClass>'
+Parsing 'com.example.examer.api.Assignment' used in 'ExamPage.<subClass>'
+Parsing 'com.example.examer.answers.CodeReviewAnswer' used in 'Answer.<subClass>'
+Parsing 'com.example.examer.answers.CodeGapAnswer' used in 'Answer.<subClass>'
+Parsing 'com.example.examer.answers.EssayAnswer' used in 'Answer.<subClass>'
+Parsing 'com.example.examer.answers.InputAnswer' used in 'Answer.<subClass>'
+Parsing 'com.example.examer.answers.ChoiceAnswer' used in 'Answer.<subClass>'
+Parsing 'com.example.examer.answers.AiInterviewAnswer' used in 'Answer.<subClass>'
+Parsing 'com.example.examer.api.items.GenericTaskType' used in 'ItemsSummary.taskType'
+Parsing 'com.example.examer.coding.fs.FileTreeNode' used in 'FileTree.children'
+Parsing 'com.example.examer.interview.InterviewTranscriptResponse$TurnDto' used in 'InterviewTranscriptResponse.turns'
+Parsing 'com.example.examer.api.ExamTime' used in 'ExamSettings.examTime'
+Parsing 'com.example.examer.api.ExamRequirements' used in 'ExamSettings.requirements'
+Parsing 'com.example.examer.api.ViewMode' used in 'ExamSettings.mode'
+Parsing 'com.example.examer.api.Cobranding' used in 'ExamSettings.cobranding'
+Parsing 'com.example.examer.api.TocPage$TocVisited' used in 'TocPage.visited'
+Parsing 'com.example.examer.api.PageTime' used in 'Assignment.pageTime'
+Parsing 'com.example.examer.model.Comment' used in 'CodeReviewAnswer.comments'
+Parsing 'com.example.examer.answers.AiInterviewAnswer$InterviewTurn' used in 'AiInterviewAnswer.turns'
+Parsing 'com.example.examer.coding.fs.FileTreeNode$FileNode' used in 'FileTreeNode.<subClass>'
+Parsing 'com.example.examer.coding.fs.FileTreeNode$DirectoryNode' used in 'FileTreeNode.<subClass>'
+Parsing 'com.example.examer.interview.InterviewTranscriptResponse$TurnChoiceDto' used in 'TurnDto.choices'
+Parsing 'com.example.examer.api.ExamTimingModel' used in 'ExamTime.timingModel'
+Parsing 'com.example.examer.model.CompanyLogoVariant' used in 'Cobranding.logos'
+Parsing 'com.example.examer.answers.AiInterviewAnswer$InterviewRole' used in 'InterviewTurn.role'
+Parsing 'com.example.examer.answers.AiInterviewAnswer$InterviewTurn$TurnChoice' used in 'InterviewTurn.choices'
+Writing declarations to: /home/user/git/eval/src/main/resources/eval.d.ts
 [INFO] 
 [INFO] --- resources:3.5.0:testResources (default-testResources) @ eval ---
 [INFO] Copying 20 resources from src/test/resources to target/test-classes
@@ -168,16 +168,16 @@ Writing declarations to: /home/mariusz/git/eval/src/main/resources/eval.d.ts
 [INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ eval ---
 [INFO] Recompiling the module because of changed dependency.
 [INFO] Compiling 89 source files with javac [debug parameters release 25] to target/test-classes
-[INFO] /home/mariusz/git/eval/src/test/java/com/devskiller/examer/answers/activity/finish/CandidateActivitiesTest.java: Some input files use or override a deprecated API.
-[INFO] /home/mariusz/git/eval/src/test/java/com/devskiller/examer/answers/activity/finish/CandidateActivitiesTest.java: Recompile with -Xlint:deprecation for details.
-[INFO] /home/mariusz/git/eval/src/test/java/com/devskiller/examer/RabbitHelpers.java: Some input files use unchecked or unsafe operations.
-[INFO] /home/mariusz/git/eval/src/test/java/com/devskiller/examer/RabbitHelpers.java: Recompile with -Xlint:unchecked for details.
+[INFO] /home/user/git/eval/src/test/java/com/example/examer/answers/activity/finish/CandidateActivitiesTest.java: Some input files use or override a deprecated API.
+[INFO] /home/user/git/eval/src/test/java/com/example/examer/answers/activity/finish/CandidateActivitiesTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] /home/user/git/eval/src/test/java/com/example/examer/RabbitHelpers.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/user/git/eval/src/test/java/com/example/examer/RabbitHelpers.java: Recompile with -Xlint:unchecked for details.
 [INFO] -------------------------------------------------------------
 [ERROR] COMPILATION ERROR : 
 [INFO] -------------------------------------------------------------
-[ERROR] /home/mariusz/git/eval/src/test/java/com/devskiller/examer/video/VideoRecorderTest.java:[25,35] cannot find symbol
+[ERROR] /home/user/git/eval/src/test/java/com/example/examer/video/VideoRecorderTest.java:[25,35] cannot find symbol
   symbol:   variable properties
-  location: class com.devskiller.examer.video.VideoRecorderTest
+  location: class com.example.examer.video.VideoRecorderTest
 [INFO] 1 error
 [INFO] -------------------------------------------------------------
 [INFO] ------------------------------------------------------------------------
@@ -226,9 +226,9 @@ Writing declarations to: /home/mariusz/git/eval/src/main/resources/eval.d.ts
 [INFO] ------------------------------------------------------------------------
 [INFO] ForkTime: 0
 [ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:testCompile (default-testCompile) on project eval: Compilation failure
-[ERROR] /home/mariusz/git/eval/src/test/java/com/devskiller/examer/video/VideoRecorderTest.java:[25,35] cannot find symbol
+[ERROR] /home/user/git/eval/src/test/java/com/example/examer/video/VideoRecorderTest.java:[25,35] cannot find symbol
 [ERROR]   symbol:   variable properties
-[ERROR]   location: class com.devskiller.examer.video.VideoRecorderTest
+[ERROR]   location: class com.example.examer.video.VideoRecorderTest
 [ERROR] 
 [ERROR] -> [Help 1]
 [ERROR] 

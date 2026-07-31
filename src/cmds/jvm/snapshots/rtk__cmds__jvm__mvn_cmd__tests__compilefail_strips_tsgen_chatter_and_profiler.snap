@@ -3,9 +3,9 @@ source: src/cmds/jvm/mvn_cmd.rs
 expression: output
 ---
 [ERROR] COMPILATION ERROR :
-[ERROR] /home/mariusz/git/eval/src/test/java/com/devskiller/examer/video/VideoRecorderTest.java:[25,35] cannot find symbol
+[ERROR] /home/user/git/eval/src/test/java/com/example/examer/video/VideoRecorderTest.java:[25,35] cannot find symbol
 symbol:   variable properties
-location: class com.devskiller.examer.video.VideoRecorderTest
+location: class com.example.examer.video.VideoRecorderTest
 [INFO] 1 error
 [INFO] BUILD FAILURE
 [ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:testCompile (default-testCompile) on project eval: Compilation failure

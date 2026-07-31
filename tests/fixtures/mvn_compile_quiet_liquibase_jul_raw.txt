@@ -1,9 +1,9 @@
-[INFO] Ignoring source directory /home/mariusz/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
+[INFO] Ignoring source directory /home/user/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
 [INFO] NOTHING TO DO: There is nothing to do. If this is unexpected, review the above logs for more details.
-[INFO] Ignoring source directory /home/mariusz/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
+[INFO] Ignoring source directory /home/user/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
 [INFO] NOTHING TO DO: There is nothing to do. If this is unexpected, review the above logs for more details.
 [INFO] BUILD SUCCESS
-WARNING: Final field _cipher in class org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher has been mutated reflectively by class org.eclipse.sisu.bean.BeanPropertyField in unnamed module @475e586c (file:/home/mariusz/.m2/wrapper/dists/apache-maven-3.9.9/3477a4f1/lib/org.eclipse.sisu.inject-0.9.0.M3.jar)
+WARNING: Final field _cipher in class org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher has been mutated reflectively by class org.eclipse.sisu.bean.BeanPropertyField in unnamed module @475e586c (file:/home/user/.m2/wrapper/dists/apache-maven-3.9.9/3477a4f1/lib/org.eclipse.sisu.inject-0.9.0.M3.jar)
 WARNING: Use --enable-final-field-mutation=ALL-UNNAMED to avoid a warning
 WARNING: Mutating final fields will be blocked in a future release unless final field mutation is enabled
 INFO: Set default schema name to public
@@ -311,7 +311,7 @@ INFO: Table company_promotion_category created
 INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-15::system ran successfully in 3ms
 INFO: Table company_promotion_config created
 INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-16::system ran successfully in 2ms
-INFO: Table devskiller_connection created
+INFO: Table example_connection created
 INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-17::system ran successfully in 2ms
 INFO: Table evaluation created
 INFO: ChangeSet db/changelog/db.changelog-baseline.yaml::1676025407402-18::system ran successfully in 3ms
@@ -418,7 +418,7 @@ INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1784823172-dac-edition-sta
 INFO: Custom SQL executed
 INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1784930101-dac-scorm-progress-measure.sql::dac-scorm-progress-measure-1::kuba ran successfully in 1ms
 INFO: Custom SQL executed
-INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1785169227-spring-batch-job-instance-seq.yaml::1785169227-1::mariusz ran successfully in 1ms
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-1785169227-spring-batch-job-instance-seq.yaml::1785169227-1::user ran successfully in 1ms
 INFO: Custom SQL executed
 INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-add-dictionary-managed-by.sql::add-dictionary-managed-by-1::marek ran successfully in 2ms
 INFO: Custom SQL executed
@@ -442,7 +442,7 @@ INFO: ChangeSet db/changelog/2026/db.changelog.2026-z-workflow-definition-purpos
 INFO: Custom SQL executed
 INFO: ChangeSet db/changelog/2026/db.changelog.2026-zz-dac-activity-richtext.sql::dac-richtext-1::marek ran successfully in 4ms
 INFO: Custom SQL executed
-INFO: ChangeSet db/changelog/2026/db.changelog.2026-zz-dac-activity-search-ts.sql::dac-activity-search-ts-1::mariusz ran successfully in 5ms
+INFO: ChangeSet db/changelog/2026/db.changelog.2026-zz-dac-activity-search-ts.sql::dac-activity-search-ts-1::user ran successfully in 5ms
 INFO: Custom SQL executed
 INFO: ChangeSet db/changelog/2026/db.changelog.2026-zz-dac-edition-richtext.sql::dac-edition-richtext-1::marek ran successfully in 2ms
 INFO: Table media_asset created

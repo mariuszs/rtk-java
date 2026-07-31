@@ -6,13 +6,13 @@
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- resources:3.4.0:resources (default-resources) @ repro ---
-[INFO] skip non existing resourceDirectory /tmp/claude-1000/-home-mariusz-projects-rtk-java/df28e768-e887-4192-9d9a-074f2221af70/scratchpad/mvn-repro/src/main/resources
+[INFO] skip non existing resourceDirectory /tmp/claude-1000/-home-user-projects-rtk-java/df28e768-e887-4192-9d9a-074f2221af70/scratchpad/mvn-repro/src/main/resources
 [INFO] 
 [INFO] --- compiler:3.15.0:compile (default-compile) @ repro ---
 [INFO] No sources to compile
 [INFO] 
 [INFO] --- resources:3.4.0:testResources (default-testResources) @ repro ---
-[INFO] skip non existing resourceDirectory /tmp/claude-1000/-home-mariusz-projects-rtk-java/df28e768-e887-4192-9d9a-074f2221af70/scratchpad/mvn-repro/src/test/resources
+[INFO] skip non existing resourceDirectory /tmp/claude-1000/-home-user-projects-rtk-java/df28e768-e887-4192-9d9a-074f2221af70/scratchpad/mvn-repro/src/test/resources
 [INFO] 
 [INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ repro ---
 [INFO] Nothing to compile - all classes are up to date.

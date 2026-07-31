@@ -641,9 +641,9 @@ mod tests {
         // report on disk uses CDATA; the hand-written fixtures do not, which
         // is why the unit tests stayed green while the feature was dead.
         let xml = include_str!(
-            "../../../tests/fixtures/java/surefire-reports/TEST-com.devskiller.selfie.domain.CandidateServiceSpec.xml"
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.example.selfie.domain.CandidateServiceSpec.xml"
         );
-        let result = parse_content(xml, &["com.devskiller".to_string()])
+        let result = parse_content(xml, &["com.example".to_string()])
             .expect("context failure testsuite parses");
         assert_eq!(result.failures.len(), 1);
         let f = &result.failures[0];
@@ -673,9 +673,9 @@ mod tests {
         // CONDITIONS EVALUATION REPORT: short lines, so the char cap alone let
         // ~70 of them through.
         let xml = include_str!(
-            "../../../tests/fixtures/java/surefire-reports/TEST-com.devskiller.selfie.domain.CandidateServiceSpec.xml"
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.example.selfie.domain.CandidateServiceSpec.xml"
         );
-        let result = parse_content(xml, &["com.devskiller".to_string()]).expect("parses");
+        let result = parse_content(xml, &["com.example".to_string()]).expect("parses");
         let output = result.failures[0]
             .test_output
             .as_deref()
@@ -696,9 +696,9 @@ mod tests {
         // this — DEBUG chatter wrapped in nine-byte colour codes — while the
         // two lines that explain the failure sat just above the tail window.
         let xml = include_str!(
-            "../../../tests/fixtures/java/surefire-reports/TEST-com.devsc.answers.ExamFinishedReceiverTest.xml"
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.example.answers.ExamFinishedReceiverTest.xml"
         );
-        let result = parse_content(xml, &["com.devsc".to_string()]).expect("parses");
+        let result = parse_content(xml, &["com.example".to_string()]).expect("parses");
         let output = result.failures[0]
             .test_output
             .as_deref()

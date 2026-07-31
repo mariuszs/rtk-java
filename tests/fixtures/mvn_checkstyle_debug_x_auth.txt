@@ -1,27 +1,27 @@
 Apache Maven 4.0.0-rc-5 (fb3ecaef88106acb40467a450248dfdbd75f3b35)
-Maven home: /home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591
-Java version: 26.0.1, vendor: Eclipse Adoptium, runtime: /home/mariusz/.sdkman/candidates/java/26.0.1-tem
+Maven home: /home/user/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591
+Java version: 26.0.1, vendor: Eclipse Adoptium, runtime: /home/user/.sdkman/candidates/java/26.0.1-tem
 Default locale: en_US, platform encoding: UTF-8
 OS name: "linux", version: "7.1.3-201.fc44.x86_64", arch: "amd64", family: "unix"
-Command line: /home/mariusz/.sdkman/candidates/java/26.0.1-tem/bin/java --enable-native-access=ALL-UNNAMED -classpath /home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/boot/plexus-classworlds-2.9.0.jar -Dclassworlds.conf=/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/bin/m2.conf -Dmaven.home=/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591 -Dmaven.mainClass=org.apache.maven.cling.MavenCling -Dlibrary.jline.path=/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/lib/jline-native -Dmaven.multiModuleProjectDirectory=/home/mariusz/git/auth org.codehaus.plexus.classworlds.launcher.Launcher checkstyle:check -X -B
+Command line: /home/user/.sdkman/candidates/java/26.0.1-tem/bin/java --enable-native-access=ALL-UNNAMED -classpath /home/user/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/boot/plexus-classworlds-2.9.0.jar -Dclassworlds.conf=/home/user/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/bin/m2.conf -Dmaven.home=/home/user/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591 -Dmaven.mainClass=org.apache.maven.cling.MavenCling -Dlibrary.jline.path=/home/user/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/lib/jline-native -Dmaven.multiModuleProjectDirectory=/home/user/git/auth org.codehaus.plexus.classworlds.launcher.Launcher checkstyle:check -X -B
 Terminal: DumbTerminal (type=dumb, provider=dumb)
 [DEBUG] Configured core extensions (in precedence order):
-[DEBUG] * Source file: /home/mariusz/git/auth/.mvn/extensions.xml
-[DEBUG]   - com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5 -> /home/mariusz/git/auth/.mvn/extensions.xml:3
+[DEBUG] * Source file: /home/user/git/auth/.mvn/extensions.xml
+[DEBUG]   - com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5 -> /home/user/git/auth/.mvn/extensions.xml:3
 [DEBUG] Selected core extensions (in loading order):
-[DEBUG] * com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5: /home/mariusz/git/auth/.mvn/extensions.xml:3
-[DEBUG] Reading installation settings from '/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/conf/settings.xml'
-[DEBUG] Reading project settings from '/home/mariusz/git/auth/.mvn/settings.xml'
-[DEBUG] Reading user settings from '/home/mariusz/.m2/settings.xml'
+[DEBUG] * com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5: /home/user/git/auth/.mvn/extensions.xml:3
+[DEBUG] Reading installation settings from '/home/user/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/conf/settings.xml'
+[DEBUG] Reading project settings from '/home/user/git/auth/.mvn/settings.xml'
+[DEBUG] Reading user settings from '/home/user/.m2/settings.xml'
 [DEBUG] Created adapter factory; available factories [file-lock, rwlock-local, semaphore-local, noop]; available name mappers [discriminating, file-gav, file-hgav, file-static, gav, static]
-[DEBUG] Using manager EnhancedLocalRepositoryManager with priority 10.0 for /home/mariusz/.m2/repository
+[DEBUG] Using manager EnhancedLocalRepositoryManager with priority 10.0 for /home/user/.m2/repository
 [DEBUG] Creating adapter using nameMapper 'file-gav' and factory 'file-lock'
 [DEBUG] Group rules file for remote repository central (https://repo.maven.apache.org/maven2, default, releases) not available
 [DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
-[DEBUG] Loaded prefixes for remote repository central from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-central.txt'
+[DEBUG] Loaded prefixes for remote repository central from auto-discovered file '/home/user/.m2/repository/.meta/prefixes-central.txt'
 [INFO] Loaded 23261 auto-discovered prefixes for remote repository central (prefixes-central.txt)
 [DEBUG] Reading file model from com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5
-WARNING: Final field modelId in class org.apache.maven.api.model.InputSource has been mutated reflectively by class org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState in unnamed module @27a389e6 (file:/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/lib/maven-impl-4.0.0-rc-5.jar)
+WARNING: Final field modelId in class org.apache.maven.api.model.InputSource has been mutated reflectively by class org.apache.maven.impl.model.DefaultModelBuilder$ModelBuilderSessionState in unnamed module @27a389e6 (file:/home/user/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/lib/maven-impl-4.0.0-rc-5.jar)
 WARNING: Use --enable-final-field-mutation=ALL-UNNAMED to avoid a warning
 WARNING: Mutating final fields will be blocked in a future release unless final field mutation is enabled
 [DEBUG] Collector skip mode enabled: versionless (key function GACE)
@@ -52,7 +52,7 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Group rules file for remote repository apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515 (https://repository.apache.org/snapshots, default, snapshots) not available
 [DEBUG] Reading file model from com.google.http-client:google-http-client-jackson2:1.46.3
 [DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
-[DEBUG] Loaded prefixes for remote repository apache.snapshots from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt'
+[DEBUG] Loaded prefixes for remote repository apache.snapshots from auto-discovered file '/home/user/.m2/repository/.meta/prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt'
 [INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
 [DEBUG] Reading file model from org.slf4j:slf4j-api:2.0.17
 [DEBUG] Reading file model from org.apache:apache:23
@@ -141,7 +141,7 @@ sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshot
 [DEBUG] Using transporter JdkTransporter with priority 10.0 for https://oss.sonatype.org/content/repositories/snapshots
 [DEBUG] Using connector BasicRepositoryConnector with priority 0.0 for https://oss.sonatype.org/content/repositories/snapshots
 [DEBUG] Final pipeline: offline( rrf( basic( sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) ) ) )
-[DEBUG] Writing tracking file '/home/mariusz/.m2/repository/.meta/resolver-status.properties'
+[DEBUG] Writing tracking file '/home/user/.m2/repository/.meta/resolver-status.properties'
 [DEBUG] Could not find metadata /.meta/prefixes.txt in sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots)
 [DEBUG] Prefix file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
 [DEBUG] Group rules file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
@@ -204,31 +204,31 @@ sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshot
 [DEBUG]    +- com.google.guava:failureaccess:jar:1.0.3 [runtime]
 [DEBUG]    \- org.jspecify:jspecify:jar:1.0.0 [runtime]
 [DEBUG] Populating class realm coreExtension>com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.5
-[DEBUG]   Included com.google.cloud.artifactregistry:artifactregistry-maven-wagon located at /home/mariusz/.m2/repository/com/google/cloud/artifactregistry/artifactregistry-maven-wagon/2.2.5/artifactregistry-maven-wagon-2.2.5.jar
-[DEBUG]   Included com.google.cloud.artifactregistry:artifactregistry-auth-common located at /home/mariusz/.m2/repository/com/google/cloud/artifactregistry/artifactregistry-auth-common/2.2.5/artifactregistry-auth-common-2.2.5.jar
-[DEBUG]   Included org.apache.maven.wagon:wagon-http-shared located at /home/mariusz/.m2/repository/org/apache/maven/wagon/wagon-http-shared/3.5.3/wagon-http-shared-3.5.3.jar
-[DEBUG]   Included com.google.http-client:google-http-client located at /home/mariusz/.m2/repository/com/google/http-client/google-http-client/1.46.3/google-http-client-1.46.3.jar
-[DEBUG]   Included com.google.auth:google-auth-library-oauth2-http located at /home/mariusz/.m2/repository/com/google/auth/google-auth-library-oauth2-http/1.33.1/google-auth-library-oauth2-http-1.33.1.jar
-[DEBUG]   Included com.google.guava:guava located at /home/mariusz/.m2/repository/com/google/guava/guava/33.4.6-jre/guava-33.4.6-jre.jar
-[DEBUG]   Included com.google.http-client:google-http-client-jackson2 located at /home/mariusz/.m2/repository/com/google/http-client/google-http-client-jackson2/1.46.3/google-http-client-jackson2-1.46.3.jar
-[DEBUG]   Included org.apache.httpcomponents:httpclient located at /home/mariusz/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar
-[DEBUG]   Included org.apache.httpcomponents:httpcore located at /home/mariusz/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar
-[DEBUG]   Included org.codehaus.plexus:plexus-utils located at /home/mariusz/.m2/repository/org/codehaus/plexus/plexus-utils/3.3.1/plexus-utils-3.3.1.jar
-[DEBUG]   Included io.grpc:grpc-context located at /home/mariusz/.m2/repository/io/grpc/grpc-context/1.70.0/grpc-context-1.70.0.jar
-[DEBUG]   Included io.opencensus:opencensus-api located at /home/mariusz/.m2/repository/io/opencensus/opencensus-api/0.31.1/opencensus-api-0.31.1.jar
-[DEBUG]   Included io.opencensus:opencensus-contrib-http-util located at /home/mariusz/.m2/repository/io/opencensus/opencensus-contrib-http-util/0.31.1/opencensus-contrib-http-util-0.31.1.jar
-[DEBUG]   Included com.google.auto.value:auto-value-annotations located at /home/mariusz/.m2/repository/com/google/auto/value/auto-value-annotations/1.11.0/auto-value-annotations-1.11.0.jar
-[DEBUG]   Included com.google.auth:google-auth-library-credentials located at /home/mariusz/.m2/repository/com/google/auth/google-auth-library-credentials/1.33.1/google-auth-library-credentials-1.33.1.jar
-[DEBUG]   Included com.google.http-client:google-http-client-gson located at /home/mariusz/.m2/repository/com/google/http-client/google-http-client-gson/1.46.2/google-http-client-gson-1.46.2.jar
-[DEBUG]   Included com.google.code.gson:gson located at /home/mariusz/.m2/repository/com/google/code/gson/gson/2.12.1/gson-2.12.1.jar
-[DEBUG]   Included com.google.guava:failureaccess located at /home/mariusz/.m2/repository/com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar
-[DEBUG]   Included org.jspecify:jspecify located at /home/mariusz/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar
-[DEBUG]   Included com.fasterxml.jackson.core:jackson-core located at /home/mariusz/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.2/jackson-core-2.18.2.jar
-[DEBUG]   Included commons-codec:commons-codec located at /home/mariusz/.m2/repository/commons-codec/commons-codec/1.15/commons-codec-1.15.jar
-[DEBUG]   Included org.eclipse.sisu:org.eclipse.sisu.inject located at /home/mariusz/.m2/repository/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.jar
-[DEBUG]   Included org.codehaus.plexus:plexus-component-annotations located at /home/mariusz/.m2/repository/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.jar
-[DEBUG]   Included org.codehaus.plexus:plexus-xml located at /home/mariusz/.m2/repository/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar
-[DEBUG]   Included io.grpc:grpc-api located at /home/mariusz/.m2/repository/io/grpc/grpc-api/1.70.0/grpc-api-1.70.0.jar
+[DEBUG]   Included com.google.cloud.artifactregistry:artifactregistry-maven-wagon located at /home/user/.m2/repository/com/google/cloud/artifactregistry/artifactregistry-maven-wagon/2.2.5/artifactregistry-maven-wagon-2.2.5.jar
+[DEBUG]   Included com.google.cloud.artifactregistry:artifactregistry-auth-common located at /home/user/.m2/repository/com/google/cloud/artifactregistry/artifactregistry-auth-common/2.2.5/artifactregistry-auth-common-2.2.5.jar
+[DEBUG]   Included org.apache.maven.wagon:wagon-http-shared located at /home/user/.m2/repository/org/apache/maven/wagon/wagon-http-shared/3.5.3/wagon-http-shared-3.5.3.jar
+[DEBUG]   Included com.google.http-client:google-http-client located at /home/user/.m2/repository/com/google/http-client/google-http-client/1.46.3/google-http-client-1.46.3.jar
+[DEBUG]   Included com.google.auth:google-auth-library-oauth2-http located at /home/user/.m2/repository/com/google/auth/google-auth-library-oauth2-http/1.33.1/google-auth-library-oauth2-http-1.33.1.jar
+[DEBUG]   Included com.google.guava:guava located at /home/user/.m2/repository/com/google/guava/guava/33.4.6-jre/guava-33.4.6-jre.jar
+[DEBUG]   Included com.google.http-client:google-http-client-jackson2 located at /home/user/.m2/repository/com/google/http-client/google-http-client-jackson2/1.46.3/google-http-client-jackson2-1.46.3.jar
+[DEBUG]   Included org.apache.httpcomponents:httpclient located at /home/user/.m2/repository/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar
+[DEBUG]   Included org.apache.httpcomponents:httpcore located at /home/user/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar
+[DEBUG]   Included org.codehaus.plexus:plexus-utils located at /home/user/.m2/repository/org/codehaus/plexus/plexus-utils/3.3.1/plexus-utils-3.3.1.jar
+[DEBUG]   Included io.grpc:grpc-context located at /home/user/.m2/repository/io/grpc/grpc-context/1.70.0/grpc-context-1.70.0.jar
+[DEBUG]   Included io.opencensus:opencensus-api located at /home/user/.m2/repository/io/opencensus/opencensus-api/0.31.1/opencensus-api-0.31.1.jar
+[DEBUG]   Included io.opencensus:opencensus-contrib-http-util located at /home/user/.m2/repository/io/opencensus/opencensus-contrib-http-util/0.31.1/opencensus-contrib-http-util-0.31.1.jar
+[DEBUG]   Included com.google.auto.value:auto-value-annotations located at /home/user/.m2/repository/com/google/auto/value/auto-value-annotations/1.11.0/auto-value-annotations-1.11.0.jar
+[DEBUG]   Included com.google.auth:google-auth-library-credentials located at /home/user/.m2/repository/com/google/auth/google-auth-library-credentials/1.33.1/google-auth-library-credentials-1.33.1.jar
+[DEBUG]   Included com.google.http-client:google-http-client-gson located at /home/user/.m2/repository/com/google/http-client/google-http-client-gson/1.46.2/google-http-client-gson-1.46.2.jar
+[DEBUG]   Included com.google.code.gson:gson located at /home/user/.m2/repository/com/google/code/gson/gson/2.12.1/gson-2.12.1.jar
+[DEBUG]   Included com.google.guava:failureaccess located at /home/user/.m2/repository/com/google/guava/failureaccess/1.0.3/failureaccess-1.0.3.jar
+[DEBUG]   Included org.jspecify:jspecify located at /home/user/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar
+[DEBUG]   Included com.fasterxml.jackson.core:jackson-core located at /home/user/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.2/jackson-core-2.18.2.jar
+[DEBUG]   Included commons-codec:commons-codec located at /home/user/.m2/repository/commons-codec/commons-codec/1.15/commons-codec-1.15.jar
+[DEBUG]   Included org.eclipse.sisu:org.eclipse.sisu.inject located at /home/user/.m2/repository/org/eclipse/sisu/org.eclipse.sisu.inject/0.9.0.M3/org.eclipse.sisu.inject-0.9.0.M3.jar
+[DEBUG]   Included org.codehaus.plexus:plexus-component-annotations located at /home/user/.m2/repository/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.jar
+[DEBUG]   Included org.codehaus.plexus:plexus-xml located at /home/user/.m2/repository/org/codehaus/plexus/plexus-xml/3.0.1/plexus-xml-3.0.1.jar
+[DEBUG]   Included io.grpc:grpc-api located at /home/user/.m2/repository/io/grpc/grpc-api/1.70.0/grpc-api-1.70.0.jar
 [DEBUG] Shutting down adapter factory; available factories [file-lock, rwlock-local, semaphore-local, noop]; available name mappers [discriminating, file-gav, file-hgav, file-static, gav, static]
 [DEBUG] Shutting down 'file-lock' factory
 [DEBUG] Shutting down 'rwlock-local' factory
@@ -319,16 +319,16 @@ sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshot
 [DEBUG] Populating class realm maven.api.v4
 [INFO] Error stacktraces are turned on.
 [DEBUG] Message scheme: plain
-[DEBUG] Reading installation settings from '/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/conf/settings.xml'
-[DEBUG] Reading project settings from '/home/mariusz/git/auth/.mvn/settings.xml'
-[DEBUG] Reading user settings from '/home/mariusz/.m2/settings.xml'
-[DEBUG] Reading installation toolchains from '/home/mariusz/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/conf/toolchains.xml'
-[DEBUG] Reading user toolchains from '/home/mariusz/.m2/toolchains.xml'
-[DEBUG] Using local repository at /home/mariusz/.m2/repository
-[DEBUG] Using manager EnhancedLocalRepositoryManager with priority 10.0 for /home/mariusz/.m2/repository
+[DEBUG] Reading installation settings from '/home/user/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/conf/settings.xml'
+[DEBUG] Reading project settings from '/home/user/git/auth/.mvn/settings.xml'
+[DEBUG] Reading user settings from '/home/user/.m2/settings.xml'
+[DEBUG] Reading installation toolchains from '/home/user/.m2/wrapper/dists/apache-maven-4.0.0-rc-5/1d86e591/conf/toolchains.xml'
+[DEBUG] Reading user toolchains from '/home/user/.m2/toolchains.xml'
+[DEBUG] Using local repository at /home/user/.m2/repository
+[DEBUG] Using manager EnhancedLocalRepositoryManager with priority 10.0 for /home/user/.m2/repository
 [INFO] Scanning for projects...
 [DEBUG] [1][general] PhasingExecutor created.
-[DEBUG] Reading file model from /home/mariusz/git/auth/pom.xml
+[DEBUG] Reading file model from /home/user/git/auth/pom.xml
 [DEBUG] [1][close] Closing PhasingExecutor. Active tasks: 0
 [DEBUG] [1][close] All tasks completed. Shutting down executor.
 [DEBUG] [1][close] PhasingExecutor closed. Total completed tasks: 0
@@ -337,30 +337,30 @@ sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshot
 [DEBUG] [2][close] Closing PhasingExecutor. Active tasks: 1
 [DEBUG] [2][close] Waiting for 1 active tasks to complete.
 [DEBUG] [2][task] Task executing. Active tasks: 1
-[DEBUG] Merging repositories from com.devskiller:auth:jar:1.3-SNAPSHOT
+[DEBUG] Merging repositories from com.example:auth:jar:1.3-SNAPSHOT
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
 central (https://repo1.maven.org/maven2, default, releases)
-artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
 shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
 [DEBUG] Creating adapter using nameMapper 'file-gav' and factory 'file-lock'
 [DEBUG] Group rules file for remote repository google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63 (https://maven-central.storage-download.googleapis.com/maven2, default, releases) not available
 [DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
-[DEBUG] Loaded prefixes for remote repository google-maven-central-copy from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63.txt'
+[DEBUG] Loaded prefixes for remote repository google-maven-central-copy from auto-discovered file '/home/user/.m2/repository/.meta/prefixes-google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63.txt'
 [INFO] Loaded 23257 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-c4cd290f3f22839f5b0a2afe35defbe31dfa3a63.txt)
 [DEBUG] Group rules file for remote repository google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases) not available
 [DEBUG] Group rules file for remote repository central (https://repo1.maven.org/maven2, default, releases) not available
 [DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
-[DEBUG] Loaded prefixes for remote repository central from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-central.txt'
+[DEBUG] Loaded prefixes for remote repository central from auto-discovered file '/home/user/.m2/repository/.meta/prefixes-central.txt'
 [INFO] Loaded 23261 auto-discovered prefixes for remote repository central (prefixes-central.txt)
-[DEBUG] Group rules file for remote repository artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
-[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e has elapsed or updates are forced
-[DEBUG] Prefix file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
-[DEBUG] Group rules file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
-[DEBUG] Group rules file for remote repository artifact-registry-snapshots-3aafd0d46c78bc81d16517878441c9e22f3dec16 (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots) not available
-[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-snapshots-3aafd0d46c78bc81d16517878441c9e22f3dec16 has elapsed or updates are forced
-[DEBUG] Prefix file for remote repository artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots) not available
-[DEBUG] Group rules file for remote repository artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots) not available
+[DEBUG] Group rules file for remote repository artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases) not available
+[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases) not available
+[DEBUG] Group rules file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases) not available
+[DEBUG] Group rules file for remote repository artifact-registry-snapshots-3aafd0d46c78bc81d16517878441c9e22f3dec16 (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots) not available
+[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-snapshots-3aafd0d46c78bc81d16517878441c9e22f3dec16 has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots) not available
+[DEBUG] Group rules file for remote repository artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots) not available
 [DEBUG] Group rules file for remote repository shibboleth-releases-5d99c0486312ae43e4bc39d107c6522d62203c00 (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots) not available
 [DEBUG] Using transporter JdkTransporter with priority 10.0 for https://build.shibboleth.net/nexus/content/repositories/releases/
 [DEBUG] Using connector BasicRepositoryConnector with priority 0.0 for https://build.shibboleth.net/nexus/content/repositories/releases/
@@ -375,7 +375,7 @@ shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/rel
 [DEBUG] [2][close] Waiting for 1 active tasks to complete.
 [DEBUG] [2][close] Waiting for 1 active tasks to complete.
 [DEBUG] [2][close] Waiting for 1 active tasks to complete.
-[DEBUG] Writing tracking file '/home/mariusz/.m2/repository/.meta/resolver-status.properties'
+[DEBUG] Writing tracking file '/home/user/.m2/repository/.meta/resolver-status.properties'
 [WARNING] Could not transfer metadata /.meta/prefixes.txt from/to shibboleth-releases-5d99c0486312ae43e4bc39d107c6522d62203c00 (https://build.shibboleth.net/nexus/content/repositories/releases/): Checksum validation failed, no checksums available
 org.eclipse.aether.transfer.MetadataTransferException: Could not transfer metadata /.meta/prefixes.txt from/to shibboleth-releases-5d99c0486312ae43e4bc39d107c6522d62203c00 (https://build.shibboleth.net/nexus/content/repositories/releases/): Checksum validation failed, no checksums available
     at org.eclipse.aether.connector.basic.MetadataTransportListener.transferFailed(MetadataTransportListener.java:44)
@@ -515,7 +515,7 @@ Caused by: org.eclipse.aether.transfer.ChecksumFailureException: Checksum valida
 [DEBUG] Group rules file for remote repository shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots) not available
 [DEBUG] Reading file model from org.springframework.boot:spring-boot-starter-parent:4.1.0
 [DEBUG] Reading file model from org.springframework.boot:spring-boot-dependencies:4.1.0
-[DEBUG] Extension realms for project com.devskiller:auth:jar:1.3-SNAPSHOT: (none)
+[DEBUG] Extension realms for project com.example:auth:jar:1.3-SNAPSHOT: (none)
 [DEBUG] Reading file model from org.springframework.cloud:spring-cloud-dependencies:2025.1.2
 [DEBUG] Reading file model from org.springframework.cloud:spring-cloud-dependencies-parent:5.0.2
 [DEBUG] Reading file model from org.springframework.cloud:spring-cloud-commons-dependencies:5.0.2
@@ -549,25 +549,25 @@ Caused by: org.eclipse.aether.transfer.ChecksumFailureException: Checksum valida
 [DEBUG] Merging repositories from com.google.api:gapic-generator-java-pom-parent:pom:2.62.1
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
 central (https://repo1.maven.org/maven2, default, releases)
-artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
 shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
 maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
 [DEBUG] Group rules file for remote repository maven-central-de66ab544dabb92499170649134bc3bd0ea8afac (https://repo1.maven.org/maven2, default, releases+snapshots) not available
 [DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
-[DEBUG] Loaded prefixes for remote repository maven-central from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-maven-central-de66ab544dabb92499170649134bc3bd0ea8afac.txt'
+[DEBUG] Loaded prefixes for remote repository maven-central from auto-discovered file '/home/user/.m2/repository/.meta/prefixes-maven-central-de66ab544dabb92499170649134bc3bd0ea8afac.txt'
 [INFO] Loaded 23261 auto-discovered prefixes for remote repository maven-central (prefixes-maven-central-de66ab544dabb92499170649134bc3bd0ea8afac.txt)
 [DEBUG] Group rules file for remote repository maven-central (https://repo1.maven.org/maven2, default, releases+snapshots) not available
 [DEBUG] Replacing repositories from com.google.api:gapic-generator-java-bom:pom:2.62.1
     central (https://repo1.maven.org/maven2, default, releases)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
     shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots)
     maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
 [DEBUG] Group rules file for remote repository google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388 (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots) not available
 [DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
-[DEBUG] Loaded prefixes for remote repository google-maven-central-copy from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388.txt'
+[DEBUG] Loaded prefixes for remote repository google-maven-central-copy from auto-discovered file '/home/user/.m2/repository/.meta/prefixes-google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388.txt'
 [INFO] Loaded 23257 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy-618f292136d6a9d006041d40d67cd906e4edc388.txt)
 [DEBUG] Group rules file for remote repository google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots) not available
 [DEBUG] Reading file model from com.google.auth:google-auth-library-bom:1.39.0
@@ -576,8 +576,8 @@ maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
 [DEBUG] Reading file model from org.sonatype.oss:oss-parent:9
 [DEBUG] Replacing repositories from com.google.guava:guava-bom:pom:33.4.0-jre
     central (https://repo1.maven.org/maven2, default, releases)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
     shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots)
     maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
@@ -588,8 +588,8 @@ maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
 [DEBUG] Reading file model from com.google.cloud:google-cloud-core-bom:2.60.1
 [DEBUG] Replacing repositories from com.google.cloud:google-cloud-core-bom:pom:2.60.1
     central (https://repo1.maven.org/maven2, default, releases)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
     shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots)
     maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
@@ -601,15 +601,15 @@ maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
 [DEBUG] Merging repositories from com.google.cloud:google-cloud-pom-parent:pom:1.68.0
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
 central (https://repo1.maven.org/maven2, default, releases)
-artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
 shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
 maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
 [DEBUG] Reading file model from com.google.cloud:sdk-platform-java-config:3.52.1
 [DEBUG] Replacing repositories from com.google.cloud:gapic-libraries-bom:pom:1.68.0
     central (https://repo1.maven.org/maven2, default, releases)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
     shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases+snapshots)
     maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
@@ -832,8 +832,8 @@ maven-central (https://repo1.maven.org/maven2, default, releases+snapshots)
 [DEBUG] Merging repositories from [inherited]:jackson-bom:pom:2.21.4
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
 central (https://repo1.maven.org/maven2, default, releases)
-artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
 shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
 central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots)
 [DEBUG] Group rules file for remote repository central-snapshots-352bfcd0a19f69feab0d695da3597248f399af75 (https://central.sonatype.com/repository/maven-snapshots, default, snapshots) not available
@@ -846,8 +846,8 @@ central-snapshots (https://central.sonatype.com/repository/maven-snapshots, defa
 [DEBUG] Merging repositories from tools.jackson:jackson-bom:pom:3.1.4
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
 central (https://repo1.maven.org/maven2, default, releases)
-artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
 shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
 central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots)
 [DEBUG] Reading file model from com.fasterxml:oss-parent:79
@@ -872,8 +872,8 @@ central-snapshots (https://central.sonatype.com/repository/maven-snapshots, defa
 [DEBUG] Replacing repositories from io.netty:netty-bom:pom:4.2.15.Final
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
     central (https://repo1.maven.org/maven2, default, releases)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
     shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)
     sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
 [DEBUG] Reading file model from io.opentelemetry:opentelemetry-bom:1.62.0
@@ -906,34 +906,34 @@ central-snapshots (https://central.sonatype.com/repository/maven-snapshots, defa
 [DEBUG] Merging repositories from [inherited]:spring-boot-starter-parent:pom:[inherited]
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
 central (https://repo1.maven.org/maven2, default, releases)
-artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
 [DEBUG] Merging repositories from [inherited]:jackson-bom:pom:2.21.4
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
 central (https://repo1.maven.org/maven2, default, releases)
-artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
 central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots)
 [DEBUG] Merging repositories from tools.jackson:jackson-bom:pom:3.1.4
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
 central (https://repo1.maven.org/maven2, default, releases)
-artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
 central-snapshots (https://central.sonatype.com/repository/maven-snapshots, default, snapshots)
 [DEBUG] Reading file model from org.jooq:jooq-bom:3.21.5
 [DEBUG] Replacing repositories from io.netty:netty-bom:pom:4.2.15.Final
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
     central (https://repo1.maven.org/maven2, default, releases)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
     sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
 [DEBUG] Replacing repositories from org.springframework.boot:spring-boot-dependencies:pom:4.1.0
     google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases)
     central (https://repo1.maven.org/maven2, default, releases)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
-    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
+    artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots)
 [WARNING] 
-[WARNING] 36 problems were encountered while building the effective model for 'com.devskiller:auth:jar:1.3-SNAPSHOT' (use -e to see details)
+[WARNING] 36 problems were encountered while building the effective model for 'com.example:auth:jar:1.3-SNAPSHOT' (use -e to see details)
 [WARNING] Ignored POM import for: io.grpc:grpc-all:jar:1.80.0@compile as already imported io.grpc:grpc-all:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
 [WARNING] Ignored POM import for: io.grpc:grpc-alts:jar:1.80.0@compile as already imported io.grpc:grpc-alts:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
 [WARNING] Ignored POM import for: io.grpc:grpc-api:jar:1.80.0@compile as already imported io.grpc:grpc-api:jar:1.71.0@compile. Add the conflicting managed dependency directly to the dependencyManagement section of the POM.
@@ -978,192 +978,192 @@ central-snapshots (https://central.sonatype.com/repository/maven-snapshots, defa
 [WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
 [WARNING] 
 [DEBUG] Resolving plugin prefix checkstyle from [org.apache.maven.plugins, org.codehaus.mojo]
-[DEBUG] Could not find metadata org.springframework.boot/maven-metadata.xml in local (/home/mariusz/.m2/repository)
-[DEBUG] Group rules file for remote repository devskiller-plugins-virtual-7d212acefdfdf6dbbc838fa0c78806d1df14b678 (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots) not available
-[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of devskiller-plugins-virtual-7d212acefdfdf6dbbc838fa0c78806d1df14b678 has elapsed or updates are forced
-[DEBUG] Prefix file for remote repository devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots) not available
-[DEBUG] Group rules file for remote repository devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots) not available
+[DEBUG] Could not find metadata org.springframework.boot/maven-metadata.xml in local (/home/user/.m2/repository)
+[DEBUG] Group rules file for remote repository example-plugins-virtual-7d212acefdfdf6dbbc838fa0c78806d1df14b678 (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots) not available
+[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of example-plugins-virtual-7d212acefdfdf6dbbc838fa0c78806d1df14b678 has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots) not available
+[DEBUG] Group rules file for remote repository example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots) not available
 [DEBUG] Skipped remote request for org.springframework.boot/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Group rules file for remote repository artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
-[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e has elapsed or updates are forced
-[DEBUG] Prefix file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
-[DEBUG] Group rules file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases) not available
-[DEBUG] org.springframework.boot/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Group rules file for remote repository artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases) not available
+[DEBUG] /.meta/prefixes.txt was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases-360228f3f313fbd72106f937e81da738bf42e99e has elapsed or updates are forced
+[DEBUG] Prefix file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases) not available
+[DEBUG] Group rules file for remote repository artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases) not available
+[DEBUG] org.springframework.boot/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Group rules file for remote repository central (https://repo.maven.apache.org/maven2, default, releases) not available
 [DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
-[DEBUG] Loaded prefixes for remote repository central from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-central.txt'
+[DEBUG] Loaded prefixes for remote repository central from auto-discovered file '/home/user/.m2/repository/.meta/prefixes-central.txt'
 [INFO] Loaded 23261 auto-discovered prefixes for remote repository central (prefixes-central.txt)
 [DEBUG] Skipped remote request for org.springframework.boot/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.jacoco/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.jacoco/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.jacoco/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.jacoco/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.jacoco/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.jacoco/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.springframework.cloud/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.springframework.cloud/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.springframework.cloud/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.springframework.cloud/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.springframework.cloud/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.springframework.cloud/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata com.github.eirslett/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata com.github.eirslett/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for com.github.eirslett/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] com.github.eirslett/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] com.github.eirslett/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for com.github.eirslett/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.liquibase/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.liquibase/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.liquibase/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.liquibase/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.liquibase/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.liquibase/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata cz.habarta.typescript-generator/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata cz.habarta.typescript-generator/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for cz.habarta.typescript-generator/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] cz.habarta.typescript-generator/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] cz.habarta.typescript-generator/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for cz.habarta.typescript-generator/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.testcontainers/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.testcontainers/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.testcontainers/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.testcontainers/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.testcontainers/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.testcontainers/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.cyclonedx/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.cyclonedx/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.cyclonedx/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.cyclonedx/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.cyclonedx/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.cyclonedx/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.flywaydb/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.flywaydb/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.flywaydb/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.flywaydb/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.flywaydb/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.flywaydb/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata io.github.git-commit-id/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata io.github.git-commit-id/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for io.github.git-commit-id/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] io.github.git-commit-id/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] io.github.git-commit-id/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for io.github.git-commit-id/maven-metadata.xml, locally cached metadata up-to-date
 [DEBUG] Skipped remote request for org.jooq/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.jooq/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.jooq/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.jooq/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.jetbrains.kotlin/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.jetbrains.kotlin/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.jetbrains.kotlin/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.jetbrains.kotlin/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.jetbrains.kotlin/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.jetbrains.kotlin/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.graalvm.buildtools/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.graalvm.buildtools/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.graalvm.buildtools/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.graalvm.buildtools/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.graalvm.buildtools/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.graalvm.buildtools/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata io.github.ascopes/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata io.github.ascopes/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for io.github.ascopes/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] io.github.ascopes/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] io.github.ascopes/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for io.github.ascopes/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.eclipse.m2e/maven-metadata.xml in local (/home/mariusz/.m2/repository)
-[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of devskiller-plugins-virtual has elapsed or updates are forced
-[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Could not find metadata org.eclipse.m2e/maven-metadata.xml in local (/home/user/.m2/repository)
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of example-plugins-virtual has elapsed or updates are forced
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in https://repo.maven.apache.org/maven2 during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of central has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.apache.maven.plugins/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.apache.maven.plugins/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.apache.maven.plugins/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.apache.maven.plugins/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.codehaus.mojo/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.codehaus.mojo/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.codehaus.mojo/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.codehaus.mojo/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.codehaus.mojo/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.codehaus.mojo/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Resolved plugin prefix checkstyle to org.apache.maven.plugins:maven-checkstyle-plugin from repository devskiller-plugins-virtual
+[DEBUG] Resolved plugin prefix checkstyle to org.apache.maven.plugins:maven-checkstyle-plugin from repository example-plugins-virtual
 [DEBUG] Reading file model from org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0
 [DEBUG] Reading file model from org.apache.maven.plugins:maven-plugins:43
 [DEBUG] Reading file model from org.apache.maven:maven-parent:43
 [DEBUG] Merging repositories from org.apache.maven:maven-parent:pom:43
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
 central (https://repo.maven.apache.org/maven2, default, releases)
 apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Group rules file for remote repository apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515 (https://repository.apache.org/snapshots, default, snapshots) not available
 [DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
-[DEBUG] Loaded prefixes for remote repository apache.snapshots from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt'
+[DEBUG] Loaded prefixes for remote repository apache.snapshots from auto-discovered file '/home/user/.m2/repository/.meta/prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt'
 [INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots-c1d4c55f9308e5ac18a4069bed41dca64d85c515.txt)
 [DEBUG] Group rules file for remote repository apache.snapshots (https://repository.apache.org/snapshots, default, snapshots) not available
 [DEBUG] Reading file model from org.apache:apache:33
 [DEBUG] Replacing repositories from org.apache.maven.plugins:maven-checkstyle-plugin:maven-plugin:3.6.0
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.junit:junit-bom:5.10.3
 [DEBUG] === REACTOR BUILD PLAN ================================================
-[DEBUG] Project: com.devskiller:auth:jar:1.3-SNAPSHOT
+[DEBUG] Project: com.example:auth:jar:1.3-SNAPSHOT
 [DEBUG] Tasks:   [checkstyle:check]
 [DEBUG] Style:   Regular
 [DEBUG] =======================================================================
 [INFO] 
-[INFO] ------------------------< com.devskiller:auth >-------------------------
+[INFO] ------------------------< com.example:auth >-------------------------
 [INFO] Building auth 1.3-SNAPSHOT
 [INFO]   from pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [DEBUG] Resolving plugin prefix checkstyle from [org.apache.maven.plugins, org.codehaus.mojo]
-[DEBUG] Could not find metadata org.springframework.boot/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.springframework.boot/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.springframework.boot/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.springframework.boot/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.springframework.boot/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.springframework.boot/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.jacoco/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.jacoco/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.jacoco/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.jacoco/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.jacoco/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.jacoco/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.springframework.cloud/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.springframework.cloud/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.springframework.cloud/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.springframework.cloud/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.springframework.cloud/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.springframework.cloud/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata com.github.eirslett/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata com.github.eirslett/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for com.github.eirslett/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] com.github.eirslett/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] com.github.eirslett/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for com.github.eirslett/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.liquibase/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.liquibase/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.liquibase/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.liquibase/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.liquibase/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.liquibase/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata cz.habarta.typescript-generator/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata cz.habarta.typescript-generator/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for cz.habarta.typescript-generator/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] cz.habarta.typescript-generator/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] cz.habarta.typescript-generator/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for cz.habarta.typescript-generator/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.testcontainers/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.testcontainers/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.testcontainers/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.testcontainers/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.testcontainers/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.testcontainers/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.cyclonedx/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.cyclonedx/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.cyclonedx/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.cyclonedx/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.cyclonedx/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.cyclonedx/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.flywaydb/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.flywaydb/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.flywaydb/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.flywaydb/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.flywaydb/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.flywaydb/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata io.github.git-commit-id/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata io.github.git-commit-id/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for io.github.git-commit-id/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] io.github.git-commit-id/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] io.github.git-commit-id/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for io.github.git-commit-id/maven-metadata.xml, locally cached metadata up-to-date
 [DEBUG] Skipped remote request for org.jooq/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.jooq/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.jooq/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.jooq/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.jetbrains.kotlin/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.jetbrains.kotlin/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.jetbrains.kotlin/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.jetbrains.kotlin/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.jetbrains.kotlin/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.jetbrains.kotlin/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.graalvm.buildtools/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.graalvm.buildtools/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.graalvm.buildtools/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.graalvm.buildtools/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.graalvm.buildtools/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.graalvm.buildtools/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata io.github.ascopes/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata io.github.ascopes/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for io.github.ascopes/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] io.github.ascopes/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] io.github.ascopes/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for io.github.ascopes/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.eclipse.m2e/maven-metadata.xml in local (/home/mariusz/.m2/repository)
-[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of devskiller-plugins-virtual has elapsed or updates are forced
-[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] Could not find metadata org.eclipse.m2e/maven-metadata.xml in local (/home/user/.m2/repository)
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of example-plugins-virtual has elapsed or updates are forced
+[DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] org.eclipse.m2e/maven-metadata.xml was not found in https://repo.maven.apache.org/maven2 during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of central has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.apache.maven.plugins/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.apache.maven.plugins/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.apache.maven.plugins/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.apache.maven.plugins/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Could not find metadata org.codehaus.mojo/maven-metadata.xml in local (/home/mariusz/.m2/repository)
+[DEBUG] Could not find metadata org.codehaus.mojo/maven-metadata.xml in local (/home/user/.m2/repository)
 [DEBUG] Skipped remote request for org.codehaus.mojo/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] org.codehaus.mojo/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
+[DEBUG] org.codehaus.mojo/maven-metadata.xml was not found in artifactregistry://europe-maven.pkg.dev/example-ci/example-releases during a previous attempt. This failure was cached in the local repository and resolution is not be reattempted until the update interval of artifact-registry-releases has elapsed or updates are forced
 [DEBUG] Skipped remote request for org.codehaus.mojo/maven-metadata.xml, locally cached metadata up-to-date
-[DEBUG] Resolved plugin prefix checkstyle to org.apache.maven.plugins:maven-checkstyle-plugin from repository devskiller-plugins-virtual
+[DEBUG] Resolved plugin prefix checkstyle to org.apache.maven.plugins:maven-checkstyle-plugin from repository example-plugins-virtual
 [DEBUG] Lifecycle clean -> [clean]
 [DEBUG] Lifecycle default -> [all, each, validate, initialize, build, sources, resources, compile, ready, package, verify, unit-test, test-sources, test-resources, test-compile, test, integration-test, install, deploy]
 [DEBUG] Lifecycle site -> [site, site-deploy]
 [DEBUG] === PROJECT BUILD PLAN ================================================
-[DEBUG] Project:       com.devskiller:auth:1.3-SNAPSHOT
+[DEBUG] Project:       com.example:auth:1.3-SNAPSHOT
 [DEBUG] Dependencies (collect): []
 [DEBUG] Dependencies (resolve): []
-[DEBUG] Repositories (dependencies): [google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases), central (https://repo1.maven.org/maven2, default, releases), artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases), artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-snapshots, default, snapshots), shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)]
-[DEBUG] Repositories (plugins)     : [devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots), artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases), central (https://repo.maven.apache.org/maven2, default, releases)]
+[DEBUG] Repositories (dependencies): [google-maven-central-copy (https://maven-central.storage-download.googleapis.com/maven2, default, releases), central (https://repo1.maven.org/maven2, default, releases), artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases), artifact-registry-snapshots (artifactregistry://europe-maven.pkg.dev/example-ci/example-snapshots, default, snapshots), shibboleth-releases (https://build.shibboleth.net/nexus/content/repositories/releases/, default, releases+snapshots)]
+[DEBUG] Repositories (plugins)     : [example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots), artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases), central (https://repo.maven.apache.org/maven2, default, releases)]
 [DEBUG] -----------------------------------------------------------------------
 [DEBUG] Goal:          org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check (default-cli)
 [DEBUG] Style:         Regular
@@ -1198,7 +1198,7 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
   <skip default-value="false">${checkstyle.skip}</skip>
   <skipExec default-value="false">${checkstyle.skipExec}</skipExec>
   <sourceDirectories>
-    <sourceDirectory>/home/mariusz/git/auth/src/main/java</sourceDirectory>
+    <sourceDirectory>/home/user/git/auth/src/main/java</sourceDirectory>
   </sourceDirectories>
   <suppressionsFileExpression default-value="checkstyle.suppressions.file">${checkstyle.suppression.expression}</suppressionsFileExpression>
   <suppressionsLocation>${checkstyle.suppressions.location}</suppressionsLocation>
@@ -1210,8 +1210,8 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [INFO] 
 [INFO] --- checkstyle:3.6.0:check (default-cli) @ auth ---
 [DEBUG] Replacing repositories from org.apache.maven.plugins:maven-checkstyle-plugin:maven-plugin:3.6.0
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Collector skip mode enabled: versionless (key function GACE)
@@ -1233,8 +1233,8 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.codehaus.plexus:plexus:16
 [DEBUG] Reading file model from org.codehaus.plexus:plexus:17
 [DEBUG] Replacing repositories from com.puppycrawl.tools:checkstyle:jar:13.3.0
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
     sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
@@ -1260,8 +1260,8 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from net.java:jvnet-parent:5
 [DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for codehaus.snapshots (http://snapshots.repository.codehaus.org).
 [DEBUG] Replacing repositories from org.codehaus.plexus:plexus-i18n:jar:1.0-beta-10
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
     maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
@@ -1269,8 +1269,8 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from commons-beanutils:commons-beanutils:1.11.0
 [DEBUG] Reading file model from com.google.guava:guava:33.5.0-jre
 [DEBUG] Replacing repositories from javax.xml.bind:jaxb-api:jar:2.3.1
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
     jvnet-nexus-releases (https://maven.java.net/content/repositories/releases/, default, releases)
@@ -1303,15 +1303,15 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.apache.maven:maven-archiver:3.6.2
 [DEBUG] Reading file model from org.apache.maven.resolver:maven-resolver-api:1.4.1
 [DEBUG] Replacing repositories from org.apache.maven.doxia:doxia-core:jar:1.12.0
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.eclipse.sisu:org.eclipse.sisu.plexus:0.9.0.M3
 [DEBUG] Replacing repositories from org.apache.maven.doxia:doxia-module-xdoc:jar:1.12.0
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
@@ -1325,8 +1325,8 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.apache.commons:commons-text:1.12.0
 [DEBUG] Reading file model from org.apache.commons:commons-parent:74
 [DEBUG] Replacing repositories from org.eclipse.sisu:org.eclipse.sisu.plexus:jar:0.9.0.M3
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
     sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
@@ -1354,8 +1354,8 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.apache.maven.doxia:doxia-sink-api:1.12.0
 [DEBUG] Reading file model from org.codehaus.plexus:plexus-component-annotations:2.1.0
 [DEBUG] Replacing repositories from org.apache.maven.doxia:doxia-sink-api:jar:1.12.0
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
@@ -1375,7 +1375,7 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.apache.velocity.tools:velocity-tools-parent:3.1
 [DEBUG] Reading file model from org.apache.velocity:velocity-master:4
 [DEBUG] Reading file model from org.codehaus.plexus:plexus-archiver:4.9.2
-[DEBUG] Writing tracking file '/home/mariusz/.m2/repository/.meta/resolver-status.properties'
+[DEBUG] Writing tracking file '/home/user/.m2/repository/.meta/resolver-status.properties'
 [DEBUG] Could not find metadata /.meta/prefixes.txt in sonatype-nexus-snapshots-696eddf78d2a1df624a12b8dedcbe2cacce1d215 (https://oss.sonatype.org/content/repositories/snapshots)
 [DEBUG] Prefix file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
 [DEBUG] Group rules file for remote repository sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots) not available
@@ -1383,7 +1383,7 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.codehaus.plexus:plexus-classworlds:2.6.0
 [DEBUG] Group rules file for remote repository jvnet-nexus-releases-a5d540dd75d8efce5a7e6a5ccab82bab11416135 (https://maven.java.net/content/repositories/releases/, default, releases) not available
 [DEBUG] Skipped remote request for /.meta/prefixes.txt, locally cached metadata up-to-date
-[DEBUG] Loaded prefixes for remote repository jvnet-nexus-releases from auto-discovered file '/home/mariusz/.m2/repository/.meta/prefixes-jvnet-nexus-releases-a5d540dd75d8efce5a7e6a5ccab82bab11416135.txt'
+[DEBUG] Loaded prefixes for remote repository jvnet-nexus-releases from auto-discovered file '/home/user/.m2/repository/.meta/prefixes-jvnet-nexus-releases-a5d540dd75d8efce5a7e6a5ccab82bab11416135.txt'
 [INFO] Loaded 22459 auto-discovered prefixes for remote repository jvnet-nexus-releases (prefixes-jvnet-nexus-releases-a5d540dd75d8efce5a7e6a5ccab82bab11416135.txt)
 [DEBUG] Group rules file for remote repository jvnet-nexus-releases (https://maven.java.net/content/repositories/releases/, default, releases) not available
 [DEBUG] Reading file model from javax.activation:javax.activation-api:1.2.0
@@ -1393,16 +1393,16 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from net.java:jvnet-parent:1
 [DEBUG] Reading file model from org.apache:apache:16
 [DEBUG] Replacing repositories from javax.activation:javax.activation-api:jar:1.2.0
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
     jvnet-nexus-releases (https://maven.java.net/content/repositories/releases/, default, releases)
     jvnet-nexus-snapshots (https://maven.java.net/content/repositories/snapshots, default, snapshots)
 [DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for apache.snapshots (http://repository.apache.org/snapshots).
 [DEBUG] Replacing repositories from commons-collections:commons-collections:jar:3.2.2
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
     maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
@@ -1423,16 +1423,16 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.apache.commons:commons-parent:65
 [DEBUG] Reading file model from org.apache.commons:commons-parent:66
 [DEBUG] Replacing repositories from org.apache.commons:commons-digester3:jar:3.2
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
 [DEBUG] Reading file model from commons-codec:commons-codec:1.16.1
 [DEBUG] Reading file model from org.iq80.snappy:snappy:0.4
 [DEBUG] Reading file model from org.tukaani:xz:1.9
 [DEBUG] Replacing repositories from org.iq80.snappy:snappy:jar:0.4
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
     sonatype-nexus-snapshots (https://oss.sonatype.org/content/repositories/snapshots, default, snapshots)
@@ -1450,13 +1450,13 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG] Reading file model from org.apache.commons:commons-parent:64
 [DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for apache.snapshots (http://people.apache.org/repo/m2-snapshot-repository).
 [DEBUG] Replacing repositories from commons-logging:commons-logging:jar:1.1.1
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
 [DEBUG] Replacing repositories from commons-beanutils:commons-beanutils:jar:1.8.3
-    devskiller-plugins-virtual (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-virtual, default, releases+snapshots)
-    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/devskiller-ci/devskiller-releases, default, releases)
+    example-plugins-virtual (artifactregistry://europe-maven.pkg.dev/example-ci/example-virtual, default, releases+snapshots)
+    artifact-registry-releases (artifactregistry://europe-maven.pkg.dev/example-ci/example-releases, default, releases)
     central (https://repo.maven.apache.org/maven2, default, releases)
     maven-default-http-blocker (http://0.0.0.0/, default, snapshots, blocked)
 [DEBUG] Reading file model from org.apache:apache:30
@@ -1592,7 +1592,7 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG]   Included: commons-logging:commons-logging:jar:1.1.1
 [DEBUG] Loading mojo org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check from plugin realm ClassRealm[plugin>org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0, parent: jdk.internal.loader.ClassLoaders$AppClassLoader@5bc2b487]
 [DEBUG] Configuring mojo execution 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check:default-cli' with basic configurator -->
-[DEBUG]   (f) cacheFile = /home/mariusz/git/auth/target/checkstyle-cachefile
+[DEBUG]   (f) cacheFile = /home/user/git/auth/target/checkstyle-cachefile
 [DEBUG]   (f) checkstyleRulesHeader = <?xml version="1.0"?>
 <!DOCTYPE module PUBLIC "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
         "https://checkstyle.org/dtds/configuration_1_3.dtd">
@@ -1612,33 +1612,33 @@ apache.snapshots (https://repository.apache.org/snapshots, default, snapshots)
 [DEBUG]   (f) logViolationsToConsole = true
 [DEBUG]   (f) maxAllowedViolations = 0
 [DEBUG]   (f) omitIgnoredModules = false
-[DEBUG]   (f) outputFile = /home/mariusz/git/auth/target/checkstyle-result.xml
+[DEBUG]   (f) outputFile = /home/user/git/auth/target/checkstyle-result.xml
 [DEBUG]   (f) outputFileFormat = xml
 [DEBUG]   (f) plugin = Component Descriptor: role: 'org.apache.maven.plugin.Mojo', implementation: 'org.apache.maven.plugins.checkstyle.CheckstyleViolationCheckMojo', role hint: 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check'
 role: 'org.apache.maven.plugin.Mojo', implementation: 'org.apache.maven.plugins.checkstyle.CheckstyleReport', role hint: 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:checkstyle'
 role: 'org.apache.maven.plugin.Mojo', implementation: 'org.apache.maven.plugins.checkstyle.CheckstyleAggregateReport', role hint: 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:checkstyle-aggregate'
 role: 'org.apache.maven.plugin.Mojo', implementation: 'org.apache.maven.plugins.maven_checkstyle_plugin.HelpMojo', role hint: 'org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:help'
 ---
-[DEBUG]   (f) project = MavenProject: com.devskiller:auth:1.3-SNAPSHOT @ /home/mariusz/git/auth/pom.xml
+[DEBUG]   (f) project = MavenProject: com.example:auth:1.3-SNAPSHOT @ /home/user/git/auth/pom.xml
 [DEBUG]   (f) resourceIncludes = **/*.properties
-[DEBUG]   (f) resources = [Resource {targetPath: null, filtering: true, FileSet {directory: /home/mariusz/git/auth/src/main/resources, PatternSet [includes: {**/application*.yml, **/application*.yaml, **/application*.properties}, excludes: {}]}}, Resource {targetPath: null, filtering: false, FileSet {directory: /home/mariusz/git/auth/src/main/resources, PatternSet [includes: {}, excludes: {**/application*.yml, **/application*.yaml, **/application*.properties}]}}]
-[DEBUG]   (f) rulesFiles = /home/mariusz/git/auth/target/checkstyle-rules.xml
+[DEBUG]   (f) resources = [Resource {targetPath: null, filtering: true, FileSet {directory: /home/user/git/auth/src/main/resources, PatternSet [includes: {**/application*.yml, **/application*.yaml, **/application*.properties}, excludes: {}]}}, Resource {targetPath: null, filtering: false, FileSet {directory: /home/user/git/auth/src/main/resources, PatternSet [includes: {}, excludes: {**/application*.yml, **/application*.yaml, **/application*.properties}]}}]
+[DEBUG]   (f) rulesFiles = /home/user/git/auth/target/checkstyle-rules.xml
 [DEBUG]   (f) skip = false
 [DEBUG]   (f) skipExec = false
-[DEBUG]   (f) sourceDirectories = [/home/mariusz/git/auth/src/main/java]
+[DEBUG]   (f) sourceDirectories = [/home/user/git/auth/src/main/java]
 [DEBUG]   (f) suppressionsFileExpression = checkstyle.suppressions.file
-[DEBUG]   (f) testResources = [Resource {targetPath: null, filtering: false, FileSet {directory: /home/mariusz/git/auth/src/test/resources, PatternSet [includes: {}, excludes: {}]}}]
+[DEBUG]   (f) testResources = [Resource {targetPath: null, filtering: false, FileSet {directory: /home/user/git/auth/src/test/resources, PatternSet [includes: {}, excludes: {}]}}]
 [DEBUG]   (f) violationSeverity = error
 [DEBUG] -- end configuration --
 [DEBUG] executeCheckstyle start headerLocation : LICENSE.txt
-[DEBUG] JarResourceLoader : trying to load 'jar:file:/home/mariusz/.m2/repository/com/puppycrawl/tools/checkstyle/13.3.0/checkstyle-13.3.0.jar'
-[DEBUG] Added 918 source files found in '/home/mariusz/git/auth/src/main/java'.
-[DEBUG] Added 1 resource files found in '/home/mariusz/git/auth/src/main/resources'.
-[DEBUG] Added 1 resource files found in '/home/mariusz/git/auth/src/main/resources'.
-[DEBUG] Added 2 resource files found in '/home/mariusz/git/auth/src/test/resources'.
+[DEBUG] JarResourceLoader : trying to load 'jar:file:/home/user/.m2/repository/com/puppycrawl/tools/checkstyle/13.3.0/checkstyle-13.3.0.jar'
+[DEBUG] Added 918 source files found in '/home/user/git/auth/src/main/java'.
+[DEBUG] Added 1 resource files found in '/home/user/git/auth/src/main/resources'.
+[DEBUG] Added 1 resource files found in '/home/user/git/auth/src/main/resources'.
+[DEBUG] Added 2 resource files found in '/home/user/git/auth/src/test/resources'.
 [DEBUG] Added 921 files to process.
 [DEBUG] request.getConfigLocation() checkstyle.xml
-[DEBUG] The resource 'checkstyle.xml' was found as '/home/mariusz/git/auth/checkstyle.xml'
+[DEBUG] The resource 'checkstyle.xml' was found as '/home/user/git/auth/checkstyle.xml'
 [DEBUG] headerLocation LICENSE.txt
 [DEBUG] The resource 'LICENSE.txt' was not found with resourceLoader org.codehaus.plexus.resource.loader.FileResourceLoader.
 [DEBUG] The resource 'LICENSE.txt' was not found with resourceLoader org.codehaus.plexus.resource.loader.JarResourceLoader.
@@ -1647,8 +1647,8 @@ role: 'org.apache.maven.plugin.Mojo', implementation: 'org.apache.maven.plugins.
 [DEBUG] The resource 'LICENSE.txt' was not found with resourceLoader org.codehaus.plexus.resource.loader.URLResourceLoader.
 [DEBUG] Unable to process header location: LICENSE.txt
 [DEBUG] Checkstyle will throw exception if ${checkstyle.header.file} is used
-[DEBUG] Added '/home/mariusz/git/auth/src/main/resources' as a source directory.
-[DEBUG] Added '/home/mariusz/git/auth/src/main/resources' as a source directory.
+[DEBUG] Added '/home/user/git/auth/src/main/resources' as a source directory.
+[DEBUG] Added '/home/user/git/auth/src/main/resources' as a source directory.
 [INFO] You have 0 Checkstyle violations.
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
