@@ -2230,6 +2230,22 @@ const INFO_NOISE_PATTERNS: &[&str] = &[
     //   "The encoding used to copy filtered properties files have not been set…"
     "copy filtered",
     "skip non existing resourceDirectory",
+    // spring-cloud-contract-maven-plugin progress: one ~150-char line per
+    // generated stub/test, each echoing an absolute path. Under `mvn -q` the
+    // `[INFO] --- plugin ---` markers that drive the noisy-segment state are
+    // suppressed, so without these the whole block reaches the agent — 16
+    // lines / 1972 chars ahead of a 3-line compile error in a real auth run.
+    "Creating new stub [",
+    "Creating new class file [",
+    "Will use contracts provided in the folder",
+    "Directory with contract is present at",
+    "Stub Server stubs mappings directory",
+    "Spring Cloud Contract Verifier contracts",
+    "as base class for test classes",
+    // hibernate-jpamodelgen / protobuf-maven-plugin / maven-enforcer banners
+    "Hibernate compile-time tooling",
+    "Ignoring source directory",
+    "Skipping Rule Enforcement",
     // maven-checkstyle-plugin clean-audit output
     "Starting audit",
     "Audit done",
@@ -4123,6 +4139,56 @@ mod tests {
         assert!(
             output.contains("Failed to execute goal"),
             "the failure cause must survive, got:\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_compile_quiet_contract_plugin_chatter_dropped() {
+        // Real `./mvnw test -Dskip.npm -Dtest=… -q` from auth (2026-07-31
+        // 10:29), lines copied verbatim out of what rtk actually rendered:
+        // 16 lines / 1972 chars of spring-cloud-contract + Hibernate plugin
+        // progress ahead of the 3-line compile error the agent was after —
+        // 68% of that run. Same disease as the JUL and Logback cases: `-q`
+        // suppresses the `[INFO] --- plugin ---` markers, so the noisy-segment
+        // state never engages and plain `[INFO]` lines fall through to "keep".
+        let input = include_str!("../../../tests/fixtures/mvn_test_quiet_contract_plugin_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        for noise in [
+            "Creating new stub [",
+            "Creating new class file [",
+            "Will use contracts provided",
+            "Stub Server stubs mappings",
+            "Hibernate compile-time tooling",
+            "as base class for test classes",
+        ] {
+            assert!(
+                !output.contains(noise),
+                "plugin chatter {noise:?} must be dropped, got:\n{output}"
+            );
+        }
+        assert!(
+            output.contains("cannot find symbol"),
+            "the compile error must survive, got:\n{output}"
+        );
+        assert!(
+            output.contains("class InvitationActivationService"),
+            "the unprefixed javac detail lines must survive, got:\n{output}"
+        );
+        assert!(
+            output.contains("BUILD FAILURE") && output.contains("Failed to execute goal"),
+            "the native verdict and cause must survive, got:\n{output}"
+        );
+    }
+
+    #[test]
+    fn test_compile_quiet_contract_plugin_savings() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_quiet_contract_plugin_raw.txt");
+        let output = filter_mvn_compile(input);
+        let savings = 100.0 - (output.len() as f64 / input.len() as f64 * 100.0);
+        assert!(
+            savings >= 60.0,
+            "expected >=60% savings, got {savings:.1}%:\n{output}"
         );
     }
 

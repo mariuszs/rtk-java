@@ -2,9 +2,7 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: filter_mvn_compile(input)
 ---
-[INFO] Ignoring source directory /home/mariusz/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
 [INFO] NOTHING TO DO: There is nothing to do. If this is unexpected, review the above logs for more details.
-[INFO] Ignoring source directory /home/mariusz/git/map.worktrees/fix-edition-attendance-bean-conflict/src/main/protobuf as it does not appear to actually exist
 [INFO] NOTHING TO DO: There is nothing to do. If this is unexpected, review the above logs for more details.
 [INFO] BUILD SUCCESS
 ⚠️ Your config has 1 warning.
