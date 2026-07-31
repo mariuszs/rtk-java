@@ -337,16 +337,41 @@ static CAPTURED_DEBUG_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 
-/// Strip console colour codes and drop TRACE/DEBUG log lines from a captured
-/// output block, so the tail budget is spent on lines that carry meaning.
-/// ANSI goes first: the level field is only findable once the colour codes
-/// wrapped around it are gone.
+/// Banner Spring's `ConditionEvaluationReportLogger` prints when a context
+/// fails to load. Everything from it on is the report: `Positive matches`,
+/// `Negative matches`, `Exclusions`, `Unconditional classes` — either bare
+/// `None`s or thousands of indented auto-configuration class names, never a
+/// clue about why the context failed. It is emitted on the failure path, so
+/// it is terminal within the block; cutting at the banner puts the tail
+/// budget back on the application's own log lines above it.
+const CONDITIONS_REPORT_BANNER: &str = "CONDITIONS EVALUATION REPORT";
+
+/// Strip console colour codes, cut Spring's conditions report, and drop
+/// TRACE/DEBUG log lines from a captured output block, so the tail budget is
+/// spent on lines that carry meaning. ANSI goes first: the level field is
+/// only findable once the colour codes wrapped around it are gone.
 fn clean_captured(text: &str) -> String {
     let text = CAPTURED_ANSI_RE.replace_all(text, "");
-    text.lines()
-        .filter(|l| !CAPTURED_DEBUG_LINE_RE.is_match(l))
-        .collect::<Vec<_>>()
-        .join("\n")
+    let mut kept: Vec<&str> = Vec::new();
+    for line in text.lines() {
+        if line.trim() == CONDITIONS_REPORT_BANNER {
+            // The `====` rule printed directly above the banner belongs to it.
+            if kept.last().is_some_and(|l| is_banner_rule(l)) {
+                kept.pop();
+            }
+            break;
+        }
+        if !CAPTURED_DEBUG_LINE_RE.is_match(line) {
+            kept.push(line);
+        }
+    }
+    kept.join("\n")
+}
+
+/// A `====…` rule line, the separator Spring prints around the banner.
+fn is_banner_rule(line: &str) -> bool {
+    let t = line.trim();
+    t.len() >= 4 && t.bytes().all(|b| b == b'=')
 }
 
 /// Remove bare-text JVM agent/self-attach warning lines from a captured
@@ -696,6 +721,47 @@ mod tests {
             "captured output should collapse to a few informative lines, got {} chars:\n{output}",
             output.len()
         );
+    }
+
+    #[test]
+    fn captured_output_cuts_spring_conditions_report() {
+        // Two independent real shapes: the selfie report on disk carries a
+        // degenerate all-`None` report twice in `<system-err>` (590 chars of
+        // pure banner), while an auth integration failure rendered the other
+        // extreme — the `Unconditional classes` listing, thousands of indented
+        // auto-configuration class names alternating with blank lines, which
+        // `collapse_blank_runs` cannot touch because the blanks are not
+        // consecutive. Neither says why the context failed.
+        let stdout = "\
+11:54:22.212 [main] WARN  c.d.a.u.p.PasswordResetService - Cannot find requested user
+============================
+CONDITIONS EVALUATION REPORT
+============================
+
+
+Positive matches:
+-----------------
+
+    None
+
+
+Unconditional classes:
+----------------------
+
+    org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration
+
+    org.springframework.boot.autoconfigure.availability.ApplicationAvailabilityAutoConfiguration";
+        let out = super::combine_test_output(stdout, "", 2000).expect("captured output");
+        assert_eq!(out, "11:54:22.212 [main] WARN  c.d.a.u.p.PasswordResetService - Cannot find requested user");
+    }
+
+    #[test]
+    fn captured_output_is_dropped_when_only_the_conditions_report_remains() {
+        // The selfie shape: `<system-err>` holds nothing but the report, so
+        // there is no captured output left to show.
+        let stderr = "\n\n============================\nCONDITIONS EVALUATION REPORT\n\
+                      ============================\n\n\nExclusions:\n-----------\n\n    None\n";
+        assert!(super::combine_test_output("", stderr, 2000).is_none());
     }
 
     #[test]
