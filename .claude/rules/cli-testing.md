@@ -119,6 +119,28 @@ pnpm list > tests/fixtures/pnpm_list_raw.txt
 # let input = include_str!("../tests/fixtures/git_log_raw.txt");
 ```
 
+**Sanitize before committing** — real output carries real identifiers, and fixtures ship in
+a public repo. The established mapping (already applied across `tests/fixtures/`):
+
+| Real | Fixture |
+|------|---------|
+| company groupId (`com.acme…`) | `com.example…` — keep the module/package tail |
+| internal artifact repos (`acme-ci`, `acme-releases`) | `example-ci`, `example-releases` |
+| internal hosts (`vault.acme.tech`) | `example.com` |
+| `/home/<you>`, `/Users/<you>` | `/home/user` |
+| your login in log bodies (`started by …`, liquibase author) | `user` |
+
+```bash
+sed -i 's/acme/example/g; s|/home/myname|/home/user|g' tests/fixtures/new_fixture.txt
+grep -n 'acme\|myname' tests/fixtures/new_fixture.txt   # expect empty
+```
+
+Watch for the shapes a groupId sweep misses: **environment dumps** (flapdoodle's `SystemEnv`,
+`ProcessBuilder` errors) leak hostname, session ids and keys; abbreviated loggers appear as
+`c.acme.data.Foo`; report fixtures carry the class name **in the filename** too. Replace
+values in place rather than deleting the line — a 2.9k-char noise line is often the point of
+the fixture.
+
 ### Savings Target
 
 There is a single enforced floor, not a per-filter table: **≥60% savings is the release
