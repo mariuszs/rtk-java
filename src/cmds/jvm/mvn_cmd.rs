@@ -1409,7 +1409,17 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
 /// captured-output block.
 fn render_failure_body(out: &mut String, f: &TestFailure) {
     if let Some(trace) = &f.stack_trace {
-        for line in trace.lines() {
+        let mut lines = trace.lines().peekable();
+        // Surefire repeats the message in the trace header, so the label line
+        // right above already said it: `AssertionError: Status expected:<400>`
+        // then `java.lang.AssertionError: Status expected:<400>`. Drop the
+        // header only when it adds nothing — same type, and a message the
+        // label already carries in full (a header that says MORE, because
+        // surefire truncated the message attribute, stays).
+        if lines.peek().is_some_and(|l| header_duplicates_label(l, f)) {
+            lines.next();
+        }
+        for line in lines {
             writeln!(out, "[ERROR]       {line}").ok();
         }
     }
@@ -1419,6 +1429,28 @@ fn render_failure_body(out: &mut String, f: &TestFailure) {
             writeln!(out, "[ERROR]       {line}").ok();
         }
     }
+}
+
+/// True when a stack trace's header line says nothing the failure's own label
+/// line has not already said: the simple type names match and the header's
+/// message is either empty or a prefix of the label's (surefire truncates the
+/// message attribute with a trailing `...`, and the untruncated header must
+/// then survive).
+fn header_duplicates_label(header: &str, f: &TestFailure) -> bool {
+    let header = header.trim();
+    let (header_type, header_msg) = match header.split_once(':') {
+        Some((ty, msg)) => (ty.trim(), msg.trim()),
+        None => (header, ""),
+    };
+    fn simple(t: &str) -> &str {
+        t.rsplit('.').next().unwrap_or(t)
+    }
+    let failure_type = f.failure_type.as_deref().unwrap_or("");
+    if failure_type.is_empty() || simple(header_type) != simple(failure_type) {
+        return false;
+    }
+    let label_msg = f.message.as_deref().unwrap_or("").trim();
+    header_msg.is_empty() || label_msg.contains(header_msg)
 }
 
 /// `... (N lines truncated)` / `... (N chars truncated)` markers inserted by
@@ -5751,6 +5783,67 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(
             out.contains("disk full") && out.contains("refused"),
             "distinct causes must both render:\n{out}"
+        );
+    }
+
+    #[test]
+    fn render_failure_body_drops_the_header_duplicated_by_the_label() {
+        // Surefire repeats the message in the trace header, so every failure
+        // paid for it twice: the `AssertionError: Status expected…` label line
+        // and then `java.lang.AssertionError: Status expected…` right below.
+        let assertion = |message: &str, trace: &str| TestFailure {
+            test_class: "com.example.app.MeterReadingControllerTest".into(),
+            test_method: "shouldReturn400ForNegativeValueOnUpdate".into(),
+            kind: FailureKind::Failure,
+            message: Some(message.into()),
+            failure_type: Some("java.lang.AssertionError".into()),
+            stack_trace: Some(trace.into()),
+            test_output: None,
+        };
+
+        let dup = assertion(
+            "Status expected:<400> but was:<200>",
+            "java.lang.AssertionError: Status expected:<400> but was:<200>\n\t... 4 framework frames omitted\n\tat com.example.app.MeterReadingControllerTest.shouldReturn400ForNegativeValueOnUpdate(MeterReadingControllerTest.java:105)",
+        );
+        let mut out = String::new();
+        super::render_failure_block(&mut out, std::slice::from_ref(&dup));
+        assert_eq!(
+            out.matches("Status expected:<400> but was:<200>").count(),
+            1,
+            "the message must be rendered once:\n{out}"
+        );
+        assert!(
+            out.contains("MeterReadingControllerTest.java:105"),
+            "the frames must survive:\n{out}"
+        );
+
+        // Bare header whose message lives only in the label — same duplication.
+        let bare = assertion(
+            "Expecting code to raise a throwable.",
+            "java.lang.AssertionError: \n\t... 2 framework frames omitted\n\tat com.example.app.FooTest.bar(FooTest.java:76)",
+        );
+        let mut out = String::new();
+        super::render_failure_block(&mut out, std::slice::from_ref(&bare));
+        assert!(
+            !out.contains("java.lang.AssertionError"),
+            "a bare header adds nothing the label did not say:\n{out}"
+        );
+        assert!(
+            out.contains("Expecting code to raise a throwable.") && out.contains("FooTest.java:76"),
+            "label and frames must survive:\n{out}"
+        );
+
+        // A header carrying MORE than the label (label truncated by surefire)
+        // is not a duplicate and must stay.
+        let richer = assertion(
+            "Expecting actual throwable to be an instance of: ...",
+            "java.lang.AssertionError: Expecting actual throwable to be an instance of: java.lang.IllegalArgumentException but was: java.time.format.DateTimeParseException\n\tat com.example.app.FooTest.bar(FooTest.java:49)",
+        );
+        let mut out = String::new();
+        super::render_failure_block(&mut out, std::slice::from_ref(&richer));
+        assert!(
+            out.contains("DateTimeParseException"),
+            "a header that says more than the label must stay:\n{out}"
         );
     }
 

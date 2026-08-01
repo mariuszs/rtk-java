@@ -1,5 +1,6 @@
 ---
 source: src/cmds/jvm/mvn_cmd.rs
+assertion_line: 6060
 expression: out.text
 ---
 [ERROR] Tests run: 12, Failures: 4, Errors: 0, Skipped: 0
@@ -8,14 +9,12 @@ expression: out.text
 [ERROR] Failures:
 [ERROR]   com.example.FailingTest.shouldReturnUser <<< FAILURE!
 [ERROR]     AssertionFailedError: expected:<200> but was:<404>
-[ERROR]       org.opentest4j.AssertionFailedError: expected:<200> but was:<404>
 [ERROR]       	... 1 framework frames omitted
 [ERROR]       	at com.example.FailingTest.shouldReturnUser(FailingTest.java:42)
 [ERROR]       	... 1 framework frames omitted
 
 [ERROR]   com.example.FailingTest.shouldHandleNull <<< FAILURE!
 [ERROR]     AssertionError: Unexpected exception: NullPointerException
-[ERROR]       java.lang.AssertionError: Unexpected exception: NullPointerException
 [ERROR]       	at com.example.FailingTest.shouldHandleNull(FailingTest.java:55)
 [ERROR]       	... 1 framework frames omitted
 
@@ -24,13 +23,11 @@ expression: out.text
 [ERROR] Integration failures:
 [ERROR]   com.example.PortConflictIT.shouldStartServer <<< FAILURE!
 [ERROR]     [error] BindException: Address already in use
-[ERROR]       java.net.BindException: Address already in use
 [ERROR]       	... 2 framework frames omitted
 [ERROR]       	at com.example.PortConflictIT.shouldStartServer(PortConflictIT.java:42)
 
 [ERROR]   com.example.DbIntegrationIT.shouldConnect <<< FAILURE!
 [ERROR]     [error] IllegalStateException: Failed to load ApplicationContext
-[ERROR]       java.lang.IllegalStateException: Failed to load ApplicationContext
 [ERROR]       	... 3 framework frames omitted
 [ERROR]       Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSource'
 [ERROR]       	... 3 framework frames omitted
