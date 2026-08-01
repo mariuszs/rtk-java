@@ -24,6 +24,12 @@ const DEBUG_TAG: &str = "[DEBUG]";
 
 const MAX_FAILURES_PER_SOURCE: usize = 10;
 
+/// Failing test names listed (name line only, no diagnostic body) after the
+/// body cap. Agents grep `<<< FAILURE!` to enumerate what broke; when the
+/// overflow was a bare `... +6 more failures` counter they went to the tee log
+/// and spent three greps recovering the names (real run, 2026-08-01).
+const MAX_FAILURE_NAMES: usize = 40;
+
 static TESTS_RUN_RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"Tests run:\s*(\d+),\s*Failures:\s*(\d+),\s*Errors:\s*(\d+),\s*Skipped:\s*(\d+)").unwrap()
 });
@@ -1406,13 +1412,20 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         }
         out.push('\n');
     }
-    if failures.len() > MAX_FAILURES_PER_SOURCE {
-        writeln!(
-            out,
-            "[ERROR]   ... +{} more failures",
-            failures.len() - MAX_FAILURES_PER_SOURCE
-        )
-        .ok();
+    // Past the body cap the names alone still carry most of the value: they
+    // are what the agent greps for, and one line is far cheaper than the
+    // follow-up read of the tee log that a bare counter provokes.
+    let named: Vec<&TestFailure> = failures
+        .iter()
+        .skip(MAX_FAILURES_PER_SOURCE)
+        .take(MAX_FAILURE_NAMES)
+        .collect();
+    for f in &named {
+        writeln!(out, "[ERROR]   {}.{} <<< FAILURE!", f.test_class, f.test_method).ok();
+    }
+    let listed = MAX_FAILURES_PER_SOURCE + named.len();
+    if failures.len() > listed {
+        writeln!(out, "[ERROR]   ... +{} more failures", failures.len() - listed).ok();
     }
 }
 
@@ -5922,6 +5935,79 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             out.matches("... same failure as").count(),
             2,
             "repeats must carry an elision reference:\n{out}"
+        );
+    }
+
+    #[test]
+    fn render_failure_block_lists_names_past_the_body_cap() {
+        // Real case 2026-08-01 (projects/najemnik): 16 failures, 10 bodies
+        // rendered and `... +6 more failures` for the rest — the agent spent
+        // three follow-up greps against the tee log just to learn the six
+        // names. A name line is ~90 chars; the recovery turns cost far more.
+        let failure = |n: usize| {
+            TestFailure {
+            test_class: "com.example.app.InvoiceServiceTest".into(),
+            test_method: format!("shouldReject{n}"),
+            kind: FailureKind::Failure,
+            message: Some(format!("expected:<{n}> but was:<0>")),
+            failure_type: Some("java.lang.AssertionError".into()),
+            stack_trace: Some(format!(
+                "java.lang.AssertionError: expected:<{n}> but was:<0>\n\tat com.example.app.InvoiceServiceTest.shouldReject{n}(InvoiceServiceTest.java:{n})"
+            )),
+            test_output: None,
+        }
+        };
+        let failures: Vec<TestFailure> = (1..=16).map(failure).collect();
+
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &failures);
+
+        assert_eq!(
+            out.matches("<<< FAILURE!").count(),
+            16,
+            "every failing test name must be listed, not just the first ten:\n{out}"
+        );
+        assert!(
+            out.contains(
+                "[ERROR]   com.example.app.InvoiceServiceTest.shouldReject16 <<< FAILURE!"
+            ),
+            "the overflow names keep Maven's own per-test coord shape:\n{out}"
+        );
+        assert_eq!(
+            out.matches("InvoiceServiceTest.java:").count(),
+            10,
+            "only the first ten carry a diagnostic body:\n{out}"
+        );
+        assert!(
+            !out.contains("more failures"),
+            "with every name listed there is no remainder left to count:\n{out}"
+        );
+    }
+
+    #[test]
+    fn render_failure_block_caps_the_overflow_name_list() {
+        let failure = |n: usize| TestFailure {
+            test_class: "com.example.app.WideTest".into(),
+            test_method: format!("case{n}"),
+            kind: FailureKind::Failure,
+            message: Some("boom".into()),
+            failure_type: Some("java.lang.AssertionError".into()),
+            stack_trace: Some("java.lang.AssertionError: boom".into()),
+            test_output: None,
+        };
+        let failures: Vec<TestFailure> = (1..=200).map(failure).collect();
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &failures);
+        assert!(
+            out.matches("<<< FAILURE!").count() <= MAX_FAILURE_NAMES + MAX_FAILURES_PER_SOURCE,
+            "a 200-failure run must stay bounded:\n{out}"
+        );
+        assert!(
+            out.contains(&format!(
+                "... +{} more failures",
+                200 - MAX_FAILURES_PER_SOURCE - MAX_FAILURE_NAMES
+            )),
+            "the remainder is still counted:\n{out}"
         );
     }
 
