@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.settlements.service.SettlementServiceIntegrationTest" time="9.61" tests="3" errors="0" skipped="0" failures="1">
+  <testcase name="shouldGenerateJanuary2026SettlementFromDatabase" classname="com.example.settlements.service.SettlementServiceIntegrationTest" time="0.328">
+    <failure message="[Energia] &#10;expected: 156.01&#10; but was: 167.94" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: 
+[Energia] 
+expected: 156.01
+ but was: 167.94
+	at com.example.settlements.service.SettlementServiceIntegrationTest.shouldGenerateJanuary2026SettlementFromDatabase(SettlementServiceIntegrationTest.java:84)
+]]></failure>
+    <system-out><![CDATA[23:17:26.831 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.example.settlements.service.SettlementServiceIntegrationTest]: SettlementServiceIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+23:17:26.850 [main] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+23:17:26.851 [main] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+23:17:26.862 [main] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 2.0.3
+23:17:26.949 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Loaded org.testcontainers.dockerclient.UnixSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+23:17:27.088 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with local Unix socket (unix:///var/run/docker.sock)
+23:17:27.089 [main] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
+23:17:27.096 [main] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
+  Server Version: 28.1.1
+  API Version: 1.49
+  Operating System: Fedora Linux 44 (Workstation Edition)
+  Total Memory: 61674 MB
+23:17:27.108 [main] INFO tc.testcontainers/ryuk:0.13.0 -- Creating container for image: testcontainers/ryuk:0.13.0
+23:17:27.212 [main] INFO tc.testcontainers/ryuk:0.13.0 -- Container testcontainers/ryuk:0.13.0 is starting: 9eb4dc41007590dad96b3f9e08b4bcc8ce4712b9dbfc3a25edae02c422d7e746
+23:17:27.434 [main] INFO tc.testcontainers/ryuk:0.13.0 -- Container testcontainers/ryuk:0.13.0 started in PT0.325865151S
+23:17:27.436 [main] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+23:17:27.436 [main] INFO org.testcontainers.DockerClientFactory -- Checking the system...
+23:17:27.437 [main] INFO org.testcontainers.DockerClientFactory -- ✔︎ Docker server version should be at least 1.6.0
+23:17:27.477 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.example.settlements.ExampleApplication for test class com.example.settlements.service.SettlementServiceIntegrationTest
+23:17:27.507 [main] INFO tc.postgres:16-alpine -- Creating container for image: postgres:16-alpine
+23:17:27.578 [main] INFO tc.postgres:16-alpine -- Container postgres:16-alpine is starting: dc55b332fac9252371c2116cbeb2ee6d36a18e5ab5007ec32b59968a0880353c
+23:17:33.151 [main] INFO tc.postgres:16-alpine -- Container postgres:16-alpine started in PT5.644266271S
+23:17:33.152 [main] INFO tc.postgres:16-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:33174/test?loggerLevel=OFF)
+23:17:33.302 [main] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:33174/test?loggerLevel=OFF (PostgreSQL 16.14)
+23:17:33.326 [main] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+23:17:33.327 [main] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 20 migrations (execution time 00:00.014s)
+23:17:33.332 [main] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+23:17:33.357 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+23:17:33.364 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - initial schema"
+23:17:33.380 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - initial data"
+23:17:33.382 [main] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +--------+
+| setval |
++--------+
+| 13     |
++--------+
+
+23:17:33.383 [main] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +--------+
+| setval |
++--------+
+| 1      |
++--------+
+
+23:17:33.383 [main] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +--------+
+| setval |
++--------+
+| 1      |
++--------+
+
+23:17:33.383 [main] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +--------+
+| setval |
++--------+
+| 1      |
++--------+
+
+23:17:33.384 [main] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +--------+
+| setval |
++--------+
+| 1      |
++--------+
+
+23:17:33.388 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - refactor meter readings"
+23:17:33.402 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - fix meter readings precision"
+23:17:33.407 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - add settlement status"
+23:17:33.411 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - add additional charges"
+23:17:33.415 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - add provider bills"
+23:17:33.418 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - add utility type to provider bills"
+23:17:33.421 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - add payment notes and audit log"
+23:17:33.426 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - update community fee july 2025"
+23:17:33.429 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - fix community fee for all configs"
+23:17:33.430 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - add july 2025 rate config"
+23:17:33.433 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - refactor settlement to items"
+23:17:33.438 [main] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: constraint "settlements_meter_reading_id_fkey" of relation "settlements" does not exist, skipping
+23:17:33.438 [main] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: column "meter_reading_id" of relation "settlements" does not exist, skipping
+23:17:33.442 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - add lease agreements"
+23:17:33.446 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - add deposit transactions"
+23:17:33.450 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - add january 2026 rate config"
+23:17:33.452 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - fix january 2026 rent"
+23:17:33.454 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - add april 2026 rate config"
+23:17:33.456 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "19 - fix april 2026 community fee"
+23:17:33.458 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - fix community fee and august 2026 rates"
+23:17:33.461 [main] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 20 migrations to schema "public", now at version v20 (execution time 00:00.045s)
+23:17:33.479 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+
+  ____                              _                 _    _
+ |  _ \ ___ _____ __ __ _  ___ ___ | |__  _   _ _ __ | | _(_)
+ | |_) / _ \_  / '__/ _` |/ __/ _ \| '_ \| | | | '_ \| |/ / |
+ |  _ < (_) / /| | | (_| | (_| (_) | | | | |_| | | | |   <| |
+ |_| \_\___/___|_|  \__,_|\___\___/|_| |_|\__,_|_| |_|_|\_\_|
+
+  Example App v1.0.0
+  Spring Boot 4.0.2
+
+  http://localhost:8081/
+
+
+2026-07-31T23:17:33.564+02:00  INFO 1344785 --- [           main] c.e.s.s.SettlementServiceIntegrationTest : Starting SettlementServiceIntegrationTest using Java 25.0.2 with PID 1344785 (started by user in /home/user/projects/example-app)
+2026-07-31T23:17:33.565+02:00  INFO 1344785 --- [           main] c.e.s.s.SettlementServiceIntegrationTest : No active profile set, falling back to 1 default profile: "default"
+2026-07-31T23:17:33.859+02:00  INFO 1344785 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-31T23:17:33.887+02:00  INFO 1344785 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 24 ms. Found 12 JPA repository interfaces.
+2026-07-31T23:17:34.074+02:00  INFO 1344785 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:33174/test?loggerLevel=OFF (PostgreSQL 16.14)
+2026-07-31T23:17:34.085+02:00  INFO 1344785 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 20 migrations (execution time 00:00.005s)
+2026-07-31T23:17:34.093+02:00  INFO 1344785 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 20
+2026-07-31T23:17:34.094+02:00  INFO 1344785 --- [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-07-31T23:17:34.124+02:00  INFO 1344785 --- [           main] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-07-31T23:17:34.145+02:00  INFO 1344785 --- [           main] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.1.Final
+2026-07-31T23:17:34.287+02:00  INFO 1344785 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-31T23:17:34.298+02:00  INFO 1344785 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-31T23:17:34.306+02:00  INFO 1344785 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@31048b3d
+2026-07-31T23:17:34.306+02:00  INFO 1344785 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-31T23:17:34.327+02:00  INFO 1344785 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:33174/test?loggerLevel=OFF]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 16.14
+	Default catalog/schema: test/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-07-31T23:17:34.744+02:00  INFO 1344785 --- [           main] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-31T23:17:34.747+02:00  INFO 1344785 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-31T23:17:34.782+02:00  INFO 1344785 --- [           main] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-31T23:17:35.437+02:00  WARN 1344785 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-31T23:17:35.656+02:00  INFO 1344785 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-07-31T23:17:35.682+02:00  INFO 1344785 --- [           main] c.e.s.s.SettlementServiceIntegrationTest : Started SettlementServiceIntegrationTest in 2.206 seconds (process running for 9.168)
+]]></system-out>
+    <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/home/user/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+  </testcase>
+  <testcase name="shouldGenerateDecember2025SettlementFromDatabase" classname="com.example.settlements.service.SettlementServiceIntegrationTest" time="0.028"/>
+  <testcase name="shouldGenerateNovember2025SettlementFromDatabase" classname="com.example.settlements.service.SettlementServiceIntegrationTest" time="0.023"/>
+</testsuite>

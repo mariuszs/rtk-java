@@ -346,6 +346,30 @@ static CAPTURED_DEBUG_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
 /// budget back on the application's own log lines above it.
 const CONDITIONS_REPORT_BANNER: &str = "CONDITIONS EVALUATION REPORT";
 
+/// Spring Boot's own words for "the application context is up":
+/// `Started SettlementServiceIntegrationTest in 2.206 seconds (process running
+/// for 9.61)`. Everything above it is context startup — the banner,
+/// Testcontainers, Flyway, Hikari, the Hibernate connection-pool dump —
+/// printed identically for every test class and never about the test that
+/// failed. A real report spent all 128 lines of its `<system-out>` on it. The
+/// marker is self-delimiting in the direction that matters: a context that
+/// *fails* to start never prints it, and there the startup log IS the
+/// diagnostic, so nothing is cut.
+static SPRING_STARTUP_COMPLETE_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"Started \S+ in [\d.]+ seconds \(process running for [\d.]+\)").unwrap()
+});
+
+/// Chatter the TestContext framework prints once per test class before the
+/// context is even looked up ("Could not detect default configuration classes
+/// for test class …", "Found @SpringBootConfiguration …"). It appears with no
+/// startup marker after it when the context is reused across classes, so the
+/// marker cut alone does not reach it.
+const CAPTURED_BOOTSTRAP_NOISE: &[&str] = &[
+    "AnnotationConfigContextLoaderUtils",
+    "SpringBootTestContextBootstrapper",
+    "DefaultTestContextBootstrapper",
+];
+
 /// Strip console colour codes, cut Spring's conditions report, and drop
 /// TRACE/DEBUG log lines from a captured output block, so the tail budget is
 /// spent on lines that carry meaning. ANSI goes first: the level field is
@@ -361,9 +385,18 @@ fn clean_captured(text: &str) -> String {
             }
             break;
         }
-        if !CAPTURED_DEBUG_LINE_RE.is_match(line) {
-            kept.push(line);
+        if SPRING_STARTUP_COMPLETE_RE.is_match(line) {
+            // Startup finished here: everything collected so far was getting
+            // the application up, marker line included.
+            kept.clear();
+            continue;
         }
+        if CAPTURED_DEBUG_LINE_RE.is_match(line)
+            || CAPTURED_BOOTSTRAP_NOISE.iter().any(|p| line.contains(p))
+        {
+            continue;
+        }
+        kept.push(line);
     }
     kept.join("\n")
 }
@@ -720,6 +753,98 @@ mod tests {
             output.len() < 700,
             "captured output should collapse to a few informative lines, got {} chars:\n{output}",
             output.len()
+        );
+    }
+
+    #[test]
+    fn captured_output_cuts_application_startup_chatter() {
+        // Real report (projects/rozrachunki-app, 2026-07-31): 128 lines of
+        // `<system-out>`, all of it Testcontainers + Spring Boot + Flyway +
+        // Hikari + Hibernate startup, ending on Spring's own "Started … in N
+        // seconds (process running for M)". The whole 12-line tail budget went
+        // to it — 1622 of that run's 2474 chars — and none of it says anything
+        // about the assertion that failed.
+        let xml = include_str!(
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.example.settlements.service.SettlementServiceIntegrationTest.xml"
+        );
+        let result = parse_content(xml, &["com.example".to_string()]).expect("parses");
+        let failure = &result.failures[0];
+
+        assert!(
+            failure
+                .test_output
+                .as_deref()
+                .map(|o| o.trim().is_empty())
+                .unwrap_or(true),
+            "a block that is nothing but startup chatter must not be rendered: {:?}",
+            failure.test_output
+        );
+        assert!(
+            failure
+                .message
+                .as_deref()
+                .is_some_and(|m| m.contains("expected: 156.01")),
+            "the assertion itself must survive: {:?}",
+            failure.message
+        );
+    }
+
+    #[test]
+    fn captured_output_keeps_what_the_test_logged_after_startup() {
+        // The cut is anchored on Spring's own startup-complete marker, so
+        // whatever the test logs afterwards — the part that can explain a
+        // failure — is exactly what is left.
+        let stdout = "\
+2026-07-31T23:17:33.564+02:00  INFO 1344785 --- [           main] c.e.s.SettlementTest     : Starting SettlementTest using Java 25.0.2
+2026-07-31T23:17:34.298+02:00  INFO 1344785 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-31T23:17:35.682+02:00  INFO 1344785 --- [           main] c.e.s.SettlementTest     : Started SettlementTest in 2.206 seconds (process running for 9.61)
+2026-07-31T23:17:36.100+02:00  WARN 1344785 --- [           main] org.hibernate.orm.jdbc.error             : ERROR: new row for relation \"invoice\" violates check constraint";
+        let cleaned = clean_captured(stdout);
+        assert!(
+            !cleaned.contains("HikariPool-1") && !cleaned.contains("Started SettlementTest"),
+            "startup must be cut up to and including the marker:\n{cleaned}"
+        );
+        assert!(
+            cleaned.contains("violates check constraint"),
+            "what the test logged after startup must survive:\n{cleaned}"
+        );
+    }
+
+    #[test]
+    fn captured_output_keeps_startup_when_the_context_never_started() {
+        // No startup-complete marker means the context failed while starting —
+        // there the startup log IS the diagnostic and nothing may be cut.
+        let stdout = "\
+2026-07-31T23:17:33.564+02:00  INFO 1344785 --- [           main] c.e.s.SettlementTest     : Starting SettlementTest using Java 25.0.2
+2026-07-31T23:17:34.298+02:00  INFO 1344785 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-31T23:17:34.900+02:00 ERROR 1344785 --- [           main] o.s.boot.SpringApplication               : Application run failed";
+        let cleaned = clean_captured(stdout);
+        assert!(
+            cleaned.contains("HikariPool-1") && cleaned.contains("Application run failed"),
+            "a context that never started keeps its whole log:\n{cleaned}"
+        );
+    }
+
+    #[test]
+    fn captured_output_drops_test_context_bootstrap_chatter() {
+        // Printed per test class by the TestContext framework, never about the
+        // test: four lines / ~1000 chars ahead of the two Hibernate WARNs that
+        // actually explained the failure (projects/najemnik, 2026-08-01).
+        let stdout = "\
+2026-08-01T12:16:11.425+02:00  INFO 224826 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.example.app.InvoiceServiceTest]: InvoiceServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-08-01T12:16:11.429+02:00  INFO 224826 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.example.app.ExampleApplication for test class com.example.app.InvoiceServiceTest
+2026-08-01T12:16:11.436+02:00  WARN 224826 --- [           main] org.hibernate.orm.jdbc.error             : HHH000247: ErrorCode: 0, SQLState: 23514
+2026-08-01T12:16:11.436+02:00  WARN 224826 --- [           main] org.hibernate.orm.jdbc.error             : ERROR: new row for relation \"invoice_section\" violates check constraint";
+        let cleaned = clean_captured(stdout);
+        assert!(
+            !cleaned.contains("AnnotationConfigContextLoaderUtils")
+                && !cleaned.contains("SpringBootTestContextBootstrapper"),
+            "bootstrap chatter must not spend the tail budget:\n{cleaned}"
+        );
+        assert_eq!(
+            cleaned.lines().count(),
+            2,
+            "the two lines that explain the failure are what is left:\n{cleaned}"
         );
     }
 
