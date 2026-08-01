@@ -1364,9 +1364,6 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         // to list failing test names. Every line keeps the `[ERROR]` prefix
         // so retained/reconstructed output stays greppable like Maven's own.
         writeln!(out, "[ERROR]   {}.{} <<< FAILURE!", f.test_class, f.test_method).ok();
-        if let Some(kind_label) = failure_kind_label(f) {
-            writeln!(out, "[ERROR]     {kind_label}").ok();
-        }
         // Spring's own words for a cascade: the context already failed for an
         // earlier test in this run and it is "skipping repeated attempt". The
         // trace and captured output are then a verbatim repeat of the first
@@ -1374,23 +1371,37 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         // into a dozen of these. The name line still lands (agents grep it);
         // only the repeated body is dropped, so every emitted line stays a
         // native subset with no invented prose.
-        if !is_context_failure_cascade(f) {
-            let name = format!("{}.{}", f.test_class, f.test_method);
-            match failure_body_signature(f) {
-                Some(sig) => {
-                    if let Some((_, first)) =
-                        seen_bodies.iter().find(|(s, _)| *s == sig)
-                    {
-                        // Elision reference in the `... ` marker family —
-                        // the full body is above under the named test.
-                        writeln!(out, "[ERROR]       ... same failure as {first} above").ok();
-                        out.push('\n');
-                        continue;
+        let signature = if is_context_failure_cascade(f) {
+            None
+        } else {
+            failure_body_signature(f)
+        };
+        let repeat_of = signature.as_ref().and_then(|sig| {
+            seen_bodies
+                .iter()
+                .find(|(s, _)| s == sig)
+                .map(|(_, first)| first.clone())
+        });
+        match repeat_of {
+            // The label is part of the signature, so a repeat's label is
+            // identical to the one printed above it — and an `Unresolved
+            // compilation problem` label is two lines of javac text that a
+            // real run repeated 13 times. The reference carries it instead.
+            Some(first) => {
+                // Elision reference in the `... ` marker family — the full
+                // body is above under the named test.
+                writeln!(out, "[ERROR]       ... same failure as {first} above").ok();
+            }
+            None => {
+                if let Some(kind_label) = failure_kind_label(f) {
+                    writeln!(out, "[ERROR]     {kind_label}").ok();
+                }
+                if !is_context_failure_cascade(f) {
+                    if let Some(sig) = signature {
+                        seen_bodies.push((sig, format!("{}.{}", f.test_class, f.test_method)));
                     }
-                    seen_bodies.push((sig, name));
                     render_failure_body(out, f);
                 }
-                None => render_failure_body(out, f),
             }
         }
         out.push('\n');
@@ -1470,23 +1481,39 @@ static OUTPUT_TRUNCATION_MARKER_RE: LazyLock<Regex> =
 /// coincidence).
 fn failure_body_signature(f: &TestFailure) -> Option<String> {
     let mut sig = String::new();
+    // The label first: surefire routinely puts the whole diagnostic in the
+    // message attribute and leaves the trace header bare (a javac
+    // "Unresolved compilation problem" arrives as `java.lang.Error:`), so a
+    // signature built from the trace alone read as a bare type and every
+    // identical body was rendered in full — 13 of them in a real run.
+    if let Some(label) = failure_kind_label(f) {
+        sig.push_str(label.trim());
+        sig.push('\n');
+    }
+    let mut chain_lines = 0usize;
+    let mut chain_carries_message = false;
     if let Some(trace) = &f.stack_trace {
         for line in trace.lines() {
             let t = line.trim();
             if t.is_empty() || t.starts_with("at ") || t.starts_with("... ") {
                 continue;
             }
+            chain_lines += 1;
+            chain_carries_message |= t
+                .split_once(": ")
+                .is_some_and(|(_, msg)| !msg.trim().is_empty());
             sig.push_str(t);
             sig.push('\n');
         }
     }
-    let trace_lines = sig.lines().count();
+    let mut has_output = false;
     if let Some(output) = f.test_output.as_deref() {
         for line in output.lines() {
             let t = line.trim();
             if t.is_empty() || OUTPUT_TRUNCATION_MARKER_RE.is_match(t) {
                 continue;
             }
+            has_output = true;
             sig.push_str(t);
             sig.push('\n');
         }
@@ -1494,14 +1521,14 @@ fn failure_body_signature(f: &TestFailure) -> Option<String> {
     if sig.is_empty() {
         return None;
     }
-    // Weak identity: a single header line whose message part is empty
-    // ("java.lang.NullPointerException") and no captured output to anchor it.
-    if trace_lines <= 1 && sig.lines().count() <= 1 {
-        let first = sig.lines().next().unwrap_or("");
-        let msg = first.split_once(": ").map(|(_, m)| m.trim()).unwrap_or("");
-        if msg.is_empty() {
-            return None;
-        }
+    // Weak identity: bare exception types only — no message on the failure, no
+    // message anywhere in the chain, no `Caused by:` depth and no captured
+    // output to anchor them ("java.lang.NullPointerException"). There the
+    // frames ARE the diagnostic, and unrelated failures share a type by
+    // coincidence.
+    let has_message = f.message.as_deref().is_some_and(|m| !m.trim().is_empty());
+    if !has_message && !has_output && !chain_carries_message && chain_lines <= 1 {
+        return None;
     }
     Some(sig)
 }
@@ -5844,6 +5871,57 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(
             out.contains("DateTimeParseException"),
             "a header that says more than the label must stay:\n{out}"
+        );
+    }
+
+    #[test]
+    fn render_failure_block_dedups_bodies_whose_message_is_the_diagnostic() {
+        // Real case 2026-08-01 (projects/najemnik): one unresolvable assertj
+        // call broke the test class's constructor, so all 13 tests failed with
+        // the identical javac text — 4.5k of a 6.1k-char render. Surefire puts
+        // that text in the message attribute and leaves the trace header bare
+        // (`java.lang.Error:`), so a signature built from the trace alone saw
+        // a bare type, judged it too weak, and rendered every body in full.
+        let failure = |method: &str| {
+            TestFailure {
+            test_class: "com.example.app.GoldenScenarioTest".into(),
+            test_method: method.into(),
+            kind: FailureKind::Error,
+            message: Some(
+                "Unresolved compilation problem: \n\tThe method isLessThanOrEqualTo(YearMonth) is undefined for the type AbstractYearMonthAssert<capture#30-of ?>"
+                    .into(),
+            ),
+            failure_type: Some("java.lang.Error".into()),
+            stack_trace: Some(
+                "java.lang.Error: \n\t... 3 framework frames omitted\n\tat com.example.app.GoldenScenarioTest.<init>(GoldenScenarioTest.java:199)"
+                    .into(),
+            ),
+            test_output: None,
+        }
+        };
+        let failures = vec![
+            failure("seedShouldCreateMeterReadings"),
+            failure("seedShouldBeIdempotent"),
+            failure("seedShouldCreateLease"),
+        ];
+
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &failures);
+
+        assert_eq!(
+            out.matches("isLessThanOrEqualTo").count(),
+            1,
+            "the identical javac text must render once, not per test:\n{out}"
+        );
+        assert_eq!(
+            out.matches("<<< FAILURE!").count(),
+            3,
+            "every failing test name must still be greppable:\n{out}"
+        );
+        assert_eq!(
+            out.matches("... same failure as").count(),
+            2,
+            "repeats must carry an elision reference:\n{out}"
         );
     }
 
