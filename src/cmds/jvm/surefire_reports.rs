@@ -7,6 +7,7 @@ use crate::cmds::jvm::stack_trace;
 use quick_xml::events::{BytesStart, Event};
 use quick_xml::Reader;
 use regex::Regex;
+use std::collections::HashMap;
 use std::path::Path;
 use std::sync::LazyLock;
 use std::time::SystemTime;
@@ -370,6 +371,66 @@ const CAPTURED_BOOTSTRAP_NOISE: &[&str] = &[
     "DefaultTestContextBootstrapper",
 ];
 
+/// A stack frame, or the frame-elision counter that closes a segment, as it
+/// appears *inside* captured output. When a context fails to load, the logged
+/// trace lands in `system-out` in full while the report's own `<failure>`
+/// element carries the same chain — which the trace renderer already prints
+/// elided. The tail budget then went entirely to frames: three real renders
+/// spent their whole captured-output block on `at org.springframework…`
+/// repeats of the exception rendered directly above them. Headers
+/// (`Caused by: …`) are kept: those are the diagnosis, the frames are the
+/// duplicate.
+static CAPTURED_FRAME_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\s*(?:at [\w$.<>]+[.(]|\.\.\. \d+ (?:common|framework) frames omitted)").unwrap()
+});
+
+/// A log line's timestamp prefix. The remainder is the dedup key for
+/// [`collapse_repeated_log_lines`] — two emissions of the same logger event
+/// differ only in the stamp.
+static CAPTURED_LOG_STAMP_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\s*(?:\d{4}-\d{2}-\d{2}[ T])?\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?<rest>.+)$").unwrap()
+});
+
+/// Render a log line that an infrastructure component repeats verbatim once,
+/// keeping its **last** emission. A statsd client with nothing listening
+/// logged the identical netty `PortUnreachableException` WARN 19 times inside
+/// one test's 43-line `system-out`, interleaved with the 24 lines the
+/// application itself logged — so the flood did not merely cost chars, it
+/// evicted the diagnostic from the 12-line tail budget. The last emission is
+/// the one kept because the block is cut from the end: keeping the first would
+/// hand the tail an elision marker for a line the agent never sees.
+///
+/// Only timestamped log lines are eligible; repeated plain text (a data dump,
+/// an assertion table) is left alone.
+fn collapse_repeated_log_lines(lines: Vec<&str>) -> (Vec<&str>, usize) {
+    let mut last_seen: HashMap<&str, usize> = HashMap::new();
+    for (i, line) in lines.iter().enumerate() {
+        if let Some(rest) = CAPTURED_LOG_STAMP_RE
+            .captures(line)
+            .and_then(|c| c.name("rest"))
+        {
+            last_seen.insert(rest.as_str(), i);
+        }
+    }
+    let mut dropped = 0usize;
+    let kept = lines
+        .iter()
+        .enumerate()
+        .filter(|(i, line)| {
+            let repeat = CAPTURED_LOG_STAMP_RE
+                .captures(line)
+                .and_then(|c| c.name("rest"))
+                .is_some_and(|rest| last_seen.get(rest.as_str()) != Some(i));
+            if repeat {
+                dropped += 1;
+            }
+            !repeat
+        })
+        .map(|(_, line)| *line)
+        .collect();
+    (kept, dropped)
+}
+
 /// Strip console colour codes, cut Spring's conditions report, and drop
 /// TRACE/DEBUG log lines from a captured output block, so the tail budget is
 /// spent on lines that carry meaning. ANSI goes first: the level field is
@@ -392,13 +453,25 @@ fn clean_captured(text: &str) -> String {
             continue;
         }
         if CAPTURED_DEBUG_LINE_RE.is_match(line)
+            || CAPTURED_FRAME_RE.is_match(line)
             || CAPTURED_BOOTSTRAP_NOISE.iter().any(|p| line.contains(p))
         {
             continue;
         }
         kept.push(line);
     }
-    kept.join("\n")
+    let (kept, repeats) = collapse_repeated_log_lines(kept);
+    let mut out = kept.join("\n");
+    if repeats > 0 {
+        // Marker in the `...` family the rest of the block already uses, and
+        // last so the tail cut cannot eat it: a silent collapse would read as
+        // "this is everything the test logged".
+        let plural = if repeats == 1 { "" } else { "s" };
+        out.push_str(&format!(
+            "\n... ({repeats} repeated log line{plural} omitted)"
+        ));
+    }
+    out
 }
 
 /// A `====…` rule line, the separator Spring prints around the banner.
@@ -902,6 +975,73 @@ Unconditional classes:
         assert!(!out.contains("loading user cache"), "DEBUG kept: {out}");
         assert!(out.contains("Password reset requested"), "INFO dropped: {out}");
         assert!(out.contains("Cannot find requested user"), "WARN dropped: {out}");
+    }
+
+    #[test]
+    fn captured_output_collapses_a_repeated_log_line_flood() {
+        // Real `<system-out>` of one failing test from an auth failsafe report:
+        // 43 lines, 19 of them the identical micrometer/netty statsd WARN
+        // (`PortUnreachableException`, statsd not listening on :8125), differing
+        // only in the millisecond stamp. They are *interleaved* with the 24
+        // lines the application itself logged, so the flood does not just cost
+        // chars — with the 12-line tail budget it evicts the diagnostic.
+        let stdout = include_str!("../../../tests/fixtures/surefire_captured_log_flood_raw.txt");
+        let out = super::combine_test_output(stdout, "", 2000).expect("captured output");
+        assert_eq!(
+            out.matches("FluxReceive").count(),
+            1,
+            "repeated log line must render once:\n{out}"
+        );
+        assert!(
+            out.contains("repeated log lines omitted"),
+            "elision marker missing:\n{out}"
+        );
+        // The point of the fix: the tail budget now holds what the application
+        // logged. Before it, 6 of the 12 kept lines were the flood.
+        assert!(
+            out.contains("remains without owner") && out.contains("get user"),
+            "application log lines evicted by the flood:\n{out}"
+        );
+        assert!(
+            out.lines().filter(|l| l.contains("i.m.s.r.netty")).count() * 4 < out.lines().count(),
+            "infrastructure noise still owns the budget:\n{out}"
+        );
+        let savings = 100.0 - (out.len() as f64 / stdout.len() as f64 * 100.0);
+        assert!(savings >= 60.0, "expected >=60% savings, got {savings:.1}%");
+    }
+
+    #[test]
+    fn captured_output_drops_stack_frames_the_trace_already_carries() {
+        // Verbatim tail of a real captured-output block (najemnik,
+        // MeterReadingRepositoryFilterTest): after `... (348 lines truncated)`
+        // every kept line was a raw framework frame repeating the exception
+        // chain that the `<failure>` trace already renders above in elided
+        // form. Headers stay — they are the diagnosis; frames are the
+        // duplicate.
+        let stdout = "\
+17:15:33.101 [main] INFO  c.m.n.NajemnikApplication - starting reading import
+Caused by: java.lang.IllegalArgumentException: Maximum capacity has to be at least twice the concurrencyLevel
+\tat org.hibernate.internal.util.cache.InternalCacheFactoryImpl.createInternalCache(InternalCacheFactoryImpl.java:11) ~[hibernate-core-7.4.1.Final.jar:7.4.1.Final]
+\tat org.hibernate.query.internal.QueryEngineImpl.<init>(QueryEngineImpl.java:81) ~[hibernate-core-7.4.1.Final.jar:7.4.1.Final]
+\tat org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:436) ~[spring-orm-7.0.8.jar:7.0.8]
+\t... 110 common frames omitted";
+        let out = super::combine_test_output(stdout, "", 2000).expect("captured output");
+        assert!(
+            !out.contains("\tat org.hibernate") && !out.contains("at org.springframework"),
+            "framework frames kept in captured output:\n{out}"
+        );
+        assert!(
+            !out.contains("common frames omitted"),
+            "frame-elision counter kept in captured output:\n{out}"
+        );
+        assert!(
+            out.contains("Maximum capacity has to be at least twice"),
+            "exception header dropped — that is the diagnosis:\n{out}"
+        );
+        assert!(
+            out.contains("starting reading import"),
+            "application log line dropped:\n{out}"
+        );
     }
 
     #[test]
