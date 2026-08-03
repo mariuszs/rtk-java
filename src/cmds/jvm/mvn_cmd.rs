@@ -1377,8 +1377,14 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         // into a dozen of these. The name line still lands (agents grep it);
         // only the repeated body is dropped, so every emitted line stays a
         // native subset with no invented prose.
+        // A cascade renders no body, so its label IS its body — and Spring
+        // prints that label identically (down to the context's identity hash)
+        // for every test after the first, ~230 chars each. Signing it on the
+        // label collapses the repeats onto the same elision reference the
+        // deduped bodies use; a different context has a different hash and so
+        // keeps its own label.
         let signature = if is_context_failure_cascade(f) {
-            None
+            failure_kind_label(f).map(|label| format!("[cascade] {label}"))
         } else {
             failure_body_signature(f)
         };
@@ -1402,10 +1408,10 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
                 if let Some(kind_label) = failure_kind_label(f) {
                     writeln!(out, "[ERROR]     {kind_label}").ok();
                 }
+                if let Some(sig) = signature {
+                    seen_bodies.push((sig, format!("{}.{}", f.test_class, f.test_method)));
+                }
                 if !is_context_failure_cascade(f) {
-                    if let Some(sig) = signature {
-                        seen_bodies.push((sig, format!("{}.{}", f.test_class, f.test_method)));
-                    }
                     render_failure_body(out, f);
                 }
             }
@@ -5716,6 +5722,60 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             out.matches("CONDITIONS EVALUATION REPORT").count(),
             1,
             "captured output must not repeat per cascade:\n{out}"
+        );
+    }
+
+    #[test]
+    fn render_failure_block_collapses_the_repeated_cascade_label() {
+        // Real case 2026-08-03 (auth, ScimUserControllerIntegrationTest): 110
+        // errors from one context failure. The bodies were already dropped,
+        // but Spring's cascade wording is a ~230-char label carrying only the
+        // context's identity hash — and it was paid once per cascaded test,
+        // 1.7k chars over the review window. It says nothing the first one
+        // did not; the elision reference carries it.
+        let label = "ApplicationContext failure threshold (1) exceeded: skipping repeated \
+                     attempt to load context for [WebMergedContextConfiguration@18d532a4 \
+                     testClass = com.example.auth.scim.ScimUserControllerIntegrationTest, \
+                     locations = [], classes = [com.example.auth.AuthApplication]]";
+        let failure = |method: &str, message: &str| TestFailure {
+            test_class: "com.example.auth.scim.ScimUserControllerIntegrationTest".into(),
+            test_method: method.into(),
+            kind: FailureKind::Error,
+            message: Some(message.into()),
+            failure_type: Some("java.lang.IllegalStateException".into()),
+            stack_trace: None,
+            test_output: None,
+        };
+        let failures = vec![
+            failure("should_return_empty_when_user_not_found", "Failed to load ApplicationContext for [WebMergedContextConfiguration@18d532a4 testClass = com.example.auth.scim.ScimUserControllerIntegrationTest]"),
+            failure("should_return_service_provider_config", label),
+            failure("should_not_find_user_from_different_company", label),
+            failure("should_update_employeeNumber_via_put", label),
+        ];
+
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &failures);
+
+        assert_eq!(
+            out.matches("skipping repeated attempt").count(),
+            1,
+            "the cascade label must be paid once, not per cascaded test:\n{out}"
+        );
+        assert_eq!(
+            out.matches("<<< FAILURE!").count(),
+            4,
+            "every failing test name must still be greppable:\n{out}"
+        );
+        // Three cascades: the first states Spring's wording, the other two
+        // point at it.
+        assert_eq!(
+            out.matches("... same failure as").count(),
+            2,
+            "each collapsed cascade needs its reference to the first:\n{out}"
+        );
+        assert!(
+            out.contains("should_return_service_provider_config"),
+            "collapsed cascade lost its name line:\n{out}"
         );
     }
 
