@@ -1420,6 +1420,16 @@ fn render_enriched(
         out.push_str(&footer);
     }
 
+    // `!out.contains(...)`: the text filter appends the same hint from stdout;
+    // it normally sits past the stripped `Failures:` block, but a run whose
+    // text pass rendered no failure header keeps it — don't double it.
+    if (has_stale_ecj_failures(surefire) || has_stale_ecj_failures(failsafe))
+        && !out.contains(STALE_ECJ_HINT)
+    {
+        out.push_str("\n\n");
+        out.push_str(STALE_ECJ_HINT);
+    }
+
     out
 }
 
@@ -1715,6 +1725,32 @@ fn counts(r: Option<&SurefireResult>) -> (usize, usize, usize) {
         .unwrap_or((0, 0, 0))
 }
 
+/// ECJ's proceed-on-error stub marker. Maven compiles with javac, so this
+/// error at *test runtime* can only come from `.class` files an IDE language
+/// server (Eclipse/JDTLS) compiled with errors and wrote into
+/// `target/classes` — typically because it cannot see generated sources
+/// (jOOQ, annotation processors). Maven's incremental compile then keeps the
+/// poisoned classes; they must be deleted (or `mvn clean`).
+const STALE_ECJ_MARKER: &str = "Unresolved compilation problem";
+
+/// rtk-owned diagnosis line (same bracketed reference family as
+/// `[full per-class report: …]`), appended after the failure section when
+/// [`STALE_ECJ_MARKER`] shows up in a test failure. ECJ embeds the error
+/// text in the stub's constant pool, so the grep lists the exact poisoned
+/// files.
+const STALE_ECJ_HINT: &str = "[hint: 'Unresolved compilation problem' at test runtime = stale IDE-compiled (ECJ/JDTLS) stubs in target/classes; locate: grep -rl \"Unresolved compilation\" --include=*.class . -- delete them or run mvn clean]";
+
+fn has_stale_ecj_failures(r: Option<&SurefireResult>) -> bool {
+    r.is_some_and(|x| {
+        x.failures.iter().any(|f| {
+            [&f.message, &f.stack_trace, &f.test_output]
+                .into_iter()
+                .flatten()
+                .any(|s| s.contains(STALE_ECJ_MARKER))
+        })
+    })
+}
+
 /// Filter `mvn test` output using a state machine parser.
 #[cfg(test)]
 pub(crate) fn filter_mvn_test(output: &str) -> String {
@@ -1936,6 +1972,13 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
             total_failures_seen - MAX_FAILURES_SHOWN
         )
         .ok();
+    }
+    // Stdout carries the marker only inside runtime stack traces, so a plain
+    // substring check is safe here; XML enrichment (when it runs) strips this
+    // block and re-derives the same hint from the parsed failures.
+    if clean.contains(STALE_ECJ_MARKER) {
+        result.push('\n');
+        result.push_str(STALE_ECJ_HINT);
     }
     result.trim().to_string()
 }
@@ -3411,6 +3454,38 @@ mod tests {
         assert!(
             output.contains("PatchableFieldTest"),
             "should list compilation errors"
+        );
+    }
+
+    #[test]
+    fn stale_ecj_hint_on_unresolved_compilation_failures() {
+        // Real shape: an IDE language server (JDTLS) compiled classes with
+        // errors and wrote ECJ proceed-on-error stubs into target/classes;
+        // surefire then throws `java.lang.Error: Unresolved compilation
+        // problem` at test runtime. The agent otherwise burns a whole
+        // debugging loop on red tests whose sources are fine.
+        let input = include_str!("../../../tests/fixtures/mvn_test_large_suite.txt");
+        let output = filter_mvn_test(input);
+        assert_eq!(
+            output
+                .matches("[hint: 'Unresolved compilation problem'")
+                .count(),
+            1,
+            "exactly one stale-ECJ hint expected:\n{output}"
+        );
+        assert!(
+            output.contains("grep -rl \"Unresolved compilation\" --include=*.class"),
+            "hint must carry the locate command:\n{output}"
+        );
+    }
+
+    #[test]
+    fn no_stale_ecj_hint_without_the_marker() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
+        let output = filter_mvn_test(input);
+        assert!(
+            !output.contains("[hint:"),
+            "hint must not fire without the ECJ marker:\n{output}"
         );
     }
 
@@ -6964,6 +7039,54 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(out.contains("[ERROR] Failures:"), "\n{out}");
         assert!(!out.contains("(from surefire-reports/)"), "path-tell leaked:\n{out}");
         assert!(!out.contains("1. "), "RTK numbering leaked:\n{out}");
+    }
+
+    #[test]
+    fn enriched_appends_stale_ecj_hint_once() {
+        // Real incident 2026-08-07: JDTLS could not see jOOQ generated
+        // sources, wrote ECJ stubs into data/target/classes, and 14 tests
+        // died at context load with `INVITATION cannot be resolved`.
+        let failure = |method: &str| TestFailure {
+            test_class: "com.example.app.JooqContextTest".to_string(),
+            test_method: method.to_string(),
+            kind: FailureKind::Error,
+            message: Some(
+                "Unresolved compilation problems: \n\tINVITATION cannot be resolved".to_string(),
+            ),
+            failure_type: Some("java.lang.Error".to_string()),
+            stack_trace: Some(
+                "java.lang.Error: \n\tat com.example.app.JooqContextTest.<init>(JooqContextTest.java:12)"
+                    .to_string(),
+            ),
+            test_output: None,
+        };
+        let sf = SurefireResult {
+            failures: vec![failure("loadsContext"), failure("loadsBeans")],
+            ..Default::default()
+        };
+        let out = super::render_enriched(
+            "[ERROR] Tests run: 2, Failures: 0, Errors: 2, Skipped: 0\n[INFO] BUILD FAILURE",
+            Some(&sf),
+            None,
+        );
+        assert_eq!(
+            out.matches("[hint: 'Unresolved compilation problem'").count(),
+            1,
+            "exactly one stale-ECJ hint expected:\n{out}"
+        );
+    }
+
+    #[test]
+    fn enriched_no_stale_ecj_hint_without_the_marker() {
+        let out = super::render_enriched(
+            "[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE",
+            Some(&sf_result_with_two_failures()),
+            None,
+        );
+        assert!(
+            !out.contains("[hint:"),
+            "hint must not fire without the ECJ marker:\n{out}"
+        );
     }
 
     #[test]
