@@ -1,0 +1,6 @@
+---
+source: src/cmds/jvm/mvn_cmd.rs
+expression: output
+---
+[INFO] BUILD FAILURE
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.15.0:compile (default-compile) on project example-app: Fatal error compiling: error: release version 99 not supported -> [Help 1]

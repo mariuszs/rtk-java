@@ -632,6 +632,51 @@ struct MultiParts {
     checkstyle: String,
     build: String,      // [INFO] BUILD SUCCESS/FAILURE (+ Reactor Summary on failure); no Total time
     stray_errors: Vec<String>, // [ERROR] lines from dropped/Other segments
+    footer_errors: Vec<String>, // [ERROR] cause lines from the post-footer epilogue
+}
+
+/// Maximum post-footer cause lines kept; `-fae` reactors can abort in every
+/// module and the first few already identify the failure.
+const MAX_FOOTER_ERRORS: usize = 10;
+
+/// Recover the failure cause Maven prints *after* the build footer.
+///
+/// `split_segments` deliberately stops accumulating at the footer, so the
+/// trailing `[ERROR]` epilogue reaches no segment filter at all. When the
+/// failure has no per-file javac diagnostic — a plugin abort, `Fatal error
+/// compiling`, an enforcer rule, dependency resolution — that epilogue is the
+/// *only* carrier of the diagnosis, and the multi-goal render collapsed to a
+/// bare `[INFO] BUILD FAILURE`. Observed 2026-08-05 on `./mvnw -B clean
+/// test-compile`: the agent could learn nothing without grepping the tee log.
+///
+/// `is_maven_boilerplate` already knows which epilogue lines are noise
+/// (`Re-run Maven`, `-> [Help 1]`, the cwiki link) and which must survive
+/// (`Failed to execute goal …`, except the redundant `There are test failures`
+/// variant whose detail is rendered separately).
+fn extract_footer_errors(raw: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    let mut in_footer = false;
+    for line in raw.lines() {
+        let stripped = strip_ansi(line);
+        let st = stripped.trim();
+        if !in_footer {
+            in_footer = BUILD_FOOTER_RE.is_match(st);
+            continue;
+        }
+        if !st.starts_with(ERROR_TAG) || is_maven_boilerplate(st) {
+            continue;
+        }
+        let owned = st.to_string();
+        if !out.contains(&owned) {
+            out.push(owned);
+        }
+    }
+    if out.len() > MAX_FOOTER_ERRORS {
+        let extra = out.len() - MAX_FOOTER_ERRORS;
+        out.truncate(MAX_FOOTER_ERRORS);
+        out.push(format!("[ERROR] ... +{extra} more failed goals"));
+    }
+    out
 }
 
 /// Pull the trailing build footer: always keep the native `[INFO] BUILD
@@ -706,7 +751,30 @@ fn filter_segments(raw: &str) -> MultiParts {
         parts.checkstyle = filter_mvn_checkstyle(&checkstyle_buf);
     }
     parts.build = extract_build_block(raw);
+    let rendered = format!("{}\n{}\n{}", parts.compile, parts.tests, parts.checkstyle);
+    parts.footer_errors = extract_footer_errors(raw)
+        .into_iter()
+        .filter(|e| !parts.stray_errors.contains(e) && !footer_error_already_rendered(e, &rendered))
+        .collect();
     parts
+}
+
+/// The epilogue largely reprints what Maven already said inline. Drop the
+/// lines whose detail is elsewhere in the composed report, so recovering the
+/// epilogue costs only the causes that were genuinely missing.
+fn footer_error_already_rendered(err: &str, rendered: &str) -> bool {
+    // javac diagnostics come back verbatim; the inline copy is already deduped
+    // by (path, line, col), so match on that key rather than the whole line.
+    if let Some(m) = COMPILE_ERROR_LOCATION_RE.find(err) {
+        return rendered.contains(m.as_str());
+    }
+    // `… on project X: Compilation failure` is the compile-goal twin of
+    // `… : There are test failures.` — a pointer to detail rendered
+    // separately. Worth keeping only if nothing else survived.
+    if err.contains("Failed to execute goal") && err.contains("Compilation failure") {
+        return !rendered.trim().is_empty();
+    }
+    rendered.contains(err.trim())
 }
 
 /// Assemble the final multi-goal report from already-filtered (and possibly
@@ -737,6 +805,11 @@ fn compose_multi(parts: &MultiParts, _goals_header: &str) -> String {
     }
     if !parts.build.trim().is_empty() {
         out.push_str(parts.build.trim_end());
+        out.push('\n');
+    }
+    // After the footer, as Maven prints them.
+    for e in &parts.footer_errors {
+        out.push_str(e);
         out.push('\n');
     }
     out.trim_end().to_string()
@@ -1438,6 +1511,13 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
 /// Render one failure's diagnostic body: enriched stack trace, then the
 /// captured-output block.
 fn render_failure_body(out: &mut String, f: &TestFailure) {
+    // Cause headers already printed as the trace. When a Spring context fails
+    // the framework *logs* the same chain into `<system-out>`, so the report
+    // carries it twice — once in `<failure>` (rendered above, elided) and once
+    // verbatim in the captured block. Only exact repeats are dropped: a
+    // captured chain that says more than the trace is the reason the block is
+    // shown at all.
+    let mut trace_causes: HashSet<&str> = HashSet::new();
     if let Some(trace) = &f.stack_trace {
         let mut lines = trace.lines().peekable();
         // Surefire repeats the message in the trace header, so the label line
@@ -1450,15 +1530,37 @@ fn render_failure_body(out: &mut String, f: &TestFailure) {
             lines.next();
         }
         for line in lines {
+            let t = line.trim();
+            if t.starts_with("Caused by:") {
+                trace_causes.insert(t);
+            }
             writeln!(out, "[ERROR]       {line}").ok();
         }
     }
     if let Some(output) = f.test_output.as_deref().filter(|s| !s.is_empty()) {
-        writeln!(out, "[ERROR]     captured output:").ok();
-        for line in output.lines() {
-            writeln!(out, "[ERROR]       {line}").ok();
+        let kept: Vec<&str> = output
+            .lines()
+            .filter(|l| !trace_causes.contains(l.trim()))
+            .collect();
+        // Dropping the repeats can empty the block; a bare header would then
+        // read as "the test logged nothing", which is not what happened.
+        if kept.iter().any(|l| !l.trim().is_empty()) {
+            writeln!(out, "[ERROR]     captured output:").ok();
+            for line in trim_blank_edges(&kept) {
+                writeln!(out, "[ERROR]       {line}").ok();
+            }
         }
     }
+}
+
+/// Drop leading and trailing blank lines left behind after filtering.
+fn trim_blank_edges<'s, 'a>(lines: &'s [&'a str]) -> &'s [&'a str] {
+    let start = lines.iter().position(|l| !l.trim().is_empty()).unwrap_or(0);
+    let end = lines
+        .iter()
+        .rposition(|l| !l.trim().is_empty())
+        .map_or(start, |i| i + 1);
+    &lines[start..end]
 }
 
 /// True when a stack trace's header line says nothing the failure's own label
@@ -1983,6 +2085,7 @@ fn is_maven_boilerplate(line: &str) -> bool {
         "enable verbose output",
         "See dump files",
         "There are test failures",
+        "failsafe-reports",
         "For more information about the errors",
     ];
 
@@ -5835,6 +5938,64 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         );
     }
 
+    /// When a Spring context fails, the same `Caused by:` chain reaches the
+    /// render twice: once from the report's `<failure>` element (rendered as
+    /// the trace, elided) and again inside `<system-out>`, because the test
+    /// framework also logs it. Verbatim lines from a real 2026-08-07
+    /// najemnik run — 430 of that render's 2864 chars were this repeat.
+    #[test]
+    fn captured_output_drops_cause_lines_the_trace_already_printed() {
+        let chain = "Caused by: java.lang.IllegalStateException: Cannot bind to SpringApplication\n\
+             Caused by: org.springframework.core.convert.ConversionFailedException: Failed to convert from type [java.lang.String] to type [org.springframework.boot.Banner$Mode] for value [INVALID]";
+        let f = TestFailure {
+            test_class: "com.example.app.ApplicationTests".into(),
+            test_method: "contextLoads".into(),
+            kind: FailureKind::Error,
+            message: None,
+            failure_type: Some("java.lang.IllegalStateException".into()),
+            stack_trace: Some(format!("java.lang.IllegalStateException: Failed to load ApplicationContext\n{chain}")),
+            test_output: Some(format!(
+                "Update your application's configuration. The following values are valid:\n\n    CONSOLE\n    LOG\n    OFF\n\n{chain}"
+            )),
+        };
+        let mut out = String::new();
+        super::render_failure_body(&mut out, &f);
+        assert_eq!(
+            out.matches("Cannot bind to SpringApplication").count(),
+            1,
+            "cause line rendered twice:\n{out}"
+        );
+        assert_eq!(
+            out.matches("No enum constant").count() + out.matches("ConversionFailedException").count(),
+            1,
+            "cause chain rendered twice:\n{out}"
+        );
+        // The part of the captured block that is NOT in the trace is the
+        // whole reason the block is shown — Spring's own remediation text.
+        assert!(
+            out.contains("CONSOLE") && out.contains("The following values are valid"),
+            "remediation text lost:\n{out}"
+        );
+    }
+
+    /// A captured block that is *only* a repeat of the trace must not leave
+    /// an empty `captured output:` header behind.
+    #[test]
+    fn captured_output_header_dropped_when_nothing_survives_dedup() {
+        let f = TestFailure {
+            test_class: "com.example.app.FooTest".into(),
+            test_method: "bar".into(),
+            kind: FailureKind::Error,
+            message: None,
+            failure_type: Some("java.lang.IllegalStateException".into()),
+            stack_trace: Some("java.lang.IllegalStateException: boom\nCaused by: java.net.ConnectException: refused".into()),
+            test_output: Some("Caused by: java.net.ConnectException: refused".into()),
+        };
+        let mut out = String::new();
+        super::render_failure_body(&mut out, &f);
+        assert!(!out.contains("captured output:"), "empty captured block header kept:\n{out}");
+    }
+
     #[test]
     fn render_failure_block_keeps_distinct_and_weak_signature_bodies() {
         let npe = |method: &str, frame_line: u32| TestFailure {
@@ -6505,6 +6666,30 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(!output.contains("Total time"), "Total time leaked: {output}");
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 60.0, "failure path still expected ≥60%, got {:.1}%", savings);
+        insta::assert_snapshot!(output);
+    }
+
+    /// A plugin abort with no per-file javac diagnostic puts the whole
+    /// diagnosis in the `[ERROR]` epilogue *after* the build footer. Real
+    /// 2026-08-05 regression: `./mvnw -B clean test-compile` rendered as a bare
+    /// `[INFO] BUILD FAILURE` and the agent had to grep the tee log to learn
+    /// anything at all.
+    #[test]
+    fn test_filter_mvn_multi_keeps_post_footer_failure_cause() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_multi_plugin_abort_after_footer_raw.txt");
+        let output = filter_mvn_multi(input, "clean test-compile");
+        assert!(output.contains("[INFO] BUILD FAILURE"), "lost failure signal: {output}");
+        assert!(
+            output.contains("Failed to execute goal") && output.contains("release version 99"),
+            "lost the only carrier of the failure cause: {output}"
+        );
+        // The epilogue's own boilerplate must not come back with it.
+        assert!(!output.contains("Re-run Maven"), "epilogue boilerplate leaked: {output}");
+        assert!(!output.contains("cwiki.apache.org"), "Help link leaked: {output}");
+        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        assert!(savings >= 60.0, "expected ≥60% savings, got {savings:.1}%");
         insta::assert_snapshot!(output);
     }
 
