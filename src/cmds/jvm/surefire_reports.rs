@@ -371,6 +371,26 @@ const CAPTURED_BOOTSTRAP_NOISE: &[&str] = &[
     "DefaultTestContextBootstrapper",
 ];
 
+/// Micrometer's shaded reactor-netty client — the transport under a statsd /
+/// StatsD-family metrics registry. In a test JVM there is nothing listening on
+/// the collector port, so every export attempt logs a ~380-char WARN
+/// (`PortUnreachableException`, `An exception has been observed post
+/// termination`). Over 2026-08-03..07 real traffic that single sender was
+/// 8.5k chars — 10.1% of every character rtk rendered for `mvn` — and was
+/// never the diagnosis of anything.
+///
+/// It escapes [`collapse_repeated_log_lines`]: it lands once per test rather
+/// than in a burst, and the connection identity in the message differs per
+/// fork, so neither within-block dedup nor verbatim matching catches it. The
+/// sender is the only stable signal. Matched on the shaded package in both
+/// spellings that appear in practice — logback's abbreviation (`i.m.s.r.`)
+/// and Spring Boot's (`i.m.s.reactor.`) — plus the unabbreviated form.
+const CAPTURED_METRICS_EXPORT_NOISE: &[&str] = &[
+    "i.m.s.r.netty",
+    "i.m.s.reactor.netty",
+    "io.micrometer.shaded",
+];
+
 /// A stack frame, or the frame-elision counter that closes a segment, as it
 /// appears *inside* captured output. When a context fails to load, the logged
 /// trace lands in `system-out` in full while the report's own `<failure>`
@@ -455,6 +475,7 @@ fn clean_captured(text: &str) -> String {
         if CAPTURED_DEBUG_LINE_RE.is_match(line)
             || CAPTURED_FRAME_RE.is_match(line)
             || CAPTURED_BOOTSTRAP_NOISE.iter().any(|p| line.contains(p))
+            || CAPTURED_METRICS_EXPORT_NOISE.iter().any(|p| line.contains(p))
         {
             continue;
         }
@@ -987,10 +1008,12 @@ Unconditional classes:
         // chars — with the 12-line tail budget it evicts the diagnostic.
         let stdout = include_str!("../../../tests/fixtures/surefire_captured_log_flood_raw.txt");
         let out = super::combine_test_output(stdout, "", 2000).expect("captured output");
+        // Once collapsed to a single emission; now dropped outright — the
+        // sender is micrometer's statsd exporter, see the metrics-noise test.
         assert_eq!(
             out.matches("FluxReceive").count(),
-            1,
-            "repeated log line must render once:\n{out}"
+            0,
+            "statsd exporter noise must not reach the render:\n{out}"
         );
         assert!(
             out.contains("repeated log lines omitted"),
@@ -1002,12 +1025,35 @@ Unconditional classes:
             out.contains("remains without owner") && out.contains("get user"),
             "application log lines evicted by the flood:\n{out}"
         );
-        assert!(
-            out.lines().filter(|l| l.contains("i.m.s.r.netty")).count() * 4 < out.lines().count(),
-            "infrastructure noise still owns the budget:\n{out}"
-        );
         let savings = 100.0 - (out.len() as f64 / stdout.len() as f64 * 100.0);
         assert!(savings >= 60.0, "expected >=60% savings, got {savings:.1}%");
+    }
+
+    /// The statsd exporter's UDP client logs a ~380-char WARN every time it
+    /// cannot reach a collector — which, in a test JVM, is always. Measured
+    /// over 2026-08-03..07 real traffic it was 8.5k chars, 10.1% of every
+    /// character rtk rendered for `mvn`, and never once the diagnosis. It
+    /// escapes [`collapse_repeated_log_lines`] because it lands once per test
+    /// and the socket identity differs per fork, so only a sender-level rule
+    /// catches it. Both logback's abbreviation and Spring Boot's are seen.
+    #[test]
+    fn captured_output_drops_statsd_exporter_noise() {
+        let stdout = "\
+11:54:21.931 [main] INFO  c.e.auth.user.UserSearchService - Found 0 users
+12:54:37.711 [udp-epoll-2] WARN  i.m.s.r.netty.channel.FluxReceive - [fc96a1ff, L:/127.0.0.1:56204 - R:localhost/127.0.0.1:8125] An exception has been observed post termination, use DEBUG level to see the full stack: java.net.PortUnreachableException: recvAddress(..) failed with error(-111): Connection refused
+2026-08-04T12:54:37.712+02:00  WARN 12345 --- [    udp-epoll-1] [                    ] i.m.s.reactor.netty.channel.FluxReceive  : An exception has been observed post termination
+11:54:21.940 [main] INFO  c.e.auth.user.UserSearchService - Using encryptor: Fallback
+";
+        let out = super::combine_test_output(stdout, "", 2000).expect("captured output");
+        assert!(
+            !out.contains("FluxReceive") && !out.contains("PortUnreachableException"),
+            "statsd exporter noise survived:\n{out}"
+        );
+        // The application's own lines are what the budget is for.
+        assert!(
+            out.contains("Found 0 users") && out.contains("Using encryptor"),
+            "application log lines lost:\n{out}"
+        );
     }
 
     #[test]
