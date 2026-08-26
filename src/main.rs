@@ -1348,8 +1348,8 @@ fn run_fallback(parse_error: clap::Error) -> Result<i32> {
         match result {
             Ok(output) => {
                 let exit_code = core::utils::exit_code_from_output(&output, &raw_command);
-                let stdout_raw = String::from_utf8_lossy(&output.stdout);
-                let stderr_raw = String::from_utf8_lossy(&output.stderr);
+                let stdout_raw = core::utils::decode_process_output(&output.stdout);
+                let stderr_raw = core::utils::decode_process_output(&output.stderr);
 
                 // Merge stderr into the text to filter when filter_stderr is enabled;
                 // otherwise emit stderr directly so it is always visible.
@@ -1888,7 +1888,10 @@ fn run_cli() -> Result<i32> {
             0
         }
 
-        Commands::Find { args } => find_cmd::run_from_args(&args, cli.verbose)?,
+        Commands::Find { args } => {
+            find_cmd::run_from_args(&args, cli.verbose)?;
+            0
+        }
 
         Commands::Diff { file1, file2 } => {
             if let Some(f2) = file2 {
@@ -2683,8 +2686,8 @@ fn run_cli() -> Result<i32> {
                 .join()
                 .map_err(|_| anyhow::anyhow!("stderr streaming thread panicked"))??;
 
-            let stdout = String::from_utf8_lossy(&stdout_bytes);
-            let stderr = String::from_utf8_lossy(&stderr_bytes);
+            let stdout = core::utils::decode_process_output(&stdout_bytes);
+            let stderr = core::utils::decode_process_output(&stderr_bytes);
             let full_output = format!("{}{}", stdout, stderr);
 
             // Track usage (input = output since no filtering)
