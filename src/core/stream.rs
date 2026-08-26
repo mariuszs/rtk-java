@@ -243,6 +243,70 @@ pub fn status_to_exit_code(status: std::process::ExitStatus) -> i32 {
 
 // ISSUE #897: ChildGuard RAII prevents zombie processes that caused kernel panic
 pub const RAW_CAP: usize = 10_485_760; // 10 MiB
+/// Bytes reserved for each end of an oversized stream.
+const CAP_HALF: usize = RAW_CAP / 2;
+
+/// Line accumulator bounded at `RAW_CAP` that keeps BOTH ends of the stream.
+///
+/// A head-only cap is actively misleading for Maven: the build footer, the
+/// `Failed to execute goal` cause and the final `BUILD FAILURE` all live at the
+/// very end. Observed 2026-08-25 on a >10 MiB `mvn test` — everything past the
+/// cap was discarded and the render came out as `Tests run: 0` + `BUILD
+/// SUCCESS` while the process exited 1. The raw tee log keeps the full output;
+/// what the filter sees must at least contain the diagnosis.
+struct CappedCapture {
+    head: String,
+    tail: std::collections::VecDeque<String>,
+    tail_bytes: usize,
+    overflowed: bool,
+}
+
+impl CappedCapture {
+    fn new() -> Self {
+        Self {
+            head: String::new(),
+            tail: std::collections::VecDeque::new(),
+            tail_bytes: 0,
+            overflowed: false,
+        }
+    }
+
+    fn push(&mut self, line: &str) {
+        if !self.overflowed && self.head.len() + line.len() < CAP_HALF {
+            self.head.push_str(line);
+            self.head.push('\n');
+            return;
+        }
+        // Past the head budget: keep a rolling window of the most recent lines
+        // so the tail of the stream always survives.
+        self.overflowed = true;
+        self.tail_bytes += line.len() + 1;
+        self.tail.push_back(line.to_string());
+        while self.tail_bytes > CAP_HALF {
+            match self.tail.pop_front() {
+                Some(dropped) => self.tail_bytes -= dropped.len() + 1,
+                None => break,
+            }
+        }
+    }
+
+    fn overflowed(&self) -> bool {
+        self.overflowed
+    }
+
+    fn finish(self) -> String {
+        if !self.overflowed {
+            return self.head;
+        }
+        let mut out = String::with_capacity(self.head.len() + self.tail_bytes);
+        out.push_str(&self.head);
+        for line in &self.tail {
+            out.push_str(line);
+            out.push('\n');
+        }
+        out
+    }
+}
 
 pub fn run_streaming(
     cmd: &mut Command,
@@ -323,11 +387,9 @@ pub fn run_streaming(
 
     let stdout = child.0.stdout.take().context("No child stdout handle")?;
     let stderr = child.0.stderr.take().context("No child stderr handle")?;
-    let mut raw_stdout = String::new();
-    let mut raw_stderr = String::new();
+    let raw_stdout;
+    let raw_stderr;
     let mut filtered = String::new();
-    let mut capped_out = false;
-    let mut capped_err = false;
     let mut saved_filter: Option<Box<dyn StreamFilter + '_>> = None;
     let mut filter_fd_is_stderr = false;
 
@@ -355,6 +417,8 @@ pub fn run_streaming(
             }
         });
 
+        let mut cap_out = CappedCapture::new();
+        let mut cap_err = CappedCapture::new();
         if let FilterMode::Streaming(mut filter) = stdout_mode {
             let stdout_handle = io::stdout();
             let mut out = stdout_handle.lock();
@@ -367,23 +431,9 @@ pub fn run_streaming(
                     StreamLine::Stdout(l) => (l, false),
                 };
                 if is_stderr {
-                    if !capped_err {
-                        if raw_stderr.len() + line.len() < RAW_CAP {
-                            raw_stderr.push_str(&line);
-                            raw_stderr.push('\n');
-                        } else {
-                            capped_err = true;
-                            eprintln!("[rtk] warning: stderr exceeds 10 MiB — capture truncated");
-                        }
-                    }
-                } else if !capped_out {
-                    if raw_stdout.len() + line.len() < RAW_CAP {
-                        raw_stdout.push_str(&line);
-                        raw_stdout.push('\n');
-                    } else {
-                        capped_out = true;
-                        eprintln!("[rtk] warning: stdout exceeds 10 MiB — filter input truncated");
-                    }
+                    cap_err.push(&line);
+                } else {
+                    cap_out.push(&line);
                 }
                 filter_fd_is_stderr = is_stderr;
                 if let Some(output) = filter.feed_line(&line) {
@@ -411,21 +461,24 @@ pub fn run_streaming(
             saved_filter = Some(filter);
         }
 
+        if cap_out.overflowed() {
+            eprintln!("[rtk] warning: stdout exceeds 10 MiB — filter input truncated (middle dropped, both ends kept)");
+        }
+        if cap_err.overflowed() {
+            eprintln!("[rtk] warning: stderr exceeds 10 MiB — capture truncated (middle dropped, both ends kept)");
+        }
+        raw_stdout = cap_out.finish();
+        raw_stderr = cap_err.finish();
+
         stdout_thread.join().ok();
         stderr_thread.join().ok();
     } else {
         let stderr_thread = std::thread::spawn(move || -> String {
-            let mut raw_err = String::new();
-            let mut capped = false;
+            let mut cap_err = CappedCapture::new();
             for line in BufReader::new(stderr).lines().map_while(Result::ok) {
-                if raw_err.len() + line.len() < RAW_CAP {
-                    raw_err.push_str(&line);
-                    raw_err.push('\n');
-                } else if !capped {
-                    capped = true;
-                }
+                cap_err.push(&line);
             }
-            raw_err
+            cap_err.finish()
         });
 
         {
@@ -436,17 +489,16 @@ pub fn run_streaming(
                 FilterMode::Passthrough => unreachable!("handled by early-return above"),
                 FilterMode::Streaming(_) => unreachable!("handled by is_streaming branch"),
                 FilterMode::Buffered(filter_fn) => {
+                    let mut cap_out = CappedCapture::new();
                     for line in BufReader::new(stdout).lines().map_while(Result::ok) {
-                        if raw_stdout.len() + line.len() < RAW_CAP {
-                            raw_stdout.push_str(&line);
-                            raw_stdout.push('\n');
-                        } else if !capped_out {
-                            capped_out = true;
-                            eprintln!(
-                                "[rtk] warning: output exceeds 10 MiB — filter input truncated"
-                            );
-                        }
+                        cap_out.push(&line);
                     }
+                    if cap_out.overflowed() {
+                        eprintln!(
+                            "[rtk] warning: output exceeds 10 MiB — filter input truncated (middle dropped, both ends kept)"
+                        );
+                    }
+                    raw_stdout = cap_out.finish();
                     filtered = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                         filter_fn(&raw_stdout)
                     }))
@@ -461,17 +513,16 @@ pub fn run_streaming(
                     }
                 }
                 FilterMode::CaptureOnly => {
+                    let mut cap_out = CappedCapture::new();
                     for line in BufReader::new(stdout).lines().map_while(Result::ok) {
-                        if raw_stdout.len() + line.len() < RAW_CAP {
-                            raw_stdout.push_str(&line);
-                            raw_stdout.push('\n');
-                        } else if !capped_out {
-                            capped_out = true;
-                            eprintln!(
-                                "[rtk] warning: output exceeds 10 MiB — filter input truncated"
-                            );
-                        }
+                        cap_out.push(&line);
                     }
+                    if cap_out.overflowed() {
+                        eprintln!(
+                            "[rtk] warning: output exceeds 10 MiB — filter input truncated (middle dropped, both ends kept)"
+                        );
+                    }
+                    raw_stdout = cap_out.finish();
                     filtered = raw_stdout.clone();
                 }
             }
@@ -752,6 +803,42 @@ pub(crate) mod tests {
         assert!(
             result.raw.len() > 1_000_000,
             "Should have captured significant data"
+        );
+    }
+
+    #[test]
+    fn raw_cap_keeps_the_tail_of_an_oversized_stream() {
+        // Observed 2026-08-25 (map, `./mvnw test`): a >10 MiB build hit the cap,
+        // every line after it was discarded, and the render came out as
+        // `Tests run: 0 / [INFO] BUILD SUCCESS` on exit code 1 — the real
+        // failure lived in the dropped tail. Maven always puts the diagnosis
+        // last, so the cap must keep both ends, not just the head.
+        // nosemgrep: interpreter-execution
+        let mut cmd = Command::new("sh");
+        cmd.args([
+            "-c",
+            "dd if=/dev/zero bs=1024 count=11264 2>/dev/null | tr '\\0' 'a' | fold -w 80; \
+             echo '[ERROR] Failed to execute goal'; echo '[INFO] BUILD FAILURE'",
+        ]);
+        let result = run_streaming(&mut cmd, StdinMode::Null, FilterMode::CaptureOnly).unwrap();
+        assert!(
+            result.raw.contains("[INFO] BUILD FAILURE"),
+            "build footer must survive the 10 MiB cap, got {} bytes ending in {:?}",
+            result.raw.len(),
+            &result.raw[result.raw.len().saturating_sub(120)..]
+        );
+        assert!(
+            result.raw.contains("[ERROR] Failed to execute goal"),
+            "failure cause must survive the 10 MiB cap"
+        );
+        assert!(
+            result.raw.starts_with("aaaa"),
+            "head of the stream must still be kept"
+        );
+        assert!(
+            result.raw.len() <= RAW_CAP + 4096,
+            "capped capture must stay bounded, got {} bytes",
+            result.raw.len()
         );
     }
 
