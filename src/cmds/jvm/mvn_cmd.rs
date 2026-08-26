@@ -74,11 +74,20 @@ static REACTOR_SUMMARY_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
 /// Capture groups: 1=path, 2=line, 3=col. Used for error dedup.
 static COMPILE_ERROR_LOCATION_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\[ERROR\]\s+(\S+?):\[(\d+),(\d+)\]").unwrap());
-/// Javac context line attached to a previous error:
-/// `[ERROR]   symbol:   ...`, `[ERROR]   location: ...`, required/found/reason.
-static COMPILE_ERROR_CONTEXT_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\[ERROR\]\s+(?:symbol|location|required|found|reason):").unwrap()
-});
+/// Javac context line attached to a previous error, as reprinted with the
+/// `[ERROR]` tag in Maven's post-footer epilogue:
+/// `[ERROR]   symbol:   ...`, `[ERROR]   location: ...`, required/found/reason,
+/// and the overload-resolution block `[ERROR]     method X.y(..) is not
+/// applicable` / `[ERROR]       (actual and formal argument lists differ …)`.
+///
+/// Matched on javac's **indentation**, not on a keyword list: javac indents
+/// every continuation by at least two spaces, while Maven's own epilogue lines
+/// (`[ERROR] /path/File.java:[l,c] …`, `[ERROR] Failed to execute goal …`,
+/// `[ERROR] -> [Help 1]`) all use the single tag separator. A closed keyword
+/// list silently missed every diagnostic shape it had not enumerated — on an
+/// overload-resolution failure that is most of the error body, reprinted whole.
+static COMPILE_ERROR_CONTEXT_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\[ERROR\] {2,}\S").unwrap());
 /// Checkstyle violation lines:
 /// `[ERROR] <path>:[<line>[,<col>]] (<category>) <Rule>: <msg>`
 /// (also matches `[WARN]` severity for plugins configured with warn level).
@@ -701,12 +710,22 @@ fn extract_footer_errors(raw: &str) -> Vec<String> {
             out.push(owned);
         }
     }
-    if out.len() > MAX_FOOTER_ERRORS {
-        let extra = out.len() - MAX_FOOTER_ERRORS;
-        out.truncate(MAX_FOOTER_ERRORS);
-        out.push(format!("[ERROR] ... +{extra} more failed goals"));
-    }
     out
+}
+
+/// Apply `MAX_FOOTER_ERRORS` to the epilogue lines that actually render.
+///
+/// Deliberately *not* folded back into `extract_footer_errors`: capping before
+/// `footer_error_already_rendered` runs lets suppressed noise — a javac
+/// continuation block is a dozen lines on its own — consume the budget and
+/// push genuine causes out behind the truncation marker.
+fn cap_footer_errors(mut errs: Vec<String>) -> Vec<String> {
+    if errs.len() > MAX_FOOTER_ERRORS {
+        let extra = errs.len() - MAX_FOOTER_ERRORS;
+        errs.truncate(MAX_FOOTER_ERRORS);
+        errs.push(format!("[ERROR] ... +{extra} more failed goals"));
+    }
+    errs
 }
 
 /// Pull the trailing build footer: always keep the native `[INFO] BUILD
@@ -781,22 +800,53 @@ fn filter_segments(raw: &str) -> MultiParts {
         parts.checkstyle = filter_mvn_checkstyle(&checkstyle_buf);
     }
     parts.build = extract_build_block(raw);
-    let rendered = format!("{}\n{}\n{}", parts.compile, parts.tests, parts.checkstyle);
-    parts.footer_errors = extract_footer_errors(raw)
+    let rendered = normalize_rendered(&format!(
+        "{}\n{}\n{}",
+        parts.compile, parts.tests, parts.checkstyle
+    ));
+    let kept: Vec<String> = extract_footer_errors(raw)
         .into_iter()
         .filter(|e| !parts.stray_errors.contains(e) && !footer_error_already_rendered(e, &rendered))
         .collect();
+    parts.footer_errors = cap_footer_errors(kept);
     parts
+}
+
+/// Canonical form for comparing an epilogue line against the composed body.
+///
+/// Maven prints the same javac diagnostic twice and *reformats it in between*:
+/// bare and re-indented under `COMPILATION ERROR :`, then `[ERROR]`-tagged with
+/// javac's original indent in the post-footer epilogue. A raw `contains` sees
+/// two different strings, so the epilogue copy survived — on an
+/// overload-resolution failure that is most of the error body, billed twice.
+/// Dropping the tag and collapsing whitespace makes the two comparable.
+fn normalize_epilogue_line(line: &str) -> String {
+    let t = line.trim();
+    let t = t.strip_prefix(ERROR_TAG).unwrap_or(t);
+    t.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// Per-line normalization of the composed body, newlines preserved so a
+/// single-line needle can never match across a line boundary.
+fn normalize_rendered(rendered: &str) -> String {
+    rendered
+        .lines()
+        .map(normalize_epilogue_line)
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// The epilogue largely reprints what Maven already said inline. Drop the
 /// lines whose detail is elsewhere in the composed report, so recovering the
 /// epilogue costs only the causes that were genuinely missing.
+///
+/// `rendered` must already be `normalize_rendered`'d — normalizing it once per
+/// report rather than once per candidate line.
 fn footer_error_already_rendered(err: &str, rendered: &str) -> bool {
     // javac diagnostics come back verbatim; the inline copy is already deduped
     // by (path, line, col), so match on that key rather than the whole line.
     if let Some(m) = COMPILE_ERROR_LOCATION_RE.find(err) {
-        return rendered.contains(m.as_str());
+        return rendered.contains(&normalize_epilogue_line(m.as_str()));
     }
     // `… on project X: Compilation failure` is the compile-goal twin of
     // `… : There are test failures.` — a pointer to detail rendered
@@ -804,7 +854,10 @@ fn footer_error_already_rendered(err: &str, rendered: &str) -> bool {
     if err.contains("Failed to execute goal") && err.contains("Compilation failure") {
         return !rendered.trim().is_empty();
     }
-    rendered.contains(err.trim())
+    let needle = normalize_epilogue_line(err);
+    // A bare `[ERROR]` separator carries nothing; `contains("")` would be true
+    // anyway, but say so explicitly rather than leaning on that.
+    needle.is_empty() || rendered.contains(&needle)
 }
 
 /// Assemble the final multi-goal report from already-filtered (and possibly
@@ -6806,6 +6859,97 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "mvn test output missing compile-error signal:\n{output}"
         );
         assert!(output.contains("BUILD FAILURE"));
+    }
+
+    #[test]
+    fn javac_overload_continuations_render_once() {
+        // Maven prints the javac diagnostic twice: bare under
+        // `COMPILATION ERROR :`, then again `[ERROR]`-prefixed in the
+        // epilogue after the build footer. The location lines are deduped by
+        // (path, line, col), but their indented continuation lines used to
+        // survive the second pass — on an overload-resolution failure that is
+        // most of the body.
+        let input = include_str!("../../../tests/fixtures/mvn_test_compile_overload_failure.txt");
+        let output = filter_mvn_test(input);
+
+        for needle in [
+            "(actual and formal argument lists differ in length)",
+            "(argument mismatch; java.lang.String cannot be converted to \
+             com.example.auth.password.ResetToken)",
+            "symbol:   method assertTokenExpired(com.example.auth.password.ResetToken)",
+        ] {
+            let inline = output
+                .lines()
+                .filter(|l| l.contains(needle.trim()))
+                .count();
+            assert!(inline > 0, "continuation line vanished: `{needle}`\n{output}");
+        }
+
+        // Each distinct continuation body appears once per error it explains —
+        // never a second time from the epilogue.
+        let dup = output
+            .lines()
+            .filter(|l| l.contains("(argument mismatch; java.lang.String cannot be converted"))
+            .count();
+        assert_eq!(dup, 1, "epilogue reprinted the javac continuation:\n{output}");
+
+        let applicable = output.lines().filter(|l| l.contains("is not applicable")).count();
+        assert_eq!(
+            applicable, 4,
+            "expected the 4 inline `is not applicable` lines, got {applicable}:\n{output}"
+        );
+    }
+
+    #[test]
+    fn multi_goal_epilogue_drops_already_rendered_javac_continuations() {
+        // Same duplication on the multi-goal path, via a different mechanism:
+        // `footer_error_already_rendered` compared the raw epilogue line
+        // (`[ERROR]   symbol:   …`) against a body that renders it bare and
+        // unindented, so `contains` never matched. Worse, the junk ate the
+        // MAX_FOOTER_ERRORS budget and evicted real causes behind a dangling
+        // `... +N more failed goals`.
+        let input = include_str!("../../../tests/fixtures/mvn_test_compile_overload_failure.txt");
+        let output = filter_mvn_piped(input);
+
+        let footer = output.split("BUILD FAILURE").nth(1).unwrap_or("");
+        assert!(
+            !footer.contains("is not applicable")
+                && !footer.contains("(actual and formal argument lists differ")
+                && !footer.contains("symbol:")
+                && !footer.contains("location:"),
+            "epilogue reprinted javac continuations already rendered inline:\n{output}"
+        );
+        assert!(
+            !footer.contains("more failed goals"),
+            "dangling truncation marker with no causes behind it:\n{output}"
+        );
+        // The inline body must be untouched — this is a post-footer fix only.
+        assert_eq!(
+            output.lines().filter(|l| l.contains("is not applicable")).count(),
+            4,
+            "inline javac body was damaged:\n{output}"
+        );
+    }
+
+    #[test]
+    fn footer_cap_survives_the_already_rendered_filter() {
+        // The cap must apply to what actually renders, not to the raw
+        // epilogue: filtering after truncation lets suppressed noise consume
+        // the budget and push genuine causes out.
+        let mut raw = String::from("[INFO] BUILD FAILURE\n");
+        for i in 0..14 {
+            raw.push_str(&format!("[ERROR] Failed to execute goal g{i} on project p{i}: boom\n"));
+        }
+        let errs = extract_footer_errors(&raw);
+        assert_eq!(errs.len(), 14, "extraction must not truncate: {errs:?}");
+
+        let kept = cap_footer_errors(errs);
+        assert_eq!(kept.len(), MAX_FOOTER_ERRORS + 1);
+        assert!(
+            kept.last()
+                .is_some_and(|l| l.contains("+4 more failed goals")),
+            "{kept:?}"
+        );
     }
 
     #[test]

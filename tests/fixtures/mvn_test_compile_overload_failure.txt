@@ -1,0 +1,66 @@
+[INFO] Scanning for projects...
+[INFO]
+[INFO] -----------------------< com.example:auth-core >------------------------
+[INFO] Building auth-core 3.14.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ auth-core ---
+[INFO] Copying 4 resources from src/main/resources to target/classes
+[INFO]
+[INFO] --- compiler:3.13.0:compile (default-compile) @ auth-core ---
+[INFO] Nothing to compile - all classes are up to date
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ auth-core ---
+[INFO] Copying 11 resources from src/test/resources to target/test-classes
+[INFO]
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ auth-core ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 87 source files with javac [debug release 21] to target/test-classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR :
+[INFO] -------------------------------------------------------------
+[ERROR] /home/user/projects/auth/auth-core/src/test/java/com/example/auth/password/PasswordResetServiceTest.java:[64,24] no suitable method found for resetPassword(java.lang.String)
+    method com.example.auth.password.PasswordResetService.resetPassword(java.lang.String,java.lang.String) is not applicable
+      (actual and formal argument lists differ in length)
+    method com.example.auth.password.PasswordResetService.resetPassword(com.example.auth.password.ResetToken) is not applicable
+      (argument mismatch; java.lang.String cannot be converted to com.example.auth.password.ResetToken)
+[ERROR] /home/user/projects/auth/auth-core/src/test/java/com/example/auth/password/PasswordResetServiceTest.java:[71,24] no suitable method found for resetPassword(java.lang.String,java.lang.String,java.lang.String)
+    method com.example.auth.password.PasswordResetService.resetPassword(java.lang.String,java.lang.String) is not applicable
+      (actual and formal argument lists differ in length)
+    method com.example.auth.password.PasswordResetService.resetPassword(com.example.auth.password.ResetToken) is not applicable
+      (actual and formal argument lists differ in length)
+[ERROR] /home/user/projects/auth/auth-core/src/test/java/com/example/auth/password/PasswordResetServiceTest.java:[88,17] cannot find symbol
+  symbol:   method assertTokenExpired(com.example.auth.password.ResetToken)
+  location: class com.example.auth.password.PasswordResetServiceTest
+[ERROR] /home/user/projects/auth/auth-core/src/test/java/com/example/auth/password/PasswordResetServiceTest.java:[103,36] incompatible types: java.time.Instant cannot be converted to java.time.Duration
+[INFO] 4 errors
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.412 s
+[INFO] Finished at: 2026-08-26T09:41:07+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project auth-core: Compilation failure: Compilation failure:
+[ERROR] /home/user/projects/auth/auth-core/src/test/java/com/example/auth/password/PasswordResetServiceTest.java:[64,24] no suitable method found for resetPassword(java.lang.String)
+[ERROR]     method com.example.auth.password.PasswordResetService.resetPassword(java.lang.String,java.lang.String) is not applicable
+[ERROR]       (actual and formal argument lists differ in length)
+[ERROR]     method com.example.auth.password.PasswordResetService.resetPassword(com.example.auth.password.ResetToken) is not applicable
+[ERROR]       (argument mismatch; java.lang.String cannot be converted to com.example.auth.password.ResetToken)
+[ERROR] /home/user/projects/auth/auth-core/src/test/java/com/example/auth/password/PasswordResetServiceTest.java:[71,24] no suitable method found for resetPassword(java.lang.String,java.lang.String,java.lang.String)
+[ERROR]     method com.example.auth.password.PasswordResetService.resetPassword(java.lang.String,java.lang.String) is not applicable
+[ERROR]       (actual and formal argument lists differ in length)
+[ERROR]     method com.example.auth.password.PasswordResetService.resetPassword(com.example.auth.password.ResetToken) is not applicable
+[ERROR]       (actual and formal argument lists differ in length)
+[ERROR] /home/user/projects/auth/auth-core/src/test/java/com/example/auth/password/PasswordResetServiceTest.java:[88,17] cannot find symbol
+[ERROR]   symbol:   method assertTokenExpired(com.example.auth.password.ResetToken)
+[ERROR]   location: class com.example.auth.password.PasswordResetServiceTest
+[ERROR] /home/user/projects/auth/auth-core/src/test/java/com/example/auth/password/PasswordResetServiceTest.java:[103,36] incompatible types: java.time.Instant cannot be converted to java.time.Duration
+[ERROR] -> [Help 1]
+[ERROR]
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR]
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
