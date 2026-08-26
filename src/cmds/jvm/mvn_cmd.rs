@@ -1879,6 +1879,65 @@ pub(crate) fn filter_mvn_verify(output: &str) -> String {
     filter_mvn_tests_with_goal(output, "verify", &[])
 }
 
+/// Render the `[ERROR]` block of a Maven run that never reached the reactor.
+///
+/// Such a run (unresolvable build extension, broken settings.xml, no POM in the
+/// directory) prints no banner, no `Tests run:` and no `BUILD FAILURE` — only
+/// `[ERROR]` lines, sometimes with the reason on an unprefixed continuation
+/// line below. Deliberately not delegated to [`filter_mvn_compile`]: that
+/// filter assumes a reactor ran and synthesizes `[INFO] BUILD SUCCESS` when it
+/// finds no failure banner, which on this input claims the exact opposite of
+/// what happened.
+///
+/// Returns an empty string when there is nothing error-ish to show, so the
+/// caller can fall through to its normal verdict.
+fn bootstrap_error_block(clean: &str) -> String {
+    // Per `[ERROR]` line: how many unprefixed continuation lines may follow it.
+    // One is the norm (`Cannot access central … in offline mode`); the cap stops
+    // a stack trace that happens to trail an `[ERROR]` from flooding the block.
+    const MAX_DETAIL_LINES: usize = 3;
+    const MAX_LINES: usize = 12;
+
+    let mut out: Vec<String> = Vec::new();
+    let mut detail_budget = 0usize;
+
+    for line in clean.lines() {
+        let t = line.trim();
+        if t.starts_with(ERROR_TAG) {
+            // The first surviving `[ERROR]` line is the primary cause by
+            // construction, so it is kept even when it ends in `-> [Help 1]` —
+            // `mvn` with no POM in the directory says everything on that one
+            // line, and the shared boilerplate rule would drop it with the help
+            // link.
+            let keep = out.is_empty() || !is_maven_boilerplate(t);
+            detail_budget = if keep { MAX_DETAIL_LINES } else { 0 };
+            if keep && !out.iter().any(|e| e == t) {
+                out.push(t.to_string());
+            }
+            continue;
+        }
+        // Unprefixed continuation of the line above: Maven puts the actual
+        // reason there. Deduped, because it repeats verbatim under `Caused by:`.
+        if detail_budget > 0 && !t.is_empty() && !t.starts_with('[') {
+            detail_budget -= 1;
+            if !out.iter().any(|e| e == t) {
+                out.push(t.to_string());
+            }
+            continue;
+        }
+        if !t.is_empty() {
+            detail_budget = 0;
+        }
+    }
+
+    if out.len() > MAX_LINES {
+        let extra = out.len() - MAX_LINES;
+        out.truncate(MAX_LINES);
+        out.push(format!("[ERROR] ... +{extra} more error lines"));
+    }
+    out.join("\n")
+}
+
 /// Shared state machine parser for test-producing goals (`test`, `verify`).
 ///
 /// States: Preamble -> Testing -> Summary -> Done
@@ -2029,6 +2088,20 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         //       the compile filter so the error block reaches them.
         if clean.contains("BUILD FAILURE") {
             return filter_mvn_compile(output);
+        }
+        //   (c) Maven died before the reactor ever started — an unresolvable
+        //       build extension, a broken settings.xml, a bad -D argument. It
+        //       prints `[ERROR] Error executing Maven.` and the cause chain,
+        //       but never a reactor banner and never `BUILD FAILURE`. The
+        //       no-tests line would then be the only thing the user sees, and
+        //       it reads as "the build ran and had no tests" — the opposite of
+        //       what happened. Keyed off a build that also never succeeded, so
+        //       a plugin grumbling `[ERROR]` on a green build is unaffected.
+        if !clean.contains("BUILD SUCCESS") {
+            let block = bootstrap_error_block(&clean);
+            if !block.is_empty() {
+                return block;
+            }
         }
         // Surefire's own native line — no synthetic `mvn <goal>:` prose.
         let _ = goal; // goal no longer interpolated into the no-tests line
@@ -2217,6 +2290,13 @@ fn is_maven_boilerplate(line: &str) -> bool {
     // per-test failure details.
     if stripped.contains("Failed to execute goal") {
         return stripped.contains("There are test failures");
+    }
+
+    // Same shape, different carrier: `mvn <goal>` in a directory with no POM
+    // reports the whole diagnosis on one line that also ends in `-> [Help 1]`.
+    // Dropping it leaves a bare `[INFO] BUILD FAILURE` with no reason at all.
+    if stripped.contains("requires a project to execute") {
+        return false;
     }
 
     // Plexus classworlds realm dump, printed under `[ERROR]` on any
@@ -3803,6 +3883,65 @@ mod tests {
     fn test_empty_input() {
         let output = filter_mvn_test("");
         assert_eq!(output, "[WARNING] No tests were executed!");
+    }
+
+    /// Maven can die before the reactor even starts: an unresolvable build
+    /// *extension* produces no `T E S T S` marker, no reactor banner and no
+    /// `BUILD FAILURE` line — only `[ERROR]` lines. Falling through to the
+    /// surefire "no tests" warning there reads as "the build ran and had no
+    /// tests" while dropping every line that carries the actual cause.
+    #[test]
+    fn bootstrap_failure_keeps_error_block() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_extension_resolution_failure_raw.txt");
+        let out = filter_mvn_test(input);
+        assert!(
+            !out.contains("No tests were executed"),
+            "misleading no-tests verdict on a build that never started:\n{out}"
+        );
+        assert!(out.contains("Error executing Maven"), "\n{out}");
+        assert!(out.contains("Caused by:"), "\n{out}");
+        assert!(out.contains("could not be resolved"), "\n{out}");
+        // Fidelity case, not a savings case: the whole raw output is the
+        // diagnosis. The floor that applies here is never-worse.
+        assert!(out.len() <= input.len(), "{} vs {}", out.len(), input.len());
+    }
+
+    /// `mvn test` in a directory with no POM is the same family: no reactor,
+    /// no banner, and the single line that explains it ends in `-> [Help 1]`,
+    /// which the shared boilerplate rule drops. Keeping the first `[ERROR]`
+    /// line unconditionally is what saves it — and the compile filter must not
+    /// be used here, since it would synthesize `[INFO] BUILD SUCCESS`.
+    #[test]
+    fn no_pom_reports_the_error_not_a_fabricated_success() {
+        let out = filter_mvn_test(include_str!("../../../tests/fixtures/mvn_no_pom_raw.txt"));
+        assert!(!out.contains("BUILD SUCCESS"), "\n{out}");
+        assert!(!out.contains("No tests were executed"), "\n{out}");
+        assert!(out.contains("there is no POM in this directory"), "\n{out}");
+    }
+
+    /// Newer Maven prints the reactor banner even when there is no POM, so
+    /// this one takes the `BUILD FAILURE` branch rather than the bootstrap
+    /// one — and used to render the banner alone, with the reason dropped as
+    /// `-> [Help 1]` boilerplate.
+    #[test]
+    fn no_pom_with_banner_keeps_the_reason() {
+        let out = filter_mvn_test(include_str!(
+            "../../../tests/fixtures/mvn_no_pom_build_failure_raw.txt"
+        ));
+        assert!(out.contains("there is no POM in this directory"), "\n{out}");
+        assert!(out.contains("BUILD FAILURE"), "\n{out}");
+    }
+
+    /// The bootstrap guard keys off a *failed* build, not off the mere
+    /// presence of an `[ERROR]` line — a plugin that grumbles on an
+    /// otherwise green build still gets the native no-tests warning.
+    #[test]
+    fn stray_error_line_on_a_successful_build_still_reports_no_tests() {
+        let out = filter_mvn_test(
+            "[INFO] Building my-project 1.0\n[ERROR] plugin grumbled\n[INFO] BUILD SUCCESS\n",
+        );
+        assert_eq!(out, "[WARNING] No tests were executed!");
     }
 
     #[test]

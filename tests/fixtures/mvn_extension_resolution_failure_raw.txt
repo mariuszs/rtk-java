@@ -1,0 +1,8 @@
+[WARNING] The POM for com.google.cloud.artifactregistry:artifactregistry-maven-wagon:jar:2.2.0 is missing, no dependency information available
+[ERROR] Error executing Maven.
+[ERROR] Extension com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.0 or one of its dependencies could not be resolved: Plugin com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.0 or one of its dependencies could not be resolved:
+	Cannot access central (https://repo.maven.apache.org/maven2) in offline mode and the artifact com.google.cloud.artifactregistry:artifactregistry-maven-wagon:jar:2.2.0 has not been downloaded from it before.
+
+[ERROR] Caused by: Plugin com.google.cloud.artifactregistry:artifactregistry-maven-wagon:2.2.0 or one of its dependencies could not be resolved:
+	Cannot access central (https://repo.maven.apache.org/maven2) in offline mode and the artifact com.google.cloud.artifactregistry:artifactregistry-maven-wagon:jar:2.2.0 has not been downloaded from it before.
+
