@@ -3,14 +3,14 @@ source: src/cmds/jvm/mvn_cmd.rs
 expression: digest
 ---
 [INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 8
-.: MicrosoftEntraIdClient2Test 8 (0.0s)
-services: UsersTest 5 (0.8s)
+[INFO] Tests run: 8, Skipped: 8 -- in com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test
+[INFO] Tests run: 5 -- in com.example.auth.user.UsersTest
 skipped:
-  MicrosoftEntraIdClient2Test.should_read_client3_users — Work in progress - not ready for CI
-  MicrosoftEntraIdClient2Test.should_read_client4_users — Work in progress - not ready for CI
-  MicrosoftEntraIdClient2Test.should_read_client2_users2 — Work in progress - not ready for CI
-  MicrosoftEntraIdClient2Test.should_read_vendor_groups — Work in progress - not ready for CI
   MicrosoftEntraIdClient2Test.should_read_client1_users — Work in progress - not ready for CI
-  MicrosoftEntraIdClient2Test.should_read_client4_groups — Work in progress - not ready for CI
   MicrosoftEntraIdClient2Test.should_read_client2_users — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_client2_users2 — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_client3_users — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_client4_groups — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_client4_users — Work in progress - not ready for CI
+  MicrosoftEntraIdClient2Test.should_read_vendor_groups — Work in progress - not ready for CI
   MicrosoftEntraIdClient2Test.should_read_vendor_users — Work in progress - not ready for CI

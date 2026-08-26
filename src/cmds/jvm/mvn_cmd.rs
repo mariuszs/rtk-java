@@ -1377,16 +1377,34 @@ fn all_skipped<'a>(
 
 /// Condensed per-class report written next to the tee log. `None` when no
 /// suites were parsed (nothing worth writing).
+///
+/// The digest is written on every enriched run but billed only when an agent
+/// opens it, so its format is tuned for being *read under a question* rather
+/// than for size. Two properties earn their bytes, both learned from a real
+/// 2026-08-25 session where an agent diffed two digests to explain a
+/// 1243 -> 1238 test drop and got back two ~7 kB "modified" lines for 3913
+/// billed tokens:
+///
+/// * **line-scoped** — one class per line, so a one-class delta diffs as one
+///   line and `grep <Class>` returns that class instead of every class in its
+///   module. The old format comma-joined a module's classes onto a single
+///   line, which made both useless.
+/// * **stable** — sorted by FQCN and carrying no elapsed time, so re-running
+///   the same suite yields a byte-identical digest. Per-class timings drift
+///   every run and would have marked every line modified on their own.
+///
+/// Module grouping goes with the timings: the FQCN identifies the class, and
+/// a `module:` header line has no Maven-native equivalent to reconstruct.
 fn render_classes_digest(
     _goal: &str,
     surefire: Option<&SurefireResult>,
     failsafe: Option<&SurefireResult>,
 ) -> Option<String> {
-    let suites = all_suites(surefire, failsafe);
+    let mut suites = all_suites(surefire, failsafe);
     if suites.is_empty() {
         return None;
     }
-    let skipped = all_skipped(surefire, failsafe);
+    let mut skipped = all_skipped(surefire, failsafe);
     // Maven-native aggregate line: agents grep tee logs with Maven's own
     // summary pattern, so the header must match it verbatim — no RTK label,
     // no goal prose. (The digest's own file-reference note lives in
@@ -1407,26 +1425,29 @@ fn render_classes_digest(
     );
     out.push('\n');
 
-    // Group by module; BTreeMap for deterministic order, root module last-free
-    // "." key sorts first which is fine.
-    let mut by_module: std::collections::BTreeMap<&str, Vec<String>> =
-        std::collections::BTreeMap::new();
+    // One line per class, sorted by FQCN, in surefire's own
+    // `Tests run: N -- in <FQCN>` shape (the same one `render_pass_inline`
+    // reconstructs). Sorting is by class name rather than by the rendered
+    // line so a class whose test count changes keeps its position.
+    suites.sort_by(|a, b| a.class_name.cmp(&b.class_name));
     for s in &suites {
-        by_module
-            .entry(s.module.as_deref().unwrap_or("."))
-            .or_default()
-            .push(format!(
-                "{} {} ({:.1}s)",
-                short_class(&s.class_name),
-                s.tests,
-                s.time_secs
-            ));
-    }
-    for (module, classes) in &by_module {
-        writeln!(out, "{module}: {}", classes.join(", ")).ok();
+        if s.skipped > 0 {
+            writeln!(
+                out,
+                "[INFO] Tests run: {}, Skipped: {} -- in {}",
+                s.tests, s.skipped, s.class_name
+            )
+            .ok();
+        } else {
+            writeln!(out, "[INFO] Tests run: {} -- in {}", s.tests, s.class_name).ok();
+        }
     }
 
     if !skipped.is_empty() {
+        // Sorted for the same reason as the suites: surefire emits skips in
+        // fork-completion order, which would otherwise reshuffle the block
+        // between two identical runs.
+        skipped.sort_by(|a, b| (&a.class, &a.method).cmp(&(&b.class, &b.method)));
         out.push_str("skipped:\n");
         for st in &skipped {
             match &st.reason {
@@ -7323,6 +7344,117 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             .unwrap_or_else(|| panic!("header not maven-native: {header}"));
         assert_eq!(&caps[1], sf.summary.run.to_string().as_str());
         assert_eq!(&caps[4], sf.summary.skipped.to_string().as_str());
+    }
+
+    /// Two runs of the same suite must render a byte-identical digest.
+    ///
+    /// Real 2026-08-25 auth session: an agent diffed two `*_classes.log`
+    /// digests to explain a 1243 -> 1238 test drop and got back two ~7 kB
+    /// "modified" lines (3913 billed tokens), reporting "diff jest
+    /// nieczytelny wprost". Per-class elapsed time drifts on every run and
+    /// surefire's fork order is not stable, so both had to leave the digest
+    /// before a delta could be readable.
+    #[test]
+    fn digest_is_stable_across_reruns() {
+        let build = |times: [f64; 2], reversed: bool| {
+            let mut sf = parsed_fixture(include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+            ));
+            let entra = parsed_fixture(include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+            ));
+            sf.suites.extend(entra.suites.clone());
+            sf.skipped_tests.extend(entra.skipped_tests.clone());
+            sf.summary.add(&entra.summary);
+            for (s, t) in sf.suites.iter_mut().zip(times) {
+                s.time_secs = t;
+            }
+            if reversed {
+                sf.suites.reverse();
+                sf.skipped_tests.reverse();
+            }
+            super::render_classes_digest("test", Some(&sf), None).expect("suites -> digest")
+        };
+        assert_eq!(
+            build([0.8, 0.0], false),
+            build([12.4, 3.1], true),
+            "digest must not drift with fork order or elapsed time"
+        );
+    }
+
+    /// One Maven-native, FQCN-keyed line per class, sorted by class name, so
+    /// `grep <Class>` returns that class's own line. The old format packed a
+    /// module's classes onto one comma-joined line, which forced the agent
+    /// into `grep -oE '.{40}UsersTest [0-9]+'` to read a single entry.
+    #[test]
+    fn digest_emits_one_native_line_per_class() {
+        let mut sf = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        ));
+        let entra = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+        ));
+        sf.suites.extend(entra.suites.clone());
+        sf.skipped_tests.extend(entra.skipped_tests.clone());
+        sf.summary.add(&entra.summary);
+
+        let digest = super::render_classes_digest("test", Some(&sf), None)
+            .expect("suites present -> digest");
+        let class_re =
+            regex::Regex::new(r"^\[INFO\] Tests run: \d+(?:, Skipped: \d+)? -- in ([\w.$]+)$")
+                .expect("valid regex");
+        let matched: Vec<&str> = digest
+            .lines()
+            .filter_map(|l| class_re.captures(l).map(|c| c.get(1).expect("group").as_str()))
+            .collect();
+        assert_eq!(
+            matched,
+            vec![
+                "com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test",
+                "com.example.auth.user.UsersTest",
+            ],
+            "expected sorted FQCN-keyed native lines:\n{digest}"
+        );
+        let elapsed_re = regex::Regex::new(r"\(\d+\.\d+s\)").expect("valid regex");
+        assert!(
+            !elapsed_re.is_match(&digest),
+            "elapsed time must not reach the digest:\n{digest}"
+        );
+    }
+
+    /// One class dropping out of a run must render as one changed line (plus
+    /// the aggregate header) — the exact question the 2026-08-25 diff failed
+    /// to answer.
+    #[test]
+    fn digest_delta_is_line_scoped() {
+        let users = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        ));
+        let entra = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+        ));
+        // `entra` owns the run's skipped tests, so drop the *other* class to
+        // keep the delta down to a single suite.
+        let mut both = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+        ));
+        both.suites.extend(users.suites.clone());
+        both.summary.add(&users.summary);
+
+        let before = super::render_classes_digest("test", Some(&both), None).expect("digest");
+        let after = super::render_classes_digest("test", Some(&entra), None).expect("digest");
+
+        let kept: Vec<&str> = after.lines().collect();
+        let dropped: Vec<&str> = before.lines().filter(|l| !kept.contains(l)).collect();
+        assert_eq!(
+            dropped.len(),
+            2,
+            "one dropped class == aggregate header + its own line, got:\n{dropped:#?}"
+        );
+        assert!(
+            dropped.iter().any(|l| l.ends_with("-- in com.example.auth.user.UsersTest")),
+            "the dropped class must be named on its own line: {dropped:#?}"
+        );
     }
 
     #[test]
