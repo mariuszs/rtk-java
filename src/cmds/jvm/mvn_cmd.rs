@@ -2878,6 +2878,11 @@ fn filter_mvn_checkstyle(output: &str) -> String {
     let mut violations_seen = 0usize;
     let mut violation_end = 0usize;
     let mut elided_rules: Vec<(String, usize)> = Vec::new();
+    // Checkstyle prints its summary once per reactor module, so a green
+    // 7-module build renders as seven byte-identical `You have 0 Checkstyle
+    // violations.` lines. Keep the first, count the rest.
+    // Entries are (line, index in `result`, repeats seen after the first).
+    let mut summary_repeats: Vec<(String, usize, usize)> = Vec::new();
     // `-X` debug blocks and `[WARNING]` headers spill untagged continuation
     // lines (repository listings, mojo config dumps, transfer-failure stack
     // traces) — swallow those until the next `[INFO]`/`[ERROR]` line. The
@@ -2979,7 +2984,14 @@ fn filter_mvn_checkstyle(output: &str) -> String {
                 || stripped.contains("BUILD FAILURE")
             {
                 // Keep the `[INFO]` tag verbatim — retained lines stay a
-                // prefix-preserving subset of Maven's own output.
+                // prefix-preserving subset of Maven's own output. Only
+                // byte-identical repeats collapse, so a module that really
+                // reported violations still says so on its own line.
+                if let Some(entry) = summary_repeats.iter_mut().find(|(l, _, _)| l == line) {
+                    entry.2 += 1;
+                    continue;
+                }
+                summary_repeats.push((line.to_string(), result.len(), 0));
                 result.push(line.to_string());
                 continue;
             }
@@ -3011,6 +3023,9 @@ fn filter_mvn_checkstyle(output: &str) -> String {
         result.push(line.to_string());
     }
 
+    // Both elisions are positional, so collect them and insert back-to-front —
+    // an earlier insert would shift every later index.
+    let mut markers: Vec<(usize, String)> = Vec::new();
     if !elided_rules.is_empty() {
         let dropped: usize = elided_rules.iter().map(|(_, n)| n).sum();
         let by_rule = elided_rules
@@ -3018,10 +3033,24 @@ fn filter_mvn_checkstyle(output: &str) -> String {
             .map(|(rule, n)| format!("{rule} x{n}"))
             .collect::<Vec<_>>()
             .join(", ");
-        result.insert(
+        markers.push((
             violation_end,
             format!("[ERROR]   ... +{dropped} more Checkstyle violations ({by_rule})"),
-        );
+        ));
+    }
+    for (_, idx, repeats) in &summary_repeats {
+        if *repeats == 0 {
+            continue;
+        }
+        let plural = if *repeats == 1 { "" } else { "s" };
+        markers.push((
+            idx + 1,
+            format!("[INFO]   ... +{repeats} identical line{plural} omitted"),
+        ));
+    }
+    markers.sort_by(|a, b| b.0.cmp(&a.0));
+    for (idx, marker) in markers {
+        result.insert(idx, marker);
     }
 
     if result.is_empty() {
@@ -5406,6 +5435,59 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             drop_first_goal(&args, "help:evaluate"),
             vec!["-q".to_string(), "-Dexpression=jooq.version".to_string()]
         );
+    }
+
+    #[test]
+    fn checkstyle_collapses_identical_per_module_summaries() {
+        // Observed 2026-08-25 (skiller, three separate runs): a green
+        // `./mvnw -q checkstyle:check` on a 7-module reactor rendered as seven
+        // byte-identical `You have 0 Checkstyle violations.` lines — the whole
+        // 240-char render, where one line plus a count says the same thing.
+        let input = "[INFO] You have 0 Checkstyle violations.\n".repeat(7);
+        let output = filter_mvn_checkstyle(&input);
+
+        assert_eq!(
+            output.matches("You have 0 Checkstyle violations.").count(),
+            1,
+            "identical per-module summaries must collapse:\n{output}"
+        );
+        assert!(
+            output.contains("[INFO]   ... +6 identical lines omitted"),
+            "the collapse must be counted, not silent:\n{output}"
+        );
+        assert!(
+            output.len() * 2 < input.len(),
+            "expected the collapse to more than halve the render, {} -> {}",
+            input.len(),
+            output.len()
+        );
+    }
+
+    #[test]
+    fn checkstyle_keeps_distinct_module_summaries() {
+        // Only byte-identical lines collapse: a module that actually reported
+        // violations still says so, and the count is singular for one repeat.
+        let input = "\
+[INFO] You have 0 Checkstyle violations.
+[INFO] You have 3 Checkstyle violations.
+[INFO] You have 0 Checkstyle violations.
+[INFO] BUILD FAILURE
+";
+        let output = filter_mvn_checkstyle(input);
+        assert!(
+            output.contains("You have 3 Checkstyle violations."),
+            "distinct summary lost:\n{output}"
+        );
+        assert_eq!(
+            output.matches("You have 0 Checkstyle violations.").count(),
+            1,
+            "\n{output}"
+        );
+        assert!(
+            output.contains("[INFO]   ... +1 identical line omitted"),
+            "singular wording for a single repeat:\n{output}"
+        );
+        assert!(output.contains("BUILD FAILURE"), "verdict lost:\n{output}");
     }
 
     #[test]
