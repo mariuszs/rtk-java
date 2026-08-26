@@ -1,0 +1,58 @@
+[INFO] Scanning for projects...
+[INFO] ------------------< com.example:notifications-parent >------------------
+[INFO] Building notifications-parent 1.0.0-SNAPSHOT
+[INFO] --- checkstyle:3.6.0:check (default) @ notifications ---
+[INFO] Starting audit...
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/ActionContexts.java:63: Line is longer than 170 characters (found 205). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/ActionContexts.java:69: Line is longer than 170 characters (found 178). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/ActionContexts.java:85: Line is longer than 170 characters (found 214). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/ActionContexts.java:96: Line is longer than 170 characters (found 193). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/ActionContexts.java:122: Line is longer than 170 characters (found 277). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/ActionContexts.java:127: Line is longer than 170 characters (found 256). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/ActionContexts.java:139: Line is longer than 170 characters (found 177). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/BrandThemes.java:67: Line is longer than 170 characters (found 202). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/BrandThemes.java:82: Line is longer than 170 characters (found 211). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/BrandThemes.java:92: Line is longer than 170 characters (found 212). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/BrandThemes.java:97: Line is longer than 170 characters (found 253). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/BrandThemes.java:102: Line is longer than 170 characters (found 253). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/Companies.java:72: Line is longer than 170 characters (found 241). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/Companies.java:77: Line is longer than 170 characters (found 251). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/Companies.java:82: Line is longer than 170 characters (found 226). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/CompanyChannelMappings.java:66: Line is longer than 170 characters (found 213). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/CompanyChannelMappings.java:77: Line is longer than 170 characters (found 185). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/CompanyChannelMappings.java:82: Line is longer than 170 characters (found 178). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/CompanyChannelMappings.java:87: Line is longer than 170 characters (found 264). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/CompanyChannelMappings.java:92: Line is longer than 170 characters (found 264). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/records/CompanyIntegrationsRecord.java:229: Line is longer than 170 characters (found 301). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/records/NotificationDeliveriesRecord.java:247: Line is longer than 170 characters (found 343). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/records/NotificationInboxRecord.java:202: Line is longer than 170 characters (found 243). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/records/NotificationPreferencesRecord.java:380: Line is longer than 170 characters (found 503). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/records/TemplateHistoryRecord.java:262: Line is longer than 170 characters (found 295). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/records/TemplatesRecord.java:244: Line is longer than 170 characters (found 283). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/tables/records/VariablesRecord.java:173: Line is longer than 170 characters (found 203). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:57: Line is longer than 170 characters (found 232). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:58: Line is longer than 170 characters (found 211). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:59: Line is longer than 170 characters (found 193). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:60: Line is longer than 170 characters (found 292). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:61: Line is longer than 170 characters (found 353). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:62: Line is longer than 170 characters (found 267). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:63: Line is longer than 170 characters (found 314). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:64: Line is longer than 170 characters (found 357). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:65: Line is longer than 170 characters (found 288). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:66: Line is longer than 170 characters (found 278). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:67: Line is longer than 170 characters (found 260). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:68: Line is longer than 170 characters (found 253). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:69: Line is longer than 170 characters (found 295). [LineLength]
+[ERROR] /home/user/project/target/generated-sources/jooq/com/example/notifications/jooq/Keys.java:70: Line is longer than 170 characters (found 320). [LineLength]
+Audit done.
+[INFO] There are 141 errors reported by Checkstyle 10.21.0 with checkstyle.xml ruleset.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:42 min
+[INFO] Finished at: 2026-08-11T15:13:22+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check (default) on project notifications: You have 141 Checkstyle violations. The maximum number of allowed violations is 0. -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven with the -X switch to enable full debug logging.

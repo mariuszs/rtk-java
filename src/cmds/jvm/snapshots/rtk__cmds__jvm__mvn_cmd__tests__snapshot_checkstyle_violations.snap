@@ -8,3 +8,4 @@ expression: output
   src/main/java/com/example/auth/app/ExternalAppId.java:10 [LineLength] Line is longer than 200 characters (found 241).
   src/main/java/com/example/auth/app/ExternalAppId.java:10:16 [LocalVariableName] Name 'BadVariable' must match pattern '^([a-z][a-zA-Z0-9]*|_)$'.
 [INFO] BUILD FAILURE
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-checkstyle-plugin:3.6.0:check (default-cli) on project auth: You have 4 Checkstyle violations. -> [Help 1]

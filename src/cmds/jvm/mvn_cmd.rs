@@ -85,6 +85,20 @@ static COMPILE_ERROR_CONTEXT_RE: LazyLock<Regex> = LazyLock::new(|| {
 static CHECKSTYLE_VIOLATION_RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^\[(?:ERROR|WARN)\] (.+?):\[(\d+)(?:,(\d+))?\] \(\w+\) (\w+): (.+)$").unwrap()
 });
+/// Checkstyle's other console format, emitted when the plugin runs without
+/// `<consoleOutput>`'s bracketed layout:
+/// `[ERROR] <path>:<line>[:<col>]: <msg> [<Rule>]`
+/// Already prefix-preserving, so these lines are kept verbatim — only counted
+/// for the cap below.
+static CHECKSTYLE_PLAIN_VIOLATION_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\[(?:ERROR|WARN)\] (?:.+?):\d+(?::\d+)?: .+ \[(\w+)\]$").unwrap()
+});
+/// Violation lines rendered before eliding the rest. A checkstyle run against
+/// generated sources reports hundreds of identical `LineLength` hits; without
+/// a cap the list alone overruns the host's output limit and the verdict
+/// (violation count, BUILD FAILURE, `Failed to execute goal` cause) — which
+/// Maven prints *after* the list — never reaches the agent.
+const MAX_CHECKSTYLE_VIOLATIONS: usize = 25;
 /// mvnd / maven 3.9+ extension-loader noise:
 /// `[INFO] Loaded 22539 auto-discovered prefixes for remote repository central (...)`
 static PREFIX_LOAD_RE: LazyLock<Regex> =
@@ -442,8 +456,24 @@ enum GoalRouting {
     Checkstyle,
     DepTree,
     DepList,
+    /// Short, non-interactive informational goals (`help:*`, `dependency:get`,
+    /// `deploy:deploy-file`). Their real answer is a line or two, so the JVM's
+    /// per-launch warning banner is most of what the agent sees. Filtered by
+    /// `filter_mvn_utility` — noise removal only, everything else verbatim.
+    Utility,
     /// Stream unchanged via `status()`; tracked for metrics only.
     Passthrough,
+}
+
+/// True for goals routed to `GoalRouting::Utility`. Deliberately narrow: only
+/// goals that print a short answer and exit. Long-running or interactive ones
+/// (`spring-boot:run`, `quarkus:dev`) must keep the raw streaming passthrough.
+fn is_utility_goal(goal: &str) -> bool {
+    goal.starts_with("help:")
+        || matches!(
+            goal,
+            "dependency:get" | "deploy:deploy-file" | "install:install-file"
+        )
 }
 
 /// Maven lifecycle phases (clean + default + site lifecycles). A bare token
@@ -928,6 +958,7 @@ fn route_goal(subcommand: &str) -> GoalRouting {
         "checkstyle:check" | "checkstyle" => GoalRouting::Checkstyle,
         "dependency:tree" => GoalRouting::DepTree,
         "dependency:list" => GoalRouting::DepList,
+        g if is_utility_goal(g) => GoalRouting::Utility,
         _ => GoalRouting::Passthrough,
     }
 }
@@ -963,8 +994,14 @@ fn run_passthrough_all(binary: MvnBinary, args: &[OsString], verbose: u8) -> Res
 /// compression itself — the same "smart quiet" applied in multi-goal mode. The
 /// unfiltered Passthrough route does NOT use this (it keeps `-q` and streams raw).
 fn filtered_goal_args(str_args: &[String], goal: &str) -> Vec<String> {
+    strip_quiet_flags(&drop_first_goal(str_args, goal))
+}
+
+/// Drop the first occurrence of the matched goal token, keeping every flag —
+/// `-q` included. The `run_*` helpers prepend their own canonical goal name.
+fn drop_first_goal(str_args: &[String], goal: &str) -> Vec<String> {
     let mut removed = false;
-    let without_goal: Vec<String> = str_args
+    str_args
         .iter()
         .filter(|a| {
             if !removed && a.as_str() == goal {
@@ -975,8 +1012,7 @@ fn filtered_goal_args(str_args: &[String], goal: &str) -> Vec<String> {
             }
         })
         .cloned()
-        .collect();
-    strip_quiet_flags(&without_goal)
+        .collect()
 }
 
 pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32> {
@@ -995,6 +1031,13 @@ pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32
                 GoalRouting::Checkstyle => run_checkstyle(binary, &rest, verbose),
                 GoalRouting::DepTree => run_dep_tree(binary, &rest, verbose),
                 GoalRouting::DepList => run_dep_list(binary, &rest, verbose),
+                // `-q` is the caller's own noise control here (`help:evaluate
+                // -q -DforceStdout` prints just the value), so utility goals
+                // keep it instead of going through `filtered_goal_args`.
+                GoalRouting::Utility => {
+                    let rest = drop_first_goal(&str_args, &goal);
+                    run_simple_goal(binary, &goal, "utility", filter_mvn_utility, &rest, verbose)
+                }
                 GoalRouting::Passthrough => run_passthrough_all(binary, args, verbose),
             }
         }
@@ -2693,15 +2736,35 @@ fn should_keep_compile_line(line: &str) -> bool {
 /// pages. They are distinct from real `[ERROR]` violations, so we match by
 /// substring after stripping the prefix.
 const CHECKSTYLE_HELP_BOILERPLATE: &[&str] = &[
-    "Failed to execute goal",
     "To see the full stack trace",
+    // Maven words this two ways ("using the '-X' switch" / "with the -X switch")
     "Re-run Maven using",
+    "Re-run Maven with",
     "For more information about the errors",
     "[Help 1]",
     "[Help 2]",
     "MojoFailureException",
     "cwiki.apache.org",
 ];
+
+/// Filter for informational goals (`help:*`, `dependency:get`,
+/// `deploy:deploy-file`). Subtractive only: drop the JVM's per-launch warning
+/// banner and keep every other line byte-for-byte. These goals answer in a
+/// line or two, so the banner was routinely the bulk of the render — observed
+/// 2026-08-25 on `./mvnw -q help:evaluate -Dexpression=jooq.version
+/// -DforceStdout`, 85 chars of which 6 were the answer.
+fn filter_mvn_utility(output: &str) -> String {
+    let clean = strip_ansi(output);
+    let kept: Vec<&str> = clean
+        .lines()
+        .filter(|line| {
+            let t = line.trim_start();
+            !stack_trace::is_jvm_runtime_noise(t)
+                && !JVM_WARNING_PREFIXES.iter().any(|p| t.starts_with(p))
+        })
+        .collect();
+    kept.join("\n")
+}
 
 /// Filter `mvn clean` output — collapse to one line showing what was deleted
 /// and total time. If clean is combined with a later goal (`mvn clean compile`)
@@ -2757,6 +2820,11 @@ fn filter_mvn_clean(output: &str) -> String {
 fn filter_mvn_checkstyle(output: &str) -> String {
     let clean = strip_ansi(output);
     let mut result: Vec<String> = Vec::new();
+    // Violation bookkeeping for the cap: how many were rendered, where the
+    // elision line belongs, and which rules were dropped.
+    let mut violations_seen = 0usize;
+    let mut violation_end = 0usize;
+    let mut elided_rules: Vec<(String, usize)> = Vec::new();
     // `-X` debug blocks and `[WARNING]` headers spill untagged continuation
     // lines (repository listings, mojo config dumps, transfer-failure stack
     // traces) — swallow those until the next `[INFO]`/`[ERROR]` line. The
@@ -2797,19 +2865,43 @@ fn filter_mvn_checkstyle(output: &str) -> String {
             let col = caps.get(3).map(|m| m.as_str()).unwrap_or("");
             let rule = &caps[4];
             let msg = &caps[5];
+            violations_seen += 1;
+            if violations_seen > MAX_CHECKSTYLE_VIOLATIONS {
+                tally_elided_rule(&mut elided_rules, rule);
+                continue;
+            }
             let compact = if col.is_empty() {
                 format!("  {}:{} [{}] {}", path, lineno, rule, msg)
             } else {
                 format!("  {}:{}:{} [{}] {}", path, lineno, col, rule, msg)
             };
             result.push(compact);
+            violation_end = result.len();
+            continue;
+        }
+
+        // Violations in Checkstyle's other console format — already carry
+        // Maven's `[ERROR]` prefix, so they are kept byte-for-byte.
+        if let Some(caps) = CHECKSTYLE_PLAIN_VIOLATION_RE.captures(line) {
+            violations_seen += 1;
+            if violations_seen > MAX_CHECKSTYLE_VIOLATIONS {
+                tally_elided_rule(&mut elided_rules, &caps[1]);
+                continue;
+            }
+            result.push(line.to_string());
+            violation_end = result.len();
             continue;
         }
 
         let stripped = strip_maven_prefix(line);
 
-        // Drop Help-link boilerplate emitted after BUILD FAILURE
+        // Drop Help-link boilerplate emitted after BUILD FAILURE.
+        // `Failed to execute goal …` is exempt: for checkstyle it carries the
+        // verdict (`You have N Checkstyle violations`), the same reason the
+        // test/compile surfaces keep it. It ends in `-> [Help 1]`, so the
+        // exemption has to come before the substring scan.
         if line.starts_with(ERROR_TAG)
+            && !stripped.starts_with("Failed to execute goal")
             && CHECKSTYLE_HELP_BOILERPLATE
                 .iter()
                 .any(|p| stripped.contains(p))
@@ -2866,11 +2958,33 @@ fn filter_mvn_checkstyle(output: &str) -> String {
         result.push(line.to_string());
     }
 
+    if !elided_rules.is_empty() {
+        let dropped: usize = elided_rules.iter().map(|(_, n)| n).sum();
+        let by_rule = elided_rules
+            .iter()
+            .map(|(rule, n)| format!("{rule} x{n}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        result.insert(
+            violation_end,
+            format!("[ERROR]   ... +{dropped} more Checkstyle violations ({by_rule})"),
+        );
+    }
+
     if result.is_empty() {
         return "[INFO] BUILD SUCCESS".to_string();
     }
 
     result.join("\n")
+}
+
+/// Count one elided violation against its rule, keeping first-seen order so
+/// the summary reads in the order Checkstyle reported them.
+fn tally_elided_rule(tally: &mut Vec<(String, usize)>, rule: &str) {
+    match tally.iter_mut().find(|(r, _)| r == rule) {
+        Some((_, n)) => *n += 1,
+        None => tally.push((rule.to_string(), 1)),
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -5152,9 +5266,14 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             !output.contains("MojoFailureException"),
             "should strip Help-link MojoFailureException reference"
         );
+        // The `Failed to execute goal …` line is the verdict, not boilerplate:
+        // it is where checkstyle states `You have N Checkstyle violations`.
+        // Dropping it (as this surface used to) left a violation list with no
+        // verdict once the list itself was capped — see
+        // `checkstyle_violation_flood_is_capped`.
         assert!(
-            !output.contains("Failed to execute goal org.apache.maven.plugins"),
-            "should strip 'Failed to execute goal …' [ERROR] line"
+            output.contains("You have 4 Checkstyle violations"),
+            "should keep the checkstyle verdict, got:\n{output}"
         );
 
         // Exactly 4 rewritten violation lines (one per rule above).
@@ -5180,6 +5299,100 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "mvn checkstyle violations: expected >=60% savings, got {:.1}%\nOutput:\n{}",
             savings,
             output
+        );
+    }
+
+    #[test]
+    fn utility_goal_drops_jvm_warning_banner() {
+        // Observed 2026-08-25 (map, skiller): `./mvnw -q help:evaluate
+        // -Dexpression=jooq.version -DforceStdout | tail -2` rendered 85
+        // chars, 6 of them the answer. `help:*` fell through to the unfiltered
+        // passthrough route, so nothing stripped the JVM banner.
+        let input = "\
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/home/user/.m2/repository/com/google/guava/guava/33.4.0-jre/guava-33.4.0-jre.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+WARNING: Mutating final fields will be blocked in a future release unless final field mutation is enabled
+3.21.7
+";
+        assert_eq!(filter_mvn_utility(input), "3.21.7");
+    }
+
+    #[test]
+    fn utility_filter_keeps_everything_else_verbatim() {
+        let input = "[INFO] BUILD SUCCESS\n[ERROR] Couldn't download artifact: org.jooq.pro:jooq:jar:3.21.7\n";
+        assert_eq!(
+            filter_mvn_utility(input),
+            "[INFO] BUILD SUCCESS\n[ERROR] Couldn't download artifact: org.jooq.pro:jooq:jar:3.21.7"
+        );
+    }
+
+    #[test]
+    fn informational_goals_route_off_passthrough() {
+        assert_eq!(route_goal("help:evaluate"), GoalRouting::Utility);
+        assert_eq!(route_goal("help:effective-pom"), GoalRouting::Utility);
+        assert_eq!(route_goal("help:describe"), GoalRouting::Utility);
+        assert_eq!(route_goal("dependency:get"), GoalRouting::Utility);
+        assert_eq!(route_goal("deploy:deploy-file"), GoalRouting::Utility);
+        // Long-running / interactive goals must keep the raw streaming route.
+        assert_eq!(route_goal("spring-boot:run"), GoalRouting::Passthrough);
+        assert_eq!(route_goal("quarkus:dev"), GoalRouting::Passthrough);
+    }
+
+    #[test]
+    fn utility_goal_args_keep_quiet_flag() {
+        // `-q` is the caller's own noise control on `help:evaluate`; stripping
+        // it (as the filtered-goal routes do) would dump the whole build log.
+        let args = vec![
+            "-q".to_string(),
+            "help:evaluate".to_string(),
+            "-Dexpression=jooq.version".to_string(),
+        ];
+        assert_eq!(
+            drop_first_goal(&args, "help:evaluate"),
+            vec!["-q".to_string(), "-Dexpression=jooq.version".to_string()]
+        );
+    }
+
+    #[test]
+    fn checkstyle_violation_flood_is_capped() {
+        // Observed 2026-08-11 (beacon, `./mvnw test checkstyle:check`): the
+        // checkstyle run reported 141 `LineLength` violations, every one of
+        // them in `target/generated-sources/jooq/**`. Nothing capped them, so
+        // the render blew past the host's 30k truncation limit and the agent
+        // never saw the verdict — no violation count, no BUILD FAILURE, no
+        // `Failed to execute goal` cause. All of that sits *after* the
+        // violation list in Maven's output.
+        let input = include_str!("../../../tests/fixtures/mvn_checkstyle_generated_flood.txt");
+        let output = filter_mvn_checkstyle(input);
+
+        let violation_lines = output
+            .lines()
+            .filter(|l| l.contains(".java:") && l.contains("[LineLength]"))
+            .count();
+        assert!(
+            violation_lines <= MAX_CHECKSTYLE_VIOLATIONS,
+            "expected at most {MAX_CHECKSTYLE_VIOLATIONS} violation lines, got {violation_lines}:\n{output}"
+        );
+        assert!(
+            output.contains("... +16 more Checkstyle violations"),
+            "elided violations must be counted:\n{output}"
+        );
+        assert!(
+            output.contains("LineLength x16"),
+            "elision must name the rules it dropped:\n{output}"
+        );
+
+        // The verdict is the whole point of the run and lives after the list.
+        assert!(output.contains("BUILD FAILURE"), "verdict lost:\n{output}");
+        assert!(
+            output.contains("141 errors reported by Checkstyle"),
+            "violation count lost:\n{output}"
+        );
+        assert!(
+            output.contains("You have 141 Checkstyle violations"),
+            "failure cause lost:\n{output}"
         );
     }
 
