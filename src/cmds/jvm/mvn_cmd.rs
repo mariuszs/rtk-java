@@ -920,7 +920,31 @@ pub fn filter_mvn_piped(raw: &str) -> String {
 
 /// Pure multi-goal filter (no XML enrichment) — snapshot-tested directly.
 /// run_multi_goal (later task) wraps this and adds enrichment on the test portion.
+/// A plugin marker that carries an `mvnd` lane tag (`[child-a] [INFO] --- …`).
+static TAGGED_PLUGIN_MARKER_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?m)^\[[^\]\s]+\][ \t]+\[INFO\][ \t]+-{3,}[ \t]+\S+?:\S+:\S+[ \t]+\(").unwrap()
+});
+
+/// True when the build was rendered by a parallel `mvnd` reactor: every
+/// plugin marker carries a `[module]` lane tag, so none of the filters'
+/// `^[INFO]` / `^[ERROR]` anchors can reach the build at all.
+///
+/// mvnd prefixes each line with the module that emitted it and interleaves
+/// the modules line by line. The segmenter and the Surefire state machine
+/// both key off unprefixed Maven anchors, so a tagged reactor classifies as
+/// pure noise and the render collapses to the reactor summary — the failing
+/// class, its assertion and the `Failed to execute goal` cause all vanish.
+/// Until lane-aware routing exists here, such a build falls back to raw:
+/// losing the compression is the fork's documented contract, losing the
+/// diagnostics is not.
+fn is_untaggable_daemon_reactor(raw: &str) -> bool {
+    TAGGED_PLUGIN_MARKER_RE.is_match(raw) && !PLUGIN_MARKER_RE.is_match(raw)
+}
+
 fn filter_mvn_multi(raw: &str, goals_header: &str) -> String {
+    if is_untaggable_daemon_reactor(raw) {
+        return raw.to_string();
+    }
     // Degraded-input fallback: no markers AND no build footer → never swallow.
     if !PLUGIN_MARKER_RE.is_match(raw) && !BUILD_FOOTER_RE.is_match(raw) {
         return raw.to_string();
@@ -977,6 +1001,9 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
         move |raw: &str| {
             // Degraded-input fallback: never swallow output.
             if !PLUGIN_MARKER_RE.is_match(raw) && !BUILD_FOOTER_RE.is_match(raw) {
+                return raw.to_string();
+            }
+            if is_untaggable_daemon_reactor(raw) {
                 return raw.to_string();
             }
             let mut parts = filter_segments(raw);
@@ -1946,6 +1973,9 @@ fn bootstrap_error_block(clean: &str) -> String {
 /// - Summary: parse final "Tests run:" line, BUILD SUCCESS/FAILURE, Total time
 /// - Done: stop at Help boilerplate
 fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String]) -> String {
+    if is_untaggable_daemon_reactor(output) {
+        return output.to_string();
+    }
     let clean = strip_ansi(output);
     let mut state = TestParseState::Preamble;
 
@@ -2356,6 +2386,9 @@ fn is_maven_boilerplate(line: &str) -> bool {
 /// because Maven prints them twice on failure — inline during compilation and
 /// again in the trailing `[ERROR]` help block.
 fn filter_mvn_compile(output: &str) -> String {
+    if is_untaggable_daemon_reactor(output) {
+        return output.to_string();
+    }
     let clean = strip_ansi(output);
     let mut in_build_order = false;
     // (status, name) per module while the Reactor Summary block is open.
@@ -2972,6 +3005,9 @@ fn filter_mvn_clean(output: &str) -> String {
 /// - keep `BUILD SUCCESS` / `BUILD FAILURE` and `Total time`
 /// - strip trailing Help-link boilerplate
 fn filter_mvn_checkstyle(output: &str) -> String {
+    if is_untaggable_daemon_reactor(output) {
+        return output.to_string();
+    }
     let clean = strip_ansi(output);
     let mut result: Vec<String> = Vec::new();
     // Violation bookkeeping for the cap: how many were rendered, where the
@@ -5911,6 +5947,49 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "native warning must not reference the goal, got: {}",
             out.text
         );
+    }
+
+    /// A parallel `mvnd` reactor tags every plugin marker with its module, so
+    /// none of the filters' unprefixed anchors can reach the build. Filtering
+    /// it anyway collapsed the render to the reactor summary and destroyed the
+    /// failing class, its assertion and the `Failed to execute goal` cause.
+    #[test]
+    fn mvnd_parallel_reactor_never_swallows_diagnostics() {
+        let raw = include_str!("../../../tests/fixtures/mvnd_reactor_fail_raw.txt");
+        assert!(
+            is_untaggable_daemon_reactor(raw),
+            "fixture must be a lane-tagged reactor"
+        );
+
+        let out = filter_mvn_piped(raw);
+        for needle in [
+            "com.example.rtk.ParallelFailTest",
+            "expected: <1> but was: <2>",
+            "Failed to execute goal",
+        ] {
+            assert!(out.contains(needle), "lost {needle:?} from: {out}");
+        }
+    }
+
+    /// A sequential `mvnd` build emits unprefixed markers, so the guard must
+    /// stay out of its way and the normal compression must still happen.
+    #[test]
+    fn mvnd_sequential_build_still_filters() {
+        let raw = include_str!("../../../tests/fixtures/mvnd_test_fail_raw.txt");
+        assert!(!is_untaggable_daemon_reactor(raw));
+        let out = filter_mvn_piped(raw);
+        assert!(out.len() < raw.len() / 2, "expected compression, got: {out}");
+        assert!(out.contains("CalcTest.failOne"), "got: {out}");
+    }
+
+    /// The guard keyed off a plugin-marker shape whose `\s+` crossed newlines,
+    /// so Maven's own bare `[INFO]` line followed by a marker read as a lane
+    /// tag and every ordinary build fell back to raw.
+    #[test]
+    fn plain_maven_build_is_not_a_daemon_reactor() {
+        assert!(!is_untaggable_daemon_reactor(
+            "[INFO]\n[INFO] --- compiler:3.13.0:compile (default-compile) @ app ---\n"
+        ));
     }
 
     #[test]
