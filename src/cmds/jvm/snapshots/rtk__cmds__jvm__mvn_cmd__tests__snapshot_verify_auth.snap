@@ -2,5 +2,8 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: output
 ---
-[INFO] Tests run: 950, Failures: 0, Errors: 0, Skipped: 9
+[INFO] --- surefire:3.5.5:test (default-test) @ app ---
+[INFO] Tests run: 688, Failures: 0, Errors: 0, Skipped: 8
+[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---
+[INFO] Tests run: 262, Failures: 0, Errors: 0, Skipped: 1
 [INFO] BUILD SUCCESS

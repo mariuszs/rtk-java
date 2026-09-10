@@ -600,6 +600,10 @@ enum SegmentKind {
 
 struct Segment {
     kind: SegmentKind,
+    /// The `[INFO] --- plugin:version:goal (exec) @ module ---` line that
+    /// opened the segment (empty for the preamble). The test filter needs
+    /// the surefire/failsafe ones to attribute each `Results:` block.
+    marker: String,
     body: String,
 }
 
@@ -629,6 +633,7 @@ fn classify_marker(plugin: &str) -> SegmentKind {
 fn split_segments(raw: &str) -> Vec<Segment> {
     let mut segments: Vec<Segment> = Vec::new();
     let mut current_kind = SegmentKind::Preamble;
+    let mut current_marker = String::new();
     let mut current_body = String::new();
     let mut in_footer = false;
 
@@ -640,12 +645,17 @@ fn split_segments(raw: &str) -> Vec<Segment> {
         if let Some(caps) = PLUGIN_MARKER_RE.captures(&stripped) {
             // flush the previous segment
             if !current_body.is_empty() || current_kind != SegmentKind::Preamble {
-                segments.push(Segment { kind: current_kind, body: std::mem::take(&mut current_body) });
+                segments.push(Segment {
+                    kind: current_kind,
+                    marker: std::mem::take(&mut current_marker),
+                    body: std::mem::take(&mut current_body),
+                });
             } else {
                 current_body.clear();
             }
             let plugin = caps.get(1).map_or("", |m| m.as_str());
             current_kind = classify_marker(plugin);
+            current_marker = stripped.trim().to_string();
             in_footer = false;
             continue;
         }
@@ -655,7 +665,7 @@ fn split_segments(raw: &str) -> Vec<Segment> {
         }
     }
     if !current_body.is_empty() {
-        segments.push(Segment { kind: current_kind, body: current_body });
+        segments.push(Segment { kind: current_kind, marker: current_marker, body: current_body });
     }
     segments
 }
@@ -772,8 +782,16 @@ fn filter_segments(raw: &str) -> MultiParts {
     for seg in &segments {
         match seg.kind {
             SegmentKind::Compile => compile_buf.push_str(&seg.body),
-            SegmentKind::Surefire => test_buf.push_str(&seg.body),
+            // The marker goes in with the body: it is how the test filter
+            // tells a surefire `Results:` block from a failsafe one.
+            SegmentKind::Surefire => {
+                test_buf.push_str(&seg.marker);
+                test_buf.push('\n');
+                test_buf.push_str(&seg.body);
+            }
             SegmentKind::Failsafe => {
+                test_buf.push_str(&seg.marker);
+                test_buf.push('\n');
                 test_buf.push_str(&seg.body);
                 has_failsafe = true;
             }
@@ -1320,7 +1338,8 @@ pub(crate) fn enrich_with_reports(
     let (sf_dirs, fs_dirs) = discover_report_dirs(cwd);
     let sf = collect_reports(&sf_dirs, since, app_packages, cwd);
     let fs = collect_reports(&fs_dirs, since, app_packages, cwd);
-    let digest = render_classes_digest(goal, sf.as_ref(), fs.as_ref());
+    let markers = PluginMarkers::from_rendered(text_summary);
+    let digest = render_classes_digest(goal, sf.as_ref(), fs.as_ref(), &markers);
 
     if passing {
         // Fallback invariant: no parsed reports -> summary unchanged, silently.
@@ -1422,16 +1441,41 @@ fn all_skipped<'a>(
 ///
 /// Module grouping goes with the timings: the FQCN identifies the class, and
 /// a `module:` header line has no Maven-native equivalent to reconstruct.
+///
+/// With both plugin markers known (a `verify` run that printed them) the
+/// digest mirrors the inline render: each plugin's marker, its own aggregate
+/// line, then its classes — so "which of these are integration tests" is
+/// answered by the grouping, and the per-plugin `Tests run:` lines agents
+/// grep for are there.
 fn render_classes_digest(
     _goal: &str,
     surefire: Option<&SurefireResult>,
     failsafe: Option<&SurefireResult>,
+    markers: &PluginMarkers,
 ) -> Option<String> {
     let mut suites = all_suites(surefire, failsafe);
     if suites.is_empty() {
         return None;
     }
     let mut skipped = all_skipped(surefire, failsafe);
+    if let (true, Some(sf), Some(fs)) = (markers.is_dual(), surefire, failsafe) {
+        let mut out = String::new();
+        for (marker, result) in [(&markers.surefire, sf), (&markers.failsafe, fs)] {
+            if let Some(m) = marker {
+                out.push_str(m);
+                out.push('\n');
+            }
+            out.push_str(&aggregate_line(&result.summary));
+            out.push('\n');
+            let mut group: Vec<_> = result.suites.iter().collect();
+            group.sort_by(|a, b| a.class_name.cmp(&b.class_name));
+            for s in group {
+                push_digest_class_line(&mut out, s);
+            }
+        }
+        push_digest_skipped(&mut out, &mut skipped);
+        return Some(out);
+    }
     // Maven-native aggregate line: agents grep tee logs with Maven's own
     // summary pattern, so the header must match it verbatim — no RTK label,
     // no goal prose. (The digest's own file-reference note lives in
@@ -1446,10 +1490,7 @@ fn render_classes_digest(
     if let Some(fs) = failsafe {
         summary.add(&fs.summary);
     }
-    let mut out = format!(
-        "[INFO] Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
-        summary.run, summary.failures, summary.errors, summary.skipped
-    );
+    let mut out = aggregate_line(&summary);
     out.push('\n');
 
     // One line per class, sorted by FQCN, in surefire's own
@@ -1458,37 +1499,44 @@ fn render_classes_digest(
     // line so a class whose test count changes keeps its position.
     suites.sort_by(|a, b| a.class_name.cmp(&b.class_name));
     for s in &suites {
-        if s.skipped > 0 {
-            writeln!(
-                out,
-                "[INFO] Tests run: {}, Skipped: {} -- in {}",
-                s.tests, s.skipped, s.class_name
-            )
-            .ok();
-        } else {
-            writeln!(out, "[INFO] Tests run: {} -- in {}", s.tests, s.class_name).ok();
-        }
+        push_digest_class_line(&mut out, s);
     }
+    push_digest_skipped(&mut out, &mut skipped);
+    Some(out)
+}
 
-    if !skipped.is_empty() {
-        // Sorted for the same reason as the suites: surefire emits skips in
-        // fork-completion order, which would otherwise reshuffle the block
-        // between two identical runs.
-        skipped.sort_by(|a, b| (&a.class, &a.method).cmp(&(&b.class, &b.method)));
-        out.push_str("skipped:\n");
-        for st in &skipped {
-            match &st.reason {
-                Some(reason) => {
-                    writeln!(out, "  {}.{} — {}", short_class(&st.class), st.method, reason)
-                        .ok();
-                }
-                None => {
-                    writeln!(out, "  {}.{}", short_class(&st.class), st.method).ok();
-                }
+fn push_digest_class_line(out: &mut String, s: &surefire_reports::SuiteStat) {
+    if s.skipped > 0 {
+        writeln!(
+            out,
+            "[INFO] Tests run: {}, Skipped: {} -- in {}",
+            s.tests, s.skipped, s.class_name
+        )
+        .ok();
+    } else {
+        writeln!(out, "[INFO] Tests run: {} -- in {}", s.tests, s.class_name).ok();
+    }
+}
+
+fn push_digest_skipped(out: &mut String, skipped: &mut [&surefire_reports::SkippedTest]) {
+    if skipped.is_empty() {
+        return;
+    }
+    // Sorted for the same reason as the suites: surefire emits skips in
+    // fork-completion order, which would otherwise reshuffle the block
+    // between two identical runs.
+    skipped.sort_by(|a, b| (&a.class, &a.method).cmp(&(&b.class, &b.method)));
+    out.push_str("skipped:\n");
+    for st in skipped.iter() {
+        match &st.reason {
+            Some(reason) => {
+                writeln!(out, "  {}.{} — {}", short_class(&st.class), st.method, reason).ok();
+            }
+            None => {
+                writeln!(out, "  {}.{}", short_class(&st.class), st.method).ok();
             }
         }
     }
-    Some(out)
 }
 
 /// Hybrid inline rendering for passing runs. Returns the (possibly extended)
@@ -1503,25 +1551,46 @@ fn render_pass_inline(
     let skipped = all_skipped(surefire, failsafe);
     let needs_reference =
         suites.len() > MAX_INLINE_CLASSES || skipped.len() > MAX_INLINE_SKIPPED;
+    let inline_classes = !suites.is_empty() && suites.len() <= MAX_INLINE_CLASSES;
+    let inline_skipped = !skipped.is_empty() && skipped.len() <= MAX_INLINE_SKIPPED;
+
+    // Per-plugin breakdown, in surefire's own per-class line shape
+    // (reactor-suppressed), zero-valued fields trimmed on a clean pass.
+    let breakdown = |result: Option<&SurefireResult>| -> String {
+        let mut block = String::new();
+        if let Some(r) = result {
+            if inline_classes {
+                for s in &r.suites {
+                    write!(block, "\n[INFO] Tests run: {} -- in {}", s.tests, s.class_name).ok();
+                }
+            }
+            if inline_skipped {
+                for st in &r.skipped_tests {
+                    write!(block, "\n[INFO] Tests run: 0, Skipped: 1 -- in {}", st.class).ok();
+                }
+            }
+        }
+        block
+    };
 
     // The pass summary ends with a maven-native "BUILD SUCCESS" footer; the
     // inline breakdown slots in before it so the footer stays the last line.
-    let (mut out, build_footer) = match text_summary.strip_suffix("\n[INFO] BUILD SUCCESS") {
-        Some(head) => (head.to_string(), true),
-        None => (text_summary.to_string(), false),
+    let (head, build_footer) = match text_summary.strip_suffix("\n[INFO] BUILD SUCCESS") {
+        Some(head) => (head, true),
+        None => (text_summary, false),
     };
-    if !suites.is_empty() && suites.len() <= MAX_INLINE_CLASSES {
-        for s in &suites {
-            // Reconstruct surefire's own per-class line (reactor-suppressed),
-            // trimming zero-valued fields on a clean pass.
-            write!(out, "\n[INFO] Tests run: {} -- in {}", s.tests, s.class_name).ok();
+    // A dual render (surefire and failsafe totals under their markers) gets
+    // each plugin's classes under its own total: surefire's before the
+    // failsafe marker, failsafe's at the end.
+    let markers = PluginMarkers::from_rendered(head);
+    let mut out = match (&markers.failsafe, surefire) {
+        (Some(fs_marker), Some(_)) if markers.is_dual() => {
+            let idx = head.find(fs_marker.as_str()).unwrap_or(head.len());
+            let before = head[..idx].trim_end_matches('\n');
+            format!("{before}{}\n{}{}", breakdown(surefire), &head[idx..], breakdown(failsafe))
         }
-    }
-    if !skipped.is_empty() && skipped.len() <= MAX_INLINE_SKIPPED {
-        for st in &skipped {
-            write!(out, "\n[INFO] Tests run: 0, Skipped: 1 -- in {}", st.class).ok();
-        }
-    }
+        _ => format!("{head}{}{}", breakdown(surefire), breakdown(failsafe)),
+    };
     if build_footer {
         out.push_str("\n[INFO] BUILD SUCCESS");
     }
@@ -1965,6 +2034,108 @@ fn bootstrap_error_block(clean: &str) -> String {
     out.join("\n")
 }
 
+/// First `[INFO] --- surefire… ---` / `--- failsafe… ---` marker line seen in
+/// a run. They label the per-plugin totals on a `verify` render and group
+/// the class digest; both stay `None` under `-q`, where Maven prints no
+/// markers, and the render then falls back to one summed line.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub(crate) struct PluginMarkers {
+    pub(crate) surefire: Option<String>,
+    pub(crate) failsafe: Option<String>,
+}
+
+impl PluginMarkers {
+    fn record(&mut self, kind: SegmentKind, line: &str) {
+        let slot = match kind {
+            SegmentKind::Surefire => &mut self.surefire,
+            SegmentKind::Failsafe => &mut self.failsafe,
+            _ => return,
+        };
+        if slot.is_none() {
+            *slot = Some(line.to_string());
+        }
+    }
+
+    /// Markers from an already-rendered summary (the enrichment step gets
+    /// the text, not the parse state).
+    fn from_rendered(text: &str) -> Self {
+        let mut markers = Self::default();
+        for line in text.lines() {
+            if let Some(caps) = PLUGIN_MARKER_RE.captures(line) {
+                markers.record(classify_marker(caps.get(1).map_or("", |m| m.as_str())), line);
+            }
+        }
+        markers
+    }
+
+    fn is_dual(&self) -> bool {
+        self.surefire.is_some() && self.failsafe.is_some()
+    }
+}
+
+/// Per-plugin `Results:` totals of one run, with how many blocks fed each.
+#[derive(Debug, Default)]
+struct PluginTotals {
+    surefire: TestSummary,
+    surefire_sections: usize,
+    failsafe: TestSummary,
+    failsafe_sections: usize,
+}
+
+impl PluginTotals {
+    fn add(&mut self, kind: SegmentKind, section: &TestSummary) {
+        match kind {
+            SegmentKind::Failsafe => {
+                self.failsafe.add(section);
+                self.failsafe_sections += 1;
+            }
+            _ => {
+                self.surefire.add(section);
+                self.surefire_sections += 1;
+            }
+        }
+    }
+
+    fn combined(&self) -> TestSummary {
+        let mut all = TestSummary::default();
+        all.add(&self.surefire);
+        all.add(&self.failsafe);
+        all
+    }
+
+    /// The aggregate block: one summed line, or — when failsafe contributed
+    /// a `Results:` block and both plugins are identifiable by a marker —
+    /// each plugin's total under its own (first) marker line. A reactor sums
+    /// a plugin's modules into one line, as the single line always did.
+    fn render(&self, markers: &PluginMarkers) -> String {
+        if self.failsafe_sections == 0 || !markers.is_dual() {
+            return aggregate_line(&self.combined());
+        }
+        let mut lines: Vec<String> = Vec::with_capacity(4);
+        if self.surefire_sections > 0 {
+            if let Some(m) = &markers.surefire {
+                lines.push(m.clone());
+            }
+            lines.push(aggregate_line(&self.surefire));
+        }
+        if let Some(m) = &markers.failsafe {
+            lines.push(m.clone());
+        }
+        lines.push(aggregate_line(&self.failsafe));
+        lines.join("\n")
+    }
+}
+
+/// Maven's own summary line, prefixed exactly as surefire prints it:
+/// `[INFO]` on a clean pass, `[ERROR]` when there are failures/errors.
+fn aggregate_line(counts: &TestSummary) -> String {
+    let prefix = if counts.failures > 0 || counts.errors > 0 { "[ERROR]" } else { "[INFO]" };
+    format!(
+        "{prefix} Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
+        counts.run, counts.failures, counts.errors, counts.skipped
+    )
+}
+
 /// Shared state machine parser for test-producing goals (`test`, `verify`).
 ///
 /// States: Preamble -> Testing -> Summary -> Done
@@ -1982,19 +2153,37 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
     let mut failures: Vec<FailureEntry> = Vec::with_capacity(MAX_FAILURES_SHOWN);
     let mut current_failure: Option<FailureEntry> = None;
 
-    let mut cumulative = TestSummary::default();
-    let mut section: Option<TestSummary> = None;
+    // Totals are kept per test plugin. A `verify` run prints two `Results:`
+    // blocks — surefire's unit tests, then failsafe's integration tests —
+    // and the split is exactly what an agent asks after a green build; four
+    // separate 2026-09 sessions grepped the raw log for it when the render
+    // carried one summed line. Sections are attributed at the moment their
+    // `Tests run:` line is parsed, under whichever surefire/failsafe marker
+    // was seen last (surefire when there is none, e.g. under `-q`).
+    let mut totals = PluginTotals::default();
+    let mut markers = PluginMarkers::default();
+    let mut current_plugin = SegmentKind::Surefire;
+    let mut section: Option<(SegmentKind, TestSummary)> = None;
     let mut total_failures_seen: usize = 0;
 
     for line in clean.lines() {
         let trimmed = line.trim();
         let stripped = strip_maven_prefix(trimmed);
 
+        if let Some(caps) = PLUGIN_MARKER_RE.captures(trimmed) {
+            let kind = classify_marker(caps.get(1).map_or("", |m| m.as_str()));
+            if matches!(kind, SegmentKind::Surefire | SegmentKind::Failsafe) {
+                current_plugin = kind;
+                markers.record(kind, trimmed);
+            }
+            continue;
+        }
+
         // Global transition: T E S T S marker resets to Testing from any state
         // (multi-module builds emit this marker per module)
         if stripped.contains("T E S T S") {
-            if let Some(s) = section.take() {
-                cumulative.add(&s);
+            if let Some((kind, s)) = section.take() {
+                totals.add(kind, &s);
             }
             state = TestParseState::Testing;
             continue;
@@ -2038,7 +2227,7 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                 // overwrite the real per-module total.
                 if !trimmed.contains("-- in") {
                     if let Some(caps) = TESTS_RUN_RE.captures(stripped) {
-                        section = Some(parse_counts(&caps));
+                        section = Some((current_plugin, parse_counts(&caps)));
                         continue;
                     }
                 }
@@ -2089,7 +2278,7 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
 
                 if section.is_none() {
                     if let Some(caps) = TESTS_RUN_RE.captures(stripped) {
-                        section = Some(parse_counts(&caps));
+                        section = Some((current_plugin, parse_counts(&caps)));
                     }
                 }
 
@@ -2104,8 +2293,8 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         }
     }
 
-    if let Some(s) = section.take() {
-        cumulative.add(&s);
+    if let Some((kind, s)) = section.take() {
+        totals.add(kind, &s);
     }
 
     if state == TestParseState::Preamble {
@@ -2138,7 +2327,7 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         return "[WARNING] No tests were executed!".to_string();
     }
 
-    let counts = cumulative;
+    let counts = totals.combined();
     let has_failures = counts.failures > 0 || counts.errors > 0;
 
     // Guard: BUILD FAILURE while still in `Testing` (no `Results:` block,
@@ -2152,13 +2341,10 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         return filter_mvn_compile(output);
     }
 
-    // Maven's own summary line, prefixed exactly as surefire prints it:
+    // Maven's own summary line(s), prefixed exactly as surefire prints them:
     // `[INFO]` on a clean pass, `[ERROR]` when there are failures/errors.
-    let agg_prefix = if has_failures { "[ERROR]" } else { "[INFO]" };
-    let aggregate = format!(
-        "{agg_prefix} Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
-        counts.run, counts.failures, counts.errors, counts.skipped
-    );
+    // Two lines under their plugin markers when failsafe also ran.
+    let aggregate = totals.render(&markers);
 
     if !has_failures {
         // Frame only — enrichment (per-class breakdown) is slotted in by
@@ -5745,8 +5931,9 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let input = include_str!("../../../tests/fixtures/mvn_verify_auth.txt");
         let output = filter_mvn_verify(input);
         assert!(
-            output.contains("[INFO] Tests run: 950, Failures: 0, Errors: 0, Skipped: 9"),
-            "should accumulate surefire+failsafe (688+262)=950 run, 9 skipped (8 surefire + 1 failsafe), got: {}",
+            output.contains("[INFO] Tests run: 688, Failures: 0, Errors: 0, Skipped: 8")
+                && output.contains("[INFO] Tests run: 262, Failures: 0, Errors: 0, Skipped: 1"),
+            "surefire (688/8) and failsafe (262/1) totals must stay apart, got: {}",
             output
         );
         assert!(!output.contains("Total time"), "Total time leaked: {output}");
@@ -5766,9 +5953,12 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let output_tokens = count_tokens(&output);
         let savings = 100.0 - (output_tokens as f64 / input_tokens as f64 * 100.0);
 
+        // The fixture is a 295-token slice, so the two plugin markers that
+        // keep unit and integration totals apart cost 2.5 points here and
+        // ~0 on a real 30k-char run.
         assert!(
-            savings >= 90.0,
-            "mvn verify auth: expected >=90% savings, got {:.1}% ({} -> {} tokens)",
+            savings >= 85.0,
+            "mvn verify auth: expected >=85% savings, got {:.1}% ({} -> {} tokens)",
             savings,
             input_tokens,
             output_tokens,
@@ -7530,7 +7720,12 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         sf.summary.add(&entra.summary);
         sf.suites[0].module = Some("services".to_string());
 
-        let digest = super::render_classes_digest("test", Some(&sf), None)
+        let digest = super::render_classes_digest(
+            "test",
+            Some(&sf),
+            None,
+            &super::PluginMarkers::default(),
+        )
             .expect("suites present -> digest");
         insta::assert_snapshot!("pass_digest_snapshot", digest);
     }
@@ -7550,7 +7745,12 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         sf.skipped_tests.extend(entra.skipped_tests.clone());
         sf.summary.add(&entra.summary);
 
-        let digest = super::render_classes_digest("test", Some(&sf), None)
+        let digest = super::render_classes_digest(
+            "test",
+            Some(&sf),
+            None,
+            &super::PluginMarkers::default(),
+        )
             .expect("suites present -> digest");
         let header = digest.lines().next().expect("digest has a header line");
         let maven_re = regex::Regex::new(
@@ -7591,7 +7791,12 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
                 sf.suites.reverse();
                 sf.skipped_tests.reverse();
             }
-            super::render_classes_digest("test", Some(&sf), None).expect("suites -> digest")
+            super::render_classes_digest(
+            "test",
+            Some(&sf),
+            None,
+            &super::PluginMarkers::default(),
+        ).expect("suites -> digest")
         };
         assert_eq!(
             build([0.8, 0.0], false),
@@ -7616,7 +7821,12 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         sf.skipped_tests.extend(entra.skipped_tests.clone());
         sf.summary.add(&entra.summary);
 
-        let digest = super::render_classes_digest("test", Some(&sf), None)
+        let digest = super::render_classes_digest(
+            "test",
+            Some(&sf),
+            None,
+            &super::PluginMarkers::default(),
+        )
             .expect("suites present -> digest");
         let class_re =
             regex::Regex::new(r"^\[INFO\] Tests run: \d+(?:, Skipped: \d+)? -- in ([\w.$]+)$")
@@ -7659,8 +7869,20 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         both.suites.extend(users.suites.clone());
         both.summary.add(&users.summary);
 
-        let before = super::render_classes_digest("test", Some(&both), None).expect("digest");
-        let after = super::render_classes_digest("test", Some(&entra), None).expect("digest");
+        let before = super::render_classes_digest(
+            "test",
+            Some(&both),
+            None,
+            &super::PluginMarkers::default(),
+        )
+        .expect("digest");
+        let after = super::render_classes_digest(
+            "test",
+            Some(&entra),
+            None,
+            &super::PluginMarkers::default(),
+        )
+        .expect("digest");
 
         let kept: Vec<&str> = after.lines().collect();
         let dropped: Vec<&str> = before.lines().filter(|l| !kept.contains(l)).collect();
@@ -7677,9 +7899,20 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
 
     #[test]
     fn digest_none_without_suites() {
-        assert_eq!(super::render_classes_digest("test", None, None), None);
+        assert_eq!(
+            super::render_classes_digest("test", None, None, &super::PluginMarkers::default()),
+            None
+        );
         let empty = super::surefire_reports::SurefireResult::default();
-        assert_eq!(super::render_classes_digest("test", Some(&empty), None), None);
+        assert_eq!(
+            super::render_classes_digest(
+                "test",
+                Some(&empty),
+                None,
+                &super::PluginMarkers::default()
+            ),
+            None
+        );
     }
 
     #[test]
@@ -7893,6 +8126,144 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(text.contains("[full per-class report:"), "tee-hint-style ref missing:\n{text}");
         assert!(!text.contains("classes:"), "old RTK ref leaked:\n{text}");
     }
+
+    // -----------------------------------------------------------------------
+    // surefire vs failsafe totals on `verify` (usage review 2026-09-10)
+    // -----------------------------------------------------------------------
+
+    /// Real 2026-09-08/09 auth sessions, four separate `./mvnw clean verify`
+    /// runs: the render said `Tests run: 2192` and every agent then grepped
+    /// the raw tee log for `surefire|failsafe` and the two aggregate
+    /// `Tests run:` lines to split unit from integration tests — ~25 raw-log
+    /// reads for a number Maven had already printed twice. Keep both totals
+    /// apart, each under its own plugin marker, so the split is answered
+    /// inline with four Maven-native lines.
+    #[test]
+    fn verify_keeps_surefire_and_failsafe_totals_apart() {
+        let input = include_str!("../../../tests/fixtures/mvn_verify_auth.txt");
+        let output = filter_mvn_verify(input);
+        let expected = "[INFO] --- surefire:3.5.5:test (default-test) @ app ---\n\
+[INFO] Tests run: 688, Failures: 0, Errors: 0, Skipped: 8\n\
+[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---\n\
+[INFO] Tests run: 262, Failures: 0, Errors: 0, Skipped: 1\n\
+[INFO] BUILD SUCCESS";
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn test_only_run_keeps_the_single_aggregate_line() {
+        // No failsafe section -> nothing to split; the render must not grow
+        // a marker line on the ~600 green `mvn test` runs a fortnight sees.
+        let input = include_str!("../../../tests/fixtures/mvn_test_pass_slice_raw.txt");
+        let output = filter_mvn_test(input);
+        assert!(!output.contains("--- surefire"), "marker leaked on a test-only run:\n{output}");
+        assert_eq!(output.matches("Tests run:").count(), 1, "{output}");
+    }
+
+    #[test]
+    fn multi_verify_keeps_surefire_and_failsafe_totals_apart() {
+        // Reactor: two surefire executions (core 18 + app 44) sum into one
+        // surefire line under the FIRST surefire marker; failsafe stays its
+        // own line and keeps Maven's [ERROR] prefix because that is where the
+        // failure is.
+        let input = include_str!("../../../tests/fixtures/mvn_multi_clean_verify_fail.txt");
+        let output = filter_mvn_multi(input, "clean verify");
+        assert!(
+            output.contains("[INFO] --- surefire:3.5.5:test (default-test) @ core ---\n[INFO] Tests run: 62, Failures: 0, Errors: 0, Skipped: 0\n"),
+            "surefire total under its marker:\n{output}"
+        );
+        assert!(
+            output.contains("[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---\n[ERROR] Tests run: 6, Failures: 1, Errors: 0, Skipped: 0\n"),
+            "failsafe total under its marker:\n{output}"
+        );
+        assert!(!output.contains("Tests run: 68,"), "summed total must go:\n{output}");
+    }
+
+    #[test]
+    fn pass_inline_dual_plugins_groups_classes_under_their_marker() {
+        let sf = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        ));
+        let fs = parsed_fixture(include_str!(
+            "../../../tests/fixtures/java/failsafe-reports/TEST-com.example.DbIntegrationIT.xml"
+        ));
+        let text = "[INFO] --- surefire:3.5.5:test (default-test) @ app ---\n\
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0\n\
+[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---\n\
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0\n\
+[INFO] BUILD SUCCESS";
+        let (out, needs_ref) = super::render_pass_inline(text, Some(&sf), Some(&fs));
+        assert!(!needs_ref);
+        let lines: Vec<&str> = out.lines().collect();
+        let pos = |needle: &str| {
+            lines
+                .iter()
+                .position(|l| l.contains(needle))
+                .unwrap_or_else(|| panic!("missing {needle:?} in:\n{out}"))
+        };
+        assert!(pos("Tests run: 5, Failures") < pos("-- in com.example.auth.user.UsersTest"));
+        assert!(pos("-- in com.example.auth.user.UsersTest") < pos("--- failsafe:"));
+        assert!(pos("Tests run: 3, Failures") < pos("-- in com.example.DbIntegrationIT"));
+        assert_eq!(lines.last(), Some(&"[INFO] BUILD SUCCESS"));
+    }
+
+    #[test]
+    fn digest_dual_plugins_groups_classes_under_their_marker() {
+        let sf = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        ));
+        let fs = parsed_fixture(include_str!(
+            "../../../tests/fixtures/java/failsafe-reports/TEST-com.example.DbIntegrationIT.xml"
+        ));
+        let markers = super::PluginMarkers {
+            surefire: Some("[INFO] --- surefire:3.5.5:test (default-test) @ app ---".to_string()),
+            failsafe: Some("[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---".to_string()),
+        };
+        let digest = super::render_classes_digest("verify", Some(&sf), Some(&fs), &markers)
+            .expect("digest");
+        let lines: Vec<&str> = digest.lines().collect();
+        assert_eq!(lines[0], "[INFO] --- surefire:3.5.5:test (default-test) @ app ---");
+        assert!(lines[1].starts_with("[INFO] Tests run: 5, Failures: 0"), "{digest}");
+        let i_fs = lines
+            .iter()
+            .position(|l| l.starts_with("[INFO] --- failsafe:"))
+            .expect("fs marker");
+        assert!(
+            lines[i_fs + 1].starts_with("[ERROR] Tests run: 2, Failures: 0, Errors: 1"),
+            "{digest}"
+        );
+        let i_users = lines
+            .iter()
+            .position(|l| l.ends_with("com.example.auth.user.UsersTest"))
+            .unwrap();
+        let i_it = lines
+            .iter()
+            .position(|l| l.ends_with("com.example.DbIntegrationIT"))
+            .unwrap();
+        assert!(i_users < i_fs && i_fs < i_it, "{digest}");
+        // Two aggregate lines, both in Maven's greppable shape.
+        assert_eq!(digest.matches(", Failures: ").count(), 2, "{digest}");
+    }
+
+    #[test]
+    fn digest_without_markers_keeps_the_single_header() {
+        let sf = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.user.UsersTest.xml"
+        ));
+        let fs = parsed_fixture(include_str!(
+            "../../../tests/fixtures/java/failsafe-reports/TEST-com.example.DbIntegrationIT.xml"
+        ));
+        let digest = super::render_classes_digest(
+            "verify",
+            Some(&sf),
+            Some(&fs),
+            &super::PluginMarkers::default(),
+        )
+        .expect("digest");
+        assert!(digest.starts_with("[ERROR] Tests run: 7, Failures: 0, Errors: 1"), "{digest}");
+        assert_eq!(digest.matches(", Failures: ").count(), 1, "{digest}");
+    }
+
 }
 
 /// Truncation-aware savings audit over every mvn fixture.

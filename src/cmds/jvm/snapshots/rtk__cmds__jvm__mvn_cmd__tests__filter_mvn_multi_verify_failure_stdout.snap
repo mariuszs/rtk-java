@@ -2,7 +2,10 @@
 source: src/cmds/jvm/mvn_cmd.rs
 expression: output
 ---
-[ERROR] Tests run: 68, Failures: 1, Errors: 0, Skipped: 0
+[INFO] --- surefire:3.5.5:test (default-test) @ core ---
+[INFO] Tests run: 62, Failures: 0, Errors: 0, Skipped: 0
+[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---
+[ERROR] Tests run: 6, Failures: 1, Errors: 0, Skipped: 0
 
 [ERROR] Failures:
 [ERROR]   com.example.app.UserProvisioningIT.shouldProvisionUser <<< FAILURE!
