@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0.2" name="com.example.scim.api.AdGroupSyncControllerTest" time="4.6" tests="8" errors="0" skipped="0" failures="1">
+  <testcase name="aCandidateWithTheHiddenFlagIsPlannedAsHidden" classname="com.example.scim.api.AdGroupSyncControllerTest" time="0.412"/>
+  <testcase name="aCandidateWithoutTheHiddenFlagIsPlannedAsVisible" classname="com.example.scim.api.AdGroupSyncControllerTest" time="0.388">
+    <failure message="Status expected:&lt;200&gt; but was:&lt;400&gt;" type="java.lang.AssertionError">java.lang.AssertionError: Status expected:&lt;200&gt; but was:&lt;400&gt;
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+	at org.springframework.test.web.servlet.result.StatusResultMatchers.lambda$matcher$9(StatusResultMatchers.java:637)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:214)
+	at com.example.scim.api.AdGroupSyncControllerTest.aCandidateWithoutTheHiddenFlagIsPlannedAsVisible(AdGroupSyncControllerTest.java:172)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+</failure>
+    <system-out><![CDATA[23:27:00.459 [main] WARN  c.e.s.GlobalControllerExceptionHandler - Caught exception while handling a request: exception=org.springframework.http.converter.HttpMessageNotReadableException, message=Failed to read request, logref=3AtpS3scl0kGelzSbDA66c
+
+MockHttpServletRequest:
+      HTTP Method = POST
+      Request URI = /api/companies/00000000-0000-0001-5976-3be73c131652/ad-group-sync/preview
+       Parameters = {}
+          Headers = [Content-Type:"application/json;charset=UTF-8", Content-Length:"143"]
+             Body = {"identifierType":"UUID","identifier":"Pracownicy","products":["SCORE"],"hiddenInProduct":["BOOST"]}
+    Session Attrs = {SPRING_SECURITY_CONTEXT=SecurityContextImpl [Authentication=UsernamePasswordAuthenticationToken [Principal=user, Credentials=[PROTECTED], Authenticated=true, Details=null, Granted Authorities=[ROLE_ADMIN]]]}
+
+Handler:
+             Type = com.example.scim.api.AdGroupSyncController
+           Method = com.example.scim.api.AdGroupSyncController#previewCandidateConfiguration(CompanyId, AdGroupSyncPreviewRequestDto)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = org.springframework.http.converter.HttpMessageNotReadableException
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 400
+    Error message = null
+          Headers = [Content-Type:"application/problem+json"]
+     Content type = application/problem+json
+             Body = {"detail":"Failed to read request","instance":"/api/companies/00000000-0000-0001-5976-3be73c131652/ad-group-sync/preview","status":400,"title":"Bad Request"}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+]]></system-out>
+  </testcase>
+  <testcase name="aCandidateInAnUnknownGroupIsRejected" classname="com.example.scim.api.AdGroupSyncControllerTest" time="0.301"/>
+  <testcase name="aDisabledCompanyGetsNoPlan" classname="com.example.scim.api.AdGroupSyncControllerTest" time="0.290"/>
+  <testcase name="anEmptyPreviewRequestIsRejected" classname="com.example.scim.api.AdGroupSyncControllerTest" time="0.277"/>
+  <testcase name="aPlanListsEveryMatchedUser" classname="com.example.scim.api.AdGroupSyncControllerTest" time="0.845"/>
+  <testcase name="aPlanIsScopedToTheCompany" classname="com.example.scim.api.AdGroupSyncControllerTest" time="0.612"/>
+  <testcase name="theSyncEndpointRequiresTheAdminRole" classname="com.example.scim.api.AdGroupSyncControllerTest" time="0.198"/>
+</testsuite>

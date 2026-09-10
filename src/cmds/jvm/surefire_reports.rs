@@ -527,9 +527,33 @@ fn keep_last_lines(text: &str, max_lines: usize) -> String {
         return text.to_string();
     }
     let dropped = lines.len() - max_lines;
-    let mut out = format!("... ({dropped} lines truncated)\n");
+    let rescued = rescued_from_cut(&lines[..dropped]);
+    let mut out = format!("... ({} lines truncated)\n", dropped - rescued.len());
+    for line in rescued {
+        out.push_str(line);
+        out.push('\n');
+    }
     out.push_str(&lines[dropped..].join("\n"));
     out
+}
+
+/// Lines the tail cut must not eat. Spring MockMvc's `print()` block is ~40
+/// lines with the request first and the response last; the window keeps
+/// the response (`Status = 400`, the problem body) but the one line that
+/// says *why* — `Resolved Exception:` / `Type = HttpMessageNotReadable…` —
+/// sits in the middle. A real 2026-09-04 run cost three raw-log reads for
+/// it. `Type = null` (printed on every request) carries nothing and stays
+/// cut.
+fn rescued_from_cut<'a>(cut: &[&'a str]) -> Vec<&'a str> {
+    let mut rescued = Vec::new();
+    for pair in cut.windows(2) {
+        let (head, next) = (pair[0].trim(), pair[1].trim());
+        if head == "Resolved Exception:" && next.starts_with("Type = ") && !next.ends_with("= null") {
+            rescued.push(pair[0]);
+            rescued.push(pair[1]);
+        }
+    }
+    rescued
 }
 
 fn collapse_blank_runs(text: &str) -> String {
@@ -1274,5 +1298,63 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
         let st = &r.skipped_tests[0];
         assert_eq!(st.class, "com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test");
         assert!(!st.method.is_empty());
+    }
+
+    #[test]
+    fn captured_output_tail_cut_keeps_resolved_exception() {
+        // Real 2026-09-04 auth run (AdGroupSyncControllerTest, MockMvc
+        // `.andDo(print())`): the block is ~40 lines and the 12-line tail
+        // window kept only FlashMap + MockHttpServletResponse — `Status = 400`
+        // and `"detail":"Failed to read request"`, but not *why*. The one line
+        // that says why, `Resolved Exception: Type = HttpMessageNotReadable…`,
+        // sat 15 lines above the window, and the agent spent three reads of
+        // the raw tee log (grep, grep, sed) to fetch it.
+        let xml = include_str!(
+            "../../../tests/fixtures/java/surefire-reports/TEST-com.example.scim.api.AdGroupSyncControllerTest.xml"
+        );
+        let result = parse_content(xml, &["com.example".to_string()]).expect("parses");
+        let output = result.failures[0]
+            .test_output
+            .as_deref()
+            .expect("captured output present");
+        assert!(
+            output.contains("Resolved Exception:")
+                && output.contains("Type = org.springframework.http.converter.HttpMessageNotReadableException"),
+            "the resolved exception must survive the tail cut:\n{output}"
+        );
+        assert!(
+            output.contains("Status = 400") && output.contains("Failed to read request"),
+            "the response block must still be there:\n{output}"
+        );
+        assert!(
+            output.contains("lines truncated"),
+            "the block is still cut, so the marker stays:\n{output}"
+        );
+        assert!(
+            output.lines().count() <= DEFAULT_PER_TEST_OUTPUT_LINES + 3,
+            "promoting the diagnosis must not reopen the window, got {} lines:\n{output}",
+            output.lines().count()
+        );
+        // Order: the marker first, then what was rescued from the cut region,
+        // then the untouched tail.
+        let i_marker = output.find("lines truncated").expect("marker");
+        let i_resolved = output.find("Resolved Exception:").expect("resolved");
+        let i_flash = output.find("FlashMap:").expect("tail");
+        assert!(i_marker < i_resolved && i_resolved < i_flash, "order:\n{output}");
+    }
+
+    #[test]
+    fn keep_last_lines_ignores_a_null_resolved_exception() {
+        // MockMvc prints the section on every request; `Type = null` carries
+        // nothing and must not spend two lines of the window.
+        let block: String = (0..20)
+            .map(|i| format!("line {i}"))
+            .chain(["Resolved Exception:".to_string(), "             Type = null".to_string()])
+            .chain((20..40).map(|i| format!("line {i}")))
+            .collect::<Vec<_>>()
+            .join("\n");
+        let out = keep_last_lines(&block, 12);
+        assert!(!out.contains("Resolved Exception"), "null section promoted:\n{out}");
+        assert_eq!(out.lines().count(), 13, "{out}");
     }
 }
