@@ -1505,17 +1505,24 @@ fn render_classes_digest(
     Some(out)
 }
 
-fn push_digest_class_line(out: &mut String, s: &surefire_reports::SuiteStat) {
+/// Surefire's own per-class line, with the zero-valued `Skipped` field
+/// trimmed on a clean class. Shared by the digest and the inline breakdown so
+/// the two can never drift into different shapes — and so a class is described
+/// by exactly one line on both surfaces, counts included.
+fn class_line(s: &surefire_reports::SuiteStat) -> String {
     if s.skipped > 0 {
-        writeln!(
-            out,
+        format!(
             "[INFO] Tests run: {}, Skipped: {} -- in {}",
             s.tests, s.skipped, s.class_name
         )
-        .ok();
     } else {
-        writeln!(out, "[INFO] Tests run: {} -- in {}", s.tests, s.class_name).ok();
+        format!("[INFO] Tests run: {} -- in {}", s.tests, s.class_name)
     }
+}
+
+fn push_digest_class_line(out: &mut String, s: &surefire_reports::SuiteStat) {
+    out.push_str(&class_line(s));
+    out.push('\n');
 }
 
 fn push_digest_skipped(out: &mut String, skipped: &mut [&surefire_reports::SkippedTest]) {
@@ -1559,14 +1566,15 @@ fn render_pass_inline(
     let breakdown = |result: Option<&SurefireResult>| -> String {
         let mut block = String::new();
         if let Some(r) = result {
-            if inline_classes {
-                for s in &r.suites {
-                    write!(block, "\n[INFO] Tests run: {} -- in {}", s.tests, s.class_name).ok();
-                }
-            }
-            if inline_skipped {
-                for st in &r.skipped_tests {
-                    write!(block, "\n[INFO] Tests run: 0, Skipped: 1 -- in {}", st.class).ok();
+            // Always one line per *class*, never one per skipped test: two
+            // skips in the same class are one class, and surefire's line shape
+            // has no slot for a method name. The class line already carries the
+            // skipped count, so the two cases only differ in which classes the
+            // caps allow through — all of them, or just the ones with skips.
+            let suites = r.suites.iter().filter(|s| inline_classes || s.skipped > 0);
+            if inline_classes || inline_skipped {
+                for s in suites {
+                    write!(block, "\n{}", class_line(s)).ok();
                 }
             }
         }
@@ -7976,6 +7984,81 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         );
         assert_eq!(out.lines().last(), Some("[INFO] BUILD SUCCESS"));
         assert!(needs_ref);
+    }
+
+    /// Two skipped tests in ONE class used to render two byte-identical
+    /// `Tests run: 0, Skipped: 1 -- in <class>` lines: the loop walked the
+    /// skipped *tests* but labelled each line with the *class*, so the only
+    /// thing telling them apart (the method name) never reached the output —
+    /// and `Tests run: 0` contradicted the 8 tests the class actually ran.
+    /// Reproduced on jfairy, whose PersonSpec skips two of its 45 tests.
+    #[test]
+    fn pass_inline_skipped_class_renders_one_truthful_line() {
+        let base = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+        ));
+        // Reshape the real parse into the shape that triggered it: one class
+        // that ran 8 tests and skipped 2, among more classes than fit inline.
+        let mut sf = super::surefire_reports::SurefireResult::default();
+        let mut skipping = base.suites[0].clone();
+        skipping.skipped = 2;
+        sf.suites.push(skipping);
+        for i in 0..6 {
+            let mut s = base.suites[0].clone();
+            s.class_name = format!("com.example.auth.Suite{i}Test");
+            s.skipped = 0;
+            sf.suites.push(s);
+        }
+        sf.skipped_tests = base.skipped_tests[..2].to_vec();
+
+        let text = "[INFO] Tests run: 56, Failures: 0, Errors: 0, Skipped: 2\n[INFO] BUILD SUCCESS";
+        let (out, needs_ref) = super::render_pass_inline(text, Some(&sf), None);
+
+        let class = &base.suites[0].class_name;
+        let line = format!("[INFO] Tests run: 8, Skipped: 2 -- in {class}");
+        assert_eq!(
+            out.matches(line.as_str()).count(),
+            1,
+            "one aggregated line per class, got: {out}"
+        );
+        assert!(
+            !out.contains("Tests run: 0, Skipped: 1"),
+            "no per-test line claiming the class ran nothing, got: {out}"
+        );
+        assert!(needs_ref, "7 classes > MAX_INLINE_CLASSES still needs the digest");
+        assert_eq!(out.lines().last(), Some("[INFO] BUILD SUCCESS"));
+    }
+
+    /// The companion defect: with the class list inlined, a class with skips
+    /// got a bare `Tests run: N -- in X` line *and* a `Tests run: 0, Skipped: 1`
+    /// one — the same class twice, with contradictory counts.
+    #[test]
+    fn pass_inline_class_line_carries_its_own_skipped_count() {
+        let base = parsed_fixture(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test.xml"
+        ));
+        let mut sf = super::surefire_reports::SurefireResult::default();
+        let mut only = base.suites[0].clone();
+        only.skipped = 2;
+        sf.suites.push(only);
+        sf.skipped_tests = base.skipped_tests[..2].to_vec();
+
+        let (out, _) = super::render_pass_inline(
+            "[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 2\n[INFO] BUILD SUCCESS",
+            Some(&sf),
+            None,
+        );
+
+        let class = &base.suites[0].class_name;
+        assert_eq!(
+            out.matches(format!(" -- in {class}").as_str()).count(),
+            1,
+            "a class appears on exactly one breakdown line, got: {out}"
+        );
+        assert!(
+            out.contains(&format!("[INFO] Tests run: 8, Skipped: 2 -- in {class}")),
+            "the class line carries its own skipped count, got: {out}"
+        );
     }
 
     #[test]
