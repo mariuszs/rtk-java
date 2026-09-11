@@ -269,6 +269,79 @@ pub fn has_heredoc(cmd: &str) -> bool {
         .any(|t| t.kind == TokenKind::Redirect && t.value.starts_with("<<"))
 }
 
+/// Byte offset just past the terminator line of the **last** heredoc in `cmd`.
+///
+/// `None` whenever the split would be a guess: a here-string (`<<<`, which has
+/// no body at all), a tag the lexer does not see as one plain word, or a body
+/// that never terminates. Terminators are matched the way bash matches them —
+/// on the raw line text, ignoring quote state — because to bash the body is
+/// bytes, not shell syntax.
+fn heredoc_body_end(cmd: &str) -> Option<usize> {
+    let tokens = tokenize(cmd);
+    let mut tags: Vec<String> = Vec::new();
+    let mut first_op: Option<usize> = None;
+    for (i, tok) in tokens.iter().enumerate() {
+        if tok.kind != TokenKind::Redirect || tok.value != "<<" {
+            continue;
+        }
+        let next = tokens.get(i + 1)?;
+        // `<<<` lexes as `<<` followed by `<`: a here-string, no body.
+        if next.kind != TokenKind::Arg {
+            return None;
+        }
+        let tag = next
+            .value
+            .strip_prefix('-')
+            .unwrap_or(&next.value)
+            .trim_matches(|c| c == '\'' || c == '"');
+        if tag.is_empty() {
+            return None;
+        }
+        first_op.get_or_insert(tok.offset);
+        tags.push(tag.to_string());
+    }
+    let first_op = first_op?;
+
+    // The body starts on the line after the one carrying the operator.
+    let mut pos = cmd[first_op..].find('\n')? + first_op + 1;
+    for tag in &tags {
+        loop {
+            let (line, next) = match cmd[pos..].find('\n') {
+                Some(rel) => (&cmd[pos..pos + rel], pos + rel + 1),
+                None => (&cmd[pos..], cmd.len()),
+            };
+            let terminated = line.trim() == tag;
+            let at_end = next >= cmd.len();
+            pos = next;
+            if terminated {
+                break;
+            }
+            if at_end {
+                return None;
+            }
+        }
+    }
+    Some(pos)
+}
+
+/// Rewrite only the part of `cmd` that follows every heredoc body, leaving the
+/// operator line and the body itself byte-for-byte intact.
+fn rewrite_past_heredocs(
+    cmd: &str,
+    excluded: &[ExcludePattern],
+    transparent_prefixes: &[String],
+) -> Option<String> {
+    let end = heredoc_body_end(cmd)?;
+    let tail = &cmd[end..];
+    let trimmed_tail = tail.trim_start();
+    if trimmed_tail.is_empty() {
+        return None;
+    }
+    let indent = &tail[..tail.len() - trimmed_tail.len()];
+    let rewritten = rewrite_command_precompiled(trimmed_tail, excluded, transparent_prefixes)?;
+    Some(format!("{}{indent}{rewritten}", &cmd[..end]))
+}
+
 pub fn split_command_chain(cmd: &str) -> Vec<&str> {
     let trimmed = cmd.trim();
     if trimmed.is_empty() {
@@ -629,8 +702,16 @@ pub(crate) fn rewrite_command_precompiled(
         return None;
     }
 
-    if has_heredoc(trimmed) || trimmed.contains("$((") {
+    if trimmed.contains("$((") {
         return None;
+    }
+
+    // A heredoc body is data, never commands — but the command *after* the
+    // terminator is a normal command, and the agent idiom that patches a file
+    // through `python3 - <<'PY' … PY` and then runs the build put 91 real
+    // calls (76k chars of raw output) past the filters in one day.
+    if has_heredoc(trimmed) {
+        return rewrite_past_heredocs(trimmed, compiled, normalized_prefixes);
     }
 
     // `bash -c '<script>'` wrappers hide the real command inside a quoted
@@ -1158,6 +1239,63 @@ fn rewrite_pipeline_final_stage(
 }
 
 /// Rewrite a compound command (with `&&`, `||`, `;`, `|`) by rewriting each segment.
+/// True when grouping makes a pipeline's segment offsets ambiguous, so the
+/// command must pass through untouched:
+///
+/// - a pipeline *inside* a group (`(git log | head) && …`);
+/// - a group that is itself a stage of a pipeline (`a | { …; } | b`), where
+///   rewriting either side would filter what the next stage reads;
+/// - grouping that does not balance.
+///
+/// A balanced group in a *different* clause than the pipeline — the
+/// `(guard) && ./mvnw … | tail -30` shape — is none of those: the group is one
+/// opaque word, and bailing on it handed whole builds to bash unfiltered.
+fn grouping_defeats_pipeline(tokens: &[ParsedToken]) -> bool {
+    let mut depth = 0i32;
+    let mut clause_has_group = false;
+    let mut clause_has_pipe = false;
+    for tok in tokens {
+        if tok.kind == TokenKind::Shellism {
+            match tok.value.as_str() {
+                "(" | "{" => {
+                    depth += 1;
+                    clause_has_group = true;
+                    continue;
+                }
+                ")" | "}" => {
+                    depth -= 1;
+                    if depth < 0 {
+                        return true;
+                    }
+                    clause_has_group = true;
+                    continue;
+                }
+                _ => {}
+            }
+        }
+        if depth > 0 {
+            if matches!(tok.kind, TokenKind::Pipe(_)) {
+                return true;
+            }
+            continue;
+        }
+        let clause_break = tok.kind == TokenKind::Operator
+            || (tok.kind == TokenKind::Shellism && tok.value == "&");
+        if clause_break {
+            clause_has_group = false;
+            clause_has_pipe = false;
+            continue;
+        }
+        if matches!(tok.kind, TokenKind::Pipe(_)) {
+            clause_has_pipe = true;
+        }
+        if clause_has_group && clause_has_pipe {
+            return true;
+        }
+    }
+    depth != 0
+}
+
 fn rewrite_compound(
     cmd: &str,
     excluded: &[ExcludePattern],
@@ -1167,10 +1305,12 @@ fn rewrite_compound(
     let has_pipe = tokens
         .iter()
         .any(|token| matches!(token.kind, TokenKind::Pipe(_)));
-    let has_opaque_grouping = tokens.iter().any(|token| {
-        token.kind == TokenKind::Shellism && matches!(token.value.as_str(), "(" | ")" | "{" | "}")
-    });
-    if has_pipe && has_opaque_grouping {
+    // A pipeline *inside* a group, or grouping that does not balance, leaves
+    // the segment walker guessing — keep the bail there. A balanced group next
+    // to a top-level pipeline does not: the group is one opaque word, and
+    // bailing on it handed whole builds (`(guard) && ./mvnw … | tail -30`) to
+    // bash unfiltered.
+    if has_pipe && grouping_defeats_pipeline(&tokens) {
         return None;
     }
 
@@ -3353,6 +3493,111 @@ mod tests {
     fn test_rewrite_heredoc_returns_none() {
         assert_eq!(
             rewrite_command_no_prefixes("cat <<'EOF'\nfoo\nEOF", &[]),
+            None
+        );
+    }
+
+    // --- heredoc: the body is data, the commands after it are not ---
+
+    #[test]
+    fn test_rewrite_after_heredoc_body() {
+        // The dominant agent idiom: patch a file through a python heredoc,
+        // then run the build. The build is a normal command and must filter.
+        assert_eq!(
+            rewrite_command_no_prefixes("python3 - <<'PY'\nprint(1)\nPY\ngit status", &[]),
+            Some("python3 - <<'PY'\nprint(1)\nPY\nrtk git status".into())
+        );
+    }
+
+    #[test]
+    fn test_rewrite_after_heredoc_body_with_pipe_stage() {
+        assert_eq!(
+            rewrite_command_no_prefixes(
+                "python3 - <<'EOF'\nx = 1\nEOF\n./mvnw test -Dskip.npm 2>&1 | tail -15",
+                &[]
+            ),
+            Some("python3 - <<'EOF'\nx = 1\nEOF\nrtk mvn test -Dskip.npm 2>&1".into())
+        );
+    }
+
+    #[test]
+    fn test_heredoc_body_lines_are_never_rewritten() {
+        // A body line that looks like a command is data, not a command.
+        assert_eq!(
+            rewrite_command_no_prefixes("cat <<'EOF'\ngit status\nEOF", &[]),
+            None
+        );
+        // …and stays verbatim when a later line does get rewritten.
+        assert_eq!(
+            rewrite_command_no_prefixes("cat <<'EOF'\ngit status\nEOF\ngit status", &[]),
+            Some("cat <<'EOF'\ngit status\nEOF\nrtk git status".into())
+        );
+    }
+
+    #[test]
+    fn test_unterminated_heredoc_passes_through() {
+        assert_eq!(
+            rewrite_command_no_prefixes("cat <<'EOF'\nfoo\ngit status", &[]),
+            None
+        );
+    }
+
+    #[test]
+    fn test_herestring_passes_through() {
+        // `<<<` is a here-string: no body, no terminator line to split on.
+        assert_eq!(
+            rewrite_command_no_prefixes("grep -c x <<< \"$VAR\"\ngit status", &[]),
+            None
+        );
+    }
+
+    #[test]
+    fn test_rewrite_after_two_heredocs() {
+        assert_eq!(
+            rewrite_command_no_prefixes("cat <<'A'\none\nA\ncat <<'B'\ntwo\nB\ngit status", &[]),
+            Some("cat <<'A'\none\nA\ncat <<'B'\ntwo\nB\nrtk git status".into())
+        );
+    }
+
+    // --- a balanced ( … ) group no longer defeats the whole rewrite ---
+
+    #[test]
+    fn test_group_then_pipeline_still_rewrites() {
+        // Real 2026-09-10 traffic: a guard subshell in front of the build made
+        // rtk hand the entire command to bash, so 8.4k chars of raw Maven log
+        // reached the agent with no verdict line in it.
+        assert_eq!(
+            rewrite_command_no_prefixes(
+                "(grep -q x f || sed -i s/a/b/ f) && ./mvnw verify -q 2>&1 | tail -30",
+                &[]
+            ),
+            Some("(grep -q x f || sed -i s/a/b/ f) && rtk mvn verify -q 2>&1".into())
+        );
+    }
+
+    #[test]
+    fn test_group_contents_keep_the_no_pipe_behaviour() {
+        // Segments inside a group are rewritten exactly as they already were
+        // without a pipeline present — the pipeline in a later clause no
+        // longer changes that.
+        assert_eq!(
+            rewrite_command_no_prefixes("(cd sub && git status) && git status", &[]),
+            Some("(cd sub && rtk git status) && rtk git status".into())
+        );
+        // …and the same command with a pipeline in the last clause now gets
+        // there instead of passing through whole.
+        assert_eq!(
+            rewrite_command_no_prefixes("(cd sub && git status) && ./mvnw test | tail -5", &[]),
+            Some("(cd sub && rtk git status) && rtk mvn test".into())
+        );
+    }
+
+    #[test]
+    fn test_pipe_inside_group_still_passes_through() {
+        // A pipeline inside the group is ambiguous for the segment walker;
+        // keep the conservative bail.
+        assert_eq!(
+            rewrite_command_no_prefixes("(git status | head -3) && git status | head", &[]),
             None
         );
     }

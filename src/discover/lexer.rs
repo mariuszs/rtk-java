@@ -300,14 +300,30 @@ fn flush_arg(tokens: &mut Vec<ParsedToken>, current: &mut String, offset: usize)
 /// (fd-dup like `2>&1` and `/dev/null` are exempt). Separators and subshells are
 /// handled by [`split_for_permissions`], not flagged here.
 pub fn contains_unattestable_construct(cmd: &str) -> bool {
+    unattestable(cmd, false)
+}
+
+/// True when the *only* reason [`contains_unattestable_construct`] fires is a
+/// heredoc operator.
+///
+/// A heredoc body is inert data and the rewrite never touches it, so such a
+/// command can still be rewritten — but the permission splitter cannot tell a
+/// body line from a command, so it must never be auto-allowed on that verdict.
+/// Callers rewrite it and hand it to the agent's own permission prompt.
+pub fn unattestable_only_by_heredoc(cmd: &str) -> bool {
+    unattestable(cmd, false) && !unattestable(cmd, true)
+}
+
+fn unattestable(cmd: &str, ignore_heredoc: bool) -> bool {
     if contains_substitution(cmd) {
         return true;
     }
     let tokens = tokenize(cmd);
-    tokens
-        .iter()
-        .enumerate()
-        .any(|(i, tok)| tok.kind == TokenKind::Redirect && redirect_has_file_target(&tokens, i))
+    tokens.iter().enumerate().any(|(i, tok)| {
+        tok.kind == TokenKind::Redirect
+            && !(ignore_heredoc && tok.value == "<<")
+            && redirect_has_file_target(&tokens, i)
+    })
 }
 
 /// Quote-aware: bash runs backtick/`$(...)` unquoted and inside double quotes,
@@ -1239,6 +1255,27 @@ mod tests {
         // nosemgrep: sensitive-path-reference -- test fixture
         assert!(contains_unattestable_construct("cat < /etc/passwd"));
         assert!(contains_unattestable_construct("cat << EOF"));
+    }
+
+    #[test]
+    fn test_unattestable_only_by_heredoc() {
+        // The body is data; nothing else in the command is opaque.
+        assert!(unattestable_only_by_heredoc("cat <<'EOF'\nfoo\nEOF"));
+        assert!(unattestable_only_by_heredoc(
+            "python3 - <<'PY'\nprint(1)\nPY\ngit status"
+        ));
+        // A real file redirect or a substitution is still opaque.
+        assert!(!unattestable_only_by_heredoc(
+            "cat <<'EOF' > /tmp/x\nfoo\nEOF"
+        ));
+        assert!(!unattestable_only_by_heredoc(
+            "cat <<'EOF'\nfoo\nEOF\ngit log $(whoami)"
+        ));
+        // A here-string is not a heredoc: no body, and the trailing `<` is a
+        // file redirect as far as the gate is concerned.
+        assert!(!unattestable_only_by_heredoc("grep -c x <<< \"$V\""));
+        // Nothing unattestable at all.
+        assert!(!unattestable_only_by_heredoc("git status"));
     }
 
     #[test]

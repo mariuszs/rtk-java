@@ -63,13 +63,19 @@ fn evaluate_with_verdict(
         return RewriteOutcome::Deny;
     }
 
-    if crate::discover::lexer::contains_unattestable_construct(cmd) {
+    // A heredoc is the one opaque construct rtk can still rewrite: the body is
+    // inert data and only the commands *after* the terminator are touched. The
+    // permission splitter cannot tell a body line from a command, so the
+    // rewrite never carries an Allow — the agent prompts exactly as it does
+    // for the raw command today, but now on a filtered one.
+    let heredoc_only = crate::discover::lexer::unattestable_only_by_heredoc(cmd);
+    if !heredoc_only && crate::discover::lexer::contains_unattestable_construct(cmd) {
         return RewriteOutcome::Passthrough;
     }
 
     match registry::rewrite_command(cmd, excluded, transparent_prefixes) {
         Some(rewritten) => match verdict {
-            PermissionVerdict::Allow => RewriteOutcome::Allow(rewritten),
+            PermissionVerdict::Allow if !heredoc_only => RewriteOutcome::Allow(rewritten),
             _ => RewriteOutcome::Ask(rewritten),
         },
         None => RewriteOutcome::Passthrough,

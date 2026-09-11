@@ -11,7 +11,7 @@ use std::io::{self, Read, Write};
 
 use crate::core::tracking::HookOutcome;
 use crate::core::utils::strip_leading_bom;
-use crate::discover::registry::{has_heredoc, rewrite_command};
+use crate::discover::registry::rewrite_command;
 
 const STDIN_CAP: usize = 1_048_576; // 1 MiB
 
@@ -234,10 +234,9 @@ fn heal_legacy_hook_file(path: &std::path::Path) -> bool {
 }
 
 fn get_rewritten(cmd: &str) -> Option<String> {
-    if has_heredoc(cmd) {
-        return None;
-    }
-
+    // Heredocs used to bail here. The registry now splits the body off itself
+    // and rewrites only what follows the terminator, so the bail would just
+    // hide that from every hook host.
     let (excluded, transparent_prefixes) = crate::core::config::hook_rewrite_params();
 
     let rewritten = rewrite_command(cmd, &excluded, &transparent_prefixes)?;
@@ -260,11 +259,17 @@ fn decide_from_verdict(cmd: &str, verdict: PermissionVerdict) -> HookDecision {
     if verdict == PermissionVerdict::Deny {
         return HookDecision::Deny;
     }
-    if crate::discover::lexer::contains_unattestable_construct(cmd) {
+    // See `rewrite_cmd::evaluate_with_verdict`: a heredoc body is data, so the
+    // command after it can still be rewritten — but never auto-allowed, since
+    // the permission splitter reads body lines as if they were commands.
+    let heredoc_only = crate::discover::lexer::unattestable_only_by_heredoc(cmd);
+    if !heredoc_only && crate::discover::lexer::contains_unattestable_construct(cmd) {
         return HookDecision::Defer;
     }
     match get_rewritten(cmd) {
-        Some(r) if verdict == PermissionVerdict::Allow => HookDecision::AllowRewrite(r),
+        Some(r) if verdict == PermissionVerdict::Allow && !heredoc_only => {
+            HookDecision::AllowRewrite(r)
+        }
         Some(r) => HookDecision::AskRewrite(r),
         None => HookDecision::Defer,
     }
@@ -1136,6 +1141,32 @@ mod tests {
     #[test]
     fn test_get_rewritten_heredoc() {
         assert!(get_rewritten("cat <<'EOF'\nhello\nEOF").is_none());
+    }
+
+    #[test]
+    fn test_heredoc_followed_by_a_build_is_rewritten_but_only_asked() {
+        // 2026-09-11 traffic: `python3 - <<'PY' … PY` + `./mvnw test | tail`
+        // deferred whole, so raw Maven reached the agent. It now rewrites —
+        // and stays an Ask even on an Allow verdict, because the permission
+        // splitter reads heredoc body lines as if they were commands.
+        let cmd = "python3 - <<'PY'\nprint(1)\nPY\n./mvnw test -Dskip.npm 2>&1 | tail -15";
+        match decide_from_verdict(cmd, PermissionVerdict::Allow) {
+            HookDecision::AskRewrite(r) => {
+                assert_eq!(
+                    r,
+                    "python3 - <<'PY'\nprint(1)\nPY\nrtk mvn test -Dskip.npm 2>&1"
+                )
+            }
+            _ => panic!("expected AskRewrite"),
+        }
+    }
+
+    #[test]
+    fn test_heredoc_with_a_file_redirect_still_defers() {
+        assert!(matches!(
+            decide_from_verdict("cat <<'EOF' > /tmp/x\nfoo\nEOF", PermissionVerdict::Allow),
+            HookDecision::Defer
+        ));
     }
 
     // --- VS Code Copilot Chat / Copilot CLI (PascalCase) handler ---
