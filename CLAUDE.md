@@ -15,6 +15,12 @@ This is a fork with critical fixes for git argument parsing and modern JavaScrip
 where upstream has no counterpart at all — not because ours is older, better
 tested, or measured faster.
 
+**Overlap means a decision the merge forces on you** — a conflict git reports,
+or a hunk upstream rewrote where the fork had patched. A fork commit that
+merely lives on an upstream file is not an overlap; it becomes one the day
+upstream touches the same lines, and git says so at that moment. Scoped that
+way the detector is the tool, not a list someone has to remember to open.
+
 Rules:
 
 1. **Superseded means deleted.** When upstream reimplements something the fork
@@ -24,14 +30,17 @@ Rules:
 2. **A fork guard that breaks an upstream test is a bug, not a conflict.**
    Delete it. Confirm the test passes on the pristine tag first
    (`git worktree add <tmp> vX.Y.Z && cargo test --bin rtk <test>`), so you know
-   the failure is ours.
+   the failure is ours. In reverse it says nothing: a fork that *deleted* an
+   upstream guard is a standing keep, and belongs on the list below.
 3. **A fork test asserting the old contract is obsolete.** Update it to the new
    upstream semantics; do not re-pin the old behavior.
-4. **Keeping fork behavior over new upstream behavior needs a stated reason and
-   must be reported to the user.** The one standing exception: the
-   `rtk mvn … | tail -N` truncation-*drop* rule runs ahead of upstream's
-   pipeline-producer path, because upstream's variant keeps the stage and it
-   would cut rtk's own compact summary.
+4. **Keeping fork behavior over new upstream behavior needs a stated reason,
+   and the reason belongs at the site.** Write it as a comment in the hunk that
+   holds the deviation, so the next conflict shows the reasoning to whoever
+   resolves it — `discover/rules.rs` carries the measured npm/npx/curl numbers
+   where those rules used to be; `cmds/js/tsc_cmd.rs` and `core/stream.rs`
+   carry theirs the same way. Only a keep with no hunk to speak from goes on
+   the standing list below. Report every keep to the user either way.
 5. **Adapt, don't fork, when upstream reshapes an API.** Fork-only helpers move
    onto the new interface (`force_tee_display` onto the `[retriever]` dispatch),
    they do not keep a private copy of the old one.
@@ -43,6 +52,25 @@ Rules:
    env HOME=$(mktemp -d) CARGO_HOME=~/.cargo RUSTUP_HOME=~/.rustup \
        PATH="$HOME/.cargo/bin:$PATH" cargo test --all
    ```
+
+**Standing exceptions** — keeps that no site comment can carry:
+
+- **`src/cmds/jvm/mvn_cmd.rs` replaces upstream's Maven filter outright.** None
+  of upstream's `detect_phase` / `filter_surefire` / `filter_compile` /
+  `filter_package` / `filter_quiet` / `run` / `run_daemon` survive here, and
+  `main.rs` routes `Commands::Mvn` / `Mvnd` to the fork's `mvn_cmd::dispatch`
+  instead. This is what the fork is for: 75.7% against upstream's 51.7% on the
+  same fixtures. Already re-decided at v0.44.1 and v0.48.0 — decide it the same
+  way, and re-measure before ever reversing it.
+- **The heredoc bail is deleted on purpose** (`discover/registry.rs`,
+  `hooks/hook_cmd.rs`, `hooks/rewrite_cmd.rs`). Upstream returns `None` on
+  `has_heredoc`; the fork splits the body off and rewrites what follows the
+  terminator, never auto-allowing the result. Restoring that bail — which rule
+  2 read backwards would do — hands raw Maven to the agent again (91 calls,
+  76k chars, measured 2026-09-11).
+- **`rtk mvn … | tail -N` truncation-*drop*** runs ahead of upstream's
+  pipeline-producer path, because upstream's variant keeps the stage and it
+  would cut rtk's own compact summary.
 
 ### Name Collision Warning
 
