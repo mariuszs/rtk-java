@@ -969,7 +969,7 @@ dependencies = [
 
 [[package]]
 name = "rtk"
-version = "0.48.0"
+version = "0.49.0"
 dependencies = [
  "anyhow",
  "automod",
@@ -994,6 +994,7 @@ dependencies = [
  "sha2",
  "tempfile",
  "toml",
+ "toml_edit",
  "ureq",
  "walkdir",
  "which",
