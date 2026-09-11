@@ -8,6 +8,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a fork with critical fixes for git argument parsing and modern JavaScript stack support (pnpm, vitest, Next.js, TypeScript, Playwright, Prisma).
 
+### Merging Upstream Releases (Non-Negotiable)
+
+**Upstream wins on every overlap.** When resolving a conflict against a
+`rtk-ai/rtk` release, take upstream's side. The fork's version survives only
+where upstream has no counterpart at all — not because ours is older, better
+tested, or measured faster.
+
+Rules:
+
+1. **Superseded means deleted.** When upstream reimplements something the fork
+   had patched, drop the fork patch entirely rather than layering it on top.
+   v0.49.0 replaced `rtk diff`'s line-pairing with a real Myers diff, so the
+   fork's resync-window fix went with it.
+2. **A fork guard that breaks an upstream test is a bug, not a conflict.**
+   Delete it. Confirm the test passes on the pristine tag first
+   (`git worktree add <tmp> vX.Y.Z && cargo test --bin rtk <test>`), so you know
+   the failure is ours.
+3. **A fork test asserting the old contract is obsolete.** Update it to the new
+   upstream semantics; do not re-pin the old behavior.
+4. **Keeping fork behavior over new upstream behavior needs a stated reason and
+   must be reported to the user.** The one standing exception: the
+   `rtk mvn … | tail -N` truncation-*drop* rule runs ahead of upstream's
+   pipeline-producer path, because upstream's variant keeps the stage and it
+   would cut rtk's own compact summary.
+5. **Adapt, don't fork, when upstream reshapes an API.** Fork-only helpers move
+   onto the new interface (`force_tee_display` onto the `[retriever]` dispatch),
+   they do not keep a private copy of the old one.
+6. **Verify on a clean `HOME`.** Local `exclude_commands` in
+   `~/.config/rtk/config.toml` makes ~27 hook tests fail for reasons unrelated
+   to the merge:
+
+   ```bash
+   env HOME=$(mktemp -d) CARGO_HOME=~/.cargo RUSTUP_HOME=~/.rustup \
+       PATH="$HOME/.cargo/bin:$PATH" cargo test --all
+   ```
+
 ### Name Collision Warning
 
 **Two different "rtk" projects exist:**
