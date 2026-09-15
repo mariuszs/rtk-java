@@ -2516,11 +2516,17 @@ fn is_maven_boilerplate(line: &str) -> bool {
         return stripped.contains("There are test failures");
     }
 
-    // Same shape, different carrier: `mvn <goal>` in a directory with no POM
-    // reports the whole diagnosis on one line that also ends in `-> [Help 1]`.
-    // Dropping it leaves a bare `[INFO] BUILD FAILURE` with no reason at all.
-    if stripped.contains("requires a project to execute") {
-        return false;
+    // A trailing `-> [Help N]` is not boilerplate either: it is how Maven's
+    // exception handler marks the summary line of each error it aborted on,
+    // so it only ever sits on a cause. Matching it here dropped every carrier
+    // that is not `Failed to execute goal` — no POM in the directory
+    // (`requires a project to execute`), a plugin unresolvable offline
+    // (`Plugin … could not be resolved`) — one carve-out at a time, each
+    // found as a bare `[INFO] BUILD FAILURE`. What stays boilerplate is the
+    // suffix standing alone — the compile epilogue's own `[ERROR] -> [Help 1]`
+    // line — and the help *link* line (`[ERROR] [Help 1] http://cwiki…`).
+    if stripped.starts_with("-> [Help") {
+        return true;
     }
 
     // Plexus classworlds realm dump, printed under `[ERROR]` on any
@@ -2539,7 +2545,6 @@ fn is_maven_boilerplate(line: &str) -> bool {
         "strategy = org.codehaus.plexus.classworlds",
         "Number of foreign imports:",
         "import: Entry[import ",
-        "-> [Help",
         "http://cwiki.apache.org",
         "https://cwiki.apache.org",
         "surefire-reports",
@@ -4161,6 +4166,27 @@ mod tests {
         ));
         assert!(out.contains("there is no POM in this directory"), "\n{out}");
         assert!(out.contains("BUILD FAILURE"), "\n{out}");
+    }
+
+    /// Third carrier of the same shape, real 2026-09-12 `./mvnw -q -o test`:
+    /// a plugin missing from the local repository in offline mode. Maven's
+    /// only diagnosis is the `[ERROR] Plugin … could not be resolved: … ->
+    /// [Help 1]` summary line, and the render was a bare `[INFO] BUILD
+    /// FAILURE` — the agent had to grep the tee log to learn why.
+    #[test]
+    fn offline_plugin_resolution_failure_keeps_the_reason() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_offline_plugin_resolution_failure_raw.txt");
+        let out = filter_mvn_test(input);
+        assert!(out.contains("BUILD FAILURE"), "\n{out}");
+        assert!(
+            out.contains("githook-maven-plugin:9.9.9 or one of its dependencies could not be resolved"),
+            "\n{out}"
+        );
+        assert!(out.contains("in offline mode"), "\n{out}");
+        // The help-link epilogue around it stays boilerplate.
+        assert!(!out.contains("Re-run Maven"), "\n{out}");
+        assert!(!out.contains("cwiki.apache.org"), "\n{out}");
     }
 
     /// The bootstrap guard keys off a *failed* build, not off the mere
