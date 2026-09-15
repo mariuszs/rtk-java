@@ -2261,7 +2261,12 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
         match state {
             TestParseState::Preamble => {}
             TestParseState::Testing => {
-                if stripped == "Results:" {
+                // Surefire's marker always carries Maven's level tag. A bare
+                // `Results:` is a test printing its own report to stdout — a
+                // real friendly-id run did, and the next per-class line was
+                // taken for the total (`Tests run: 1` on a 7099-test run).
+                let tagged = stripped.len() != trimmed.len();
+                if tagged && stripped == "Results:" {
                     if let Some(f) = current_failure.take() {
                         total_failures_seen += 1;
                         if failures.len() < MAX_FAILURES_SHOWN {
@@ -4326,6 +4331,25 @@ mod tests {
         assert!(!out.contains("ch.qos.logback"), "\n{out}");
         assert!(!out.contains("WARNING: A restricted method"), "\n{out}");
         assert!(out.len() < 1500, "{} chars:\n{out}", out.len());
+    }
+
+    /// Real 2026-09-15 friendly-id `mvn -Pjmh -pl friendly-id test`: a test
+    /// prints its own report to stdout, and the report's heading is a bare
+    /// `Results:` line. The parser took it for surefire's summary marker,
+    /// then took the next class line (`Tests run: 1 … -- in
+    /// AnalyzeGeneratedIdsTest`) for the total. The render said `Tests run:
+    /// 1` for a 7099-test run, and the agent grepped the per-class digest
+    /// four times to find out which tests had actually run.
+    #[test]
+    fn a_bare_results_line_from_test_stdout_is_not_the_summary() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_stdout_results_line_raw.txt");
+        let out = filter_mvn_test(input);
+        assert!(
+            out.contains("[INFO] Tests run: 7099, Failures: 0, Errors: 0, Skipped: 0"),
+            "\n{out}"
+        );
+        assert!(!out.contains("Tests run: 1,"), "\n{out}");
+        assert!(out.contains("[INFO] BUILD SUCCESS"), "\n{out}");
     }
 
     /// The bootstrap guard keys off a *failed* build, not off the mere

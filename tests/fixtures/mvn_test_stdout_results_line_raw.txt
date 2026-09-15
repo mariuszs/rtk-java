@@ -1,0 +1,191 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.example.friendly-id:friendly-id-samples:pom:2.0.0-SNAPSHOT
+[WARNING] 'build.plugins.plugin.version' for org.apache.maven.plugins:maven-deploy-plugin is missing. @ com.example.friendly-id:friendly-id-samples:${revision}, /home/user/friendly-id/friendly-id-samples/pom.xml, line 34, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] ---------------< com.example.friendly-id:friendly-id >---------------
+[INFO] Building FriendlyId Core 2.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (default) @ friendly-id ---
+[INFO] argLine set to -javaagent:/home/user/.m2/repository/org/jacoco/org.jacoco.agent/0.8.12/org.jacoco.agent-0.8.12-runtime.jar=destfile=/home/user/friendly-id/friendly-id/target/jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ friendly-id ---
+[INFO] skip non existing resourceDirectory /home/user/friendly-id/friendly-id/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ friendly-id ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 13 source files with javac [debug target 21] to target/classes
+[WARNING] location of system modules is not set in conjunction with -source 21
+  not setting the location of system modules may lead to class files that cannot run on JDK 21
+    --release 21 is recommended instead of -source 21 -target 21 because it sets the location of system modules automatically
+[INFO] 
+[INFO] --- build-helper:3.0.0:add-test-source (default) @ friendly-id ---
+[INFO] Test Source directory: /home/user/friendly-id/friendly-id/src/jmh/java added.
+[INFO] 
+[INFO] --- build-helper:3.0.0:add-test-resource (default) @ friendly-id ---
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ friendly-id ---
+[INFO] skip non existing resourceDirectory /home/user/friendly-id/friendly-id/src/test/resources
+[INFO] Copying 1 resource from src/jmh/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ friendly-id ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 11 source files with javac [debug target 21] to target/test-classes
+[WARNING] location of system modules is not set in conjunction with -source 21
+  not setting the location of system modules may lead to class files that cannot run on JDK 21
+    --release 21 is recommended instead of -source 21 -target 21 because it sets the location of system modules automatically
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default) @ friendly-id ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 11 source files with javac [debug target 21] to target/test-classes
+[WARNING] location of system modules is not set in conjunction with -source 21
+  not setting the location of system modules may lead to class files that cannot run on JDK 21
+    --release 21 is recommended instead of -source 21 -target 21 because it sets the location of system modules automatically
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ friendly-id ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.friendly_id.type.FriendlyIdTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.062 s -- in com.example.friendly_id.type.FriendlyIdTest
+[INFO] Running com.example.friendly_id.Url62Test
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in com.example.friendly_id.Url62Test
+[INFO] Running com.example.friendly_id.FriendlyIdsTest
+[INFO] Tests run: 3000, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.449 s -- in com.example.friendly_id.FriendlyIdsTest
+[INFO] Running com.example.friendly_id.FriendlyIdEncodingTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in com.example.friendly_id.FriendlyIdEncodingTest
+[INFO] Running com.example.friendly_id.ElegantPairingTest
+[INFO] Tests run: 68, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.146 s -- in com.example.friendly_id.ElegantPairingTest
+[INFO] Running com.example.friendly_id.BigIntegerPairingTest
+[INFO] Tests run: 2001, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.134 s -- in com.example.friendly_id.BigIntegerPairingTest
+[INFO] Running com.example.friendly_id.Base62Test
+[INFO] Tests run: 2002, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.140 s -- in com.example.friendly_id.Base62Test
+[INFO] Running com.example.friendly_id.AnalyzeGeneratedIdsTest
+
+Results:
+Min: 19
+Max: 22
+Avg: 21.87052
+Count: 100000
+Sample: 
+3gWeCIOaRCRQBdsA5ebfQu
+op21dGYfRHEbiBFmaEe0n
+4GNZuE0V0sJAzEvu9SgYdj
+17dnK372xdFvf3rtR8YdPH
+6uDa6urKwIYY3nWuO7b0y
+6xyIBlAkCc10uZJ3A9Xd5q
+1PfhwHYVWuK1CtRHL1b4yi
+2rMP2h7s9pu8L1BUjfXYAW
+2osWNxBWCwpBDisenEFRv
+2nOhqcMO0LWam7wGYJJStP
+1Trqnfv6slGyaumhBoJNUk
+5WcnoXA8SYja4x0ZzW8ABo
+26bkNocmyFJKXGzOQmyqaY
+2KY8rB6XXkMEGEN2Giy6Rs
+B7ovRWLMJ9uROPKuOpmlc
+7QGfmXXdzdL1Qygew3tGxH
+7kUvjndKrIEy0qwe9Y1nGj
+3lVHDeNdmP9Bp2YlleSUjK
+9cFHJMCFamBO61XCSYXIw
+3aZxVjecKhJDpJNmgWXo6i
+xXDXiguYhuCe119lcpZZJ
+7Yr1DC8UC7TUCbUWYEnccB
+6YWdkGb8pWXppuGsaK20I3
+7PCh393ro0m8Oqn0Xf0CEz
+1CqazeEcY2ZmWEZLVlAguP
+NN7ZJBoYt8Hkw4PTBlwTD
+5gytQtxqbkosD24zseMb5E
+lIs3gLzgtkKsW0Ptl8gbu
+7O3xKzY3AiefHq4t6rRXim
+6ed5iTRhU5Ht5ZSEOvBw0M
+6y6VyNRwjxU860tA7LaoRT
+3bkAkPy4fcxKzW4GjEQq8j
+5Iu8mpBNbmMd4bPJfGU15M
+2XIt2d9EOYI7A7ZsALoajl
+619r2H8upwK7EoWgvEOpFV
+1yuCZivFyMfGXmL2c1DYLK
+3NBFmegEXTNfam2xTTZoRu
+6auiLvF436uW1iSKMOPysZ
+3uejFPSatQpCEPrXHSp0Ma
+ohbLRXcZbmGSX6PTVIIs6
+1jgLrnT6RsYyytHQzAYBZQ
+uDQAee0vaYTGsKvsfyrbQ
+48ps2m4bTHpE4OOHAEvAqg
+4DxHBHkAL7DozUGqIfFBrf
+3dnouewZnBsJmMItYwrgVn
+4raKgXPSA9MzzppuiIqY56
+fNop5JlNuJjV3jrTCSRBg
+78ncoZy87YK9JH9nxjScLj
+57ILGCKZZZcqH8GczI8LQt
+xl5nyI40wYZ6nxAk9jmCQ
+2Z2uco4XuFKLfF8CtxcGmd
+4RKNNNZ1HxO0OSSmGITUBQ
+4iHcofBWaRtOVEjkD1suaP
+fdIUvFCwQgpitEUHQSvZp
+4lLcqIeeNTiiHZHMV1uxsm
+56m280T6kP6UHW2PxlalW8
+7Y3AxW1qRVKf5vkoZcSzGr
+75wKL88Y0jFOhIYCTWiHRp
+3vb7NIaviufGi02nVGxsvO
+3pkGEvFfm63hPJmc2ulSqy
+2geJ9tJrAJiCoxz7xJJq54
+2jaIeQIt8HZ4Jz6vtMzLMI
+NbC9xekDraDOxQ9L8JLUf
+1napqQJddIhkf4yGuIhzrw
+2bwKxVYaLUzWWj8IciP2TI
+5DJU7I9oGEuycwBnyqOOYd
+4kMU2hzdohYWUzxOM8GZ4f
+4gFNzU5W5FsuXfo1E6XPRM
+7IObXE1Vl4NVM9yuNvkhTW
+2LSrNYyoUtMh0FdVPVIwyw
+6HRVVSQeT5Pru4fekBqHYm
+5ZfgtjRpzzZAPKDsY19MQe
+51AF6dsz2MVdaqpD4SuEDv
+3LF6DRQXVrFZcRmuOP17UW
+3JxNwz1L3UpA489y4pa28e
+5piQEBABUootHH4JWJA4lY
+Ydw8elTDALtdWkOiekHE6
+22yXndL9f9pHL6LCgIH6G8
+2PFwWhALY2Fo4641J5BGFM
+4hyMCWRWkNXNJ7g79QWJ5P
+7GMB1d1K7menIA2vEuSjNl
+3kdfAJP8UtAqOAwogdrm6F
+7IS5xMkRNst74ve9rj1gdX
+5sYaen5VN9vX5R7zIwNwkg
+as1XTlg1TOcwBqhdcpgQA
+29jeZFmXnXJag24VSN2PWZ
+69iIRoQmc4kvdqYA6MyFQW
+3Ee5wvM7SphoMH35wnDt0I
+8ILPOZHbTZYq2iTGD9j9y
+75DL5bA84qE7xmzRvrCRln
+2E8Z08tjPVEkNzOMRxs5zd
+3qncXTQU2GrDz6fy4s5Jv6
+6j5dJyGSZTxZTVKsV9rTvW
+5Q1E4BD6nVyZ3ovtNsJzgi
+3kapx0Q7MOkqIp346n67mD
+1zPjTMc2rvRW19peYtf6qg
+6NjmWwWDigVv9b7troTAse
+5YGHzQrh84NKBBfQe5RgiI
+6d43VMLbzT1hm94mCKIvPv
+28yg15bEUNbkeudnf21gWJ
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.096 s -- in com.example.friendly_id.AnalyzeGeneratedIdsTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 7099, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.236 s
+[INFO] Finished at: 2026-09-15T12:10:24+02:00
+[INFO] ------------------------------------------------------------------------
