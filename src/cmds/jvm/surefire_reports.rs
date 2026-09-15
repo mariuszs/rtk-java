@@ -1174,6 +1174,31 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
         assert_eq!(first.kind, FailureKind::Failure);
     }
 
+    /// Real 2026-09-14 Spock + MockMvc run: the root cause is a 326-char
+    /// `AssertionError: … expected:<URL> but was:<URL>`, and the 200-char
+    /// header cap landed between the two URLs. The render showed what the test
+    /// wanted but not what it got, and the agent grepped the raw log for
+    /// `but was:` — the one thing a failing assertion is read for.
+    #[test]
+    fn parse_content_keeps_the_actual_value_of_a_long_root_cause() {
+        let xml = include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.api.v2.candidate.CandidatesDocumentationV2Spec.xml"
+        );
+        let result = parse_content(xml, &["com.example".to_string()]).expect("parses");
+        let failure = result
+            .failures
+            .iter()
+            .find(|f| f.test_method == "addAssessment")
+            .expect("addAssessment failed");
+        let trace = failure.stack_trace.as_deref().expect("trace parsed");
+        assert!(
+            trace.contains(
+                "but was:<https://api.example.com/candidates/575d83f6-4be6-1075-516b-be2cb327acd3/assessments/90224982-2017-4098-bfc8-48f7b60ec01d>"
+            ),
+            "{trace}"
+        );
+    }
+
     #[test]
     fn parse_content_captures_system_out_err_only_for_failed_tests() {
         let xml = include_str!(

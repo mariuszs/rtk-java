@@ -1,0 +1,352 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.example:api >-------------------------
+[INFO] Building Example API 1.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- enforcer:3.4.1:enforce (enforce-maven) @ api ---
+[INFO] Rule 0: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
+[INFO] 
+[INFO] --- githook:1.0.5:install (default) @ api ---
+[INFO] Installing commit-msg hook into /home/user/git/api/.git/hooks
+[INFO] 
+[INFO] --- jacoco:0.8.15:prepare-agent (prepare-agent) @ api ---
+[INFO] argLine set to -javaagent:/home/user/.m2/repository/org/jacoco/org.jacoco.agent/0.8.15/org.jacoco.agent-0.8.15-runtime.jar=destfile=/home/user/git/api/target/jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ api ---
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.15.0:compile (default-compile) @ api ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 175 source files with javac [debug parameters release 25] to target/classes
+[WARNING] /home/user/git/api/src/main/java/com/example/api/v2/RemoteSkillerApiConfig.java:[38,61] org.springframework.http.converter.json.MappingJackson2HttpMessageConverter in org.springframework.http.converter.json has been deprecated and marked for removal
+[WARNING] /home/user/git/api/src/main/java/com/example/api/JsonConfiguration.java:[34,16] org.springframework.http.converter.json.Jackson2ObjectMapperBuilder in org.springframework.http.converter.json has been deprecated and marked for removal
+[WARNING] /home/user/git/api/src/main/java/com/example/api/JsonConfiguration.java:[34,16] org.springframework.http.converter.json.Jackson2ObjectMapperBuilder in org.springframework.http.converter.json has been deprecated and marked for removal
+[WARNING] /home/user/git/api/src/main/java/com/example/api/JsonConfiguration.java:[34,16] org.springframework.http.converter.json.Jackson2ObjectMapperBuilder in org.springframework.http.converter.json has been deprecated and marked for removal
+[WARNING] /home/user/git/api/src/main/java/com/example/api/JsonConfiguration.java:[34,16] org.springframework.http.converter.json.Jackson2ObjectMapperBuilder in org.springframework.http.converter.json has been deprecated and marked for removal
+[WARNING] /home/user/git/api/src/main/java/com/example/api/JsonConfiguration.java:[34,16] org.springframework.http.converter.json.Jackson2ObjectMapperBuilder in org.springframework.http.converter.json has been deprecated and marked for removal
+[WARNING] /home/user/git/api/src/main/java/com/example/api/JsonConfiguration.java:[35,17] org.springframework.http.converter.json.Jackson2ObjectMapperBuilder in org.springframework.http.converter.json has been deprecated and marked for removal
+[WARNING] /home/user/git/api/src/main/java/com/example/api/JsonConfiguration.java:[35,59] org.springframework.http.converter.json.Jackson2ObjectMapperBuilder in org.springframework.http.converter.json has been deprecated and marked for removal
+[WARNING] /home/user/git/api/src/main/java/com/example/api/candidates/infrastructure/RemoteCandidateController.java:[62,69] org.springframework.http.converter.json.MappingJackson2HttpMessageConverter in org.springframework.http.converter.json has been deprecated and marked for removal
+[WARNING] /home/user/git/api/src/main/java/com/example/api/v2/RemoteBoostApiConfig.java:[45,44] org.springframework.http.converter.json.MappingJackson2HttpMessageConverter in org.springframework.http.converter.json has been deprecated and marked for removal
+[INFO] /home/user/git/api/src/main/java/com/example/api/general/endpoint/ExampleResponseErrorHandler.java: Some input files use or override a deprecated API.
+[INFO] /home/user/git/api/src/main/java/com/example/api/general/endpoint/ExampleResponseErrorHandler.java: Recompile with -Xlint:deprecation for details.
+[INFO] /home/user/git/api/src/main/java/com/example/api/ExampleApiApplication.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/user/git/api/src/main/java/com/example/api/ExampleApiApplication.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- spring-cloud-contract:5.0.3:generateTests (default-generateTests) @ api ---
+[INFO] Generating server tests source code for Spring Cloud Contract Verifier contract verification
+[INFO] Will use contracts provided in the folder [/home/user/git/api/src/test/resources/contracts]
+[INFO] Directory with contract is present at [/home/user/git/api/src/test/resources/contracts]
+[INFO] Test Source directory: /home/user/git/api/target/generated-test-sources/contracts added.
+[INFO] Using [null] as base class for test classes, [com.example.api] as base package for tests, [null] as package with base classes, base class mappings [BaseClassMapping{contractPackageRegex='v1', baseClassFQN='com.example.api.v1.MvcSpec'}, BaseClassMapping{contractPackageRegex='v2', baseClassFQN='com.example.api.v2.MvcSpec'}]
+[INFO] Creating new class file [/home/user/git/api/target/generated-test-sources/contracts/com/example/api/V1Spec.groovy]
+[INFO] Generated 1 test classes.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ api ---
+[INFO] Copying 12 resources from src/test/resources to target/test-classes
+[INFO] skip non existing resourceDirectory /home/user/git/api/target/generated-test-resources/contracts
+[INFO] 
+[INFO] --- spring-cloud-contract:5.0.3:convert (default-convert) @ api ---
+[INFO] Will use contracts provided in the folder [/home/user/git/api/src/test/resources/contracts]
+[INFO] Copying Spring Cloud Contract Verifier contracts to [/home/user/git/api/target/stubs/META-INF/com.example/api/1.1-SNAPSHOT/contracts]. Only files matching [.*] pattern will end up in the final JAR with stubs.
+[INFO] Copying 3 resources from src/test/resources/contracts to target/stubs/META-INF/com.example/api/1.1-SNAPSHOT/contracts
+[INFO] Converting from Spring Cloud Contract Verifier contracts to WireMock stubs mappings
+[INFO]      Spring Cloud Contract Verifier contracts directory: /home/user/git/api/src/test/resources/contracts
+[INFO] Stub Server stubs mappings directory: /home/user/git/api/target/stubs/META-INF/com.example/api/1.1-SNAPSHOT/mappings
+[INFO] Creating new stub [/home/user/git/api/target/stubs/META-INF/com.example/api/1.1-SNAPSHOT/mappings/v1/createCandidate.json]
+[INFO] Creating new stub [/home/user/git/api/target/stubs/META-INF/com.example/api/1.1-SNAPSHOT/mappings/v1/getCandidate.json]
+[INFO] Creating new stub [/home/user/git/api/target/stubs/META-INF/com.example/api/1.1-SNAPSHOT/mappings/v1/getCandidateResults.json]
+[INFO] 
+[INFO] --- compiler:3.15.0:testCompile (default-testCompile) @ api ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 17 source files with javac [debug parameters release 25] to target/test-classes
+[INFO] /home/user/git/api/src/test/java/com/example/api/v2/boost/BoostPersonSkillControllerTest.java: Some input files use or override a deprecated API.
+[INFO] /home/user/git/api/src/test/java/com/example/api/v2/boost/BoostPersonSkillControllerTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- gplus:5.1.0:compileTests (default) @ api ---
+[INFO] Performing in-process compilation
+[INFO] Using isolated classloader, without GMavenPlus classpath.
+[INFO] Using Groovy 5.0.8 to perform compileTests.
+[INFO] invokedynamic enabled.
+[INFO] Parallel parsing enabled.
+[INFO] Compiled 58 files.
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ api ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.example.api.v2.user.UsersDocumentationV2Spec
+2026-09-15 06:06:56.126  INFO [                ,                ] --- [main] c.d.a.v2.user.UsersDocumentationV2Spec   : Starting UsersDocumentationV2Spec using Java 25.0.4 with PID 87318 (started by user in /home/user/git/api)
+2026-09-15 06:06:56.127 DEBUG [                ,                ] --- [main] c.d.a.v2.user.UsersDocumentationV2Spec   : Running with Spring Boot v4.1.1, Spring v7.0.9
+2026-09-15 06:06:56.128  INFO [                ,                ] --- [main] c.d.a.v2.user.UsersDocumentationV2Spec   : The following 1 profile is active: "test"
+2026-09-15 06:06:58.123  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:58.123  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:58.125  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-09-15 06:06:58.153  INFO [                ,                ] --- [main] c.d.a.v2.user.UsersDocumentationV2Spec   : Started UsersDocumentationV2Spec in 2.285 seconds (process running for 3.823)
+2026-09-15 06:06:58.248  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:58.248  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:58.249  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-09-15 06:06:58.880  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:58.880  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:58.881  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 3.215 s <<< FAILURE! -- in com.example.api.v2.user.UsersDocumentationV2Spec
+[ERROR] com.example.api.v2.user.UsersDocumentationV2Spec.listUsers -- Time elapsed: 3.077 s <<< FAILURE!
+Condition failed with Exception:
+
+response.andExpect(status().isOk()) .andExpect(jsonPath('$._embedded.users[0]._links.self.href').value("https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4"))
+|        |         |        |        |         |                                                 |
+|        |         |        |        |         |                                                 <org.springframework.test.web.servlet.result.JsonPathResultMatchers$$Lambda/0x000000001e925a28@59f91ee8 arg$1=inaccessible arg$2=inaccessible>
+|        |         |        |        |         <org.springframework.test.web.servlet.result.JsonPathResultMatchers@77936f79 jsonPathHelper=inaccessible prefix=inaccessible>
+|        |         |        |        java.lang.AssertionError: JSON path "$._embedded.users[0]._links.self.href" expected:<https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4> but was:<https://api.example.com/users/6T7xno6b7EKyT6xrj2iJo7>
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+|        |         |        |        	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:172)
+|        |         |        |        	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+|        |         |        |        	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+|        |         |        |        	at com.example.api.v2.user.UsersDocumentationV2Spec.listUsers(UsersDocumentationV2Spec.groovy:49)
+|        |         |        <org.springframework.test.web.servlet.result.StatusResultMatchers$$Lambda/0x000000001e915be0@28839977 arg$1=inaccessible>
+|        |         <org.springframework.test.web.servlet.result.StatusResultMatchers@41c9d35f>
+|        <org.springframework.test.web.servlet.MockMvc$1@7d1a7bd8 val$mvcResult=inaccessible this$0=inaccessible>
+<org.springframework.test.web.servlet.MockMvc$1@7d1a7bd8 val$mvcResult=inaccessible this$0=inaccessible>
+
+	at com.example.api.v2.user.UsersDocumentationV2Spec.listUsers(UsersDocumentationV2Spec.groovy:49)
+Caused by: java.lang.AssertionError: JSON path "$._embedded.users[0]._links.self.href" expected:<https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4> but was:<https://api.example.com/users/6T7xno6b7EKyT6xrj2iJo7>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:172)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+	... 1 more
+
+[ERROR] com.example.api.v2.user.UsersDocumentationV2Spec.getUser -- Time elapsed: 0.050 s <<< FAILURE!
+Condition failed with Exception:
+
+response.andExpect(status().isOk()) .andExpect(jsonPath('$._links.self.href').value("https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4"))
+|        |         |        |        |         |                              |
+|        |         |        |        |         |                              <org.springframework.test.web.servlet.result.JsonPathResultMatchers$$Lambda/0x000000001e925a28@21545457 arg$1=inaccessible arg$2=inaccessible>
+|        |         |        |        |         <org.springframework.test.web.servlet.result.JsonPathResultMatchers@2f024c1 jsonPathHelper=inaccessible prefix=inaccessible>
+|        |         |        |        java.lang.AssertionError: JSON path "$._links.self.href" expected:<https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4> but was:<https://api.example.com/users/6T7xno6b7EKyT6xrj2iJo7>
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+|        |         |        |        	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:172)
+|        |         |        |        	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+|        |         |        |        	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+|        |         |        |        	at com.example.api.v2.user.UsersDocumentationV2Spec.getUser(UsersDocumentationV2Spec.groovy:72)
+|        |         |        <org.springframework.test.web.servlet.result.StatusResultMatchers$$Lambda/0x000000001e915be0@351acd51 arg$1=inaccessible>
+|        |         <org.springframework.test.web.servlet.result.StatusResultMatchers@4a0f9953>
+|        <org.springframework.test.web.servlet.MockMvc$1@577e9f2f val$mvcResult=inaccessible this$0=inaccessible>
+<org.springframework.test.web.servlet.MockMvc$1@577e9f2f val$mvcResult=inaccessible this$0=inaccessible>
+
+	at com.example.api.v2.user.UsersDocumentationV2Spec.getUser(UsersDocumentationV2Spec.groovy:72)
+Caused by: java.lang.AssertionError: JSON path "$._links.self.href" expected:<https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4> but was:<https://api.example.com/users/6T7xno6b7EKyT6xrj2iJo7>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:172)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+	... 1 more
+
+[INFO] Running com.example.api.v2.candidate.CandidatesDocumentationV2Spec
+2026-09-15 06:06:58.951  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:58.951  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:58.952  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-09-15 06:06:59.107  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:59.108  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:59.108  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-09-15 06:06:59.126  INFO [                ,                ] --- [main] c.d.a.v.candidate.CandidateControllerV2  : Requests CandidateListRequest{query=John, status=[WAITING_FOR_ANSWERS], tags=[Phoenix, TeamLeader], startDate=2020-04-22}
+2026-09-15 06:06:59.156  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:59.157  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:59.157  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-09-15 06:06:59.193  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:59.193  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:59.194  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-09-15 06:06:59.203  INFO [                ,                ] --- [main] c.d.api.v2.candidate.CandidateService    : Create assessment for candidate=575d83f6-4be6-1075-516b-be2cb327acd3 with exam=70Wvi8uyl9mFFM4xuVdI5o
+2026-09-15 06:06:59.260  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:59.261  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:59.267  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 5 ms
+2026-09-15 06:06:59.307  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:59.307  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:59.309  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-09-15 06:06:59.340  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:59.340  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:59.341  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-09-15 06:06:59.448  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:59.448  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:59.449  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-09-15 06:06:59.467  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:59.467  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:59.468  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-09-15 06:06:59.480  INFO [                ,                ] --- [main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15 06:06:59.481  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15 06:06:59.482  INFO [                ,                ] --- [main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+[ERROR] Tests run: 10, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 0.563 s <<< FAILURE! -- in com.example.api.v2.candidate.CandidatesDocumentationV2Spec
+[ERROR] com.example.api.v2.candidate.CandidatesDocumentationV2Spec.addAssessment -- Time elapsed: 0.051 s <<< FAILURE!
+Condition failed with Exception:
+
+response.andExpect(status().isCreated()) .andExpect(header().string("Location", "https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d"))
+|        |         |        |             |         |        |
+|        |         |        |             |         |        <org.springframework.test.web.servlet.result.HeaderResultMatchers$$Lambda/0x000000001ea27b80@620e3f51 arg$1=inaccessible arg$2=inaccessible>
+|        |         |        |             |         <org.springframework.test.web.servlet.result.HeaderResultMatchers@20aec74f>
+|        |         |        |             java.lang.AssertionError: Response header 'Location' expected:<https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d> but was:<https://api.example.com/candidates/575d83f6-4be6-1075-516b-be2cb327acd3/assessments/90224982-2017-4098-bfc8-48f7b60ec01d>
+|        |         |        |             	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+|        |         |        |             	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+|        |         |        |             	at org.springframework.test.web.servlet.result.HeaderResultMatchers.lambda$string$1(HeaderResultMatchers.java:79)
+|        |         |        |             	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+|        |         |        |             	at com.example.api.v2.candidate.CandidatesDocumentationV2Spec.addAssessment(CandidatesDocumentationV2Spec.groovy:162)
+|        |         |        <org.springframework.test.web.servlet.result.StatusResultMatchers$$Lambda/0x000000001e915be0@1d553bee arg$1=inaccessible>
+|        |         <org.springframework.test.web.servlet.result.StatusResultMatchers@5f3d9383>
+|        <org.springframework.test.web.servlet.MockMvc$1@53d22605 val$mvcResult=inaccessible this$0=inaccessible>
+<org.springframework.test.web.servlet.MockMvc$1@53d22605 val$mvcResult=inaccessible this$0=inaccessible>
+
+	at com.example.api.v2.candidate.CandidatesDocumentationV2Spec.addAssessment(CandidatesDocumentationV2Spec.groovy:162)
+Caused by: java.lang.AssertionError: Response header 'Location' expected:<https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d> but was:<https://api.example.com/candidates/575d83f6-4be6-1075-516b-be2cb327acd3/assessments/90224982-2017-4098-bfc8-48f7b60ec01d>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+	at org.springframework.test.web.servlet.result.HeaderResultMatchers.lambda$string$1(HeaderResultMatchers.java:79)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+	... 1 more
+
+[ERROR] com.example.api.v2.candidate.CandidatesDocumentationV2Spec.getAssessment -- Time elapsed: 0.110 s <<< FAILURE!
+Condition failed with Exception:
+
+response.andExpect(status().isOk()) .andExpect(jsonPath('$._links.self.href').value("https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d"))
+|        |         |        |        |         |                              |
+|        |         |        |        |         |                              <org.springframework.test.web.servlet.result.JsonPathResultMatchers$$Lambda/0x000000001e925a28@56fa0c64 arg$1=inaccessible arg$2=inaccessible>
+|        |         |        |        |         <org.springframework.test.web.servlet.result.JsonPathResultMatchers@1154f447 jsonPathHelper=inaccessible prefix=inaccessible>
+|        |         |        |        java.lang.AssertionError: JSON path "$._links.self.href" expected:<https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d> but was:<https://api.example.com/candidates/575d83f6-4be6-1075-516b-be2cb327acd3/assessments/90224982-2017-4098-bfc8-48f7b60ec01d>
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+|        |         |        |        	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:172)
+|        |         |        |        	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+|        |         |        |        	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+|        |         |        |        	at com.example.api.v2.candidate.CandidatesDocumentationV2Spec.getAssessment(CandidatesDocumentationV2Spec.groovy:234)
+|        |         |        <org.springframework.test.web.servlet.result.StatusResultMatchers$$Lambda/0x000000001e915be0@7aca8561 arg$1=inaccessible>
+|        |         <org.springframework.test.web.servlet.result.StatusResultMatchers@5b4d30c7>
+|        <org.springframework.test.web.servlet.MockMvc$1@4d71530a val$mvcResult=inaccessible this$0=inaccessible>
+<org.springframework.test.web.servlet.MockMvc$1@4d71530a val$mvcResult=inaccessible this$0=inaccessible>
+
+	at com.example.api.v2.candidate.CandidatesDocumentationV2Spec.getAssessment(CandidatesDocumentationV2Spec.groovy:234)
+Caused by: java.lang.AssertionError: JSON path "$._links.self.href" expected:<https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d> but was:<https://api.example.com/candidates/575d83f6-4be6-1075-516b-be2cb327acd3/assessments/90224982-2017-4098-bfc8-48f7b60ec01d>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:172)
+	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+	... 1 more
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   CandidatesDocumentationV2Spec.addAssessment:162 Condition failed with Exception:
+
+response.andExpect(status().isCreated()) .andExpect(header().string("Location", "https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d"))
+|        |         |        |             |         |        |
+|        |         |        |             |         |        <org.springframework.test.web.servlet.result.HeaderResultMatchers$$Lambda/0x000000001ea27b80@620e3f51 arg$1=inaccessible arg$2=inaccessible>
+|        |         |        |             |         <org.springframework.test.web.servlet.result.HeaderResultMatchers@20aec74f>
+|        |         |        |             java.lang.AssertionError: Response header 'Location' expected:<https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d> but was:<https://api.example.com/candidates/575d83f6-4be6-1075-516b-be2cb327acd3/assessments/90224982-2017-4098-bfc8-48f7b60ec01d>
+|        |         |        |             	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+|        |         |        |             	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+|        |         |        |             	at org.springframework.test.web.servlet.result.HeaderResultMatchers.lambda$string$1(HeaderResultMatchers.java:79)
+|        |         |        |             	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+|        |         |        |             	at com.example.api.v2.candidate.CandidatesDocumentationV2Spec.addAssessment(CandidatesDocumentationV2Spec.groovy:162)
+|        |         |        <org.springframework.test.web.servlet.result.StatusResultMatchers$$Lambda/0x000000001e915be0@1d553bee arg$1=inaccessible>
+|        |         <org.springframework.test.web.servlet.result.StatusResultMatchers@5f3d9383>
+|        <org.springframework.test.web.servlet.MockMvc$1@53d22605 val$mvcResult=inaccessible this$0=inaccessible>
+<org.springframework.test.web.servlet.MockMvc$1@53d22605 val$mvcResult=inaccessible this$0=inaccessible>
+
+[ERROR]   CandidatesDocumentationV2Spec.getAssessment:234 Condition failed with Exception:
+
+response.andExpect(status().isOk()) .andExpect(jsonPath('$._links.self.href').value("https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d"))
+|        |         |        |        |         |                              |
+|        |         |        |        |         |                              <org.springframework.test.web.servlet.result.JsonPathResultMatchers$$Lambda/0x000000001e925a28@56fa0c64 arg$1=inaccessible arg$2=inaccessible>
+|        |         |        |        |         <org.springframework.test.web.servlet.result.JsonPathResultMatchers@1154f447 jsonPathHelper=inaccessible prefix=inaccessible>
+|        |         |        |        java.lang.AssertionError: JSON path "$._links.self.href" expected:<https://api.example.com/candidates/1024138f-684f-4311-b539-774fd3ef3a9c/assessments/90224982-2017-4098-bfc8-48f7b60ec01d> but was:<https://api.example.com/candidates/575d83f6-4be6-1075-516b-be2cb327acd3/assessments/90224982-2017-4098-bfc8-48f7b60ec01d>
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+|        |         |        |        	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:172)
+|        |         |        |        	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+|        |         |        |        	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+|        |         |        |        	at com.example.api.v2.candidate.CandidatesDocumentationV2Spec.getAssessment(CandidatesDocumentationV2Spec.groovy:234)
+|        |         |        <org.springframework.test.web.servlet.result.StatusResultMatchers$$Lambda/0x000000001e915be0@7aca8561 arg$1=inaccessible>
+|        |         <org.springframework.test.web.servlet.result.StatusResultMatchers@5b4d30c7>
+|        <org.springframework.test.web.servlet.MockMvc$1@4d71530a val$mvcResult=inaccessible this$0=inaccessible>
+<org.springframework.test.web.servlet.MockMvc$1@4d71530a val$mvcResult=inaccessible this$0=inaccessible>
+
+[ERROR]   UsersDocumentationV2Spec.getUser:72 Condition failed with Exception:
+
+response.andExpect(status().isOk()) .andExpect(jsonPath('$._links.self.href').value("https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4"))
+|        |         |        |        |         |                              |
+|        |         |        |        |         |                              <org.springframework.test.web.servlet.result.JsonPathResultMatchers$$Lambda/0x000000001e925a28@21545457 arg$1=inaccessible arg$2=inaccessible>
+|        |         |        |        |         <org.springframework.test.web.servlet.result.JsonPathResultMatchers@2f024c1 jsonPathHelper=inaccessible prefix=inaccessible>
+|        |         |        |        java.lang.AssertionError: JSON path "$._links.self.href" expected:<https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4> but was:<https://api.example.com/users/6T7xno6b7EKyT6xrj2iJo7>
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+|        |         |        |        	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:172)
+|        |         |        |        	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+|        |         |        |        	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+|        |         |        |        	at com.example.api.v2.user.UsersDocumentationV2Spec.getUser(UsersDocumentationV2Spec.groovy:72)
+|        |         |        <org.springframework.test.web.servlet.result.StatusResultMatchers$$Lambda/0x000000001e915be0@351acd51 arg$1=inaccessible>
+|        |         <org.springframework.test.web.servlet.result.StatusResultMatchers@4a0f9953>
+|        <org.springframework.test.web.servlet.MockMvc$1@577e9f2f val$mvcResult=inaccessible this$0=inaccessible>
+<org.springframework.test.web.servlet.MockMvc$1@577e9f2f val$mvcResult=inaccessible this$0=inaccessible>
+
+[ERROR]   UsersDocumentationV2Spec.listUsers:49 Condition failed with Exception:
+
+response.andExpect(status().isOk()) .andExpect(jsonPath('$._embedded.users[0]._links.self.href').value("https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4"))
+|        |         |        |        |         |                                                 |
+|        |         |        |        |         |                                                 <org.springframework.test.web.servlet.result.JsonPathResultMatchers$$Lambda/0x000000001e925a28@59f91ee8 arg$1=inaccessible arg$2=inaccessible>
+|        |         |        |        |         <org.springframework.test.web.servlet.result.JsonPathResultMatchers@77936f79 jsonPathHelper=inaccessible prefix=inaccessible>
+|        |         |        |        java.lang.AssertionError: JSON path "$._embedded.users[0]._links.self.href" expected:<https://api.example.com/users/6fZlmOHtnSlxGJGX7SMFg4> but was:<https://api.example.com/users/6T7xno6b7EKyT6xrj2iJo7>
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:62)
+|        |         |        |        	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:129)
+|        |         |        |        	at org.springframework.test.util.JsonPathExpectationsHelper.assertValue(JsonPathExpectationsHelper.java:172)
+|        |         |        |        	at org.springframework.test.web.servlet.result.JsonPathResultMatchers.lambda$value$2(JsonPathResultMatchers.java:111)
+|        |         |        |        	at org.springframework.test.web.servlet.MockMvc$1.andExpect(MockMvc.java:212)
+|        |         |        |        	at com.example.api.v2.user.UsersDocumentationV2Spec.listUsers(UsersDocumentationV2Spec.groovy:49)
+|        |         |        <org.springframework.test.web.servlet.result.StatusResultMatchers$$Lambda/0x000000001e915be0@28839977 arg$1=inaccessible>
+|        |         <org.springframework.test.web.servlet.result.StatusResultMatchers@41c9d35f>
+|        <org.springframework.test.web.servlet.MockMvc$1@7d1a7bd8 val$mvcResult=inaccessible this$0=inaccessible>
+<org.springframework.test.web.servlet.MockMvc$1@7d1a7bd8 val$mvcResult=inaccessible this$0=inaccessible>
+
+[INFO] 
+[ERROR] Tests run: 12, Failures: 4, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  11.833 s
+[INFO] Finished at: 2026-09-14T11:43:26+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.6:test (default-test) on project api: There are test failures.
+[ERROR] 
+[ERROR] See /home/user/git/api/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.fusesource.jansi.internal.JansiLoader in an unnamed module (file:/home/user/.m2/wrapper/dists/apache-maven-3.9.6-bin/3311e1d4/apache-maven-3.9.6/lib/jansi-2.4.0.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/home/user/.m2/wrapper/dists/apache-maven-3.9.6-bin/3311e1d4/apache-maven-3.9.6/lib/guava-32.0.1-jre.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+08:06:56,073 |-WARN in ch.qos.logback.core.model.processor.AppenderModelHandler - Appender named [FILE] not referenced. Skipping further processing.
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (/home/user/.m2/repository/net/bytebuddy/byte-buddy-agent/1.18.11/byte-buddy-agent-1.18.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release

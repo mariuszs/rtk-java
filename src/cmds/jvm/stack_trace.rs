@@ -5,6 +5,8 @@
 //! collapses framework noise, and preserves root-cause frames.
 
 const MAX_HEADER_LENGTH: usize = 200;
+/// See `truncate_root_header`.
+const MAX_ROOT_HEADER_LENGTH: usize = 600;
 const DEFAULT_ROOT_CAUSE_APP_FRAMES: usize = 10;
 
 /// Bare-text JVM runtime warnings that a forked test JVM (or Maven 4's own
@@ -94,6 +96,26 @@ pub(crate) fn truncate_header(header: &str) -> String {
     }
     let truncated: String = header.chars().take(MAX_HEADER_LENGTH).collect();
     format!("{truncated}...")
+}
+
+/// Truncate the root cause's header to `MAX_ROOT_HEADER_LENGTH` characters by
+/// eliding its **middle**.
+///
+/// The root cause is the one line a failure is read for, and assertion
+/// messages put the answer at the end: `expected:<X> but was:<Y>`. A real
+/// Spock + MockMvc run had a 326-char root cause, the 200-char tail cut landed
+/// between the two URLs, and the agent grepped the raw log for `but was:`.
+/// Wrapper headers higher in the chain keep `truncate_header` — only the root
+/// gets the wider, two-ended budget.
+pub(crate) fn truncate_root_header(header: &str) -> String {
+    let char_count = header.chars().count();
+    if char_count <= MAX_ROOT_HEADER_LENGTH {
+        return header.to_string();
+    }
+    let half = MAX_ROOT_HEADER_LENGTH / 2;
+    let head: String = header.chars().take(half).collect();
+    let tail: String = header.chars().skip(char_count - half).collect();
+    format!("{head} ... {tail}")
 }
 
 /// A stack frame belongs to the application if, after stripping whitespace and
@@ -186,7 +208,8 @@ fn add_frames(
 /// Process a Java stack trace:
 ///   - Top-level header preserved (truncated to 200 chars).
 ///   - Non-root segments: header + collapsed frames.
-///   - Root (last) segment: header + capped root-cause frames.
+///   - Root (last) segment: header (middle-elided, `truncate_root_header`) +
+///     capped root-cause frames. A single segment is its own root.
 ///   - If `max_lines > 0` and the collapsed output exceeds the cap,
 ///     `apply_hard_cap` is called to truncate while preserving the root cause.
 ///
@@ -203,18 +226,20 @@ pub(crate) fn process(raw: &str, app_packages: &[String], max_lines: usize) -> O
     }
 
     let mut out: Vec<String> = Vec::new();
-    out.push(truncate_header(&segments[0].header));
 
     if segments.len() == 1 {
+        // No `Caused by:` chain — the top header is the root cause.
+        out.push(truncate_root_header(&segments[0].header));
         add_frames(&mut out, &segments[0].frames, app_packages, None);
     } else {
+        out.push(truncate_header(&segments[0].header));
         add_frames(&mut out, &segments[0].frames, app_packages, None);
         for seg in &segments[1..segments.len() - 1] {
             out.push(truncate_header(&seg.header));
             add_frames(&mut out, &seg.frames, app_packages, None);
         }
         let root = segments.last().expect("segments.len() > 1 guaranteed by branch");
-        out.push(truncate_header(&root.header));
+        out.push(truncate_root_header(&root.header));
         add_frames(
             &mut out,
             &root.frames,
@@ -246,7 +271,7 @@ fn apply_hard_cap(out: Vec<String>, segments: &[Segment], max_lines: usize) -> V
     }
 
     let root = segments.last().expect("segments.len() > 1 guaranteed by guard");
-    let truncated_root_header = truncate_header(&root.header);
+    let truncated_root_header = truncate_root_header(&root.header);
     let root_idx = out
         .iter()
         .rposition(|line| line == &truncated_root_header);
@@ -373,6 +398,52 @@ mod tests {
         let out = truncate_header(&s);
         assert_eq!(out.chars().count(), 203);
         assert!(out.ends_with("..."));
+    }
+
+    #[test]
+    fn truncate_root_header_keeps_a_header_within_budget_whole() {
+        let s = format!(
+            "AssertionError: expected:<{}> but was:<{}>",
+            "x".repeat(200),
+            "y".repeat(200)
+        );
+        assert_eq!(truncate_root_header(&s), s);
+    }
+
+    #[test]
+    fn truncate_root_header_elides_the_middle_so_the_actual_value_survives() {
+        let s = format!("AssertionError: expected:<{}> but was:<actual>", "x".repeat(2000));
+        let out = truncate_root_header(&s);
+        assert!(out.starts_with("AssertionError: expected:<xxx"), "{out}");
+        assert!(out.ends_with("> but was:<actual>"), "{out}");
+        assert!(out.contains(" ... "), "{out}");
+        assert!(out.chars().count() < 700, "{}", out.chars().count());
+    }
+
+    #[test]
+    fn process_gives_the_root_cause_header_the_wider_budget() {
+        let wrapper = format!("java.lang.IllegalStateException: {}", "w".repeat(400));
+        let root = format!(
+            "Caused by: java.lang.AssertionError: expected:<{}> but was:<b>",
+            "a".repeat(250)
+        );
+        let trace = format!(
+            "{wrapper}\n\tat com.example.A.foo(A.java:1)\n{root}\n\tat com.example.B.bar(B.java:2)"
+        );
+        let out = process(&trace, &pkgs("com.example"), 50).expect("non-empty");
+        assert!(out.contains(&root), "root cause cut:\n{out}");
+        // A wrapper header is not what the failure is read for: it keeps the cap.
+        assert!(!out.contains(&wrapper), "wrapper header uncapped:\n{out}");
+    }
+
+    #[test]
+    fn process_single_segment_header_is_the_root_cause() {
+        let header = format!(
+            "org.opentest4j.AssertionFailedError: expected: <{}> but was: <b>",
+            "a".repeat(250)
+        );
+        let out = process(&header, &[], 50).expect("non-empty");
+        assert!(out.contains(&header), "{out}");
     }
 
     #[test]

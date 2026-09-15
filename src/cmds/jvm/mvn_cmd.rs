@@ -2367,13 +2367,25 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
     for failure in failures.iter() {
         // Maven's per-test coord form: `Class.method <<< FAILURE!`, [ERROR]-prefixed.
         writeln!(result, "[ERROR]   {} <<< FAILURE!", failure.name).ok();
+        // Same root-cause budget as the XML path's `stack_trace::process`: the
+        // last `Caused by:`, or the header itself when there is no chain.
+        let root = failure
+            .details
+            .iter()
+            .rposition(|d| d.starts_with("Caused by:"))
+            .unwrap_or(0);
         for (di, detail) in failure.details.iter().enumerate() {
             let rendered = if di == 0 {
                 shorten_exception_header(detail)
             } else {
                 detail.clone()
             };
-            writeln!(result, "[ERROR]     {}", truncate(&rendered, MAX_LINE_LENGTH)).ok();
+            let rendered = if di == root {
+                stack_trace::truncate_root_header(&rendered)
+            } else {
+                truncate(&rendered, MAX_LINE_LENGTH)
+            };
+            writeln!(result, "[ERROR]     {rendered}").ok();
         }
     }
     if total_failures_seen > MAX_FAILURES_SHOWN {
@@ -4187,6 +4199,22 @@ mod tests {
         // The help-link epilogue around it stays boilerplate.
         assert!(!out.contains("Re-run Maven"), "\n{out}");
         assert!(!out.contains("cwiki.apache.org"), "\n{out}");
+    }
+
+    /// Stdout twin of `parse_content_keeps_the_actual_value_of_a_long_root_cause`
+    /// (same real run, no XML reports): the `Caused by:` detail line was cut at
+    /// 200 chars too, mid-URL, before `but was:`.
+    #[test]
+    fn stdout_path_keeps_the_actual_value_of_a_long_root_cause() {
+        let out = filter_mvn_test(include_str!(
+            "../../../tests/fixtures/mvn_test_spock_long_assertion_raw.txt"
+        ));
+        assert!(
+            out.contains(
+                "but was:<https://api.example.com/candidates/575d83f6-4be6-1075-516b-be2cb327acd3/assessments/90224982-2017-4098-bfc8-48f7b60ec01d>"
+            ),
+            "\n{out}"
+        );
     }
 
     /// The bootstrap guard keys off a *failed* build, not off the mere

@@ -1,6 +1,5 @@
 ---
 source: src/cmds/jvm/mvn_cmd.rs
-assertion_line: 6060
 expression: out.text
 ---
 [ERROR] Tests run: 12, Failures: 4, Errors: 0, Skipped: 0
@@ -31,7 +30,7 @@ expression: out.text
 [ERROR]       	... 3 framework frames omitted
 [ERROR]       Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSource'
 [ERROR]       	... 3 framework frames omitted
-[ERROR]       Caused by: org.hibernate.HibernateException: Unable to acquire JDBC Connection; nested exception is java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed ...
+[ERROR]       Caused by: org.hibernate.HibernateException: Unable to acquire JDBC Connection; nested exception is java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30000ms.
 [ERROR]       	... 1 framework frames omitted
 [ERROR]       	at com.example.DbIntegrationIT.shouldConnect(DbIntegrationIT.java:88)
 [ERROR]       	... 1 framework frames omitted
