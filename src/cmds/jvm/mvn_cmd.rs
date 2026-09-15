@@ -682,6 +682,63 @@ struct MultiParts {
     build: String,      // [INFO] BUILD SUCCESS/FAILURE (+ Reactor Summary on failure); no Total time
     stray_errors: Vec<String>, // [ERROR] lines from dropped/Other segments
     footer_errors: Vec<String>, // [ERROR] cause lines from the post-footer epilogue
+    footer_stderr: Vec<String>, // a failed child process's stderr, after the epilogue
+}
+
+/// Stderr lines kept by `extract_footer_stderr`: the message and its context,
+/// not the depth of the trace below it.
+const MAX_FOOTER_STDERR_LINES: usize = 8;
+
+/// logback's own status output (`08:02:56,689 |-WARN in ch.qos.logback.core…`),
+/// which every forked test JVM prints to stderr when its config names an
+/// appender it never attaches.
+static LOGBACK_STATUS_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\d{2}:\d{2}:\d{2},\d{3} \|-\w+ in ch\.qos\.logback\.").unwrap()
+});
+
+/// Recover what a failed build's external process said on stderr.
+///
+/// `stream.rs` hands the filter `stdout ++ stderr`, so Maven's stderr lands
+/// after the build footer, where `extract_footer_errors` keeps only `[ERROR]`
+/// lines. When the failing mojo ran a child process (`exec:exec`), that
+/// child's stderr is the real diagnosis and Maven's own words are not: a real
+/// `verify` failed `bundle-install` with `Command execution failed.`, and
+/// bundler's `NameError` — the reason — never reached the agent. Everything
+/// else on that stream is JVM, JUL and logback noise, dropped by the rules
+/// the rest of the filter already uses. Only a trace's first frame is kept:
+/// it locates the error, the rest is depth the tee log still has.
+fn extract_footer_stderr(raw: &str) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    let mut in_footer = false;
+    let mut prev_frame = false;
+    for line in raw.lines() {
+        let stripped = strip_ansi(line);
+        let t = stripped.trim();
+        if !in_footer {
+            in_footer = BUILD_FOOTER_RE.is_match(t);
+            continue;
+        }
+        if t.is_empty()
+            || t.starts_with('[')
+            || is_mvn_startup_noise(t)
+            || LOGBACK_LOG_LINE_RE.is_match(t)
+            || LOGBACK_STATUS_LINE_RE.is_match(t)
+        {
+            continue;
+        }
+        let frame = t.starts_with("at ") || t.starts_with("from ");
+        if frame && prev_frame {
+            continue;
+        }
+        prev_frame = frame;
+        // Trailing whitespace only: a caret line under a quoted source line
+        // points at a column.
+        out.push(stripped.trim_end().to_string());
+        if out.len() == MAX_FOOTER_STDERR_LINES {
+            break;
+        }
+    }
+    out
 }
 
 /// Maximum post-footer cause lines kept; `-fae` reactors can abort in every
@@ -827,6 +884,9 @@ fn filter_segments(raw: &str) -> MultiParts {
         .filter(|e| !parts.stray_errors.contains(e) && !footer_error_already_rendered(e, &rendered))
         .collect();
     parts.footer_errors = cap_footer_errors(kept);
+    if raw.contains("BUILD FAILURE") {
+        parts.footer_stderr = extract_footer_stderr(raw);
+    }
     parts
 }
 
@@ -908,8 +968,9 @@ fn compose_multi(parts: &MultiParts, _goals_header: &str) -> String {
         out.push_str(parts.build.trim_end());
         out.push('\n');
     }
-    // After the footer, as Maven prints them.
-    for e in &parts.footer_errors {
+    // After the footer, as Maven prints them — stderr last, as the stream
+    // concatenation delivers it.
+    for e in parts.footer_errors.iter().chain(&parts.footer_stderr) {
         out.push_str(e);
         out.push('\n');
     }
@@ -2346,6 +2407,19 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
     // failure. Fall back to the compile filter so the actual error block
     // (which the raw output still contains) reaches the user.
     if !has_failures && clean.contains("BUILD FAILURE") {
+        // ...unless the test block did finish: a `Results:` block was parsed
+        // and the build failed in a *later* mojo (an `exec` step, a packaging
+        // plugin). The whole-output compile fallback then spends its head
+        // budget on the green tests' console chatter and elides the failing
+        // mojo — a real `verify` rendered 88 JUnit frames and `... +1981 more
+        // lines`. Plugin boundaries isolate that mojo, so render per segment.
+        // No recursion risk: the segmenter hands the test filter only what
+        // precedes the build footer.
+        // Line-wise: the marker regex is `^`-anchored without `(?m)`.
+        let has_markers = clean.lines().any(|l| PLUGIN_MARKER_RE.is_match(l.trim()));
+        if state != TestParseState::Testing && has_markers {
+            return filter_mvn_multi(output, "");
+        }
         return filter_mvn_compile(output);
     }
 
@@ -4215,6 +4289,43 @@ mod tests {
             ),
             "\n{out}"
         );
+    }
+
+    /// Real 2026-09-12 `./mvnw -q verify -DskipITs`: all 139 tests pass, then
+    /// `exec:exec (bundle-install)` fails because the child `bundle` dies on a
+    /// Ruby `NameError` (on stderr, concatenated after Maven's footer). The
+    /// render took the whole-output compile fallback and spent its head budget
+    /// on the green tests' console chatter — 88 JUnit frames, then
+    /// `... +1981 more lines` — so the test total, the failing mojo and the
+    /// child's error were all elided. Four raw-log greps followed, and the
+    /// NameError was never found.
+    #[test]
+    fn green_tests_then_a_failing_later_mojo_renders_that_mojo() {
+        let input = include_str!(
+            "../../../tests/fixtures/mvn_verify_green_tests_then_exec_failure_slice_raw.txt"
+        );
+        let out = filter_mvn_verify(input);
+        assert!(
+            out.contains("[INFO] Tests run: 139, Failures: 0, Errors: 0, Skipped: 1"),
+            "\n{out}"
+        );
+        assert!(out.contains("[ERROR] Command execution failed."), "\n{out}");
+        assert!(out.contains("[INFO] BUILD FAILURE"), "\n{out}");
+        assert!(
+            out.contains("exec-maven-plugin:3.3.0:exec (bundle-install) on project api"),
+            "\n{out}"
+        );
+        // The child process's own diagnosis, from stderr after the footer.
+        assert!(
+            out.contains("uninitialized constant DidYouMean::SPELL_CHECKERS (NameError)"),
+            "\n{out}"
+        );
+        // None of the green tests' console output, none of the stderr noise.
+        assert!(!out.contains("org.junit.platform"), "\n{out}");
+        assert!(!out.contains("more lines"), "\n{out}");
+        assert!(!out.contains("ch.qos.logback"), "\n{out}");
+        assert!(!out.contains("WARNING: A restricted method"), "\n{out}");
+        assert!(out.len() < 1500, "{} chars:\n{out}", out.len());
     }
 
     /// The bootstrap guard keys off a *failed* build, not off the mere
