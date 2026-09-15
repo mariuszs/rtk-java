@@ -721,6 +721,7 @@ fn extract_footer_stderr(raw: &str) -> Vec<String> {
         if t.is_empty()
             || t.starts_with('[')
             || is_mvn_startup_noise(t)
+            || JUL_LOG_LINE_RE.is_match(t)
             || LOGBACK_LOG_LINE_RE.is_match(t)
             || LOGBACK_STATUS_LINE_RE.is_match(t)
         {
@@ -4350,6 +4351,34 @@ mod tests {
         );
         assert!(!out.contains("Tests run: 1,"), "\n{out}");
         assert!(out.contains("[INFO] BUILD SUCCESS"), "\n{out}");
+    }
+
+    /// Real 2026-09-15 git-client `clean verify` with one failing test: Brave's
+    /// span reporter logs every HTTP span through java.util.logging, so its
+    /// `INFO: {"traceId":…}` lines land on stderr after Maven's footer and the
+    /// footer-stderr recovery rendered three of them under `BUILD FAILURE`.
+    /// JUL records carry no diagnosis at `INFO`; the child process's own error
+    /// line after them must still survive.
+    #[test]
+    fn footer_stderr_drops_jul_info_records() {
+        let base = include_str!(
+            "../../../tests/fixtures/mvn_verify_green_tests_then_exec_failure_slice_raw.txt"
+        );
+        let jul = concat!(
+            r#"INFO: {"traceId":"7c70267dba8b82fc","id":"7c70267dba8b82fc","kind":"CLIENT","name":"GET","timestamp":1789462582139544,"duration":332053,"localEndpoint":{"serviceName":"gitClient","ipv4":"172.20.1.2"},"tags":{"http.method":"GET","http.path":"/example/friendly-id.git/info/refs"}}"#,
+            "\n",
+            r#"INFO: {"traceId":"f623c432ede573df","id":"f623c432ede573df","kind":"CLIENT","name":"POST","timestamp":1789462582484836,"duration":304140,"localEndpoint":{"serviceName":"gitClient","ipv4":"172.20.1.2"},"tags":{"http.method":"POST","http.path":"/example/friendly-id.git/git-upload-pack"}}"#,
+            "\n",
+        );
+        let marker = "/home/user/.local/share/gem/ruby/gems/bundler-2.2.22/lib/bundler/vendor/thor/lib/thor/error.rb:105:";
+        assert_eq!(base.matches(marker).count(), 1, "fixture shape changed");
+        let input = base.replacen(marker, &format!("{jul}{marker}"), 1);
+        let out = filter_mvn_verify(&input);
+        assert!(!out.contains("traceId"), "\n{out}");
+        assert!(
+            out.contains("uninitialized constant DidYouMean::SPELL_CHECKERS (NameError)"),
+            "\n{out}"
+        );
     }
 
     /// The bootstrap guard keys off a *failed* build, not off the mere
