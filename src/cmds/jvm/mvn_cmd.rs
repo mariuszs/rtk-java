@@ -1807,9 +1807,9 @@ fn render_failure_body(out: &mut String, f: &TestFailure) {
     // Cause headers already printed as the trace. When a Spring context fails
     // the framework *logs* the same chain into `<system-out>`, so the report
     // carries it twice — once in `<failure>` (rendered above, elided) and once
-    // verbatim in the captured block. Only exact repeats are dropped: a
-    // captured chain that says more than the trace is the reason the block is
-    // shown at all.
+    // verbatim in the captured block. Only repeats of the same cause are
+    // dropped: a captured chain that says something the trace does not is the
+    // reason the block is shown at all.
     let mut trace_causes: HashSet<&str> = HashSet::new();
     if let Some(trace) = &f.stack_trace {
         let mut lines = trace.lines().peekable();
@@ -1833,7 +1833,7 @@ fn render_failure_body(out: &mut String, f: &TestFailure) {
     if let Some(output) = f.test_output.as_deref().filter(|s| !s.is_empty()) {
         let kept: Vec<&str> = output
             .lines()
-            .filter(|l| !trace_causes.contains(l.trim()))
+            .filter(|l| !repeats_a_trace_cause(l, &trace_causes))
             .collect();
         // Dropping the repeats can empty the block; a bare header would then
         // read as "the test logged nothing", which is not what happened.
@@ -1845,6 +1845,40 @@ fn render_failure_body(out: &mut String, f: &TestFailure) {
         }
     }
 }
+
+/// True when a captured-output line is the same cause a trace line above
+/// already rendered.
+///
+/// Exact matching alone could never catch the common case: the trace's copy
+/// comes through `truncate_header` at 200 chars while the framework logs the
+/// message whole, so the two differ by a `...` suffix and everything past it.
+/// A real 2026-09-17 auth run (`CustomFieldPersistenceTest`) spent 2.3k of a
+/// 5.6k-char render on four such near-duplicates. The trace's copy is the one
+/// kept: it is the one rtk's truncation policy is applied to, and the root
+/// cause there already gets the wider two-ended budget.
+fn repeats_a_trace_cause(line: &str, trace_causes: &HashSet<&str>) -> bool {
+    let t = line.trim();
+    if trace_causes.contains(t) {
+        return true;
+    }
+    if !t.starts_with("Caused by:") {
+        return false;
+    }
+    // A truncated header ends in `...`; a middle-elided one carries ` ... `.
+    // Both leave a prefix long enough to identify the cause on its own.
+    trace_causes.iter().any(|cause| {
+        cause
+            .split(" ... ")
+            .next()
+            .and_then(|head| head.strip_suffix("...").or(Some(head)))
+            .is_some_and(|head| head.len() >= MIN_CAUSE_PREFIX_MATCH && t.starts_with(head))
+    })
+}
+
+/// How much of a truncated cause header must line up before a captured line
+/// counts as the same cause. A `Caused by: <type>: ` prefix is shared by every
+/// cause in a Spring cascade, so the overlap has to reach into the message.
+const MIN_CAUSE_PREFIX_MATCH: usize = 80;
 
 /// Drop leading and trailing blank lines left behind after filtering.
 fn trim_blank_edges<'s, 'a>(lines: &'s [&'a str]) -> &'s [&'a str] {
@@ -1883,6 +1917,16 @@ fn header_duplicates_label(header: &str, f: &TestFailure) -> bool {
 /// underlying output is the same, so they are excluded from the signature.
 static OUTPUT_TRUNCATION_MARKER_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^\.\.\. \(\d+ (?:lines|chars) truncated\)$").unwrap());
+
+/// Digit runs in a captured-output line. A log block's numbers are stamps,
+/// ports, pids and durations — a 2026-09-16 workspace-manager run failed four
+/// tests with one NPE from one helper, and the only difference between their
+/// captured blocks was a mock server's port and the clock, which was enough
+/// to defeat the verbatim dedup and render all four bodies (~6k of a 10k-char
+/// render). Applied to the captured output alone: the label and the exception
+/// chain stay byte-exact, so `expected:<403> but was:<200>` still separates
+/// two failures that differ only in an asserted number.
+static VOLATILE_NUMBER_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d+").unwrap());
 
 /// A conservative identity for a failure's diagnostic body, used to render
 /// repeated bodies once. Built from the exception-chain message lines (top
@@ -1928,7 +1972,7 @@ fn failure_body_signature(f: &TestFailure) -> Option<String> {
                 continue;
             }
             has_output = true;
-            sig.push_str(t);
+            sig.push_str(&VOLATILE_NUMBER_RE.replace_all(t, "N"));
             sig.push('\n');
         }
     }
@@ -7053,6 +7097,77 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(
             out.contains("CONSOLE") && out.contains("The following values are valid"),
             "remediation text lost:\n{out}"
+        );
+    }
+
+    /// Real 2026-09-16 workspace-manager run: four tests failed with the same
+    /// NPE from the same helper, and the dedup missed every one — their
+    /// captured blocks differed only in a mock server's port number and the
+    /// log stamp. The four full bodies were ~6k of a 10k-char render. Fixture
+    /// is a real surefire report produced by the shape (four tests, one
+    /// helper, java.util.logging records carrying the port).
+    #[test]
+    fn render_failure_block_dedups_bodies_that_differ_only_in_volatile_log_values() {
+        let xml = include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.app.MockServerFlowTest.xml"
+        );
+        let result = surefire_reports::parse_content(xml, &pkgs("com.example"))
+            .expect("real surefire report parses");
+        assert_eq!(result.failures.len(), 4, "fixture must carry 4 failures");
+
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &result.failures);
+
+        assert_eq!(
+            out.matches("<<< FAILURE!").count(),
+            4,
+            "every failing test name must still be greppable:\n{out}"
+        );
+        assert_eq!(
+            out.matches("MockServerFlowTest.domainFor").count(),
+            1,
+            "the identical NPE body must render once:\n{out}"
+        );
+        assert_eq!(
+            out.matches("... same failure as").count(),
+            3,
+            "each repeat needs its elision reference:\n{out}"
+        );
+    }
+
+    /// Same real report: a `Caused by:` chain the trace already rendered is
+    /// repeated verbatim inside the captured block, and the exact-match dedup
+    /// could never catch it — the trace's copy is truncated to 200 chars
+    /// while the logged copy is whole. 2.3k of a 5.6k-char auth render
+    /// (2026-09-17 `CustomFieldPersistenceTest`) was that repeat.
+    #[test]
+    fn captured_output_drops_cause_lines_the_trace_printed_truncated() {
+        let xml = include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.app.ContextCascadeTest.xml"
+        );
+        let result = surefire_reports::parse_content(xml, &pkgs("com.example"))
+            .expect("real surefire report parses");
+        let f = result.failures.first().expect("one failure in the fixture");
+
+        let mut out = String::new();
+        super::render_failure_body(&mut out, f);
+
+        for cause in [
+            "'scimConfigRepository'",
+            "'jpaSharedEM_primaryEntityManagerFactory':",
+            "[com/example/app/JpaConfig.class]",
+        ] {
+            assert_eq!(
+                out.matches(cause).count(),
+                1,
+                "cause {cause} rendered twice — trace copy is truncated, logged copy whole:\n{out}"
+            );
+        }
+        // The root cause is the line the failure is read for: it must survive
+        // whole, once, whichever copy carries it.
+        assert!(
+            out.contains("but expecting [text[] (Types#JSON)]"),
+            "root cause lost:\n{out}"
         );
     }
 
