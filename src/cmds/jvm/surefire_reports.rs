@@ -338,6 +338,21 @@ static CAPTURED_DEBUG_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 
+/// The header line of a java.util.logging record as it lands in captured
+/// output: `Sep 16, 2026 10:15:58 AM io.fabric8.mockwebserver.MockWebServer
+/// info`. It carries the logger and the method but no level — the level is on
+/// the line below — so it is only dropped together with a low-level body.
+static CAPTURED_JUL_HEADER_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*\w{3} \d{1,2}, \d{4} \d{1,2}:\d{2}:\d{2} [AP]M \S").unwrap());
+
+/// The message line of a java.util.logging record, at a level that never
+/// diagnoses a failure. `WARNING:` and `SEVERE:` are deliberately absent: a
+/// fabric8 mockwebserver suite floods the block with `INFO:` accept/close
+/// chatter (11k chars over the 2026-09-15..18 window, never a diagnosis)
+/// while its `SEVERE:` records are exactly what the agent came for.
+static CAPTURED_JUL_LOW_LEVEL_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*(?:FINEST|FINER|FINE|CONFIG|INFO):\s").unwrap());
+
 /// Banner Spring's `ConditionEvaluationReportLogger` prints when a context
 /// fails to load. Everything from it on is the report: `Positive matches`,
 /// `Negative matches`, `Exclusions`, `Unconditional classes` — either bare
@@ -457,8 +472,28 @@ fn collapse_repeated_log_lines(lines: Vec<&str>) -> (Vec<&str>, usize) {
 /// only findable once the colour codes wrapped around it are gone.
 fn clean_captured(text: &str) -> String {
     let text = CAPTURED_ANSI_RE.replace_all(text, "");
+    let lines: Vec<&str> = text.lines().collect();
     let mut kept: Vec<&str> = Vec::new();
-    for line in text.lines() {
+    let mut skip_next_jul_body = false;
+    for (i, line) in lines.iter().copied().enumerate() {
+        // A java.util.logging record is two lines: a `Mon DD, YYYY h:mm:ss AM
+        // <logger> <method>` header and the message under a bare level. The
+        // header carries no level of its own, so the decision has to look at
+        // the line below it — and only the low levels go, because a WARNING
+        // or SEVERE record is routinely the diagnosis.
+        if skip_next_jul_body {
+            // Validated by the lookahead that dropped the header above.
+            skip_next_jul_body = false;
+            continue;
+        }
+        if CAPTURED_JUL_HEADER_RE.is_match(line)
+            && lines
+                .get(i + 1)
+                .is_some_and(|next| CAPTURED_JUL_LOW_LEVEL_RE.is_match(next))
+        {
+            skip_next_jul_body = true;
+            continue;
+        }
         if line.trim() == CONDITIONS_REPORT_BANNER {
             // The `====` rule printed directly above the banner belongs to it.
             if kept.last().is_some_and(|l| is_banner_rule(l)) {
@@ -1138,6 +1173,44 @@ real stderr content the agent needs";
         assert!(
             !out.contains("serviceability tool"),
             "serviceability hint leaked: {out}"
+        );
+    }
+
+    #[test]
+    fn combine_output_drops_jul_info_records() {
+        // Real 2026-09-16 workspace-manager traffic: a fabric8 mockwebserver
+        // suite logs through java.util.logging, which prints every record as
+        // two lines — a `Mon DD, YYYY h:mm:ss AM <logger> <method>` header and
+        // the message under a bare `INFO:` level. 11k chars over the window,
+        // never a diagnosis. The compile filter and the build footer already
+        // drop these; captured output did not. WARNING/SEVERE records stay:
+        // there the record IS the diagnostic.
+        let stderr = "\
+Sep 16, 2026 10:15:58 AM io.fabric8.mockwebserver.MockWebServer info
+INFO: MockWebServer[39365] starting to accept connections on localhost
+Sep 16, 2026 10:15:59 AM io.fabric8.mockwebserver.MockWebServer info
+INFO: MockWebServer[39365] received request: GET /apis/apps/v1/namespaces/projector/deployments HTTP/1.1 and responded: HTTP/1.1 200 OK
+Sep 16, 2026 10:15:59 AM com.example.app.ProjectorClient warn
+WARNING: rolling back the deployment
+Sep 16, 2026 10:15:59 AM com.example.app.ProjectorClient severe
+SEVERE: the namespace is gone";
+        let out = super::combine_test_output("", stderr, 4000).expect("captured output");
+        assert!(
+            !out.contains("MockWebServer[39365]"),
+            "JUL INFO record leaked:\n{out}"
+        );
+        assert!(
+            !out.contains("io.fabric8.mockwebserver.MockWebServer info"),
+            "the dropped record's own header leaked:\n{out}"
+        );
+        assert!(
+            out.contains("WARNING: rolling back the deployment")
+                && out.contains("SEVERE: the namespace is gone"),
+            "WARNING/SEVERE records must stay:\n{out}"
+        );
+        assert!(
+            out.matches("com.example.app.ProjectorClient").count() == 2,
+            "a kept record must keep its own logger header:\n{out}"
         );
     }
 
