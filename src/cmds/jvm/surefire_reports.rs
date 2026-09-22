@@ -122,6 +122,9 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
 
     let mut reader = Reader::from_str(xml);
     reader.config_mut().trim_text(false);
+    // `<failure …/>` carries no trace body and would otherwise fire only
+    // `Event::Empty`, never the `End` that records the failure.
+    reader.config_mut().expand_empty_elements = true;
     let mut buf = Vec::new();
 
     let mut result = SurefireResult::default();
@@ -1434,6 +1437,30 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
                 );
             }
         }
+    }
+
+    /// A `<failure/>` with no trace body is legal XML and fires only
+    /// `Event::Empty`, never `Event::End` — it used to be counted in the
+    /// suite total but never listed.
+    #[test]
+    fn parse_content_self_closing_failure_is_listed() {
+        let xml = r#"<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.EmptyTraceTest" tests="2" failures="1" errors="1" skipped="0">
+  <testcase name="fails" classname="com.example.EmptyTraceTest">
+    <failure message="expected: &lt;1&gt; but was: &lt;2&gt;" type="org.opentest4j.AssertionFailedError"/>
+  </testcase>
+  <testcase name="errors" classname="com.example.EmptyTraceTest">
+    <error type="java.lang.IllegalStateException"/>
+  </testcase>
+</testsuite>"#;
+        let result = parse_content(xml, &[]).expect("parses");
+        assert_eq!(result.failures.len(), 2, "{:?}", result.failures);
+        assert_eq!(result.failures[0].test_method, "fails");
+        assert_eq!(result.failures[0].kind, FailureKind::Failure);
+        assert_eq!(result.failures[0].message.as_deref(), Some("expected: <1> but was: <2>"));
+        assert_eq!(result.failures[1].test_method, "errors");
+        assert_eq!(result.failures[1].kind, FailureKind::Error);
+        assert!(result.failures[1].stack_trace.is_none(), "{:?}", result.failures[1]);
     }
 
     #[test]
