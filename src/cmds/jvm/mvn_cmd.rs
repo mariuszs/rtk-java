@@ -6724,6 +6724,41 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         );
     }
 
+    /// A JUnit 5 `@Suite` announces its member classes, yet Surefire writes a
+    /// single report named after the suite (JUnit 4 `@RunWith(Suite.class)`
+    /// does the same). Class scoping must still admit it — real run,
+    /// 2026-09-22, Surefire 3.5.6; the report's `<properties>` env dump is
+    /// stripped.
+    #[test]
+    fn enrich_admits_the_single_report_of_a_junit_suite() {
+        let tmp = tempfile::tempdir().unwrap();
+        let reports_dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&reports_dir).unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/surefire-reports/TEST-com.example.AllTests.xml",
+            reports_dir.join("TEST-com.example.AllTests.xml"),
+        )
+        .unwrap();
+        let started = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let raw = "[INFO] Running com.example.AllTests\n\
+                   [INFO] Running com.example.ATest\n\
+                   [INFO] Running com.example.BTest\n";
+        let scope = ReportScope::for_run(started, raw);
+        // Admitted by the class scope itself, not rescued by the
+        // matched-nothing fallback in `enrich_with_reports`.
+        let direct = surefire_reports::parse_dir(&reports_dir, Some(&scope), &[]).unwrap();
+        assert_eq!((direct.files_read, direct.files_skipped_stale), (1, 0));
+        let out = super::enrich_with_reports(
+            "[ERROR] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE\n",
+            tmp.path(),
+            scope,
+            &pkgs("com.example"),
+            "test",
+        );
+        assert!(out.text.contains("com.example.BTest.fails <<< FAILURE!"), "\n{}", out.text);
+        assert!(out.text.contains("expected: <1> but was: <2>"), "\n{}", out.text);
+    }
+
     #[test]
     fn enrich_drops_text_failures_block_when_xml_has_failures() {
         // Regression: before deduplication the user saw two "Failures"
