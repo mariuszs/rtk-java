@@ -3345,9 +3345,10 @@ fn filter_mvn_utility(output: &str) -> String {
     kept.join("\n")
 }
 
-/// Filter `mvn clean` output — collapse to one line showing what was deleted
-/// and total time. If clean is combined with a later goal (`mvn clean compile`)
-/// that fails, keep `[ERROR]` lines so the user sees the actual compile error.
+/// Filter single-goal `mvn clean` output — collapse to the native build line,
+/// keeping `[ERROR]` lines on `BUILD FAILURE`. A run that died before the
+/// reactor never prints either verdict; it gets its `[ERROR]` block instead of
+/// the success line (see [`bootstrap_error_block`]).
 fn filter_mvn_clean(output: &str) -> String {
     let clean = strip_ansi(output);
     let mut build_failure = false;
@@ -3380,6 +3381,13 @@ fn filter_mvn_clean(output: &str) -> String {
             result.push_str(&truncate(err, MAX_LINE_LENGTH));
         }
         return result;
+    }
+
+    if !clean.contains("BUILD SUCCESS") {
+        let block = bootstrap_error_block(&clean);
+        if !block.is_empty() {
+            return block;
+        }
     }
 
     // Hard subset: clean has no native compact line other than the build result.
@@ -5736,6 +5744,26 @@ mod tests {
     fn clean_pass_is_native_build_line() {
         let out = filter_mvn_clean("[INFO] Deleting /p/target\n[INFO] BUILD SUCCESS\n[INFO] Total time: 0.4 s\n");
         assert_eq!(out, "[INFO] BUILD SUCCESS");
+    }
+
+    /// `mvn clean` that dies before the reactor prints `[ERROR]` lines but no
+    /// `BUILD FAILURE`; the filter used to answer `BUILD SUCCESS` to it.
+    #[test]
+    fn clean_bootstrap_failure_reports_the_error_not_a_fabricated_success() {
+        for (fixture, needle) in [
+            (
+                include_str!("../../../tests/fixtures/mvn_extension_resolution_failure_raw.txt"),
+                "could not be resolved",
+            ),
+            (
+                include_str!("../../../tests/fixtures/mvn_no_pom_raw.txt"),
+                "there is no POM in this directory",
+            ),
+        ] {
+            let out = filter_mvn_clean(fixture);
+            assert!(!out.contains("BUILD SUCCESS"), "\n{out}");
+            assert!(out.contains(needle), "lost {needle:?}:\n{out}");
+        }
     }
 
     // --- goal routing (dispatch / route_goal) ---
