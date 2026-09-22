@@ -555,10 +555,8 @@ fn drop_jvm_runtime_noise(text: &str) -> String {
         .join("\n")
 }
 
-/// Collapse runs of blank lines to a single one. Spring's
-/// `CONDITIONS EVALUATION REPORT`, dumped into `system-out` on every context
-/// load failure, is ~80 lines of which most are blank — the char cap alone
-/// lets it through as lines the agent still pays for.
+/// Keep the last `max_lines` lines behind a `... (N lines truncated)` marker,
+/// plus the lines [`rescued_from_cut`] pulls back out of the cut region.
 fn keep_last_lines(text: &str, max_lines: usize) -> String {
     let lines: Vec<&str> = text.lines().collect();
     if lines.len() <= max_lines {
@@ -594,6 +592,10 @@ fn rescued_from_cut<'a>(cut: &[&'a str]) -> Vec<&'a str> {
     rescued
 }
 
+/// Collapse runs of blank lines to a single one. Spring's
+/// `CONDITIONS EVALUATION REPORT`, dumped into `system-out` on every context
+/// load failure, is ~80 lines of which most are blank — the char cap alone
+/// lets it through as lines the agent still pays for.
 fn collapse_blank_runs(text: &str) -> String {
     let mut out = String::with_capacity(text.len());
     let mut blank_run = false;
