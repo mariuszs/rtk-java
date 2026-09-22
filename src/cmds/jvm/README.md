@@ -40,10 +40,20 @@ frame class names against the Java `groupId` from `pom.xml`:
 2. Fallback: `<project>/<parent>/<groupId>`.
 3. Otherwise: no filtering — full stack traces are preserved.
 
-### Time-gated report reads
+### Scoped report reads
 
-Stale XML reports from previous runs are skipped: only files with
-`mtime >= started_at` (captured just before `mvn` executes) are parsed.
+Only this run's XML reports are parsed (`ReportScope`):
+
+- **Time window** — `started_at` (captured just before `mvn` executes) up
+  to the child's exit. Keeps out a previous run's files and anything a
+  concurrent build writes after this one finished.
+- **Announced classes** — when stdout carries `[INFO] Running <class>`
+  lines, only `TEST-<class>.xml` for those classes counts. Keeps out a
+  concurrent `-pl other-module` build in the same checkout (IDE, second
+  agent), whose fresh reports otherwise pass the time window. Without
+  `Running` lines (`-q`) the window is the only gate; if the announced names
+  match no report at all (`usePhrasedClassNameInRunning`), the read falls
+  back to the window rather than lose every report.
 
 ### Red-flag heuristic for "0 tests"
 

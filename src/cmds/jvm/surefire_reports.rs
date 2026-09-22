@@ -7,7 +7,7 @@ use crate::cmds::jvm::stack_trace;
 use quick_xml::events::{BytesStart, Event};
 use quick_xml::Reader;
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::sync::LazyLock;
 use std::time::SystemTime;
@@ -621,14 +621,76 @@ fn truncate_test_output(output: &str, max_chars: usize) -> String {
     format!("... ({skip} chars truncated)\n{tail}")
 }
 
+/// `[INFO] Running com.example.FooTest`, optionally behind mvnd `[module]`
+/// tags. Surefire prints `"Running " + class.getName()`.
+static RUNNING_CLASS: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"(?m)^(?:\[[^\]\n]*\] )*\[INFO\] Running ([\w.$]+)\s*$").unwrap()
+});
+
+/// Which report files belong to the run being rendered. `since` alone keeps
+/// out a previous run's files; `until` and `suites` keep out a concurrent
+/// build's (`-pl other-module` from an IDE or a second agent in the same
+/// checkout), whose fresh reports would otherwise pass as this run's.
+#[derive(Debug, Clone)]
+pub struct ReportScope {
+    pub since: SystemTime,
+    /// The child's exit: nothing this run wrote is newer.
+    pub until: Option<SystemTime>,
+    /// Test classes the run announced on stdout; `None` when it announced
+    /// none (`-q`), so class scoping is off.
+    pub suites: Option<HashSet<String>>,
+}
+
+impl ReportScope {
+    /// Scope for a run started at `started_at` whose child has just exited,
+    /// with `raw` its stdout.
+    pub fn for_run(started_at: SystemTime, raw: &str) -> Self {
+        let suites: HashSet<String> = RUNNING_CLASS
+            .captures_iter(&crate::core::utils::strip_ansi(raw))
+            .map(|c| c[1].to_string())
+            .collect();
+        Self {
+            since: started_at,
+            until: Some(SystemTime::now()),
+            suites: (!suites.is_empty()).then_some(suites),
+        }
+    }
+
+    /// The same window without class scoping.
+    pub fn without_suites(&self) -> Self {
+        Self {
+            suites: None,
+            ..self.clone()
+        }
+    }
+
+    fn admits(&self, suite: &str, mtime: SystemTime) -> bool {
+        mtime >= self.since
+            && self.until.is_none_or(|until| mtime <= until)
+            && self.suites.as_ref().is_none_or(|s| s.contains(suite))
+    }
+}
+
+/// Time gate only: everything written at or after `since`.
+impl From<SystemTime> for ReportScope {
+    fn from(since: SystemTime) -> Self {
+        Self {
+            since,
+            until: None,
+            suites: None,
+        }
+    }
+}
+
 /// Scan a directory for `TEST-*.xml` files and merge their parsed results.
 ///
-/// - Files whose `mtime < since` are skipped and counted in `files_skipped_stale`.
+/// - Files outside `scope` (stale, written after the run, or a suite the run
+///   did not announce) are skipped and counted in `files_skipped_stale`.
 /// - Files that parse to `None` (malformed) count in `files_malformed`.
 /// - Returns `None` only if the directory does not exist or is empty.
 pub fn parse_dir(
     dir: &Path,
-    since: Option<SystemTime>,
+    scope: Option<&ReportScope>,
     app_packages: &[String],
 ) -> Option<SurefireResult> {
     if !dir.exists() || !dir.is_dir() {
@@ -644,23 +706,19 @@ pub fn parse_dir(
         let Some(name) = path.file_name().and_then(|s| s.to_str()) else {
             continue;
         };
-        if !name.starts_with("TEST-") || !name.ends_with(".xml") {
+        let Some(suite) = name
+            .strip_prefix("TEST-")
+            .and_then(|n| n.strip_suffix(".xml"))
+        else {
             continue;
-        }
+        };
         any_candidate = true;
 
-        if let Some(since) = since {
+        if let Some(scope) = scope {
             let modified = entry.metadata().ok().and_then(|m| m.modified().ok());
-            match modified {
-                Some(m) if m >= since => {}
-                Some(_) => {
-                    aggregate.files_skipped_stale += 1;
-                    continue;
-                }
-                None => {
-                    aggregate.files_skipped_stale += 1;
-                    continue;
-                }
+            if !modified.is_some_and(|m| scope.admits(suite, m)) {
+                aggregate.files_skipped_stale += 1;
+                continue;
             }
         }
 
@@ -785,10 +843,75 @@ mod tests {
         copy_fixture(&tmp, "TEST-com.example.FailingTest.xml", Some(fresh));
 
         let since = now;
-        let result = super::parse_dir(tmp.path(), Some(since), &[]).expect("parses");
+        let result = super::parse_dir(tmp.path(), Some(&since.into()), &[]).expect("parses");
         assert_eq!(result.files_read, 1, "only the fresh file counts");
         assert_eq!(result.files_skipped_stale, 1);
         assert_eq!(result.summary.failures, 2, "from FailingTest only");
+    }
+
+    #[test]
+    fn parse_dir_scope_skips_files_written_after_the_run() {
+        let tmp = tempfile::tempdir().unwrap();
+        let end = SystemTime::now();
+        copy_fixture(
+            &tmp,
+            "TEST-com.example.PassingTest.xml",
+            Some(end - Duration::from_secs(1)),
+        );
+        // A concurrent build wrote this one after our process exited.
+        copy_fixture(
+            &tmp,
+            "TEST-com.example.FailingTest.xml",
+            Some(end + Duration::from_secs(5)),
+        );
+        let scope = ReportScope {
+            since: end - Duration::from_secs(60),
+            until: Some(end),
+            suites: None,
+        };
+
+        let result = super::parse_dir(tmp.path(), Some(&scope), &[]).expect("parses");
+        assert_eq!(result.files_read, 1);
+        assert_eq!(result.files_skipped_stale, 1);
+        assert_eq!(result.summary.failures, 0, "late report ignored");
+    }
+
+    #[test]
+    fn parse_dir_scope_skips_suites_the_run_did_not_announce() {
+        let tmp = tempfile::tempdir().unwrap();
+        copy_fixture(&tmp, "TEST-com.example.PassingTest.xml", None);
+        copy_fixture(&tmp, "TEST-com.example.FailingTest.xml", None);
+        let scope = ReportScope::for_run(
+            SystemTime::now() - Duration::from_secs(60),
+            "[INFO] Running com.example.PassingTest\n",
+        );
+
+        let result = super::parse_dir(tmp.path(), Some(&scope), &[]).expect("parses");
+        assert_eq!(result.files_read, 1);
+        assert_eq!(result.summary.failures, 0, "FailingTest was not announced");
+    }
+
+    #[test]
+    fn report_scope_reads_running_lines_behind_ansi_and_mvnd_tags() {
+        let raw = "[service-a] \x1b[1;34m[INFO]\x1b[m Running com.example.FooTest\n\
+                   [\x1b[1;34mINFO\x1b[m] Running com.example.Outer$InnerTest\n\
+                   [INFO] Running the widget pipeline\n";
+        let suites = ReportScope::for_run(SystemTime::now(), raw)
+            .suites
+            .expect("classes announced");
+        assert_eq!(
+            suites,
+            HashSet::from([
+                "com.example.FooTest".to_string(),
+                "com.example.Outer$InnerTest".to_string(),
+            ])
+        );
+    }
+
+    #[test]
+    fn report_scope_without_running_lines_does_not_scope_by_class() {
+        let raw = "[ERROR] Tests run: 1, Failures: 1\n[INFO] BUILD FAILURE\n";
+        assert!(ReportScope::for_run(SystemTime::now(), raw).suites.is_none());
     }
 
     #[test]

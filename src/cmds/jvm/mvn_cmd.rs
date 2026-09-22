@@ -5,7 +5,7 @@
 //! Strips thousands of noise lines to compact failure reports (99%+ savings).
 
 use crate::cmds::jvm::stack_trace;
-use crate::cmds::jvm::surefire_reports::{self, FailureKind, SurefireResult, TestFailure, TestSummary};
+use crate::cmds::jvm::surefire_reports::{self, FailureKind, ReportScope, SurefireResult, TestFailure, TestSummary};
 use crate::core::runner;
 use crate::core::tracking;
 use crate::core::utils::{exit_code_from_status, resolved_command, strip_ansi, truncate};
@@ -355,8 +355,9 @@ fn run_tests_like(
             // frame filtering matches the XML enrichment's behavior — keeps
             // the fallback (no XML reports) format consistent with XML output.
             let filtered = filter_mvn_tests_with_goal(raw, goal_str, &app_pkgs);
+            let scope = ReportScope::for_run(started_at, raw);
             let enriched =
-                enrich_with_reports(&filtered, &cwd_for_filter, started_at, &app_pkgs, goal_str);
+                enrich_with_reports(&filtered, &cwd_for_filter, scope, &app_pkgs, goal_str);
             finalize_enriched(enriched, &tee_label_for_filter)
         },
         runner::RunOptions::with_tee(&tee_label),
@@ -1088,8 +1089,9 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
             }
             let mut parts = filter_segments(raw);
             if enrich && !parts.tests.trim().is_empty() {
+                let scope = ReportScope::for_run(started_at, raw);
                 let enriched =
-                    enrich_with_reports(&parts.tests, &cwd, started_at, &app_pkgs, test_goal);
+                    enrich_with_reports(&parts.tests, &cwd, scope, &app_pkgs, test_goal);
                 parts.tests = finalize_enriched(enriched, &tee_label_for_filter);
             }
             compose_multi(&parts, &header)
@@ -1322,13 +1324,13 @@ fn module_for_dir(dir: &std::path::Path, cwd: &std::path::Path) -> Option<String
 /// Returns `None` only when no dir produced any output.
 fn collect_reports(
     dirs: &[PathBuf],
-    since: std::time::SystemTime,
+    scope: &ReportScope,
     app_packages: &[String],
     cwd: &std::path::Path,
 ) -> Option<SurefireResult> {
     let mut merged: Option<SurefireResult> = None;
     for dir in dirs {
-        let Some(r) = surefire_reports::parse_dir(dir, Some(since), app_packages) else {
+        let Some(r) = surefire_reports::parse_dir(dir, Some(scope), app_packages) else {
             continue;
         };
         let module = module_for_dir(dir, cwd);
@@ -1371,13 +1373,17 @@ pub(crate) struct Enriched {
 /// summary is left unchanged and the full breakdown goes only into the
 /// returned digest, with `reference` signaling a
 /// "[full per-class report: <path>]" pointer line is needed.
+///
+/// Only reports inside `scope` are read (see [`ReportScope`]); a bare
+/// `SystemTime` is the time gate alone.
 pub(crate) fn enrich_with_reports(
     text_summary: &str,
     cwd: &std::path::Path,
-    since: std::time::SystemTime,
+    scope: impl Into<ReportScope>,
     app_packages: &[String],
     goal: &str,
 ) -> Enriched {
+    let scope = scope.into();
     let passthrough = |text: String| Enriched {
         text,
         digest: None,
@@ -1398,8 +1404,17 @@ pub(crate) fn enrich_with_reports(
     let passing = !zero_tests && !has_failures;
 
     let (sf_dirs, fs_dirs) = discover_report_dirs(cwd);
-    let sf = collect_reports(&sf_dirs, since, app_packages, cwd);
-    let fs = collect_reports(&fs_dirs, since, app_packages, cwd);
+    let mut sf = collect_reports(&sf_dirs, &scope, app_packages, cwd);
+    let mut fs = collect_reports(&fs_dirs, &scope, app_packages, cwd);
+    // Class scoping matched nothing although the run announced classes: the
+    // `Running` lines carry phrased names (`usePhrasedClassNameInRunning`),
+    // not class names. Fall back to the time window rather than lose every
+    // report.
+    if scope.suites.is_some() && counts(sf.as_ref()).0 + counts(fs.as_ref()).0 == 0 {
+        let unscoped = scope.without_suites();
+        sf = collect_reports(&sf_dirs, &unscoped, app_packages, cwd);
+        fs = collect_reports(&fs_dirs, &unscoped, app_packages, cwd);
+    }
     let markers = PluginMarkers::from_rendered(text_summary);
     let digest = render_classes_digest(goal, sf.as_ref(), fs.as_ref(), &markers);
 
@@ -6601,6 +6616,68 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert_ne!(with_empty, with_pkgs);
     }
 
+    /// A project holding PassingTest's and FailingTest's fresh reports, as a
+    /// concurrent `-pl other-module` build would leave them next to ours.
+    fn project_with_passing_and_failing_reports() -> tempfile::TempDir {
+        let tmp = tempfile::tempdir().unwrap();
+        let reports_dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&reports_dir).unwrap();
+        for name in [
+            "TEST-com.example.PassingTest.xml",
+            "TEST-com.example.FailingTest.xml",
+        ] {
+            std::fs::copy(
+                format!("tests/fixtures/java/surefire-reports/{name}"),
+                reports_dir.join(name),
+            )
+            .unwrap();
+        }
+        tmp
+    }
+
+    const FAILED_RUN_SUMMARY: &str =
+        "[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE\n";
+
+    #[test]
+    fn enrich_ignores_reports_of_classes_this_run_did_not_announce() {
+        let tmp = project_with_passing_and_failing_reports();
+        let started = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let raw = "[INFO] Running com.example.PassingTest\n";
+        let out = super::enrich_with_reports(
+            FAILED_RUN_SUMMARY,
+            tmp.path(),
+            ReportScope::for_run(started, raw),
+            &pkgs("com.example"),
+            "test",
+        );
+        assert!(
+            !out.text.contains("FailingTest"),
+            "a concurrent build's failures leaked in:\n{}",
+            out.text
+        );
+    }
+
+    #[test]
+    fn enrich_falls_back_to_time_window_when_running_names_match_no_report() {
+        // `usePhrasedClassNameInRunning`: the `Running` line carries a
+        // display name, not a class name, so no report file matches it.
+        let tmp = project_with_passing_and_failing_reports();
+        let started = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let raw = "[INFO] Running Checkout\n";
+        let out = super::enrich_with_reports(
+            FAILED_RUN_SUMMARY,
+            tmp.path(),
+            ReportScope::for_run(started, raw),
+            &pkgs("com.example"),
+            "test",
+        );
+        assert!(
+            out.text.contains("shouldHandleNull"),
+            "reports lost to class scoping:\n{}",
+            out.text
+        );
+    }
+
     #[test]
     fn enrich_drops_text_failures_block_when_xml_has_failures() {
         // Regression: before deduplication the user saw two "Failures"
@@ -6812,7 +6889,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let r = super::collect_reports(
             &[root_dir, mod_dir],
-            since,
+            &since.into(),
             &[],
             tmp.path(),
         )
