@@ -1928,6 +1928,40 @@ static OUTPUT_TRUNCATION_MARKER_RE: LazyLock<Regex> =
 /// two failures that differ only in an asserted number.
 static VOLATILE_NUMBER_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d+").unwrap());
 
+/// `Type@1a2b3c4d` — a JVM identity hash. Spring names the context it failed
+/// to load as `WebMergedContextConfiguration@77d4ac52 testClass = …`, so one
+/// broken bean failing every test class gave each class a different header.
+static IDENTITY_HASH_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"@[0-9a-f]{6,8}\b").unwrap());
+
+/// A signature line with what is only *where* the failure happened taken
+/// out: the failing test's own class name, and identity hashes. What remains
+/// — types, messages, asserted values — still has to match byte for byte.
+///
+/// Headers arrive already cut to a fixed raw length with `...`, so a longer
+/// class name moves the cut by any amount: a cut line that named the test
+/// keeps only what runs up to the end of the field holding the name — for
+/// Spring, `… for [WebMergedContextConfiguration@H testClass = <test>`; the
+/// `Caused by:` chain below still has to match byte for byte. A cut line that
+/// did not name it is left alone — there the cut is at the same place in
+/// both, and its last fragment may be the only difference.
+fn signature_line(line: &str, test_class: &str) -> String {
+    let line = IDENTITY_HASH_RE.replace_all(line, "@H");
+    let simple = test_class.rsplit('.').next().unwrap_or(test_class);
+    if simple.is_empty() || !line.contains(simple) {
+        return line.into_owned();
+    }
+    let mut line = line.replace(test_class, "<test>").replace(simple, "<test>");
+    if line.ends_with("...") {
+        if let Some(at) = line.rfind("<test>") {
+            let end = at + "<test>".len();
+            let cut = line[end..].find(", ").map_or(end, |rel| end + rel);
+            line.truncate(cut);
+        }
+    }
+    line
+}
+
 /// A conservative identity for a failure's diagnostic body, used to render
 /// repeated bodies once. Built from the exception-chain message lines (top
 /// header, `Caused by:` headers, inline assertion detail) plus the captured
@@ -1945,7 +1979,7 @@ fn failure_body_signature(f: &TestFailure) -> Option<String> {
     // signature built from the trace alone read as a bare type and every
     // identical body was rendered in full — 13 of them in a real run.
     if let Some(label) = failure_kind_label(f) {
-        sig.push_str(label.trim());
+        sig.push_str(&signature_line(label.trim(), &f.test_class));
         sig.push('\n');
     }
     let mut chain_lines = 0usize;
@@ -1960,19 +1994,27 @@ fn failure_body_signature(f: &TestFailure) -> Option<String> {
             chain_carries_message |= t
                 .split_once(": ")
                 .is_some_and(|(_, msg)| !msg.trim().is_empty());
-            sig.push_str(t);
+            sig.push_str(&signature_line(t, &f.test_class));
             sig.push('\n');
         }
     }
     let mut has_output = false;
     if let Some(output) = f.test_output.as_deref() {
+        // The line after a `... (N chars truncated)` marker starts wherever
+        // the char budget fell — mid-line, at a different offset per test.
+        let mut after_char_cut = false;
         for line in output.lines() {
             let t = line.trim();
-            if t.is_empty() || OUTPUT_TRUNCATION_MARKER_RE.is_match(t) {
+            if OUTPUT_TRUNCATION_MARKER_RE.is_match(t) {
+                after_char_cut = t.ends_with("chars truncated)");
+                continue;
+            }
+            if std::mem::take(&mut after_char_cut) || t.is_empty() {
                 continue;
             }
             has_output = true;
-            sig.push_str(&VOLATILE_NUMBER_RE.replace_all(t, "N"));
+            let t = signature_line(t, &f.test_class);
+            sig.push_str(&VOLATILE_NUMBER_RE.replace_all(&t, "N"));
             sig.push('\n');
         }
     }
@@ -7132,6 +7174,70 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             out.matches("... same failure as").count(),
             3,
             "each repeat needs its elision reference:\n{out}"
+        );
+    }
+
+    /// Real 2026-09-19 selfie run: a broken bean failed the context of every
+    /// Spring test class, and the dedup rendered each chain in full — they
+    /// differed only in the test's own class name and the identity hash of
+    /// `WebMergedContextConfiguration@…` in the header (~1.3k per class of a
+    /// 10k render; the agent then re-ran three times through `grep -v` to cut
+    /// its own output down). Fixtures are real reports from three
+    /// `@SpringBootTest` classes with distinct contexts and one broken bean.
+    #[test]
+    fn render_failure_block_dedups_one_broken_context_across_test_classes() {
+        let mut failures = Vec::new();
+        for xml in [
+            include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.app.CandidateServiceTest.xml"
+            ),
+            include_str!("../../../tests/fixtures/surefire_xml/TEST-com.example.app.ExamServiceTest.xml"),
+            include_str!("../../../tests/fixtures/surefire_xml/TEST-com.example.app.RegisterExamTest.xml"),
+        ] {
+            let result = surefire_reports::parse_content(xml, &pkgs("com.example"))
+                .expect("real surefire report parses");
+            failures.extend(result.failures);
+        }
+        assert_eq!(failures.len(), 3, "fixtures must carry 3 failures");
+
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &failures);
+
+        assert_eq!(
+            out.matches("<<< FAILURE!").count(),
+            3,
+            "every failing test name must still be greppable:\n{out}"
+        );
+        assert_eq!(
+            out.matches("is not an instance of com.example.app.AsyncConfiguration")
+                .count(),
+            // The first body only: its root-cause line, and the tail of its
+            // captured block (cut mid-line, so not recognised as a repeat).
+            2,
+            "the identical context-failure chain must render once:\n{out}"
+        );
+        assert_eq!(
+            out.matches("... same failure as").count(),
+            2,
+            "each repeat needs its elision reference:\n{out}"
+        );
+    }
+
+    #[test]
+    fn signature_line_normalizes_only_where_the_failure_happened() {
+        let a = "Failed to load ApplicationContext for [Web@77d4ac52 testClass = com.x.LongerNamedTest, locations = [], classes = [com.x.A...";
+        let b = "Failed to load ApplicationContext for [Web@5568c66f testClass = com.x.ShortTest, locations = [], classes = [com.x.App], ctx...";
+        assert_eq!(
+            super::signature_line(a, "com.x.LongerNamedTest"),
+            super::signature_line(b, "com.x.ShortTest")
+        );
+        // A cut line that does not name the test keeps its last fragment: it
+        // may be the only visible difference between two failures.
+        let c = "expected: <[a, b, c, d...";
+        let d = "expected: <[a, b, c, x...";
+        assert_ne!(
+            super::signature_line(c, "com.x.OneTest"),
+            super::signature_line(d, "com.x.OtherTest")
         );
     }
 
