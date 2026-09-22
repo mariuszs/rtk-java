@@ -273,14 +273,15 @@ pub fn has_heredoc(cmd: &str) -> bool {
         .any(|t| t.kind == TokenKind::Redirect && t.value.starts_with("<<"))
 }
 
-/// Byte offset just past the terminator line of the **last** heredoc in `cmd`.
+/// Byte range of every heredoc body in `cmd`: from the line after the first
+/// operator to just past the terminator line of the **last** heredoc.
 ///
 /// `None` whenever the split would be a guess: a here-string (`<<<`, which has
 /// no body at all), a tag the lexer does not see as one plain word, or a body
 /// that never terminates. Terminators are matched the way bash matches them —
 /// on the raw line text, ignoring quote state — because to bash the body is
 /// bytes, not shell syntax.
-fn heredoc_body_end(cmd: &str) -> Option<usize> {
+fn heredoc_body_span(cmd: &str) -> Option<(usize, usize)> {
     let tokens = tokenize(cmd);
     let mut tags: Vec<String> = Vec::new();
     let mut first_op: Option<usize> = None;
@@ -307,7 +308,8 @@ fn heredoc_body_end(cmd: &str) -> Option<usize> {
     let first_op = first_op?;
 
     // The body starts on the line after the one carrying the operator.
-    let mut pos = cmd[first_op..].find('\n')? + first_op + 1;
+    let start = cmd[first_op..].find('\n')? + first_op + 1;
+    let mut pos = start;
     for tag in &tags {
         loop {
             let (line, next) = match cmd[pos..].find('\n') {
@@ -325,7 +327,15 @@ fn heredoc_body_end(cmd: &str) -> Option<usize> {
             }
         }
     }
-    Some(pos)
+    Some((start, pos))
+}
+
+/// `cmd` with every heredoc body cut out — the operator line and whatever
+/// follows the last terminator, which is all of it bash parses as shell.
+/// `None` when [`heredoc_body_span`] cannot place the body.
+pub fn without_heredoc_bodies(cmd: &str) -> Option<String> {
+    let (start, end) = heredoc_body_span(cmd)?;
+    Some(format!("{}{}", &cmd[..start], &cmd[end..]))
 }
 
 /// Rewrite only the part of `cmd` that follows every heredoc body, leaving the
@@ -335,7 +345,7 @@ fn rewrite_past_heredocs(
     excluded: &[ExcludePattern],
     transparent_prefixes: &[String],
 ) -> Option<String> {
-    let end = heredoc_body_end(cmd)?;
+    let (_, end) = heredoc_body_span(cmd)?;
     let tail = &cmd[end..];
     let trimmed_tail = tail.trim_start();
     if trimmed_tail.is_empty() {
@@ -673,6 +683,17 @@ pub(crate) fn rewrite_command_precompiled(
     compiled: &[ExcludePattern],
     normalized_prefixes: &[String],
 ) -> Option<String> {
+    // A heredoc body is data, never commands — but the command *after* the
+    // terminator is a normal command, and the agent idiom that patches a file
+    // through `python3 - <<'PY' … PY` and then runs the build put 91 real
+    // calls (76k chars of raw output) past the filters in one day. Split before
+    // any normalization: the body is bytes to bash, so a backslash, a `$((` or
+    // a trailing `\` in it must neither bail the rewrite nor be rewritten —
+    // 45 of 48 such calls still deferred on 2026-09-22 when this ran later.
+    if has_heredoc(cmd) {
+        return rewrite_past_heredocs(cmd.trim(), compiled, normalized_prefixes);
+    }
+
     // Bash joins `\<NL>` with nothing, so `<<` or `$((` can arrive split across
     // a continuation; the space-join below would erase them (#3188 review).
     if cmd.contains('\\') {
@@ -694,14 +715,6 @@ pub(crate) fn rewrite_command_precompiled(
 
     if trimmed.contains("$((") {
         return None;
-    }
-
-    // A heredoc body is data, never commands — but the command *after* the
-    // terminator is a normal command, and the agent idiom that patches a file
-    // through `python3 - <<'PY' … PY` and then runs the build put 91 real
-    // calls (76k chars of raw output) past the filters in one day.
-    if has_heredoc(trimmed) {
-        return rewrite_past_heredocs(trimmed, compiled, normalized_prefixes);
     }
 
     // `bash -c '<script>'` wrappers hide the real command inside a quoted
@@ -4294,6 +4307,37 @@ mod tests {
         assert_eq!(
             rewrite_command_no_prefixes("grep -c x <<< \"$VAR\"\ngit status", &[]),
             None
+        );
+    }
+
+    #[test]
+    fn test_heredoc_body_is_bytes_not_shell() {
+        // 2026-09-22 traffic: a backslash anywhere in the body (`'\n'` in a
+        // Python string) or a quote the shell lexer sees spanning lines sent
+        // the whole command to bash unrewritten — raw Maven to the agent.
+        for body in [
+            "s=s.replace('a;','b;\\nc;',1)",
+            "s='a\nb'",
+            "# a TIMEOUT build doesn't retry",
+            "x = f(a, \\\n      b)",
+            "n = $((1+2))",
+        ] {
+            let cmd = format!("python3 - <<'EOF'\n{body}\nEOF\n./mvnw -q test 2>&1 | tail -15");
+            assert_eq!(
+                rewrite_command_no_prefixes(&cmd, &[]),
+                Some(format!(
+                    "python3 - <<'EOF'\n{body}\nEOF\nrtk mvn -q test 2>&1"
+                )),
+                "body: {body:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_line_continuation_after_heredoc_body_still_rewrites() {
+        assert_eq!(
+            rewrite_command_no_prefixes("cat <<'EOF'\na\\\nEOF\n./mvnw \\\n  test", &[]),
+            Some("cat <<'EOF'\na\\\nEOF\nrtk mvn test".into())
         );
     }
 

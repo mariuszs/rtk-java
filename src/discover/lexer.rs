@@ -376,6 +376,20 @@ pub fn unattestable_only_by_heredoc(cmd: &str) -> bool {
 }
 
 fn unattestable(cmd: &str, ignore_heredoc: bool) -> bool {
+    // A heredoc body is bytes to bash, not syntax: lexing it reads a Python
+    // `->` as a file redirect and an apostrophe as an open quote.
+    let stripped;
+    let cmd = if ignore_heredoc {
+        match crate::discover::registry::without_heredoc_bodies(cmd) {
+            Some(s) => {
+                stripped = s;
+                stripped.as_str()
+            }
+            None => cmd,
+        }
+    } else {
+        cmd
+    };
     if contains_substitution(cmd) {
         return true;
     }
@@ -1437,6 +1451,31 @@ mod tests {
         assert!(!unattestable_only_by_heredoc("grep -c x <<< \"$V\""));
         // Nothing unattestable at all.
         assert!(!unattestable_only_by_heredoc("git status"));
+    }
+
+    #[test]
+    fn test_heredoc_body_is_not_lexed_as_shell() {
+        // 2026-09-22 traffic: 45 of 48 `python3 - <<'EOF' … EOF` + mvn calls
+        // deferred, because a Python `->`, `>=` or an apostrophe in a comment
+        // read as a file redirect or an open quote. The body is bytes to bash.
+        for body in [
+            "f = lambda r: r -> None",
+            "if n >= 2: pass",
+            "# a TIMEOUT build doesn't retry",
+            "s=s.replace('a;','b;\\nc;',1)",
+            "x = a < b",
+        ] {
+            let cmd = format!("python3 - <<'EOF'\n{body}\nEOF\n./mvnw test 2>&1 | tail -5");
+            assert!(unattestable_only_by_heredoc(&cmd), "deferred on: {body}");
+        }
+        // What follows the body is still shell, and still checked.
+        assert!(!unattestable_only_by_heredoc(
+            "python3 - <<'EOF'\nx -> y\nEOF\n./mvnw test > /tmp/out.log"
+        ));
+        // An unterminated body cannot be cut off, so it stays opaque.
+        assert!(!unattestable_only_by_heredoc(
+            "python3 - <<'EOF'\nx -> y\n./mvnw test"
+        ));
     }
 
     #[test]
