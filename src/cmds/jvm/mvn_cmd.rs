@@ -3348,6 +3348,19 @@ fn filter_mvn_utility(output: &str) -> String {
     kept.join("\n")
 }
 
+/// Render for a single-goal run whose output the filter recognized nothing
+/// in. A `-q` success prints nothing and gets Maven's own success line. Any
+/// other unrecognized text — the `mvn` launcher's `JAVA_HOME` complaint, a
+/// JVM that could not start — carries no verdict at all, so it goes through
+/// verbatim instead of under an invented `BUILD SUCCESS`.
+fn quiet_success_or_verbatim(raw: &str) -> String {
+    if raw.trim().is_empty() || strip_ansi(raw).contains("BUILD SUCCESS") {
+        "[INFO] BUILD SUCCESS".to_string()
+    } else {
+        raw.to_string()
+    }
+}
+
 /// Filter single-goal `mvn clean` output — collapse to the native build line,
 /// keeping `[ERROR]` lines on `BUILD FAILURE`. A run that died before the
 /// reactor never prints either verdict; it gets its `[ERROR]` block instead of
@@ -3394,7 +3407,7 @@ fn filter_mvn_clean(output: &str) -> String {
     }
 
     // Hard subset: clean has no native compact line other than the build result.
-    "[INFO] BUILD SUCCESS".to_string()
+    quiet_success_or_verbatim(output)
 }
 
 /// Filter `mvn checkstyle:check` output:
@@ -3691,7 +3704,7 @@ fn filter_mvn_dep_tree(output: &str) -> String {
     }
 
     if result.is_empty() {
-        return "[INFO] BUILD SUCCESS".to_string();
+        return quiet_success_or_verbatim(output);
     }
 
     result.join("\n")
@@ -3784,7 +3797,7 @@ fn filter_mvn_dep_list(output: &str) -> String {
     }
 
     if result.is_empty() {
-        return "[INFO] BUILD SUCCESS".to_string();
+        return quiet_success_or_verbatim(output);
     }
 
     result.join("\n")
@@ -4851,10 +4864,23 @@ mod tests {
         assert_eq!(output, "[INFO] BUILD SUCCESS");
     }
 
+    /// Output with no Maven verdict in it — here the `mvn` launcher's own
+    /// complaint, real run with a broken `JAVA_HOME`, exit 1 — used to be
+    /// answered with an invented `[INFO] BUILD SUCCESS`. It goes through
+    /// verbatim; only a truly silent run (`-q` success) keeps the success line.
     #[test]
-    fn test_dep_list_malformed_passthrough_no_panic() {
-        let output = filter_mvn_dep_list("not valid maven output\nrandom text\n");
-        assert!(!output.is_empty());
+    fn unrecognized_output_passes_through_instead_of_a_fabricated_success() {
+        let raw = include_str!("../../../tests/fixtures/mvn_bad_java_home_raw.txt");
+        type Filter = fn(&str) -> String;
+        let filters: [(&str, Filter); 3] = [
+            ("dependency:list", filter_mvn_dep_list),
+            ("dependency:tree", filter_mvn_dep_tree),
+            ("clean", filter_mvn_clean),
+        ];
+        for (goal, filter) in filters {
+            assert_eq!(filter(raw), raw, "{goal}");
+            assert_eq!(filter(""), "[INFO] BUILD SUCCESS", "{goal} under -q");
+        }
     }
 
     #[test]
