@@ -999,8 +999,6 @@ pub fn filter_mvn_piped(raw: &str) -> String {
     filter_mvn_multi(raw, "")
 }
 
-/// Pure multi-goal filter (no XML enrichment) — snapshot-tested directly.
-/// run_multi_goal (later task) wraps this and adds enrichment on the test portion.
 /// A plugin marker that carries an `mvnd` lane tag (`[child-a] [INFO] --- …`).
 static TAGGED_PLUGIN_MARKER_RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?m)^\[[^\]\s]+\][ \t]+\[INFO\][ \t]+-{3,}[ \t]+\S+?:\S+:\S+[ \t]+\(").unwrap()
@@ -1018,16 +1016,25 @@ static TAGGED_PLUGIN_MARKER_RE: LazyLock<Regex> = LazyLock::new(|| {
 /// Until lane-aware routing exists here, such a build falls back to raw:
 /// losing the compression is the fork's documented contract, losing the
 /// diagnostics is not.
+///
+/// Any lane-tagged marker counts, even beside untagged ones: a mixed reactor
+/// loses the tagged lanes' diagnostics just the same.
 fn is_untaggable_daemon_reactor(raw: &str) -> bool {
-    TAGGED_PLUGIN_MARKER_RE.is_match(raw) && !PLUGIN_MARKER_RE.is_match(raw)
+    TAGGED_PLUGIN_MARKER_RE.is_match(raw)
 }
 
+/// Multi-goal output the segmenter must not touch. Without a build footer
+/// there is no verdict to anchor the render on — a build killed mid-run
+/// (timeout, OOM) still has plugin markers, and segmenting it printed a lone
+/// segment line for a run that never finished.
+fn multi_goal_needs_raw(raw: &str) -> bool {
+    is_untaggable_daemon_reactor(raw) || !BUILD_FOOTER_RE.is_match(raw)
+}
+
+/// Pure multi-goal filter (no XML enrichment) — snapshot-tested directly.
+/// [`run_multi_goal`] wraps the same steps and adds enrichment on the test portion.
 fn filter_mvn_multi(raw: &str, goals_header: &str) -> String {
-    if is_untaggable_daemon_reactor(raw) {
-        return raw.to_string();
-    }
-    // Degraded-input fallback: no markers AND no build footer → never swallow.
-    if !PLUGIN_MARKER_RE.is_match(raw) && !BUILD_FOOTER_RE.is_match(raw) {
+    if multi_goal_needs_raw(raw) {
         return raw.to_string();
     }
     let parts = filter_segments(raw);
@@ -1080,11 +1087,7 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
         &tool_name,
         &run_args.join(" "),
         move |raw: &str| {
-            // Degraded-input fallback: never swallow output.
-            if !PLUGIN_MARKER_RE.is_match(raw) && !BUILD_FOOTER_RE.is_match(raw) {
-                return raw.to_string();
-            }
-            if is_untaggable_daemon_reactor(raw) {
+            if multi_goal_needs_raw(raw) {
                 return raw.to_string();
             }
             let mut parts = filter_segments(raw);
@@ -6525,6 +6528,21 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let out = filter_mvn_piped(raw);
         assert!(out.len() < raw.len() / 2, "expected compression, got: {out}");
         assert!(out.contains("CalcTest.failOne"), "got: {out}");
+    }
+
+    /// A build killed before its footer (timeout, OOM) has plugin markers but
+    /// no verdict. Segmenting it anyway rendered a lone `You have 0 Checkstyle
+    /// violations.` for a run that never finished — it has to stay raw.
+    #[test]
+    fn build_killed_before_footer_stays_raw() {
+        let full =
+            include_str!("../../../tests/fixtures/mvn_multi_clean_testcompile_checkstyle_pass.txt");
+        let cut = full
+            .lines()
+            .position(|l| BUILD_FOOTER_RE.is_match(l))
+            .expect("fixture has a footer");
+        let raw = full.lines().take(cut - 1).collect::<Vec<_>>().join("\n");
+        assert_eq!(filter_mvn_multi(&raw, "clean test-compile checkstyle:check"), raw);
     }
 
     /// The guard keyed off a plugin-marker shape whose `\s+` crossed newlines,
