@@ -1,0 +1,127 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.example:archrepro >------------------------
+[INFO] Building archrepro 1.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ archrepro ---
+[INFO] skip non existing resourceDirectory /home/user/work/archrepro/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ archrepro ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ archrepro ---
+[INFO] skip non existing resourceDirectory /home/user/work/archrepro/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ archrepro ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ archrepro ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+SLF4J(W): No SLF4J providers were found.
+SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+[INFO] Running com.example.ImportsTest
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.035 s <<< FAILURE! -- in com.example.ImportsTest
+[ERROR] com.example.ImportsTest.should_return_only_imports_that_changed_something -- Time elapsed: 0.026 s <<< FAILURE!
+java.lang.AssertionError: 
+
+Expecting actual:
+  ["error",
+    "skipped",
+    "no-field-changed",
+    "full-update",
+    "department-changed",
+    "removed",
+    "created"]
+to contain exactly in any order:
+  ["created", "removed", "full-update", "department-changed", "manager-changed"]
+elements not found:
+  ["manager-changed"]
+and elements not expected:
+  ["error", "skipped", "no-field-changed"]
+
+	at com.example.ImportsTest.should_return_only_imports_that_changed_something(ImportsTest.java:12)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
+
+[INFO] Running com.example.ApiArchTest
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.159 s <<< FAILURE! -- in com.example.ApiArchTest
+[ERROR] com.example.ApiArchTest.api_controllers_must_declare_pre_authorize -- Time elapsed: 0.158 s <<< FAILURE!
+java.lang.AssertionError: 
+Architecture Violation [Priority: MEDIUM] - Rule 'methods that are declared in classes that have simple name ending with 'Controller' and are public should be annotated with @Deprecated, because every handler method of a controller under /api must declare @PreAuthorize (excluding /api/private, /api/openapi)' was violated (10 times):
+Method <com.example.api.CustomersController.get(java.lang.String)> is not annotated with @Deprecated in (CustomersController.java:5)
+Method <com.example.api.CustomersController.list()> is not annotated with @Deprecated in (CustomersController.java:4)
+Method <com.example.api.InvoicesController.get(java.lang.String)> is not annotated with @Deprecated in (InvoicesController.java:5)
+Method <com.example.api.InvoicesController.list()> is not annotated with @Deprecated in (InvoicesController.java:4)
+Method <com.example.api.OrdersController.get(java.lang.String)> is not annotated with @Deprecated in (OrdersController.java:5)
+Method <com.example.api.OrdersController.list()> is not annotated with @Deprecated in (OrdersController.java:4)
+Method <com.example.api.ProductsController.get(java.lang.String)> is not annotated with @Deprecated in (ProductsController.java:5)
+Method <com.example.api.ProductsController.list()> is not annotated with @Deprecated in (ProductsController.java:4)
+Method <com.example.api.ShipmentsController.get(java.lang.String)> is not annotated with @Deprecated in (ShipmentsController.java:5)
+Method <com.example.api.ShipmentsController.list()> is not annotated with @Deprecated in (ShipmentsController.java:4)
+	at com.tngtech.archunit.lang.ArchRule$Assertions.assertNoViolation(ArchRule.java:94)
+	at com.tngtech.archunit.lang.ArchRule$Assertions.check(ArchRule.java:86)
+	at com.tngtech.archunit.lang.ArchRule$Factory$SimpleArchRule.check(ArchRule.java:165)
+	at com.example.ApiArchTest.api_controllers_must_declare_pre_authorize(ApiArchTest.java:16)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   ApiArchTest.api_controllers_must_declare_pre_authorize:16 Architecture Violation [Priority: MEDIUM] - Rule 'methods that are declared in classes that have simple name ending with 'Controller' and are public should be annotated with @Deprecated, because every handler method of a controller under /api must declare @PreAuthorize (excluding /api/private, /api/openapi)' was violated (10 times):
+Method <com.example.api.CustomersController.get(java.lang.String)> is not annotated with @Deprecated in (CustomersController.java:5)
+Method <com.example.api.CustomersController.list()> is not annotated with @Deprecated in (CustomersController.java:4)
+Method <com.example.api.InvoicesController.get(java.lang.String)> is not annotated with @Deprecated in (InvoicesController.java:5)
+Method <com.example.api.InvoicesController.list()> is not annotated with @Deprecated in (InvoicesController.java:4)
+Method <com.example.api.OrdersController.get(java.lang.String)> is not annotated with @Deprecated in (OrdersController.java:5)
+Method <com.example.api.OrdersController.list()> is not annotated with @Deprecated in (OrdersController.java:4)
+Method <com.example.api.ProductsController.get(java.lang.String)> is not annotated with @Deprecated in (ProductsController.java:5)
+Method <com.example.api.ProductsController.list()> is not annotated with @Deprecated in (ProductsController.java:4)
+Method <com.example.api.ShipmentsController.get(java.lang.String)> is not annotated with @Deprecated in (ShipmentsController.java:5)
+Method <com.example.api.ShipmentsController.list()> is not annotated with @Deprecated in (ShipmentsController.java:4)
+[ERROR]   ImportsTest.should_return_only_imports_that_changed_something:12 
+Expecting actual:
+  ["error",
+    "skipped",
+    "no-field-changed",
+    "full-update",
+    "department-changed",
+    "removed",
+    "created"]
+to contain exactly in any order:
+  ["created", "removed", "full-update", "department-changed", "manager-changed"]
+elements not found:
+  ["manager-changed"]
+and elements not expected:
+  ["error", "skipped", "no-field-changed"]
+
+[INFO] 
+[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.663 s
+[INFO] Finished at: 2026-09-23T22:39:22+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.3:test (default-test) on project archrepro: There are test failures.
+[ERROR] 
+[ERROR] See /home/user/work/archrepro/target/surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

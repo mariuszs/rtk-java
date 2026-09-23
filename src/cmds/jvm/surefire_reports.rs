@@ -261,7 +261,13 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                             message: pending_message
                                 .take()
                                 .filter(|s| !s.is_empty())
-                                .map(|s| stack_trace::truncate_header(&s)),
+                                .map(|s| {
+                                    // AssertJ opens and closes its message
+                                    // with a newline.
+                                    stack_trace::truncate_header(
+                                        s.trim_matches(|c| c == '\n' || c == '\r'),
+                                    )
+                                }),
                             failure_type: pending_type.take().filter(|s| !s.is_empty()),
                             stack_trace: processed,
                             test_output: None,

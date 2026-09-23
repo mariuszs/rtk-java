@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.ApiArchTest" time="0.152" tests="1" errors="0" skipped="0" failures="1">
+  <properties>
+    <property name="java.specification.version" value="26"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/home/user/work/archrepro/target/test-classes:/home/user/work/archrepro/target/classes:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter/5.12.2/junit-jupiter-5.12.2.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.12.2/junit-jupiter-api-5.12.2.jar:/home/user/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-commons/1.12.2/junit-platform-commons-1.12.2.jar:/home/user/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.12.2/junit-jupiter-params-5.12.2.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.12.2/junit-jupiter-engine-5.12.2.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-engine/1.12.2/junit-platform-engine-1.12.2.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit-junit5/1.4.1/archunit-junit5-1.4.1.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit-junit5-api/1.4.1/archunit-junit5-api-1.4.1.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit/1.4.1/archunit-1.4.1.jar:/home/user/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit-junit5-engine/1.4.1/archunit-junit5-engine-1.4.1.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit-junit5-engine-api/1.4.1/archunit-junit5-engine-api-1.4.1.jar:/home/user/.m2/repository/org/assertj/assertj-core/3.27.6/assertj-core-3.27.6.jar:/home/user/.m2/repository/net/bytebuddy/byte-buddy/1.17.7/byte-buddy-1.17.7.jar:"/>
+    <property name="java.vm.vendor" value="Eclipse Adoptium"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://adoptium.net/"/>
+    <property name="os.name" value="Linux"/>
+    <property name="java.vm.specification.version" value="26"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/home/user/.sdkman/candidates/java/26.0.1-tem/lib"/>
+    <property name="sun.java.command" value="/home/user/work/archrepro/target/surefire/surefirebooter-20260923223928478_3.jar /home/user/work/archrepro/target/surefire 2026-09-23T22-39-28_448-jvmRun1 surefire-20260923223928478_1tmp surefire_0-20260923223928478_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/home/user/work/archrepro/target/test-classes:/home/user/work/archrepro/target/classes:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter/5.12.2/junit-jupiter-5.12.2.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.12.2/junit-jupiter-api-5.12.2.jar:/home/user/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-commons/1.12.2/junit-platform-commons-1.12.2.jar:/home/user/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.12.2/junit-jupiter-params-5.12.2.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.12.2/junit-jupiter-engine-5.12.2.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-engine/1.12.2/junit-platform-engine-1.12.2.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit-junit5/1.4.1/archunit-junit5-1.4.1.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit-junit5-api/1.4.1/archunit-junit5-api-1.4.1.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit/1.4.1/archunit-1.4.1.jar:/home/user/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit-junit5-engine/1.4.1/archunit-junit5-engine-1.4.1.jar:/home/user/.m2/repository/com/tngtech/archunit/archunit-junit5-engine-api/1.4.1/archunit-junit5-engine-api-1.4.1.jar:/home/user/.m2/repository/org/assertj/assertj-core/3.27.6/assertj-core-3.27.6.jar:/home/user/.m2/repository/net/bytebuddy/byte-buddy/1.17.7/byte-buddy-1.17.7.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/home/user"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-04-21"/>
+    <property name="java.home" value="/home/user/.sdkman/candidates/java/26.0.1-tem"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/home/user/work/archrepro"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="surefire.real.class.path" value="/home/user/work/archrepro/target/surefire/surefirebooter-20260923223928478_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="26.0.1+8"/>
+    <property name="user.name" value="user"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="7.2.6-200.fc44.x86_64"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Temurin-26.0.1+8"/>
+    <property name="localRepository" value="/home/user/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="java.version" value="26.0.1"/>
+    <property name="user.dir" value="/home/user/work/archrepro"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Eclipse Adoptium"/>
+    <property name="java.vm.version" value="26.0.1+8"/>
+    <property name="stdin.encoding" value="UTF-8"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="70.0"/>
+  </properties>
+  <testcase name="api_controllers_must_declare_pre_authorize" classname="com.example.ApiArchTest" time="0.15">
+    <failure message="Architecture Violation [Priority: MEDIUM] - Rule &apos;methods that are declared in classes that have simple name ending with &apos;Controller&apos; and are public should be annotated with @Deprecated, because every handler method of a controller under /api must declare @PreAuthorize (excluding /api/private, /api/openapi)&apos; was violated (10 times):&#10;Method &lt;com.example.api.CustomersController.get(java.lang.String)&gt; is not annotated with @Deprecated in (CustomersController.java:5)&#10;Method &lt;com.example.api.CustomersController.list()&gt; is not annotated with @Deprecated in (CustomersController.java:4)&#10;Method &lt;com.example.api.InvoicesController.get(java.lang.String)&gt; is not annotated with @Deprecated in (InvoicesController.java:5)&#10;Method &lt;com.example.api.InvoicesController.list()&gt; is not annotated with @Deprecated in (InvoicesController.java:4)&#10;Method &lt;com.example.api.OrdersController.get(java.lang.String)&gt; is not annotated with @Deprecated in (OrdersController.java:5)&#10;Method &lt;com.example.api.OrdersController.list()&gt; is not annotated with @Deprecated in (OrdersController.java:4)&#10;Method &lt;com.example.api.ProductsController.get(java.lang.String)&gt; is not annotated with @Deprecated in (ProductsController.java:5)&#10;Method &lt;com.example.api.ProductsController.list()&gt; is not annotated with @Deprecated in (ProductsController.java:4)&#10;Method &lt;com.example.api.ShipmentsController.get(java.lang.String)&gt; is not annotated with @Deprecated in (ShipmentsController.java:5)&#10;Method &lt;com.example.api.ShipmentsController.list()&gt; is not annotated with @Deprecated in (ShipmentsController.java:4)" type="java.lang.AssertionError"><![CDATA[java.lang.AssertionError: 
+Architecture Violation [Priority: MEDIUM] - Rule 'methods that are declared in classes that have simple name ending with 'Controller' and are public should be annotated with @Deprecated, because every handler method of a controller under /api must declare @PreAuthorize (excluding /api/private, /api/openapi)' was violated (10 times):
+Method <com.example.api.CustomersController.get(java.lang.String)> is not annotated with @Deprecated in (CustomersController.java:5)
+Method <com.example.api.CustomersController.list()> is not annotated with @Deprecated in (CustomersController.java:4)
+Method <com.example.api.InvoicesController.get(java.lang.String)> is not annotated with @Deprecated in (InvoicesController.java:5)
+Method <com.example.api.InvoicesController.list()> is not annotated with @Deprecated in (InvoicesController.java:4)
+Method <com.example.api.OrdersController.get(java.lang.String)> is not annotated with @Deprecated in (OrdersController.java:5)
+Method <com.example.api.OrdersController.list()> is not annotated with @Deprecated in (OrdersController.java:4)
+Method <com.example.api.ProductsController.get(java.lang.String)> is not annotated with @Deprecated in (ProductsController.java:5)
+Method <com.example.api.ProductsController.list()> is not annotated with @Deprecated in (ProductsController.java:4)
+Method <com.example.api.ShipmentsController.get(java.lang.String)> is not annotated with @Deprecated in (ShipmentsController.java:5)
+Method <com.example.api.ShipmentsController.list()> is not annotated with @Deprecated in (ShipmentsController.java:4)
+	at com.tngtech.archunit.lang.ArchRule$Assertions.assertNoViolation(ArchRule.java:94)
+	at com.tngtech.archunit.lang.ArchRule$Assertions.check(ArchRule.java:86)
+	at com.tngtech.archunit.lang.ArchRule$Factory$SimpleArchRule.check(ArchRule.java:165)
+	at com.example.ApiArchTest.api_controllers_must_declare_pre_authorize(ApiArchTest.java:16)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1612)
+]]></failure>
+  </testcase>
+</testsuite>

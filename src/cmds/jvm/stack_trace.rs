@@ -62,24 +62,31 @@ fn parse_segments(trace: &str) -> Vec<Segment> {
     let mut current_frames: Vec<String> = Vec::new();
 
     for line in trace.lines() {
-        if current_header.is_none() {
-            current_header = Some(line.to_string());
-        } else if line.starts_with("Caused by:") {
-            if let Some(header) = current_header.take() {
-                segments.push(Segment {
-                    header,
-                    frames: std::mem::take(&mut current_frames),
-                });
+        match current_header.as_mut() {
+            None => current_header = Some(line.to_string()),
+            Some(_) if line.starts_with("Caused by:") => {
+                if let Some(header) = current_header.take() {
+                    segments.push(Segment {
+                        header: without_trailing_blank_lines(header),
+                        frames: std::mem::take(&mut current_frames),
+                    });
+                }
+                current_header = Some(line.to_string());
             }
-            current_header = Some(line.to_string());
-        } else {
-            current_frames.push(line.to_string());
+            // A message runs on until the first frame: ArchUnit lists its
+            // violations there, AssertJ its expected/actual. Counting those
+            // lines as frames folded them into `... N framework frames omitted`.
+            Some(header) if current_frames.is_empty() && !is_frame_like(line) => {
+                header.push('\n');
+                header.push_str(line);
+            }
+            Some(_) => current_frames.push(line.to_string()),
         }
     }
 
     if let Some(header) = current_header {
         segments.push(Segment {
-            header,
+            header: without_trailing_blank_lines(header),
             frames: current_frames,
         });
     }
@@ -87,9 +94,64 @@ fn parse_segments(trace: &str) -> Vec<Segment> {
     segments
 }
 
+/// Drop the blank lines a message ends with (AssertJ's does) — but not the
+/// trailing space of a one-line header like `java.lang.AssertionError: `.
+fn without_trailing_blank_lines(mut header: String) -> String {
+    while let Some(nl) = header.rfind('\n') {
+        if !header[nl + 1..].trim().is_empty() {
+            break;
+        }
+        header.truncate(nl);
+    }
+    header
+}
+
+/// A line that belongs to the frame section of a trace rather than to the
+/// exception message above it.
+pub(crate) fn is_frame_like(line: &str) -> bool {
+    let t = line.trim_start();
+    t.starts_with("at ") || t.starts_with("... ") || is_structural_line(line)
+}
+
+/// Lines kept of a multi-line exception message; the middle of a longer one
+/// is elided. Half from each end: ArchUnit lists its violations from the top,
+/// AssertJ puts its answer (`elements not found:` …) at the bottom.
+const MAX_MESSAGE_LINES: usize = 16;
+
+/// Cap a multi-line message line by line: `first` for its first line,
+/// `truncate_header` for the rest, and the middle lines elided past
+/// `MAX_MESSAGE_LINES`. A 200-char cut over the whole text kept the first
+/// line of an ArchUnit violation list and nothing of the list.
+fn truncate_lines(text: &str, first: fn(&str) -> String) -> String {
+    let lines: Vec<&str> = text.lines().collect();
+    let capped = |(i, line): (usize, &&str)| {
+        if i == 0 {
+            first(line)
+        } else {
+            truncate_line(line)
+        }
+    };
+    if lines.len() <= MAX_MESSAGE_LINES {
+        return lines.iter().enumerate().map(capped).collect::<Vec<_>>().join("\n");
+    }
+    let half = MAX_MESSAGE_LINES / 2;
+    let tail_start = lines.len() - half;
+    let mut out: Vec<String> = lines[..half].iter().enumerate().map(capped).collect();
+    out.push(format!("... ({} lines elided)", tail_start - half));
+    out.extend(lines[tail_start..].iter().map(|l| truncate_line(l)));
+    out.join("\n")
+}
+
 /// Truncate a header to `MAX_HEADER_LENGTH` **Unicode characters** (not bytes),
-/// appending "..." if truncated.
+/// appending "..." if truncated. A multi-line header is capped per line.
 pub(crate) fn truncate_header(header: &str) -> String {
+    if header.contains('\n') {
+        return truncate_lines(header, truncate_line);
+    }
+    truncate_line(header)
+}
+
+fn truncate_line(header: &str) -> String {
     let char_count = header.chars().count();
     if char_count <= MAX_HEADER_LENGTH {
         return header.to_string();
@@ -106,8 +168,16 @@ pub(crate) fn truncate_header(header: &str) -> String {
 /// Spock + MockMvc run had a 326-char root cause, the 200-char tail cut landed
 /// between the two URLs, and the agent grepped the raw log for `but was:`.
 /// Wrapper headers higher in the chain keep `truncate_header` — only the root
-/// gets the wider, two-ended budget.
+/// gets the wider, two-ended budget. Of a multi-line header only the first
+/// line does: the lines below it are capped like any other message line.
 pub(crate) fn truncate_root_header(header: &str) -> String {
+    if header.contains('\n') {
+        return truncate_lines(header, truncate_root_line);
+    }
+    truncate_root_line(header)
+}
+
+fn truncate_root_line(header: &str) -> String {
     let char_count = header.chars().count();
     if char_count <= MAX_ROOT_HEADER_LENGTH {
         return header.to_string();
@@ -232,10 +302,10 @@ pub(crate) fn process(raw: &str, app_packages: &[String], max_lines: usize) -> O
         out.push(truncate_root_header(&segments[0].header));
         add_frames(&mut out, &segments[0].frames, app_packages, None);
     } else {
-        out.push(truncate_header(&segments[0].header));
+        push_wrapper_header(&mut out, &segments[0].header);
         add_frames(&mut out, &segments[0].frames, app_packages, None);
         for seg in &segments[1..segments.len() - 1] {
-            out.push(truncate_header(&seg.header));
+            push_wrapper_header(&mut out, &seg.header);
             add_frames(&mut out, &seg.frames, app_packages, None);
         }
         let root = segments.last().expect("segments.len() > 1 guaranteed by branch");
@@ -253,6 +323,24 @@ pub(crate) fn process(raw: &str, app_packages: &[String], max_lines: usize) -> O
     }
 
     Some(out.join("\n"))
+}
+
+/// A wrapper's header keeps its first line only. The lines below it are a
+/// library's state dump more often than a diagnosis — flapdoodle prints ~20
+/// `StateID{…}` lines, environment included, on every wrapper of an embedded
+/// Mongo failure — and the root cause further down is the part that is read.
+fn push_wrapper_header(out: &mut Vec<String>, header: &str) {
+    out.extend(wrapper_header(header));
+}
+
+pub(crate) fn wrapper_header(header: &str) -> Vec<String> {
+    let mut lines = header.lines();
+    let mut out = vec![truncate_header(lines.next().unwrap_or_default())];
+    let rest = lines.filter(|l| !l.trim().is_empty()).count();
+    if rest > 0 {
+        out.push(format!("\t... {rest} message lines omitted"));
+    }
+    out
 }
 
 /// Apply a hard cap while preserving the root cause.
@@ -368,6 +456,75 @@ mod tests {
         assert_eq!(segs.len(), 2, "indented Caused by must not split segments");
         assert_eq!(segs[0].frames.len(), 3, "Suppressed block stays in outer");
         assert_eq!(segs[1].header, "Caused by: java.io.IOException: real cause");
+    }
+
+    #[test]
+    fn parse_segments_keeps_message_continuation_lines_in_the_header() {
+        let trace = "java.lang.AssertionError: \n\
+                     Rule 'r' was violated (2 times):\n\
+                     Method <a.B.c()> is not annotated\n\
+                     Method <a.B.d()> is not annotated\n\
+                     \tat com.tngtech.archunit.lang.ArchRule.check(ArchRule.java:94)\n\
+                     Caused by: java.lang.Error: first\n\
+                     second\n\
+                     \t... 3 more";
+        let segs = parse_segments(trace);
+        assert_eq!(segs.len(), 2);
+        assert_eq!(
+            segs[0].header,
+            "java.lang.AssertionError: \nRule 'r' was violated (2 times):\n\
+             Method <a.B.c()> is not annotated\nMethod <a.B.d()> is not annotated"
+        );
+        assert_eq!(segs[0].frames.len(), 1, "only real frames are frames");
+        assert_eq!(segs[1].header, "Caused by: java.lang.Error: first\nsecond");
+        assert_eq!(segs[1].frames, vec!["\t... 3 more"]);
+    }
+
+    #[test]
+    fn process_keeps_the_message_lines_of_the_root_cause_only() {
+        let trace = "java.lang.IllegalStateException: wrapper\n\
+                     StateID{a}=1\n\
+                     StateID{b}=2\n\
+                     \tat com.example.A.foo(A.java:1)\n\
+                     Caused by: java.lang.AssertionError: \n\
+                     Method <a.B.c()> is not annotated\n\
+                     \tat com.example.B.bar(B.java:2)";
+        let out = process(trace, &pkgs("com.example"), 50).expect("non-empty trace");
+        assert_eq!(
+            out,
+            "java.lang.IllegalStateException: wrapper\n\
+             \t... 2 message lines omitted\n\
+             \tat com.example.A.foo(A.java:1)\n\
+             Caused by: java.lang.AssertionError: \n\
+             Method <a.B.c()> is not annotated\n\
+             \tat com.example.B.bar(B.java:2)"
+        );
+    }
+
+    #[test]
+    fn truncate_header_caps_each_line_of_a_multiline_message() {
+        let s = format!("first\n{}\nlast", "a".repeat(250));
+        let out = truncate_header(&s);
+        assert_eq!(out, format!("first\n{}...\nlast", "a".repeat(200)));
+    }
+
+    #[test]
+    fn truncate_header_elides_the_middle_lines_of_a_long_message() {
+        let lines: Vec<String> = (1..=40).map(|i| format!("line {i}")).collect();
+        let out = truncate_header(&lines.join("\n"));
+        assert!(out.starts_with("line 1\nline 2\n"), "{out}");
+        assert!(out.ends_with("line 39\nline 40"), "the end carries the answer: {out}");
+        assert!(out.contains("... (24 lines elided)"), "{out}");
+        assert_eq!(out.lines().count(), MAX_MESSAGE_LINES + 1, "{out}");
+    }
+
+    #[test]
+    fn truncate_root_header_gives_only_the_first_line_the_wider_budget() {
+        let s = format!("{}\n{}", "r".repeat(400), "c".repeat(400));
+        let out = truncate_root_header(&s);
+        let (first, rest) = out.split_once('\n').expect("still two lines");
+        assert_eq!(first, "r".repeat(400));
+        assert_eq!(rest, format!("{}...", "c".repeat(200)));
     }
 
     #[test]

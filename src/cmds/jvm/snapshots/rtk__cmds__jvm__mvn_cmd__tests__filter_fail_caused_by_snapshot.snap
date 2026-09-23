@@ -10,6 +10,7 @@ expression: output
 [ERROR]     AssertionFailedError:
 [ERROR]     expected: "broken.example.com"
 [ERROR]     but was: "user.example.com"
+[ERROR]     at com.example.company.EmailParserTest.should_extract_domain_from_email(EmailParserTest.java:14)
 [ERROR]   com.example.integration.DbIntegrationIT.shouldConnect <<< FAILURE!
 [ERROR]     IllegalStateException: Failed to load ApplicationContext for [WebMergedContextConfiguration@4c2af006 testClass = com.example.integration.DbIntegrationIT]
 [ERROR]     at org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.loadContext(DefaultCacheAwareContextLoaderDelegate.java:180)

@@ -1221,6 +1221,10 @@ const MAX_DETAIL_LINES: usize = 3;
 const MAX_CAUSE_LINES: usize = 4;
 const MAX_FAILURES_SHOWN: usize = 10;
 const MAX_LINE_LENGTH: usize = 200;
+/// Bound on the message collected for one failure before the render caps
+/// it — a library dumping its state into an exception message must not
+/// grow the parser's buffer without limit.
+const MAX_MESSAGE_BYTES: usize = 64 * 1024;
 
 #[derive(Debug, PartialEq)]
 enum TestParseState {
@@ -1237,6 +1241,9 @@ struct FailureEntry {
     /// How many of `details` are `Caused by:` headers — they are capped
     /// separately from regular detail lines (see `MAX_CAUSE_LINES`).
     cause_lines: usize,
+    /// Still between the exception header and its first frame: the lines
+    /// there are the message, appended to the header (`details[0]`).
+    in_message: bool,
 }
 
 /// Parse the four count fields from a `TESTS_RUN_RE` captures. The regex
@@ -1836,9 +1843,16 @@ fn render_failure_body(out: &mut String, f: &TestFailure) {
         // then `java.lang.AssertionError: Status expected:<400>`. Drop the
         // header only when it adds nothing — same type, and a message the
         // label already carries in full (a header that says MORE, because
-        // surefire truncated the message attribute, stays).
-        if lines.peek().is_some_and(|l| header_duplicates_label(l, f)) {
-            lines.next();
+        // surefire truncated the message attribute, stays). A multi-line
+        // message makes the header a block of lines, judged as a whole.
+        let header_len = trace
+            .lines()
+            .take_while(|l| !l.starts_with("Caused by:") && !stack_trace::is_frame_like(l))
+            .count()
+            .max(1);
+        let header: Vec<&str> = trace.lines().take(header_len).collect();
+        if header_duplicates_label(&header.join("\n"), f) {
+            lines.nth(header_len - 1);
         }
         for line in lines {
             let t = line.trim();
@@ -2394,6 +2408,7 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                         name: test_name,
                         details: Vec::new(),
                         cause_lines: 0,
+                        in_message: false,
                     });
                     continue;
                 }
@@ -2425,9 +2440,25 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                 }
 
                 if let Some(ref mut f) = current_failure {
+                    // A message runs on below its header until the first
+                    // frame — ArchUnit's violation list, AssertJ's
+                    // expected/actual. The detail budget cut it after its
+                    // first line; the render caps it as the XML path does.
+                    let is_cause = stripped.starts_with("Caused by:");
+                    if f.in_message {
+                        if !tagged && !is_cause && !stack_trace::is_frame_like(line) {
+                            if let Some(header) = f.details.first_mut() {
+                                if !stripped.is_empty() && header.len() < MAX_MESSAGE_BYTES {
+                                    header.push('\n');
+                                    header.push_str(stripped);
+                                }
+                            }
+                            continue;
+                        }
+                        f.in_message = false;
+                    }
                     // `Caused by:` headers get their own budget on top of the
                     // detail cap — the root cause must never be cut off.
-                    let is_cause = stripped.starts_with("Caused by:");
                     if is_cause {
                         if f.cause_lines >= MAX_CAUSE_LINES {
                             continue;
@@ -2448,6 +2479,7 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                     if is_cause {
                         f.cause_lines += 1;
                     }
+                    f.in_message = f.details.len() == 1 && !is_cause;
                 }
             }
             TestParseState::Summary => {
@@ -2566,10 +2598,14 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
             };
             let rendered = if di == root {
                 stack_trace::truncate_root_header(&rendered)
+            } else if rendered.contains('\n') {
+                stack_trace::wrapper_header(&rendered).join("\n")
             } else {
                 truncate(&rendered, MAX_LINE_LENGTH)
             };
-            writeln!(result, "[ERROR]     {rendered}").ok();
+            for line in rendered.lines() {
+                writeln!(result, "[ERROR]     {line}").ok();
+            }
         }
     }
     if total_failures_seen > MAX_FAILURES_SHOWN {
@@ -6348,6 +6384,32 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         );
     }
 
+    /// Without reports the stdout parser capped a failure at 3 detail lines,
+    /// so the same two messages lost the same answers as on the XML path:
+    /// one ArchUnit violation of ten, and AssertJ's `["error",`. Real raw
+    /// log of the ArchUnit 1.4.1 / AssertJ 3.27 reproduction.
+    #[test]
+    fn text_filter_keeps_multiline_messages_up_to_the_first_frame() {
+        let input = include_str!("../../../tests/fixtures/mvn_test_archunit_assertj_raw.txt");
+        let output = filter_mvn_tests_with_goal(input, "test", &pkgs("com.example"));
+        let listed = output
+            .lines()
+            .filter(|l| l.contains("Method <com.example.api."))
+            .count();
+        assert_eq!(listed, 10, "every violation must be listed:\n{output}");
+        for needle in ["elements not found:", "[\"manager-changed\"]", "and elements not expected:"] {
+            assert_eq!(output.matches(needle).count(), 1, "{needle} must render once:\n{output}");
+        }
+        assert!(
+            output.contains("ApiArchTest.api_controllers_must_declare_pre_authorize(ApiArchTest.java:16)"),
+            "the app frame still follows the message:\n{output}"
+        );
+        assert!(
+            output.lines().all(|l| l.is_empty() || l.starts_with('[')),
+            "every line keeps a Maven level tag:\n{output}"
+        );
+    }
+
     #[test]
     fn text_filter_shortens_exception_fqn_in_first_detail() {
         // Regression: before unification, stdout parser emitted the full FQN
@@ -7112,6 +7174,60 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             2,
             "each repeat needs its elision reference:\n{out}"
         );
+    }
+
+    fn render_real_report(xml: &str) -> String {
+        let result = surefire_reports::parse_content(xml, &pkgs("com.example"))
+            .expect("real surefire report parses");
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &result.failures);
+        out
+    }
+
+    /// Real 2026-09-23 auth run: an ArchUnit rule listed the 8 handler methods
+    /// missing `@PreAuthorize` on the lines below its message, and the render
+    /// kept only the rule's first 200 chars — the list went into `... 16
+    /// framework frames omitted`, counted as frames. The list IS the answer,
+    /// so a subagent grepped 10k chars of the tee log for it. Fixture: the
+    /// same rule shape reproduced on ArchUnit 1.4.1 / Surefire 3.5.3.
+    #[test]
+    fn render_failure_block_keeps_an_archunit_violation_list() {
+        let out = render_real_report(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.ApiArchTest.xml"
+        ));
+        let listed = out
+            .lines()
+            .filter(|l| l.starts_with("Method <com.example.api."))
+            .count();
+        assert_eq!(listed, 10, "every violation must be listed exactly once:\n{out}");
+        assert!(
+            out.contains("\t... 3 framework frames omitted"),
+            "message lines must not be counted as framework frames:\n{out}"
+        );
+        assert!(
+            out.contains("ApiArchTest.api_controllers_must_declare_pre_authorize(ApiArchTest.java:16)"),
+            "the test's own frame must survive:\n{out}"
+        );
+    }
+
+    /// AssertJ puts the answer last: `elements not found:` / `and elements
+    /// not expected:`. The 200-char message cut landed inside the first list
+    /// (2026-09-23 auth `UserImportSearchServiceTest`, seven failures, every
+    /// one cut before its answer).
+    #[test]
+    fn render_failure_block_keeps_the_end_of_a_multiline_assertj_message() {
+        let out = render_real_report(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.ImportsTest.xml"
+        ));
+        for needle in [
+            "Expecting actual:",
+            "elements not found:",
+            "[\"manager-changed\"]",
+            "and elements not expected:",
+            "[\"error\", \"skipped\", \"no-field-changed\"]",
+        ] {
+            assert_eq!(out.matches(needle).count(), 1, "{needle} must render once:\n{out}");
+        }
     }
 
     #[test]
