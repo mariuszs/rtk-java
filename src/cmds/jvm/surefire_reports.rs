@@ -101,6 +101,19 @@ fn extract_attr(
     None
 }
 
+/// A dotted Java binary class name (`com.example.Foo`, `Foo$Bar`), as opposed
+/// to a JUnit display name (`GET /{id} - getPDF`).
+fn is_java_class_name(name: &str) -> bool {
+    let is_identifier = |part: &str| {
+        let mut chars = part.chars();
+        chars
+            .next()
+            .is_some_and(|c| c.is_alphabetic() || c == '_' || c == '$')
+            && chars.all(|c| c.is_alphanumeric() || c == '_' || c == '$')
+    };
+    name.split('.').all(is_identifier)
+}
+
 fn parse_u32_attr(reader: &Reader<&[u8]>, start: &BytesStart<'_>, key: &[u8]) -> u32 {
     extract_attr(reader, start, key)
         .and_then(|v| v.parse::<u32>().ok())
@@ -129,6 +142,7 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
 
     let mut result = SurefireResult::default();
     let mut saw_testsuite = false;
+    let mut suite_class: Option<String> = None;
     let mut current_class: Option<String> = None;
     let mut current_method: Option<String> = None;
     let mut current_has_failure = false;
@@ -153,8 +167,9 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                             errors: parse_u32_attr(&reader, &e, b"errors"),
                             skipped: parse_u32_attr(&reader, &e, b"skipped"),
                         };
+                        suite_class = extract_attr(&reader, &e, b"name");
                         result.suites.push(SuiteStat {
-                            class_name: extract_attr(&reader, &e, b"name").unwrap_or_default(),
+                            class_name: suite_class.clone().unwrap_or_default(),
                             tests: file_summary.run,
                             skipped: file_summary.skipped,
                             time_secs: extract_attr(&reader, &e, b"time")
@@ -165,7 +180,11 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                         result.summary.add(&file_summary);
                     }
                     b"testcase" => {
-                        current_class = extract_attr(&reader, &e, b"classname");
+                        // `@Nested` + `@DisplayName` puts the display name in
+                        // `classname`; the suite's FQCN is what stdout prints.
+                        current_class = extract_attr(&reader, &e, b"classname")
+                            .filter(|c| is_java_class_name(c))
+                            .or_else(|| suite_class.clone());
                         current_method = extract_attr(&reader, &e, b"name");
                         current_has_failure = false;
                     }
@@ -1463,6 +1482,35 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
         assert_eq!(result.failures[1].test_method, "errors");
         assert_eq!(result.failures[1].kind, FailureKind::Error);
         assert!(result.failures[1].stack_trace.is_none(), "{:?}", result.failures[1]);
+    }
+
+    /// JUnit 5 `@Nested` classes with a `@DisplayName`: Surefire writes the
+    /// display name into `classname` (shape from a real skiller report), while
+    /// `<testsuite name>` and stdout keep the FQCN. A display name is not a
+    /// class the agent can grep for or pass to `-Dtest`.
+    #[test]
+    fn parse_content_nested_display_name_falls_back_to_suite_class() {
+        let xml = r#"<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.web.ReportControllerTest" tests="3" failures="1" errors="0" skipped="1">
+  <testcase name="shouldReturnSharedReport" classname="GET /{shareId} - getSharedReport"/>
+  <testcase name="shouldReturnConflict" classname="GET /{companyId}/{objectId}/pdf - getPDF">
+    <failure message="expected: &lt;409&gt; but was: &lt;500&gt;" type="org.opentest4j.AssertionFailedError"/>
+  </testcase>
+  <testcase name="shouldRender" classname="Rendering the PDF">
+    <skipped message="not ready"/>
+  </testcase>
+</testsuite>"#;
+        let result = parse_content(xml, &[]).expect("parses");
+        assert_eq!(result.failures.len(), 1, "{:?}", result.failures);
+        assert_eq!(
+            result.failures[0].test_class,
+            "com.example.web.ReportControllerTest"
+        );
+        assert_eq!(result.failures[0].test_method, "shouldReturnConflict");
+        assert_eq!(
+            result.skipped_tests[0].class,
+            "com.example.web.ReportControllerTest"
+        );
     }
 
     #[test]
