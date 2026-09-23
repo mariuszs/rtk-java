@@ -3,7 +3,8 @@
 //! Two heuristics, merged and deduplicated:
 //! 1. `pom.xml` `<groupId>` (top-level or parent fallback).
 //! 2. `src/main/java/` directory walk — follow unique-child dirs to find the
-//!    common package prefix (e.g. `src/main/java/com/example/app/` → `com.example.app`).
+//!    common package prefix (e.g. `src/main/java/com/example/app/` → `com.example.app`),
+//!    in `cwd` and in each depth-1 reactor module (a child dir with a `pom.xml`).
 
 use quick_xml::events::Event;
 use quick_xml::Reader;
@@ -20,13 +21,38 @@ pub fn detect(cwd: &Path) -> Vec<String> {
         pkgs.push(gid);
     }
 
-    if let Some(src) = detect_from_sources(cwd) {
+    // A reactor root usually has no sources of its own, and its groupId need
+    // not be a package prefix of the code, so each module's sources count too.
+    let roots = std::iter::once(cwd.to_path_buf()).chain(reactor_modules(cwd));
+    for src in roots.filter_map(|dir| detect_from_sources(&dir)) {
         if !pkgs.contains(&src) {
             pkgs.push(src);
         }
     }
 
     pkgs
+}
+
+/// Depth-1 child directories of `cwd` that carry a `pom.xml`, sorted by name.
+/// Hidden directories (`.claude/worktrees`, `.git`) and build output are not
+/// modules.
+fn reactor_modules(cwd: &Path) -> Vec<std::path::PathBuf> {
+    let Ok(entries) = std::fs::read_dir(cwd) else {
+        return Vec::new();
+    };
+    let mut modules: Vec<_> = entries
+        .flatten()
+        .filter(|e| e.file_type().is_ok_and(|t| t.is_dir()))
+        .filter(|e| {
+            let name = e.file_name();
+            let name = name.to_string_lossy();
+            !name.starts_with('.') && name != "target" && name != "node_modules"
+        })
+        .map(|e| e.path())
+        .filter(|p| p.join("pom.xml").is_file())
+        .collect();
+    modules.sort();
+    modules
 }
 
 /// Walk `src/main/java/` following unique-child directories.
@@ -216,5 +242,38 @@ mod tests {
             .unwrap();
         let result = detect(tmp.path());
         assert_eq!(result, vec!["com.example.app", "pl.company.project"]);
+    }
+
+    /// Run from a reactor root: the root has no `src/main/java`, and the code
+    /// lives outside the groupId (seen on a real reactor whose modules
+    /// use a different package tree). Without the module walk every frame was
+    /// classified as framework and collapsed, hiding the failing line.
+    #[test]
+    fn detect_walks_reactor_module_sources() {
+        let tmp = tempfile::tempdir().unwrap();
+        std::fs::copy(
+            "tests/fixtures/java/poms/single-module-pom.xml",
+            tmp.path().join("pom.xml"),
+        )
+        .unwrap();
+        for (module, pkg) in [("web", "org/acme/web"), ("core", "org/acme/core")] {
+            let m = tmp.path().join(module);
+            std::fs::create_dir_all(m.join("src/main/java").join(pkg).join("a")).unwrap();
+            std::fs::create_dir_all(m.join("src/main/java").join(pkg).join("b")).unwrap();
+            std::fs::write(m.join("pom.xml"), "<project/>").unwrap();
+        }
+        // Not modules: no pom.xml, hidden, or build output.
+        for dir in ["docs", ".claude", "target"] {
+            let d = tmp.path().join(dir);
+            std::fs::create_dir_all(d.join("src/main/java/org/other/x")).unwrap();
+            if dir != "docs" {
+                std::fs::write(d.join("pom.xml"), "<project/>").unwrap();
+            }
+        }
+
+        assert_eq!(
+            detect(tmp.path()),
+            vec!["com.example.app", "org.acme.core", "org.acme.web"]
+        );
     }
 }
