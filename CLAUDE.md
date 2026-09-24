@@ -63,7 +63,7 @@ Rules:
   same fixtures. Already re-decided at v0.44.1 and v0.48.0 — decide it the same
   way, and re-measure before ever reversing it.
 - **The heredoc bail is deleted on purpose** (`discover/registry.rs`,
-  `hooks/hook_cmd.rs`, `hooks/rewrite_cmd.rs`). Upstream returns `None` on
+  `discover/lexer.rs`, `hooks/decision.rs`). Upstream returns `None` on
   `has_heredoc`; the fork splits the body off and rewrites what follows the
   terminator, never auto-allowing the result. Restoring that bail — which rule
   2 read backwards would do — hands raw Maven to the agent again (91 calls,
