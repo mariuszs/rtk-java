@@ -686,6 +686,16 @@ impl ReportScope {
         }
     }
 
+    /// The run announced classes, but none by its qualified name — the
+    /// `Running` lines carry phrased names (`usePhrasedClassNameInRunning`),
+    /// which no report filename can match. A qualified name proves the run
+    /// names classes the way the report files do.
+    pub fn suites_are_phrased(&self) -> bool {
+        self.suites
+            .as_ref()
+            .is_some_and(|s| !s.iter().any(|name| name.contains('.')))
+    }
+
     /// The same window without class scoping.
     pub fn without_suites(&self) -> Self {
         Self {

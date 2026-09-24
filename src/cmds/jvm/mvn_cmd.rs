@@ -1419,8 +1419,10 @@ pub(crate) fn enrich_with_reports(
     // Class scoping matched nothing although the run announced classes: the
     // `Running` lines carry phrased names (`usePhrasedClassNameInRunning`),
     // not class names. Fall back to the time window rather than lose every
-    // report.
-    if scope.suites.is_some() && counts(sf.as_ref()).0 + counts(fs.as_ref()).0 == 0 {
+    // report. Qualified names that match nothing mean this run wrote no
+    // report (a crashed fork), and the window alone would admit a concurrent
+    // build's.
+    if scope.suites_are_phrased() && counts(sf.as_ref()).0 + counts(fs.as_ref()).0 == 0 {
         let unscoped = scope.without_suites();
         sf = collect_reports(&sf_dirs, &unscoped, app_packages, cwd);
         fs = collect_reports(&fs_dirs, &unscoped, app_packages, cwd);
@@ -6515,6 +6517,29 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(
             out.text.contains("shouldHandleNull"),
             "reports lost to class scoping:\n{}",
+            out.text
+        );
+    }
+
+    #[test]
+    fn enrich_keeps_class_scoping_when_announced_classes_wrote_no_report() {
+        // `Running` carries real class names, but this run wrote no report
+        // for them (the forked JVM died first). The zero-match fallback is
+        // for phrased names only; here it would hand a concurrent build's
+        // failures to this run.
+        let tmp = project_with_passing_and_failing_reports();
+        let started = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let raw = "[INFO] Running com.example.CrashedTest\n";
+        let out = super::enrich_with_reports(
+            FAILED_RUN_SUMMARY,
+            tmp.path(),
+            ReportScope::for_run(started, raw),
+            &pkgs("com.example"),
+            "test",
+        );
+        assert!(
+            !out.text.contains("FailingTest"),
+            "a concurrent build's failures leaked in:\n{}",
             out.text
         );
     }

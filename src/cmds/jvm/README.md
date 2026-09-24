@@ -52,8 +52,9 @@ Only this run's XML reports are parsed (`ReportScope`):
   concurrent `-pl other-module` build in the same checkout (IDE, second
   agent), whose fresh reports otherwise pass the time window. Without
   `Running` lines (`-q`) the window is the only gate; if the announced names
-  match no report at all (`usePhrasedClassNameInRunning`), the read falls
-  back to the window rather than lose every report.
+  are all unqualified (`usePhrasedClassNameInRunning`) and match no report,
+  the read falls back to the window rather than lose every report. Qualified
+  names that match nothing (a crashed fork) keep the class scope.
 
 ### Red-flag heuristic for "0 tests"
 
