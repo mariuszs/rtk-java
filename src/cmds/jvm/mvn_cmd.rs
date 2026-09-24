@@ -5,7 +5,9 @@
 //! Strips thousands of noise lines to compact failure reports (99%+ savings).
 
 use crate::cmds::jvm::stack_trace;
-use crate::cmds::jvm::surefire_reports::{self, FailureKind, ReportScope, SurefireResult, TestFailure, TestSummary};
+use crate::cmds::jvm::surefire_reports::{
+    self, FailureKind, ReportScope, SurefireResult, TestFailure, TestSummary,
+};
 use crate::core::runner;
 use crate::core::tracking;
 use crate::core::utils::{exit_code_from_status, resolved_command, strip_ansi, truncate};
@@ -31,7 +33,8 @@ const MAX_FAILURES_PER_SOURCE: usize = 10;
 const MAX_FAILURE_NAMES: usize = 40;
 
 static TESTS_RUN_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"Tests run:\s*(\d+),\s*Failures:\s*(\d+),\s*Errors:\s*(\d+),\s*Skipped:\s*(\d+)").unwrap()
+    Regex::new(r"Tests run:\s*(\d+),\s*Failures:\s*(\d+),\s*Errors:\s*(\d+),\s*Skipped:\s*(\d+)")
+        .unwrap()
 });
 static FAILURE_HEADER_RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^\[ERROR\]\s+(\S+\.\S+)\s+--\s+Time elapsed:.*<<<\s+(FAILURE|ERROR)!").unwrap()
@@ -154,9 +157,7 @@ static JUL_LOG_HEADER_RE: LazyLock<Regex> =
 /// Bare-text WARNING lines emitted by non-JVM libraries (artifactregistry-
 /// maven-wagon, google-auth-library, etc.) without any `[INFO]/[ERROR]`
 /// Maven tag. Always non-actionable compared to real compile errors.
-const BARE_PLUGIN_WARNING_PREFIXES: &[&str] = &[
-    "WARNING: Your application has authenticated",
-];
+const BARE_PLUGIN_WARNING_PREFIXES: &[&str] = &["WARNING: Your application has authenticated"];
 
 /// Returns true for mvn startup / JVM / os-detection noise that is not
 /// command-specific (applies to compile, checkstyle, and most goals).
@@ -314,7 +315,6 @@ fn mvn_command(binary: MvnBinary) -> std::process::Command {
         MvnBinary::Mvnd => resolved_command("mvnd"),
     }
 }
-
 
 fn run_tests_like(
     binary: MvnBinary,
@@ -489,25 +489,61 @@ fn is_utility_goal(goal: &str) -> bool {
 /// Maven lifecycle phases (clean + default + site lifecycles). A bare token
 /// matching one of these is a goal even without a `:`.
 const MAVEN_PHASES: &[&str] = &[
-    "pre-clean", "clean", "post-clean",
-    "validate", "initialize",
-    "generate-sources", "process-sources", "generate-resources", "process-resources",
-    "compile", "process-classes",
-    "generate-test-sources", "process-test-sources", "generate-test-resources",
-    "process-test-resources", "test-compile", "process-test-classes",
-    "test", "prepare-package", "package",
-    "pre-integration-test", "integration-test", "post-integration-test",
-    "verify", "install", "deploy",
-    "pre-site", "site", "post-site", "site-deploy",
+    "pre-clean",
+    "clean",
+    "post-clean",
+    "validate",
+    "initialize",
+    "generate-sources",
+    "process-sources",
+    "generate-resources",
+    "process-resources",
+    "compile",
+    "process-classes",
+    "generate-test-sources",
+    "process-test-sources",
+    "generate-test-resources",
+    "process-test-resources",
+    "test-compile",
+    "process-test-classes",
+    "test",
+    "prepare-package",
+    "package",
+    "pre-integration-test",
+    "integration-test",
+    "post-integration-test",
+    "verify",
+    "install",
+    "deploy",
+    "pre-site",
+    "site",
+    "post-site",
+    "site-deploy",
 ];
 
 /// Maven options that consume the FOLLOWING token as their value, so that
 /// token must never be treated as a goal (`-pl core`, `-rf :module`).
 const VALUE_TAKING_OPTS: &[&str] = &[
-    "-pl", "--projects", "-P", "--activate-profiles", "-f", "--file",
-    "-T", "--threads", "-rf", "--resume-from", "-s", "--settings",
-    "-gs", "--global-settings", "-l", "--log-file", "-b", "--builder",
-    "-t", "--toolchains",
+    "-pl",
+    "--projects",
+    "-P",
+    "--activate-profiles",
+    "-f",
+    "--file",
+    "-T",
+    "--threads",
+    "-rf",
+    "--resume-from",
+    "-s",
+    "--settings",
+    "-gs",
+    "--global-settings",
+    "-l",
+    "--log-file",
+    "-b",
+    "--builder",
+    "-t",
+    "--toolchains",
 ];
 
 /// Extract the goal/phase tokens (in order) from a raw mvn arg vector.
@@ -540,9 +576,15 @@ fn parse_goals(args: &[String]) -> Vec<String> {
 /// Phases that actually execute surefire/failsafe (everything from `test`
 /// onward in the default lifecycle).
 const TEST_RUNNING_PHASES: &[&str] = &[
-    "test", "prepare-package", "package",
-    "pre-integration-test", "integration-test", "post-integration-test",
-    "verify", "install", "deploy",
+    "test",
+    "prepare-package",
+    "package",
+    "pre-integration-test",
+    "integration-test",
+    "post-integration-test",
+    "verify",
+    "install",
+    "deploy",
 ];
 
 /// True if any goal in the chain runs tests — gates XML enrichment in
@@ -580,7 +622,8 @@ static JUL_LOG_LINE_RE: LazyLock<Regex> =
 /// field is anchored so a correlation id like `[ERROR:08de5333-…]` in the
 /// message body cannot promote a WARN line.
 static LOGBACK_LOG_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?:TRACE|DEBUG|INFO|WARN)\b").unwrap()
+    Regex::new(r"^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?:TRACE|DEBUG|INFO|WARN)\b")
+        .unwrap()
 });
 /// Single-quoted spans in codegen plugin chatter (echoed class names).
 static QUOTED_SPAN_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"'[^']*'").unwrap());
@@ -590,13 +633,13 @@ static SEGMENT_ERRORISH_RE: LazyLock<Regex> =
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum SegmentKind {
-    Preamble,   // before the first plugin marker
+    Preamble, // before the first plugin marker
     Clean,
-    Compile,    // compile / testCompile
-    Surefire,   // unit tests
-    Failsafe,   // integration tests
+    Compile,  // compile / testCompile
+    Surefire, // unit tests
+    Failsafe, // integration tests
     Checkstyle,
-    Other,      // jar, resources, install, ...
+    Other, // jar, resources, install, ...
 }
 
 struct Segment {
@@ -666,7 +709,11 @@ fn split_segments(raw: &str) -> Vec<Segment> {
         }
     }
     if !current_body.is_empty() {
-        segments.push(Segment { kind: current_kind, marker: current_marker, body: current_body });
+        segments.push(Segment {
+            kind: current_kind,
+            marker: current_marker,
+            body: current_body,
+        });
     }
     segments
 }
@@ -678,9 +725,9 @@ fn split_segments(raw: &str) -> Vec<Segment> {
 #[derive(Default)]
 struct MultiParts {
     compile: String,
-    tests: String,      // surefire + failsafe combined (enriched later in run_multi_goal)
+    tests: String, // surefire + failsafe combined (enriched later in run_multi_goal)
     checkstyle: String,
-    build: String,      // [INFO] BUILD SUCCESS/FAILURE (+ Reactor Summary on failure); no Total time
+    build: String, // [INFO] BUILD SUCCESS/FAILURE (+ Reactor Summary on failure); no Total time
     stray_errors: Vec<String>, // [ERROR] lines from dropped/Other segments
     footer_errors: Vec<String>, // [ERROR] cause lines from the post-footer epilogue
     footer_stderr: Vec<String>, // a failed child process's stderr, after the epilogue
@@ -693,9 +740,8 @@ const MAX_FOOTER_STDERR_LINES: usize = 8;
 /// logback's own status output (`08:02:56,689 |-WARN in ch.qos.logback.core…`),
 /// which every forked test JVM prints to stderr when its config names an
 /// appender it never attaches.
-static LOGBACK_STATUS_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\d{2}:\d{2}:\d{2},\d{3} \|-\w+ in ch\.qos\.logback\.").unwrap()
-});
+static LOGBACK_STATUS_LINE_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\d{2}:\d{2}:\d{2},\d{3} \|-\w+ in ch\.qos\.logback\.").unwrap());
 
 /// Recover what a failed build's external process said on stderr.
 ///
@@ -819,7 +865,11 @@ fn extract_build_block(raw: &str) -> String {
             }
         }
         if st.contains("BUILD SUCCESS") || st.contains("BUILD FAILURE") {
-            out.push(if failed { "[INFO] BUILD FAILURE".to_string() } else { "[INFO] BUILD SUCCESS".to_string() });
+            out.push(if failed {
+                "[INFO] BUILD FAILURE".to_string()
+            } else {
+                "[INFO] BUILD SUCCESS".to_string()
+            });
         }
         // Total time intentionally dropped.
     }
@@ -1074,7 +1124,10 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
     });
     let app_pkgs = crate::cmds::jvm::pom_groupid::detect(&cwd);
     let enrich = chain_runs_tests(&goals);
-    let test_goal = if goals.iter().any(|g| g == "verify" || g == "integration-test") {
+    let test_goal = if goals
+        .iter()
+        .any(|g| g == "verify" || g == "integration-test")
+    {
         "verify"
     } else {
         "test"
@@ -1093,8 +1146,7 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
             let mut parts = filter_segments(raw);
             if enrich && !parts.tests.trim().is_empty() {
                 let scope = ReportScope::for_run(started_at, raw);
-                let enriched =
-                    enrich_with_reports(&parts.tests, &cwd, scope, &app_pkgs, test_goal);
+                let enriched = enrich_with_reports(&parts.tests, &cwd, scope, &app_pkgs, test_goal);
                 parts.tests = finalize_enriched(enriched, &tee_label_for_filter);
             }
             compose_multi(&parts, &header)
@@ -1132,7 +1184,10 @@ fn route_goal(subcommand: &str) -> GoalRouting {
 /// goal-less commands like `mvn -version`). Tracked for metrics only.
 fn run_passthrough_all(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32> {
     if verbose > 0 {
-        eprintln!("Running: {binary} {} (passthrough)", tracking::args_display(args));
+        eprintln!(
+            "Running: {binary} {} (passthrough)",
+            tracking::args_display(args)
+        );
     }
     let timer = tracking::TimedExecution::start();
     let mut cmd = mvn_command(binary);
@@ -1181,7 +1236,10 @@ fn drop_first_goal(str_args: &[String], goal: &str) -> Vec<String> {
 }
 
 pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32> {
-    let str_args: Vec<String> = args.iter().map(|a| a.to_string_lossy().into_owned()).collect();
+    let str_args: Vec<String> = args
+        .iter()
+        .map(|a| a.to_string_lossy().into_owned())
+        .collect();
     let goals = parse_goals(&str_args);
 
     match goals.len() {
@@ -1233,7 +1291,6 @@ enum TestParseState {
     Summary,
     Done,
 }
-
 
 struct FailureEntry {
     name: String,
@@ -1626,7 +1683,14 @@ fn push_digest_skipped(out: &mut String, skipped: &mut [&surefire_reports::Skipp
     for st in skipped.iter() {
         match &st.reason {
             Some(reason) => {
-                writeln!(out, "  {}.{} — {}", short_class(&st.class), st.method, reason).ok();
+                writeln!(
+                    out,
+                    "  {}.{} — {}",
+                    short_class(&st.class),
+                    st.method,
+                    reason
+                )
+                .ok();
             }
             None => {
                 writeln!(out, "  {}.{}", short_class(&st.class), st.method).ok();
@@ -1645,8 +1709,7 @@ fn render_pass_inline(
 ) -> (String, bool) {
     let suites = all_suites(surefire, failsafe);
     let skipped = all_skipped(surefire, failsafe);
-    let needs_reference =
-        suites.len() > MAX_INLINE_CLASSES || skipped.len() > MAX_INLINE_SKIPPED;
+    let needs_reference = suites.len() > MAX_INLINE_CLASSES || skipped.len() > MAX_INLINE_SKIPPED;
     let inline_classes = !suites.is_empty() && suites.len() <= MAX_INLINE_CLASSES;
     let inline_skipped = !skipped.is_empty() && skipped.len() <= MAX_INLINE_SKIPPED;
 
@@ -1684,7 +1747,12 @@ fn render_pass_inline(
         (Some(fs_marker), Some(_)) if markers.is_dual() => {
             let idx = head.find(fs_marker.as_str()).unwrap_or(head.len());
             let before = head[..idx].trim_end_matches('\n');
-            format!("{before}{}\n{}{}", breakdown(surefire), &head[idx..], breakdown(failsafe))
+            format!(
+                "{before}{}\n{}{}",
+                breakdown(surefire),
+                &head[idx..],
+                breakdown(failsafe)
+            )
         }
         _ => format!("{head}{}{}", breakdown(surefire), breakdown(failsafe)),
     };
@@ -1710,18 +1778,18 @@ fn render_enriched(
         text_summary.to_string()
     };
 
-    if let Some(sf) = surefire {
-        if !sf.failures.is_empty() {
-            out.push_str("\n\n[ERROR] Failures:\n");
-            render_failure_block(&mut out, &sf.failures);
-        }
+    if let Some(sf) = surefire
+        && !sf.failures.is_empty()
+    {
+        out.push_str("\n\n[ERROR] Failures:\n");
+        render_failure_block(&mut out, &sf.failures);
     }
 
-    if let Some(fs) = failsafe {
-        if !fs.failures.is_empty() {
-            out.push_str("\n\n[ERROR] Integration failures:\n");
-            render_failure_block(&mut out, &fs.failures);
-        }
+    if let Some(fs) = failsafe
+        && !fs.failures.is_empty()
+    {
+        out.push_str("\n\n[ERROR] Integration failures:\n");
+        render_failure_block(&mut out, &fs.failures);
     }
 
     let footer = render_footer(surefire, failsafe);
@@ -1762,7 +1830,12 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         // Maven's per-test marker — agents grep for `<<< FAILURE` / `FAILURE!`
         // to list failing test names. Every line keeps the `[ERROR]` prefix
         // so retained/reconstructed output stays greppable like Maven's own.
-        writeln!(out, "[ERROR]   {}.{} <<< FAILURE!", f.test_class, f.test_method).ok();
+        writeln!(
+            out,
+            "[ERROR]   {}.{} <<< FAILURE!",
+            f.test_class, f.test_method
+        )
+        .ok();
         // Spring's own words for a cascade: the context already failed for an
         // earlier test in this run and it is "skipping repeated attempt". The
         // trace and captured output are then a verbatim repeat of the first
@@ -1820,11 +1893,21 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
         .take(MAX_FAILURE_NAMES)
         .collect();
     for f in &named {
-        writeln!(out, "[ERROR]   {}.{} <<< FAILURE!", f.test_class, f.test_method).ok();
+        writeln!(
+            out,
+            "[ERROR]   {}.{} <<< FAILURE!",
+            f.test_class, f.test_method
+        )
+        .ok();
     }
     let listed = MAX_FAILURES_PER_SOURCE + named.len();
     if failures.len() > listed {
-        writeln!(out, "[ERROR]   ... +{} more failures", failures.len() - listed).ok();
+        writeln!(
+            out,
+            "[ERROR]   ... +{} more failures",
+            failures.len() - listed
+        )
+        .ok();
     }
 }
 
@@ -1986,12 +2069,12 @@ fn signature_line(line: &str, test_class: &str) -> String {
         return line.into_owned();
     }
     let mut line = line.replace(test_class, "<test>").replace(simple, "<test>");
-    if line.ends_with("...") {
-        if let Some(at) = line.rfind("<test>") {
-            let end = at + "<test>".len();
-            let cut = line[end..].find(", ").map_or(end, |rel| end + rel);
-            line.truncate(cut);
-        }
+    if line.ends_with("...")
+        && let Some(at) = line.rfind("<test>")
+    {
+        let end = at + "<test>".len();
+        let cut = line[end..].find(", ").map_or(end, |rel| end + rel);
+        line.truncate(cut);
     }
     line
 }
@@ -2095,10 +2178,7 @@ fn failure_kind_label(f: &TestFailure) -> Option<String> {
     })
 }
 
-fn render_footer(
-    surefire: Option<&SurefireResult>,
-    failsafe: Option<&SurefireResult>,
-) -> String {
+fn render_footer(surefire: Option<&SurefireResult>, failsafe: Option<&SurefireResult>) -> String {
     let mut parts: Vec<String> = Vec::new();
     let (sf_read, sf_stale, sf_bad) = counts(surefire);
     let (fs_read, fs_stale, fs_bad) = counts(failsafe);
@@ -2252,7 +2332,10 @@ impl PluginMarkers {
         let mut markers = Self::default();
         for line in text.lines() {
             if let Some(caps) = PLUGIN_MARKER_RE.captures(line) {
-                markers.record(classify_marker(caps.get(1).map_or("", |m| m.as_str())), line);
+                markers.record(
+                    classify_marker(caps.get(1).map_or("", |m| m.as_str())),
+                    line,
+                );
             }
         }
         markers
@@ -2319,7 +2402,11 @@ impl PluginTotals {
 /// Maven's own summary line, prefixed exactly as surefire prints it:
 /// `[INFO]` on a clean pass, `[ERROR]` when there are failures/errors.
 fn aggregate_line(counts: &TestSummary) -> String {
-    let prefix = if counts.failures > 0 || counts.errors > 0 { "[ERROR]" } else { "[INFO]" };
+    let prefix = if counts.failures > 0 || counts.errors > 0 {
+        "[ERROR]"
+    } else {
+        "[INFO]"
+    };
     format!(
         "{prefix} Tests run: {}, Failures: {}, Errors: {}, Skipped: {}",
         counts.run, counts.failures, counts.errors, counts.skipped
@@ -2421,11 +2508,11 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                 // match so that the reactor aggregate (which appears after the
                 // LAST module's Summary block in multi-module builds) does not
                 // overwrite the real per-module total.
-                if !trimmed.contains("-- in") {
-                    if let Some(caps) = TESTS_RUN_RE.captures(stripped) {
-                        section = Some((current_plugin, parse_counts(&caps)));
-                        continue;
-                    }
+                if !trimmed.contains("-- in")
+                    && let Some(caps) = TESTS_RUN_RE.captures(stripped)
+                {
+                    section = Some((current_plugin, parse_counts(&caps)));
+                    continue;
                 }
 
                 // The next test class starts — close the current failure so
@@ -2449,11 +2536,12 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                     let is_cause = stripped.starts_with("Caused by:");
                     if f.in_message {
                         if !tagged && !is_cause && !stack_trace::is_frame_like(line) {
-                            if let Some(header) = f.details.first_mut() {
-                                if !stripped.is_empty() && header.len() < MAX_MESSAGE_BYTES {
-                                    header.push('\n');
-                                    header.push_str(stripped);
-                                }
+                            if let Some(header) = f.details.first_mut()
+                                && !stripped.is_empty()
+                                && header.len() < MAX_MESSAGE_BYTES
+                            {
+                                header.push('\n');
+                                header.push_str(stripped);
                             }
                             continue;
                         }
@@ -2465,9 +2553,7 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                         if f.cause_lines >= MAX_CAUSE_LINES {
                             continue;
                         }
-                    } else if f.details.len().saturating_sub(f.cause_lines)
-                        >= MAX_DETAIL_LINES
-                    {
+                    } else if f.details.len().saturating_sub(f.cause_lines) >= MAX_DETAIL_LINES {
                         continue;
                     }
                     if is_framework_frame_ext(stripped, app_packages)
@@ -2489,10 +2575,10 @@ fn filter_mvn_tests_with_goal(output: &str, goal: &str, app_packages: &[String])
                     continue;
                 }
 
-                if section.is_none() {
-                    if let Some(caps) = TESTS_RUN_RE.captures(stripped) {
-                        section = Some((current_plugin, parse_counts(&caps)));
-                    }
+                if section.is_none()
+                    && let Some(caps) = TESTS_RUN_RE.captures(stripped)
+                {
+                    section = Some((current_plugin, parse_counts(&caps)));
                 }
 
                 if parse_total_time(stripped).is_some() {
@@ -2891,9 +2977,7 @@ fn filter_mvn_compile(output: &str) -> String {
         }
 
         if in_build_order {
-            if REACTOR_BUILD_ORDER_RE.is_match(stripped)
-                || stripped.is_empty()
-                || line == INFO_TAG
+            if REACTOR_BUILD_ORDER_RE.is_match(stripped) || stripped.is_empty() || line == INFO_TAG
             {
                 continue;
             }
@@ -2965,10 +3049,10 @@ fn filter_mvn_compile(output: &str) -> String {
         push(&mut result, line);
     }
 
-    if let Some(modules) = reactor_modules.as_ref() {
-        if let Some(compact) = format_reactor_summary(modules) {
-            push(&mut result, &compact);
-        }
+    if let Some(modules) = reactor_modules.as_ref()
+        && let Some(compact) = format_reactor_summary(modules)
+    {
+        push(&mut result, &compact);
     }
 
     if result.is_empty() {
@@ -3008,7 +3092,12 @@ fn cap_compile_lines(clean: &str, result: String) -> String {
     }
     let head: Vec<&str> = result.lines().take(COMPILE_SUCCESS_HEAD_LINES).collect();
     let mut capped = head.join("\n");
-    write!(&mut capped, "\n[INFO]   ... +{} more lines", total - head.len()).ok();
+    write!(
+        &mut capped,
+        "\n[INFO]   ... +{} more lines",
+        total - head.len()
+    )
+    .ok();
     if !head.iter().any(|l| l.contains("BUILD SUCCESS")) {
         // The native build line was past the cap — re-emit it so grep for
         // `BUILD` keeps working on the capped subset.
@@ -3036,7 +3125,12 @@ fn cap_compile_failure_lines(result: String) -> String {
         .take(COMPILE_FAILURE_FOOTER_LINES)
         .collect();
     let mut capped = head.join("\n");
-    write!(&mut capped, "\n[INFO]   ... +{} more lines", total - head.len()).ok();
+    write!(
+        &mut capped,
+        "\n[INFO]   ... +{} more lines",
+        total - head.len()
+    )
+    .ok();
     for line in elided_footer {
         capped.push('\n');
         capped.push_str(line);
@@ -3878,8 +3972,10 @@ mod tests {
         let v = |s: &str| s.split(' ').map(String::from).collect::<Vec<_>>();
 
         // Multiple goals + flags
-        assert_eq!(parse_goals(&v("clean test-compile checkstyle:check -Dskip.npm -q")),
-                   vec!["clean", "test-compile", "checkstyle:check"]);
+        assert_eq!(
+            parse_goals(&v("clean test-compile checkstyle:check -Dskip.npm -q")),
+            vec!["clean", "test-compile", "checkstyle:check"]
+        );
         // -pl takes a value: `core` is NOT a goal
         assert_eq!(parse_goals(&v("-pl core test")), vec!["test"]);
         // -rf takes a value that contains ':' — must not be mistaken for a plugin goal
@@ -3887,7 +3983,10 @@ mod tests {
         // single goal + attached -D flag
         assert_eq!(parse_goals(&v("test -Dtest=Foo")), vec!["test"]);
         // leading flag before goals
-        assert_eq!(parse_goals(&v("-q clean install")), vec!["clean", "install"]);
+        assert_eq!(
+            parse_goals(&v("-q clean install")),
+            vec!["clean", "install"]
+        );
         // no goals
         assert_eq!(parse_goals(&v("-version")), Vec::<String>::new());
         // plugin:goal form
@@ -3923,8 +4022,7 @@ mod tests {
             output.contains("Tests run: 20, Failures: 0, Errors: 0, Skipped: 0"),
             "multi-module accumulation broken, got: {output}"
         );
-        let savings = 100.0
-            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 95.0, "expected ≥95%, got {:.1}%", savings);
     }
 
@@ -3939,10 +4037,15 @@ mod tests {
         // Each failure appears once in the enumerated Failures block
         // (stack trace may still reference the method name — count Maven's
         // own `<<< FAILURE!` markers instead of the old "N. " numbering).
-        let enumerated = output.lines().filter(|l| l.ends_with("<<< FAILURE!")).count();
-        assert_eq!(enumerated, 2, "expected exactly 2 enumerated failures in: {output}");
-        let savings = 100.0
-            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        let enumerated = output
+            .lines()
+            .filter(|l| l.ends_with("<<< FAILURE!"))
+            .count();
+        assert_eq!(
+            enumerated, 2,
+            "expected exactly 2 enumerated failures in: {output}"
+        );
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 85.0, "expected ≥85%, got {:.1}%", savings);
     }
 
@@ -3957,7 +4060,10 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_test_compilefail_eval.txt");
         let output = filter_mvn_test(input);
         // typescript-generator chatter gone
-        assert!(!output.contains("Running TypeScriptGenerator"), "got: {output}");
+        assert!(
+            !output.contains("Running TypeScriptGenerator"),
+            "got: {output}"
+        );
         assert!(!output.contains("Loading class"), "got: {output}");
         assert!(!output.contains("Parsing '"), "got: {output}");
         // Build Time Profiler blocks gone
@@ -3968,7 +4074,9 @@ mod tests {
         // the actual failure survives, javac location deduped to one copy
         assert!(output.contains("BUILD FAILURE"), "got: {output}");
         assert_eq!(
-            output.matches("VideoRecorderTest.java:[25,35] cannot find symbol").count(),
+            output
+                .matches("VideoRecorderTest.java:[25,35] cannot find symbol")
+                .count(),
             1,
             "javac error missing or duplicated: {output}"
         );
@@ -3977,29 +4085,25 @@ mod tests {
             "cause line missing: {output}"
         );
         insta::assert_snapshot!(output);
-        let savings = 100.0
-            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 85.0, "expected ≥85%, got {:.1}%", savings);
     }
 
     #[test]
     fn test_reactor_compile_success_collapses() {
-        let input =
-            include_str!("../../../tests/fixtures/mvn_compile_reactor_success.txt");
+        let input = include_str!("../../../tests/fixtures/mvn_compile_reactor_success.txt");
         let output = filter_mvn_compile(input);
         // Per-module SUCCESS lines must be collapsed; only BUILD SUCCESS
         // survives for an all-green reactor.
         assert!(output.contains("BUILD SUCCESS"), "got: {output}");
         assert!(!output.contains("edeal-common ....."), "got: {output}");
-        let savings = 100.0
-            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 90.0, "expected ≥90%, got {:.1}%", savings);
     }
 
     #[test]
     fn test_reactor_compile_fail_dedups_and_names_module() {
-        let input =
-            include_str!("../../../tests/fixtures/mvn_compile_reactor_fail.txt");
+        let input = include_str!("../../../tests/fixtures/mvn_compile_reactor_fail.txt");
         let output = filter_mvn_compile(input);
         // Each javac location must appear exactly once (inline; help-block copy deduped).
         assert_eq!(
@@ -4012,8 +4116,7 @@ mod tests {
             output.contains("FAILURE (edeal-webapp)"),
             "failed module missing from summary: {output}"
         );
-        let savings = 100.0
-            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 70.0, "expected ≥70%, got {:.1}%", savings);
     }
 
@@ -4027,8 +4130,14 @@ mod tests {
             output.contains("[INFO] Tests run: 183, Failures: 0, Errors: 0, Skipped: 0"),
             "should contain maven-native aggregate line, got: {output}"
         );
-        assert!(!output.contains("mvn test:"), "synthetic headline leaked: {output}");
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("mvn test:"),
+            "synthetic headline leaked: {output}"
+        );
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
     }
 
     // --- Maven-native summary trailer ---
@@ -4040,10 +4149,9 @@ mod tests {
     fn test_pass_summary_emits_maven_native_trailer() {
         let input = include_str!("../../../tests/fixtures/mvn_test_pass_mavenmcp.txt");
         let output = filter_mvn_test(input);
-        let aggregate = regex::Regex::new(
-            r"(?m)^\[INFO\] Tests run: 183, Failures: 0, Errors: 0, Skipped: 0$",
-        )
-        .expect("test regex");
+        let aggregate =
+            regex::Regex::new(r"(?m)^\[INFO\] Tests run: 183, Failures: 0, Errors: 0, Skipped: 0$")
+                .expect("test regex");
         assert!(
             aggregate.is_match(&output),
             "maven-native aggregate line missing:\n{output}"
@@ -4090,7 +4198,10 @@ mod tests {
             "should show maven-native aggregate line, got:\n{}",
             output
         );
-        assert!(!output.contains("Total time"), "Total time leaked:\n{output}");
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked:\n{output}"
+        );
         assert!(
             !output.contains("WARNING"),
             "Maven 4 JPMS warnings must be dropped, got:\n{}",
@@ -4112,7 +4223,7 @@ mod tests {
     /// its input.
     #[test]
     fn fixture_savings_floors() {
-        use crate::core::tracking::{billable_tokens_with_limit, DEFAULT_AGENT_OUTPUT_LIMIT};
+        use crate::core::tracking::{DEFAULT_AGENT_OUTPUT_LIMIT, billable_tokens_with_limit};
         type Filter = fn(&str) -> String;
         let billable = |s: &str| billable_tokens_with_limit(s, DEFAULT_AGENT_OUTPUT_LIMIT);
         #[rustfmt::skip]
@@ -4172,7 +4283,11 @@ mod tests {
                 ));
             }
         }
-        assert!(misses.is_empty(), "savings floors missed:\n{}", misses.join("\n"));
+        assert!(
+            misses.is_empty(),
+            "savings floors missed:\n{}",
+            misses.join("\n")
+        );
     }
 
     #[test]
@@ -4210,7 +4325,10 @@ mod tests {
             "should show maven-native aggregate line, got: {}",
             output
         );
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
         assert!(
             output.contains("EmailParserTest.should_extract_domain_from_email"),
             "should list first failure"
@@ -4293,10 +4411,15 @@ mod tests {
     fn pass_frame_is_prefixed_maven_subset() {
         let input = include_str!("../../../tests/fixtures/mvn_test_pass_mavenmcp.txt");
         let out = filter_mvn_test(input);
-        assert!(out.contains("[INFO] Tests run: 183, Failures: 0, Errors: 0, Skipped: 0"),
-            "prefixed aggregate missing:\n{out}");
+        assert!(
+            out.contains("[INFO] Tests run: 183, Failures: 0, Errors: 0, Skipped: 0"),
+            "prefixed aggregate missing:\n{out}"
+        );
         assert_eq!(out.lines().last(), Some("[INFO] BUILD SUCCESS"), "\n{out}");
-        assert!(!out.contains("mvn test:"), "synthetic headline leaked:\n{out}");
+        assert!(
+            !out.contains("mvn test:"),
+            "synthetic headline leaked:\n{out}"
+        );
         assert!(!out.contains("Total time"), "Total time leaked:\n{out}");
     }
 
@@ -4307,7 +4430,10 @@ mod tests {
         assert!(out.contains("[ERROR] Tests run: 20, Failures:"), "\n{out}");
         assert!(out.contains("[INFO] BUILD FAILURE"), "\n{out}");
         assert!(out.contains("[ERROR] Failures:"), "\n{out}");
-        assert!(!out.contains("mvn test:"), "synthetic headline leaked:\n{out}");
+        assert!(
+            !out.contains("mvn test:"),
+            "synthetic headline leaked:\n{out}"
+        );
     }
 
     // --- Task 7: regression fences for native-format fidelity ---
@@ -4353,9 +4479,17 @@ mod tests {
 
     #[test]
     fn retained_lines_keep_maven_prefixes() {
-        let out = filter_mvn_test(include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt"));
-        assert!(out.lines().any(|l| l.starts_with("[ERROR] Tests run:")), "\n{out}");
-        assert!(out.lines().any(|l| l.starts_with("[INFO] BUILD FAILURE")), "\n{out}");
+        let out = filter_mvn_test(include_str!(
+            "../../../tests/fixtures/mvn_test_reactor_fail.txt"
+        ));
+        assert!(
+            out.lines().any(|l| l.starts_with("[ERROR] Tests run:")),
+            "\n{out}"
+        );
+        assert!(
+            out.lines().any(|l| l.starts_with("[INFO] BUILD FAILURE")),
+            "\n{out}"
+        );
     }
 
     #[test]
@@ -4430,7 +4564,9 @@ mod tests {
         let out = filter_mvn_test(input);
         assert!(out.contains("BUILD FAILURE"), "\n{out}");
         assert!(
-            out.contains("githook-maven-plugin:9.9.9 or one of its dependencies could not be resolved"),
+            out.contains(
+                "githook-maven-plugin:9.9.9 or one of its dependencies could not be resolved"
+            ),
             "\n{out}"
         );
         assert!(out.contains("in offline mode"), "\n{out}");
@@ -4583,7 +4719,10 @@ mod tests {
             output.contains("ServiceUnavailableException"),
             "should include error details"
         );
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
     }
 
     #[test]
@@ -4595,15 +4734,15 @@ mod tests {
             "should show maven-native aggregate line (959 run, 9 skipped), got: {}",
             output
         );
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
         assert!(
             !output.contains("PortUnreachableException"),
             "should strip app log noise"
         );
-        assert!(
-            !output.contains("[stdout]"),
-            "should strip [stdout] lines"
-        );
+        assert!(!output.contains("[stdout]"), "should strip [stdout] lines");
         assert!(
             !output.contains("liquibase"),
             "should strip liquibase stderr"
@@ -4628,14 +4767,8 @@ mod tests {
             "should contain root artifact verbatim, got: {}",
             output
         );
-        assert!(
-            output.contains("slf4j-api"),
-            "should contain direct dep"
-        );
-        assert!(
-            output.contains("guava"),
-            "should contain guava"
-        );
+        assert!(output.contains("slf4j-api"), "should contain direct dep");
+        assert!(output.contains("guava"), "should contain guava");
         assert!(
             output.contains("[INFO]"),
             "[INFO] prefix must survive on kept lines — faithful native subset"
@@ -4644,10 +4777,7 @@ mod tests {
             output.contains("[INFO] BUILD SUCCESS"),
             "BUILD SUCCESS is a native Maven line — keep it verbatim"
         );
-        assert!(
-            !output.contains("Scanning"),
-            "should strip preamble"
-        );
+        assert!(!output.contains("Scanning"), "should strip preamble");
     }
 
     #[test]
@@ -4706,27 +4836,51 @@ mod tests {
         // reuse the existing dep:list fixture the current tests include_str! (mvn_dependency_list_auth.txt)
         let input = include_str!("../../../tests/fixtures/mvn_dependency_list_auth.txt");
         let out = filter_mvn_dep_list(input);
-        assert!(!out.contains("mvn dependency:list:"), "synthetic headline leaked:\n{out}");
-        assert!(!out.contains(" unique deps"), "invented count leaked:\n{out}");
+        assert!(
+            !out.contains("mvn dependency:list:"),
+            "synthetic headline leaked:\n{out}"
+        );
+        assert!(
+            !out.contains(" unique deps"),
+            "invented count leaked:\n{out}"
+        );
         // no invented per-scope group header like "compile (5):"
-        assert!(!regex::Regex::new(r"(?m)^\[INFO\] (compile|test|provided|runtime|system|import) \(\d+\):").unwrap().is_match(&out),
-            "invented scope-group header leaked:\n{out}");
+        assert!(
+            !regex::Regex::new(
+                r"(?m)^\[INFO\] (compile|test|provided|runtime|system|import) \(\d+\):"
+            )
+            .unwrap()
+            .is_match(&out),
+            "invented scope-group header leaked:\n{out}"
+        );
         // native resolved lines survive WITH their [INFO] prefix and :scope suffix
-        assert!(out.lines().any(|l| l.starts_with("[INFO]") && (l.ends_with(":compile") || l.ends_with(":test") || l.ends_with(":runtime"))),
-            "native [INFO] resolved lines missing:\n{out}");
+        assert!(
+            out.lines().any(|l| l.starts_with("[INFO]")
+                && (l.ends_with(":compile") || l.ends_with(":test") || l.ends_with(":runtime"))),
+            "native [INFO] resolved lines missing:\n{out}"
+        );
     }
 
     #[test]
     fn dep_tree_empty_is_native_build_line() {
-        assert_eq!(filter_mvn_dep_tree("[INFO] BUILD SUCCESS\n"), "[INFO] BUILD SUCCESS");
+        assert_eq!(
+            filter_mvn_dep_tree("[INFO] BUILD SUCCESS\n"),
+            "[INFO] BUILD SUCCESS"
+        );
     }
 
     #[test]
     fn dep_tree_keeps_transitive_lines_verbatim() {
         let input = "[INFO] com.example:root:jar:1.0\n[INFO] +- org.a:b:jar:2.0:compile\n[INFO] |  \\- org.c:d:jar:3.0:compile\n[INFO] BUILD SUCCESS\n";
         let out = filter_mvn_dep_tree(input);
-        assert!(out.contains("[INFO] |  \\- org.c:d:jar:3.0:compile"), "transitive line must survive verbatim:\n{out}");
-        assert!(!out.contains("transitive)"), "must NOT collapse into an invented (N transitive) count:\n{out}");
+        assert!(
+            out.contains("[INFO] |  \\- org.c:d:jar:3.0:compile"),
+            "transitive line must survive verbatim:\n{out}"
+        );
+        assert!(
+            !out.contains("transitive)"),
+            "must NOT collapse into an invented (N transitive) count:\n{out}"
+        );
     }
 
     // --- dependency:tree, bare reactor-wide runs ---
@@ -4872,9 +5026,10 @@ mod tests {
         // note real coordinate lines legitimately contain "compile (optional)"
         // as a substring, so this must be an anchored-line check, not a
         // blanket `contains`.
-        let scope_header_re =
-            regex::Regex::new(r"(?m)^\[INFO\] (compile|test|provided|runtime|system|import) \(\d+\):$")
-                .unwrap();
+        let scope_header_re = regex::Regex::new(
+            r"(?m)^\[INFO\] (compile|test|provided|runtime|system|import) \(\d+\):$",
+        )
+        .unwrap();
         assert!(
             !scope_header_re.is_match(&output),
             "must not invent a scope group header:\n{output}"
@@ -4887,9 +5042,18 @@ mod tests {
             ),
             "native resolved line must survive verbatim:\n{output}"
         );
-        assert!(output.contains("-- module"), "JPMS module note is native content — keep it");
-        assert!(output.contains(":jar:"), "default packaging token is native content — keep it");
-        assert!(output.contains("[INFO]"), "maven prefixes must survive on kept lines");
+        assert!(
+            output.contains("-- module"),
+            "JPMS module note is native content — keep it"
+        );
+        assert!(
+            output.contains(":jar:"),
+            "default packaging token is native content — keep it"
+        );
+        assert!(
+            output.contains("[INFO]"),
+            "maven prefixes must survive on kept lines"
+        );
         assert!(
             output.contains("[INFO] The following files have been resolved:"),
             "native resolved-files header must survive verbatim"
@@ -4947,10 +5111,7 @@ mod tests {
             output.contains("com.example:app"),
             "should contain root artifact"
         );
-        assert!(
-            output.contains("junit"),
-            "should contain direct dep"
-        );
+        assert!(output.contains("junit"), "should contain direct dep");
         assert!(
             output.contains("hamcrest"),
             "transitive deps are kept verbatim now — no invented collapse"
@@ -5026,10 +5187,7 @@ mod tests {
         );
 
         // Must strip plugin noise
-        assert!(
-            !output.contains("[stdout]"),
-            "should strip [stdout] lines"
-        );
+        assert!(!output.contains("[stdout]"), "should strip [stdout] lines");
         assert!(
             !output.contains("Generating table"),
             "should strip jOOQ codegen"
@@ -5054,10 +5212,7 @@ mod tests {
             !output.contains("The project was built"),
             "should strip CRA messages"
         );
-        assert!(
-            !output.contains("npm fund"),
-            "should strip npm messages"
-        );
+        assert!(!output.contains("npm fund"), "should strip npm messages");
         assert!(
             !output.contains("Server Version:"),
             "should strip Docker bare text"
@@ -5078,8 +5233,7 @@ mod tests {
         // `[INFO] --- plugin ---` markers, so the noisy-segment suppression
         // never engages and ~1900 JUL-format `INFO:` liquibase lines used to
         // stream through untouched (148KB on a BUILD SUCCESS).
-        let input =
-            include_str!("../../../tests/fixtures/mvn_compile_quiet_liquibase_jul_raw.txt");
+        let input = include_str!("../../../tests/fixtures/mvn_compile_quiet_liquibase_jul_raw.txt");
         let output = filter_mvn_compile(input);
 
         assert!(
@@ -5091,15 +5245,16 @@ mod tests {
             "JUL INFO: plugin log lines must be dropped, got:\n{output}"
         );
         assert!(
-            !output.lines().any(|l| l.trim_start().starts_with("WARNING: ")),
+            !output
+                .lines()
+                .any(|l| l.trim_start().starts_with("WARNING: ")),
             "JUL/JVM WARNING: lines must be dropped, got:\n{output}"
         );
     }
 
     #[test]
     fn test_compile_quiet_liquibase_jul_snapshot() {
-        let input =
-            include_str!("../../../tests/fixtures/mvn_compile_quiet_liquibase_jul_raw.txt");
+        let input = include_str!("../../../tests/fixtures/mvn_compile_quiet_liquibase_jul_raw.txt");
         insta::assert_snapshot!(filter_mvn_compile(input));
     }
 
@@ -5150,7 +5305,10 @@ mod tests {
             "failure output must keep all distinct errors, got {} lines:\n{output}",
             output.lines().count()
         );
-        assert!(!output.contains("... +"), "no elision on failure:\n{output}");
+        assert!(
+            !output.contains("... +"),
+            "no elision on failure:\n{output}"
+        );
     }
 
     #[test]
@@ -5161,7 +5319,9 @@ mod tests {
         // cause must be re-emitted after the elision.
         let mut input = String::new();
         for i in 0..300 {
-            input.push_str(&format!("[ERROR] /src/Foo{i}.java:[{i},5] cannot find symbol\n"));
+            input.push_str(&format!(
+                "[ERROR] /src/Foo{i}.java:[{i},5] cannot find symbol\n"
+            ));
         }
         input.push_str("[INFO] BUILD FAILURE\n");
         input.push_str(
@@ -5169,7 +5329,9 @@ mod tests {
              (bundle-install) on project api: Command execution failed.\n",
         );
         for i in 0..50 {
-            input.push_str(&format!("[ERROR] /src/Bar{i}.java:[{i},5] cannot find symbol\n"));
+            input.push_str(&format!(
+                "[ERROR] /src/Bar{i}.java:[{i},5] cannot find symbol\n"
+            ));
         }
         let output = filter_mvn_compile(&input);
 
@@ -5322,7 +5484,10 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_compile_npm_codegen.txt");
         let output = filter_mvn_compile(input);
 
-        assert!(!output.contains("npm warn deprecated"), "npm deprecation spam must be dropped");
+        assert!(
+            !output.contains("npm warn deprecated"),
+            "npm deprecation spam must be dropped"
+        );
         assert!(
             !output.contains("build/static/js/"),
             "webpack bundle-size listing must be dropped"
@@ -5354,7 +5519,10 @@ mod tests {
             !output.contains("Running Changeset:"),
             "bare liquibase changeset lines must be dropped"
         );
-        assert!(!output.contains("@@@@"), "liquibase ASCII banner must be dropped");
+        assert!(
+            !output.contains("@@@@"),
+            "liquibase ASCII banner must be dropped"
+        );
         assert!(
             !output.contains("(?i:TIMESTAMP"),
             "jooq forcedType regex echo must be dropped"
@@ -5419,7 +5587,10 @@ mod tests {
                       [INFO] BUILD SUCCESS\n\
                       [INFO] Total time: 1.0 s\n";
         let output = filter_mvn_compile(input);
-        assert!(!output.contains("[stdout]"), "should strip all [stdout] lines");
+        assert!(
+            !output.contains("[stdout]"),
+            "should strip all [stdout] lines"
+        );
         assert!(output.contains("BUILD SUCCESS"));
     }
 
@@ -5537,7 +5708,9 @@ mod tests {
 
     #[test]
     fn clean_pass_is_native_build_line() {
-        let out = filter_mvn_clean("[INFO] Deleting /p/target\n[INFO] BUILD SUCCESS\n[INFO] Total time: 0.4 s\n");
+        let out = filter_mvn_clean(
+            "[INFO] Deleting /p/target\n[INFO] BUILD SUCCESS\n[INFO] Total time: 0.4 s\n",
+        );
         assert_eq!(out, "[INFO] BUILD SUCCESS");
     }
 
@@ -5571,7 +5744,10 @@ mod tests {
         assert_eq!(route_goal("checkstyle:check"), GoalRouting::Checkstyle);
         assert_eq!(route_goal("checkstyle"), GoalRouting::Checkstyle);
         // Test-output state-machine goals (surefire/failsafe + XML enrichment):
-        assert_eq!(route_goal("test"), GoalRouting::TestsLike(TestLikeGoal::Test));
+        assert_eq!(
+            route_goal("test"),
+            GoalRouting::TestsLike(TestLikeGoal::Test)
+        );
         assert_eq!(
             route_goal("verify"),
             GoalRouting::TestsLike(TestLikeGoal::Verify)
@@ -5638,7 +5814,10 @@ mod tests {
     #[test]
     fn test_testlikegoal_tee_slugs_are_filesystem_safe() {
         // Tee labels become filenames — plugin goals must not leak ':' into them.
-        assert_eq!(TestLikeGoal::FailsafeIntegrationTest.tee_slug(), "failsafe_integration-test");
+        assert_eq!(
+            TestLikeGoal::FailsafeIntegrationTest.tee_slug(),
+            "failsafe_integration-test"
+        );
         assert_eq!(TestLikeGoal::FailsafeVerify.tee_slug(), "failsafe_verify");
         assert_eq!(TestLikeGoal::SurefireTest.tee_slug(), "surefire_test");
         assert_eq!(TestLikeGoal::Test.tee_slug(), "test");
@@ -5717,15 +5896,18 @@ mod tests {
             "should keep violation-count summary, got: {}",
             output
         );
-        assert!(output.contains("BUILD SUCCESS"), "should keep BUILD SUCCESS");
+        assert!(
+            output.contains("BUILD SUCCESS"),
+            "should keep BUILD SUCCESS"
+        );
         // Total time is dropped uniformly across every mvn surface.
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
 
         // Strip ANSI escapes (fixture has them)
-        assert!(
-            !output.contains('\x1b'),
-            "should strip ANSI escape codes"
-        );
+        assert!(!output.contains('\x1b'), "should strip ANSI escape codes");
 
         // Strip mvnd/maven 3.9+ startup noise
         assert!(
@@ -5753,8 +5935,7 @@ mod tests {
 
     #[test]
     fn test_filter_checkstyle_clean_native_warnings() {
-        let input =
-            include_str!("../../../tests/fixtures/mvn_checkstyle_clean_native.txt");
+        let input = include_str!("../../../tests/fixtures/mvn_checkstyle_clean_native.txt");
         let output = filter_mvn_checkstyle(input);
 
         assert!(output.contains("0 Checkstyle violations"));
@@ -5776,8 +5957,7 @@ mod tests {
             "should strip [INFO] os.detected.* lines"
         );
 
-        let savings = 100.0
-            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(
             savings >= 60.0,
             "mvn checkstyle clean (native): expected >=60% savings, got {:.1}%",
@@ -5840,8 +6020,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
 
     #[test]
     fn test_filter_checkstyle_violations() {
-        let input =
-            include_str!("../../../tests/fixtures/mvn_checkstyle_violations.txt");
+        let input = include_str!("../../../tests/fixtures/mvn_checkstyle_violations.txt");
         let output = filter_mvn_checkstyle(input);
 
         // Keep: error-count summary
@@ -5854,7 +6033,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // Keep: final result
         assert!(output.contains("BUILD FAILURE"));
         // Total time is dropped uniformly across every mvn surface.
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
 
         // Keep: each of 4 violations (rule name must survive the rewrite)
         for rule in &[
@@ -5906,8 +6088,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(!output.contains("auto-discovered prefixes"));
 
         // Savings ≥60%
-        let savings = 100.0
-            - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
+        let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(
             savings >= 60.0,
             "mvn checkstyle violations: expected >=60% savings, got {:.1}%\nOutput:\n{}",
@@ -6072,7 +6253,8 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
 
     #[test]
     fn checkstyle_pass_is_native_build_line() {
-        let out = filter_mvn_checkstyle("[INFO] Starting audit...\nAudit done.\n[INFO] BUILD SUCCESS\n");
+        let out =
+            filter_mvn_checkstyle("[INFO] Starting audit...\nAudit done.\n[INFO] BUILD SUCCESS\n");
         assert_eq!(out, "[INFO] BUILD SUCCESS");
     }
 
@@ -6086,7 +6268,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "surefire (688/8) and failsafe (262/1) totals must stay apart, got: {}",
             output
         );
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
         assert!(
             !output.contains("BUILD FAILURE"),
             "passing verify run should not say FAILURE, got: {}",
@@ -6105,8 +6290,11 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         );
         for i in 0..n {
             let renamed = xml.replace("UsersTest", &format!("Suite{i}Test"));
-            std::fs::write(dir.join(format!("TEST-com.example.Suite{i}Test.xml")), renamed)
-                .unwrap();
+            std::fs::write(
+                dir.join(format!("TEST-com.example.Suite{i}Test.xml")),
+                renamed,
+            )
+            .unwrap();
         }
         tmp
     }
@@ -6125,12 +6313,16 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // Inline breakdown is rendered in surefire's own line shape, not the
         // old compact "Suite0Test:" form.
         assert!(
-            out.text.contains("[INFO] Tests run: 5 -- in com.example.auth.user.Suite0Test"),
+            out.text
+                .contains("[INFO] Tests run: 5 -- in com.example.auth.user.Suite0Test"),
             "inline class list, got: {}",
             out.text
         );
         assert!(out.digest.is_some(), "digest written even for inline runs");
-        assert!(!out.reference, "2 classes fit inline — no reference line needed");
+        assert!(
+            !out.reference,
+            "2 classes fit inline — no reference line needed"
+        );
     }
 
     #[test]
@@ -6148,7 +6340,8 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "test",
         );
         assert!(
-            out.text.contains("[INFO] Tests run: 5 -- in com.example.auth.user.Suite0Test"),
+            out.text
+                .contains("[INFO] Tests run: 5 -- in com.example.auth.user.Suite0Test"),
             "inline class list, got: {}",
             out.text
         );
@@ -6165,17 +6358,14 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let tmp = tmp_with_reports(6);
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text = "[INFO] Tests run: 72, Failures: 0, Errors: 0, Skipped: 0\n[INFO] BUILD SUCCESS";
-        let out = super::enrich_with_reports(
-            text,
-            tmp.path(),
-            since,
-            &pkgs("com.example"),
-            "test",
-        );
+        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
         assert_eq!(out.text, text);
         assert!(out.reference);
         let digest = out.digest.expect("digest for large run");
-        assert!(digest.contains("Suite5Test"), "all classes in digest, got: {digest}");
+        assert!(
+            digest.contains("Suite5Test"),
+            "all classes in digest, got: {digest}"
+        );
     }
 
     #[test]
@@ -6223,7 +6413,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         );
         assert!(out.digest.is_some());
         let digest = out.digest.unwrap();
-        assert!(digest.contains("skipped:"), "skipped names in digest, got: {digest}");
+        assert!(
+            digest.contains("skipped:"),
+            "skipped names in digest, got: {digest}"
+        );
         assert!(out.reference, "8 skipped > inline cap");
     }
 
@@ -6238,7 +6431,11 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             &pkgs("com.example"),
             "test",
         );
-        assert!(out.text.contains("No tests were executed"), "got: {}", out.text);
+        assert!(
+            out.text.contains("No tests were executed"),
+            "got: {}",
+            out.text
+        );
         assert!(out.text.contains("surefire"), "got: {}", out.text);
     }
 
@@ -6297,7 +6494,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let raw = include_str!("../../../tests/fixtures/mvnd_test_fail_raw.txt");
         assert!(!is_untaggable_daemon_reactor(raw));
         let out = filter_mvn_piped(raw);
-        assert!(out.len() < raw.len() / 2, "expected compression, got: {out}");
+        assert!(
+            out.len() < raw.len() / 2,
+            "expected compression, got: {out}"
+        );
         assert!(out.contains("CalcTest.failOne"), "got: {out}");
     }
 
@@ -6313,7 +6513,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             .position(|l| BUILD_FOOTER_RE.is_match(l))
             .expect("fixture has a footer");
         let raw = full.lines().take(cut - 1).collect::<Vec<_>>().join("\n");
-        assert_eq!(filter_mvn_multi(&raw, "clean test-compile checkstyle:check"), raw);
+        assert_eq!(
+            filter_mvn_multi(&raw, "clean test-compile checkstyle:check"),
+            raw
+        );
     }
 
     /// The guard keyed off a plugin-marker shape whose `\s+` crossed newlines,
@@ -6399,11 +6602,21 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             .filter(|l| l.contains("Method <com.example.api."))
             .count();
         assert_eq!(listed, 10, "every violation must be listed:\n{output}");
-        for needle in ["elements not found:", "[\"manager-changed\"]", "and elements not expected:"] {
-            assert_eq!(output.matches(needle).count(), 1, "{needle} must render once:\n{output}");
+        for needle in [
+            "elements not found:",
+            "[\"manager-changed\"]",
+            "and elements not expected:",
+        ] {
+            assert_eq!(
+                output.matches(needle).count(),
+                1,
+                "{needle} must render once:\n{output}"
+            );
         }
         assert!(
-            output.contains("ApiArchTest.api_controllers_must_declare_pre_authorize(ApiArchTest.java:16)"),
+            output.contains(
+                "ApiArchTest.api_controllers_must_declare_pre_authorize(ApiArchTest.java:16)"
+            ),
             "the app frame still follows the message:\n{output}"
         );
         assert!(
@@ -6434,8 +6647,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // fallback kept `at org.junit.Assert.assertEquals(Assert.java:117)`
         // noise while XML output was clean.
         let input = include_str!("../../../tests/fixtures/mvn_test_reactor_fail.txt");
-        let output =
-            super::filter_mvn_tests_with_goal(input, "test", &pkgs("com.edeal.frontline"));
+        let output = super::filter_mvn_tests_with_goal(input, "test", &pkgs("com.edeal.frontline"));
         assert!(
             !output.contains("org.junit.Assert.assertEquals"),
             "kept `org.junit.Assert` framework frame with app_packages known:\n{output}"
@@ -6575,8 +6787,16 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             &pkgs("com.example"),
             "test",
         );
-        assert!(out.text.contains("com.example.BTest.fails <<< FAILURE!"), "\n{}", out.text);
-        assert!(out.text.contains("expected: <1> but was: <2>"), "\n{}", out.text);
+        assert!(
+            out.text.contains("com.example.BTest.fails <<< FAILURE!"),
+            "\n{}",
+            out.text
+        );
+        assert!(
+            out.text.contains("expected: <1> but was: <2>"),
+            "\n{}",
+            out.text
+        );
     }
 
     #[test]
@@ -6599,8 +6819,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
                     [ERROR] Failures:\n\
                     [ERROR]   com.example.FailingTest.shouldReturnUser <<< FAILURE!\n\
                     [ERROR]     AssertionFailedError: expected:<200> but was:<404>\n";
-        let out =
-            super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
+        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
 
         // XML block present — shouldHandleNull only exists in the XML fixture,
         // not in the hand-written text block above, so its presence proves
@@ -6632,11 +6851,11 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let text = "[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE\n\n\
                     [ERROR] Failures:\n\
                     [ERROR]   com.example.LostTest.boom <<< FAILURE!\n";
-        let out =
-            super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
+        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
 
         assert!(
-            out.text.contains("[ERROR] Failures:\n[ERROR]   com.example.LostTest.boom <<< FAILURE!"),
+            out.text
+                .contains("[ERROR] Failures:\n[ERROR]   com.example.LostTest.boom <<< FAILURE!"),
             "fallback dropped text failures when XML was absent:\n{}",
             out.text
         );
@@ -6663,7 +6882,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "test");
 
         assert!(out.text.contains("[ERROR] Failures:"));
-        assert!(out.text.contains("com.example.FailingTest.shouldReturnUser"));
+        assert!(
+            out.text
+                .contains("com.example.FailingTest.shouldReturnUser")
+        );
         assert!(out.text.contains("reports:"));
     }
 
@@ -6686,16 +6908,30 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         .unwrap();
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "[ERROR] Tests run: 10, Failures: 3, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
-        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
+        let text =
+            "[ERROR] Tests run: 10, Failures: 3, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
+        let out =
+            super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
         assert!(out.text.contains("[ERROR] Failures:"));
         assert!(out.text.contains("[ERROR] Integration failures:"));
-        assert!(out.text.contains("Caused by: org.hibernate.HibernateException"));
+        assert!(
+            out.text
+                .contains("Caused by: org.hibernate.HibernateException")
+        );
 
         // The digest must combine both report dirs, not just one.
-        let digest = out.digest.as_ref().expect("digest for combined report dirs");
-        assert!(digest.contains("FailingTest"), "missing surefire class: {digest}");
-        assert!(digest.contains("DbIntegrationIT"), "missing failsafe class: {digest}");
+        let digest = out
+            .digest
+            .as_ref()
+            .expect("digest for combined report dirs");
+        assert!(
+            digest.contains("FailingTest"),
+            "missing surefire class: {digest}"
+        );
+        assert!(
+            digest.contains("DbIntegrationIT"),
+            "missing failsafe class: {digest}"
+        );
     }
 
     #[test]
@@ -6738,14 +6974,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(!tmp.path().join("target").exists());
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "[ERROR] Tests run: 14, Failures: 3, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
-        let out = super::enrich_with_reports(
-            text,
-            tmp.path(),
-            since,
-            &pkgs("com.example"),
-            "verify",
-        );
+        let text =
+            "[ERROR] Tests run: 14, Failures: 3, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
+        let out =
+            super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
 
         // Failure details from module-a's surefire reports must surface.
         assert!(
@@ -6754,7 +6986,8 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             out.text
         );
         assert!(
-            out.text.contains("com.example.FailingTest.shouldReturnUser"),
+            out.text
+                .contains("com.example.FailingTest.shouldReturnUser"),
             "missed FailingTest details:\n{}",
             out.text
         );
@@ -6788,15 +7021,9 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         std::fs::write(mod_dir.join("TEST-com.example.B.xml"), xml).unwrap();
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let r = super::collect_reports(
-            &[root_dir, mod_dir],
-            &since.into(),
-            &[],
-            tmp.path(),
-        )
-        .expect("reports must parse");
-        let modules: Vec<Option<String>> =
-            r.suites.iter().map(|s| s.module.clone()).collect();
+        let r = super::collect_reports(&[root_dir, mod_dir], &since.into(), &[], tmp.path())
+            .expect("reports must parse");
+        let modules: Vec<Option<String>> = r.suites.iter().map(|s| s.module.clone()).collect();
         assert_eq!(modules, vec![None, Some("services".to_string())]);
     }
 
@@ -6928,7 +7155,8 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // later test in the same class into an "ApplicationContext failure
         // threshold (1) exceeded" repeat. Only the first carries a diagnostic;
         // the rest must keep their name line and lose the repeated body.
-        let failure = |method: &str, message: &str| TestFailure {
+        let failure = |method: &str, message: &str| {
+            TestFailure {
             test_class: "com.example.app.GitServiceSpec".into(),
             test_method: method.into(),
             kind: FailureKind::Error,
@@ -6939,11 +7167,21 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
                     .into(),
             ),
             test_output: Some("CONDITIONS EVALUATION REPORT".into()),
+        }
         };
         let failures = vec![
-            failure("should return url", "Failed to load ApplicationContext for [WebMergedContextConfiguration@3a3f3380 testClass = ...]"),
-            failure("should return url for tasks", "ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context for [WebMergedContextConfiguration@3a3f3380 ...]"),
-            failure("should fail when git returns 500", "ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context for [WebMergedContextConfiguration@3a3f3380 ...]"),
+            failure(
+                "should return url",
+                "Failed to load ApplicationContext for [WebMergedContextConfiguration@3a3f3380 testClass = ...]",
+            ),
+            failure(
+                "should return url for tasks",
+                "ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context for [WebMergedContextConfiguration@3a3f3380 ...]",
+            ),
+            failure(
+                "should fail when git returns 500",
+                "ApplicationContext failure threshold (1) exceeded: skipping repeated attempt to load context for [WebMergedContextConfiguration@3a3f3380 ...]",
+            ),
         ];
 
         let mut out = String::new();
@@ -6992,7 +7230,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             test_output: None,
         };
         let failures = vec![
-            failure("should_return_empty_when_user_not_found", "Failed to load ApplicationContext for [WebMergedContextConfiguration@18d532a4 testClass = com.example.auth.scim.ScimUserControllerIntegrationTest]"),
+            failure(
+                "should_return_empty_when_user_not_found",
+                "Failed to load ApplicationContext for [WebMergedContextConfiguration@18d532a4 testClass = com.example.auth.scim.ScimUserControllerIntegrationTest]",
+            ),
             failure("should_return_service_provider_config", label),
             failure("should_not_find_user_from_different_company", label),
             failure("should_update_employeeNumber_via_put", label),
@@ -7036,7 +7277,9 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             test_class: "com.example.git.ContractVerifierTest".into(),
             test_method: method.into(),
             kind: FailureKind::Failure,
-            message: Some("Status expected:<201 CREATED> but was:<500 INTERNAL_SERVER_ERROR>".into()),
+            message: Some(
+                "Status expected:<201 CREATED> but was:<500 INTERNAL_SERVER_ERROR>".into(),
+            ),
             failure_type: Some("java.lang.AssertionError".into()),
             stack_trace: Some(format!(
                 "java.lang.AssertionError: Status expected:<201 CREATED> but was:<500 INTERNAL_SERVER_ERROR>\n\tat com.example.git.ContractVerifierTest.{frame}(ContractVerifierTest.java:42)\n\t... 6 framework frames omitted\nCaused by: java.lang.ClassNotFoundException: com.fasterxml.jackson.databind.PropertyNamingStrategy$PropertyNamingStrategyBase"
@@ -7047,15 +7290,24 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         };
         let failures = vec![
             failure("validate_getTaskRepo", "validate_getTaskRepo", 372),
-            failure("validate_createTasksGitRepo", "validate_createTasksGitRepo", 194),
-            failure("validate_getCandidateRepo", "validate_getCandidateRepo", 194),
+            failure(
+                "validate_createTasksGitRepo",
+                "validate_createTasksGitRepo",
+                194,
+            ),
+            failure(
+                "validate_getCandidateRepo",
+                "validate_getCandidateRepo",
+                194,
+            ),
         ];
 
         let mut out = String::new();
         super::render_failure_block(&mut out, &failures);
 
         assert_eq!(
-            out.matches("Caused by: java.lang.ClassNotFoundException").count(),
+            out.matches("Caused by: java.lang.ClassNotFoundException")
+                .count(),
             1,
             "identical cause chain must render once, not per test:\n{out}"
         );
@@ -7075,7 +7327,9 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "repeats must carry an elision reference:\n{out}"
         );
         assert!(
-            out.contains("... same failure as com.example.git.ContractVerifierTest.validate_getTaskRepo"),
+            out.contains(
+                "... same failure as com.example.git.ContractVerifierTest.validate_getTaskRepo"
+            ),
             "the reference must name the first occurrence:\n{out}"
         );
     }
@@ -7095,7 +7349,9 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             kind: FailureKind::Error,
             message: None,
             failure_type: Some("java.lang.IllegalStateException".into()),
-            stack_trace: Some(format!("java.lang.IllegalStateException: Failed to load ApplicationContext\n{chain}")),
+            stack_trace: Some(format!(
+                "java.lang.IllegalStateException: Failed to load ApplicationContext\n{chain}"
+            )),
             test_output: Some(format!(
                 "Update your application's configuration. The following values are valid:\n\n    CONSOLE\n    LOG\n    OFF\n\n{chain}"
             )),
@@ -7108,7 +7364,8 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "cause line rendered twice:\n{out}"
         );
         assert_eq!(
-            out.matches("No enum constant").count() + out.matches("ConversionFailedException").count(),
+            out.matches("No enum constant").count()
+                + out.matches("ConversionFailedException").count(),
             1,
             "cause chain rendered twice:\n{out}"
         );
@@ -7169,8 +7426,12 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             include_str!(
                 "../../../tests/fixtures/surefire_xml/TEST-com.example.app.CandidateServiceTest.xml"
             ),
-            include_str!("../../../tests/fixtures/surefire_xml/TEST-com.example.app.ExamServiceTest.xml"),
-            include_str!("../../../tests/fixtures/surefire_xml/TEST-com.example.app.RegisterExamTest.xml"),
+            include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.app.ExamServiceTest.xml"
+            ),
+            include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.app.RegisterExamTest.xml"
+            ),
         ] {
             let result = surefire_reports::parse_content(xml, &pkgs("com.example"))
                 .expect("real surefire report parses");
@@ -7224,13 +7485,18 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             .lines()
             .filter(|l| l.starts_with("Method <com.example.api."))
             .count();
-        assert_eq!(listed, 10, "every violation must be listed exactly once:\n{out}");
+        assert_eq!(
+            listed, 10,
+            "every violation must be listed exactly once:\n{out}"
+        );
         assert!(
             out.contains("\t... 3 framework frames omitted"),
             "message lines must not be counted as framework frames:\n{out}"
         );
         assert!(
-            out.contains("ApiArchTest.api_controllers_must_declare_pre_authorize(ApiArchTest.java:16)"),
+            out.contains(
+                "ApiArchTest.api_controllers_must_declare_pre_authorize(ApiArchTest.java:16)"
+            ),
             "the test's own frame must survive:\n{out}"
         );
     }
@@ -7251,7 +7517,11 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "and elements not expected:",
             "[\"error\", \"skipped\", \"no-field-changed\"]",
         ] {
-            assert_eq!(out.matches(needle).count(), 1, "{needle} must render once:\n{out}");
+            assert_eq!(
+                out.matches(needle).count(),
+                1,
+                "{needle} must render once:\n{out}"
+            );
         }
     }
 
@@ -7324,7 +7594,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         };
         let mut out = String::new();
         super::render_failure_body(&mut out, &f);
-        assert!(!out.contains("captured output:"), "empty captured block header kept:\n{out}");
+        assert!(
+            !out.contains("captured output:"),
+            "empty captured block header kept:\n{out}"
+        );
     }
 
     #[test]
@@ -7496,8 +7769,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // rendered and `... +6 more failures` for the rest — the agent spent
         // three follow-up greps against the tee log just to learn the six
         // names. A name line is ~90 chars; the recovery turns cost far more.
-        let failure = |n: usize| {
-            TestFailure {
+        let failure = |n: usize| TestFailure {
             test_class: "com.example.app.InvoiceServiceTest".into(),
             test_method: format!("shouldReject{n}"),
             kind: FailureKind::Failure,
@@ -7507,7 +7779,6 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
                 "java.lang.AssertionError: expected:<{n}> but was:<0>\n\tat com.example.app.InvoiceServiceTest.shouldReject{n}(InvoiceServiceTest.java:{n})"
             )),
             test_output: None,
-        }
         };
         let failures: Vec<TestFailure> = (1..=16).map(failure).collect();
 
@@ -7609,8 +7880,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         .unwrap();
 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
-        let text = "[ERROR] Tests run: 12, Failures: 4, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
-        let out = super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
+        let text =
+            "[ERROR] Tests run: 12, Failures: 4, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE";
+        let out =
+            super::enrich_with_reports(text, tmp.path(), since, &pkgs("com.example"), "verify");
         insta::assert_snapshot!(out.text);
     }
 
@@ -7634,7 +7907,8 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // must match pre-enrichment. Native-format input so the prefix gate
         // is actually cleared (the old synthetic "mvn test: …" string took
         // the early non-prefixed passthrough and never reached the pass gate).
-        let text = "[INFO] Tests run: 859, Failures: 0, Errors: 0, Skipped: 4\n[INFO] BUILD SUCCESS";
+        let text =
+            "[INFO] Tests run: 859, Failures: 0, Errors: 0, Skipped: 4\n[INFO] BUILD SUCCESS";
         let tmp = tempfile::tempdir().unwrap();
         let out = super::enrich_with_reports(
             text,
@@ -7674,7 +7948,13 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
         let text_summary =
             "[ERROR] Tests run: 2, Failures: 0, Errors: 1, Skipped: 0\n[INFO] BUILD FAILURE";
-        let enriched = super::enrich_with_reports(text_summary, tmp.path(), since, &pkgs("com.example"), "verify");
+        let enriched = super::enrich_with_reports(
+            text_summary,
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "verify",
+        );
 
         // Sanity: the failsafe XML was actually parsed into the output this
         // time — the old test's old-format input never reached this code.
@@ -7684,7 +7964,9 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             enriched.text
         );
         assert!(
-            enriched.text.contains("Caused by: org.hibernate.HibernateException"),
+            enriched
+                .text
+                .contains("Caused by: org.hibernate.HibernateException"),
             "expected the 3-segment Caused-by chain to survive enrichment, got: {}",
             enriched.text
         );
@@ -7711,23 +7993,50 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let input = include_str!("../../../tests/fixtures/mvn_compile_pgp_multimodule.txt");
         let output = filter_mvn_compile(input);
         // Environment banner from `mvn -V`
-        assert!(!output.contains("Apache Maven 3.9.6"), "kept Maven banner: {output}");
-        assert!(!output.contains("Java version:"), "kept Java version banner: {output}");
+        assert!(
+            !output.contains("Apache Maven 3.9.6"),
+            "kept Maven banner: {output}"
+        );
+        assert!(
+            !output.contains("Java version:"),
+            "kept Java version banner: {output}"
+        );
         assert!(!output.contains("OS name:"), "kept OS banner: {output}");
         // JVM 21+ restricted-method warnings
-        assert!(!output.contains("restricted method"), "kept JVM restricted-method WARNING: {output}");
+        assert!(
+            !output.contains("restricted method"),
+            "kept JVM restricted-method WARNING: {output}"
+        );
         assert!(!output.contains("SLF4J:"), "kept SLF4J noise: {output}");
         // pgpverify-maven-plugin chatter
-        assert!(!output.contains("Verifying com.google.guava"), "kept pgp Verifying: {output}");
-        assert!(!output.contains("Key server(s)"), "kept pgp Key server line: {output}");
+        assert!(
+            !output.contains("Verifying com.google.guava"),
+            "kept pgp Verifying: {output}"
+        );
+        assert!(
+            !output.contains("Key server(s)"),
+            "kept pgp Key server line: {output}"
+        );
         // maven-resources-plugin noise
-        assert!(!output.contains("encoding to copy filtered"), "kept resources encoding line: {output}");
-        assert!(!output.contains("skip non existing resourceDirectory"), "kept skip resourceDirectory: {output}");
+        assert!(
+            !output.contains("encoding to copy filtered"),
+            "kept resources encoding line: {output}"
+        );
+        assert!(
+            !output.contains("skip non existing resourceDirectory"),
+            "kept skip resourceDirectory: {output}"
+        );
         // clean-audit checkstyle pass
         assert!(!output.contains("Audit done"), "kept Audit done: {output}");
-        assert!(!output.contains("Checkstyle violations"), "kept checkstyle 0-violations: {output}");
+        assert!(
+            !output.contains("Checkstyle violations"),
+            "kept checkstyle 0-violations: {output}"
+        );
         // Reactor Build Order modules (mvn 3.9.x `<name> <version>` format)
-        assert!(!output.contains("parent-project 2.4.1-SNAPSHOT"), "kept Reactor Build Order entry: {output}");
+        assert!(
+            !output.contains("parent-project 2.4.1-SNAPSHOT"),
+            "kept Reactor Build Order entry: {output}"
+        );
         // Must preserve the essentials
         assert!(output.contains("BUILD SUCCESS"));
         assert!(!output.contains("Total time"));
@@ -7840,11 +8149,11 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
              com.example.auth.password.ResetToken)",
             "symbol:   method assertTokenExpired(com.example.auth.password.ResetToken)",
         ] {
-            let inline = output
-                .lines()
-                .filter(|l| l.contains(needle.trim()))
-                .count();
-            assert!(inline > 0, "continuation line vanished: `{needle}`\n{output}");
+            let inline = output.lines().filter(|l| l.contains(needle.trim())).count();
+            assert!(
+                inline > 0,
+                "continuation line vanished: `{needle}`\n{output}"
+            );
         }
 
         // Each distinct continuation body appears once per error it explains —
@@ -7853,9 +8162,15 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             .lines()
             .filter(|l| l.contains("(argument mismatch; java.lang.String cannot be converted"))
             .count();
-        assert_eq!(dup, 1, "epilogue reprinted the javac continuation:\n{output}");
+        assert_eq!(
+            dup, 1,
+            "epilogue reprinted the javac continuation:\n{output}"
+        );
 
-        let applicable = output.lines().filter(|l| l.contains("is not applicable")).count();
+        let applicable = output
+            .lines()
+            .filter(|l| l.contains("is not applicable"))
+            .count();
         assert_eq!(
             applicable, 4,
             "expected the 4 inline `is not applicable` lines, got {applicable}:\n{output}"
@@ -7887,7 +8202,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         );
         // The inline body must be untouched — this is a post-footer fix only.
         assert_eq!(
-            output.lines().filter(|l| l.contains("is not applicable")).count(),
+            output
+                .lines()
+                .filter(|l| l.contains("is not applicable"))
+                .count(),
             4,
             "inline javac body was damaged:\n{output}"
         );
@@ -7900,7 +8218,9 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // the budget and push genuine causes out.
         let mut raw = String::from("[INFO] BUILD FAILURE\n");
         for i in 0..14 {
-            raw.push_str(&format!("[ERROR] Failed to execute goal g{i} on project p{i}: boom\n"));
+            raw.push_str(&format!(
+                "[ERROR] Failed to execute goal g{i} on project p{i}: boom\n"
+            ));
         }
         let errs = extract_footer_errors(&raw);
         assert_eq!(errs.len(), 14, "extraction must not truncate: {errs:?}");
@@ -7956,8 +8276,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // before `T E S T S`, the parser falls back to the compile filter,
         // and the cause line must survive — dropping it leaves only the
         // `-rf :module` resume hint (observed in real sessions, 2026-07-10).
-        let input =
-            include_str!("../../../tests/fixtures/mvn_test_no_matching_tests.txt");
+        let input = include_str!("../../../tests/fixtures/mvn_test_no_matching_tests.txt");
         let output = filter_mvn_test(input);
 
         assert!(
@@ -7977,8 +8296,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // The `Failed to execute goal …: There are test failures.` variant
         // is redundant — the actual failures are shown separately — and
         // must stay stripped even after the cause-line fix above.
-        let input =
-            include_str!("../../../tests/fixtures/mvn_quiet_fail_raw.txt");
+        let input = include_str!("../../../tests/fixtures/mvn_quiet_fail_raw.txt");
         let output = filter_mvn_test(input);
         assert!(
             !output.contains("Failed to execute goal"),
@@ -7998,7 +8316,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "kept resources-plugin encoding advisory:\n{output}"
         );
         assert!(output.contains("BUILD SUCCESS"));
-        assert!(!output.contains("Total time"), "Total time must be dropped:\n{output}");
+        assert!(
+            !output.contains("Total time"),
+            "Total time must be dropped:\n{output}"
+        );
     }
 
     #[test]
@@ -8015,27 +8336,42 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
 [INFO] Total time:  3.0 s";
         let segs = split_segments(raw);
         let kinds: Vec<SegmentKind> = segs.iter().map(|s| s.kind).collect();
-        assert_eq!(kinds, vec![
-            SegmentKind::Preamble,
-            SegmentKind::Clean,
-            SegmentKind::Compile,
-            SegmentKind::Checkstyle,
-        ]);
+        assert_eq!(
+            kinds,
+            vec![
+                SegmentKind::Preamble,
+                SegmentKind::Clean,
+                SegmentKind::Compile,
+                SegmentKind::Checkstyle,
+            ]
+        );
         // The checkstyle segment carries its body up to (not including) the BUILD block.
         assert!(segs[3].body.contains("0 Checkstyle violations"));
     }
 
     #[test]
     fn test_filter_mvn_multi_success() {
-        let input = include_str!("../../../tests/fixtures/mvn_multi_clean_testcompile_checkstyle_pass.txt");
+        let input =
+            include_str!("../../../tests/fixtures/mvn_multi_clean_testcompile_checkstyle_pass.txt");
         let output = filter_mvn_multi(input, "clean test-compile checkstyle:check");
-        assert!(!output.contains("(multi-goal)"), "(multi-goal) marker leaked: {output}");
-        assert!(output.contains("[INFO] BUILD SUCCESS"), "lost BUILD line: {output}");
-        assert!(output.contains("0 Checkstyle violations") || output.contains("0 violations"),
-                "lost checkstyle signal: {output}");
+        assert!(
+            !output.contains("(multi-goal)"),
+            "(multi-goal) marker leaked: {output}"
+        );
+        assert!(
+            output.contains("[INFO] BUILD SUCCESS"),
+            "lost BUILD line: {output}"
+        );
+        assert!(
+            output.contains("0 Checkstyle violations") || output.contains("0 violations"),
+            "lost checkstyle signal: {output}"
+        );
         // clean noise must be gone
         assert!(!output.contains("Deleting"), "clean noise leaked: {output}");
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
         // Single-module fixture — no per-module Reactor Summary line contains
         // the substring "BUILD SUCCESS", so a plain count is meaningful here
         // (mirrors the failure-path sibling's `multi_goal_has_no_rtk_markers`
@@ -8054,12 +8390,28 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
     fn test_filter_mvn_multi_compile_failure() {
         let input = include_str!("../../../tests/fixtures/mvn_multi_compile_failure.txt");
         let output = filter_mvn_multi(input, "clean test-compile checkstyle:check");
-        assert!(!output.contains("(multi-goal)"), "(multi-goal) marker leaked: {output}");
-        assert!(output.contains("[INFO] BUILD FAILURE"), "lost failure signal: {output}");
-        assert!(output.contains("cannot find symbol"), "lost compile error detail: {output}");
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("(multi-goal)"),
+            "(multi-goal) marker leaked: {output}"
+        );
+        assert!(
+            output.contains("[INFO] BUILD FAILURE"),
+            "lost failure signal: {output}"
+        );
+        assert!(
+            output.contains("cannot find symbol"),
+            "lost compile error detail: {output}"
+        );
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
-        assert!(savings >= 60.0, "failure path still expected ≥60%, got {:.1}%", savings);
+        assert!(
+            savings >= 60.0,
+            "failure path still expected ≥60%, got {:.1}%",
+            savings
+        );
         insta::assert_snapshot!(output);
     }
 
@@ -8073,15 +8425,27 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let input =
             include_str!("../../../tests/fixtures/mvn_multi_plugin_abort_after_footer_raw.txt");
         let output = filter_mvn_multi(input, "clean test-compile");
-        assert!(output.contains("[INFO] BUILD FAILURE"), "lost failure signal: {output}");
+        assert!(
+            output.contains("[INFO] BUILD FAILURE"),
+            "lost failure signal: {output}"
+        );
         assert!(
             output.contains("Failed to execute goal") && output.contains("release version 99"),
             "lost the only carrier of the failure cause: {output}"
         );
         // The epilogue's own boilerplate must not come back with it.
-        assert!(!output.contains("Re-run Maven"), "epilogue boilerplate leaked: {output}");
-        assert!(!output.contains("cwiki.apache.org"), "Help link leaked: {output}");
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("Re-run Maven"),
+            "epilogue boilerplate leaked: {output}"
+        );
+        assert!(
+            !output.contains("cwiki.apache.org"),
+            "Help link leaked: {output}"
+        );
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 60.0, "expected ≥60% savings, got {savings:.1}%");
         insta::assert_snapshot!(output);
@@ -8092,36 +8456,66 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         let v = |s: &str| s.split(' ').map(String::from).collect::<Vec<_>>();
         assert_eq!(strip_quiet_flags(&v("clean verify -q")), v("clean verify"));
         assert_eq!(strip_quiet_flags(&v("--quiet clean test")), v("clean test"));
-        assert_eq!(strip_quiet_flags(&v("clean test -Dq=1")), v("clean test -Dq=1"));
+        assert_eq!(
+            strip_quiet_flags(&v("clean test -Dq=1")),
+            v("clean test -Dq=1")
+        );
     }
 
     #[test]
     fn test_filtered_goal_args() {
         let v = |s: &str| s.split(' ').map(String::from).collect::<Vec<_>>();
         // Drops the matched goal token AND strips -q so the filter sees full output.
-        assert_eq!(filtered_goal_args(&v("-q test -DskipTests"), "test"), v("-DskipTests"));
-        assert_eq!(filtered_goal_args(&v("--quiet install -Pprod"), "install"), v("-Pprod"));
+        assert_eq!(
+            filtered_goal_args(&v("-q test -DskipTests"), "test"),
+            v("-DskipTests")
+        );
+        assert_eq!(
+            filtered_goal_args(&v("--quiet install -Pprod"), "install"),
+            v("-Pprod")
+        );
         // Only the first goal token is dropped; -q removed even in tail position.
-        assert_eq!(filtered_goal_args(&v("verify -q"), "verify"), Vec::<String>::new());
+        assert_eq!(
+            filtered_goal_args(&v("verify -q"), "verify"),
+            Vec::<String>::new()
+        );
         // -Dq=1 is not a quiet flag — kept.
-        assert_eq!(filtered_goal_args(&v("package -Dq=1"), "package"), v("-Dq=1"));
+        assert_eq!(
+            filtered_goal_args(&v("package -Dq=1"), "package"),
+            v("-Dq=1")
+        );
     }
 
     #[test]
     fn test_classify_marker_both_forms() {
         // Full artifact-id form
         assert_eq!(classify_marker("maven-clean-plugin"), SegmentKind::Clean);
-        assert_eq!(classify_marker("maven-compiler-plugin"), SegmentKind::Compile);
-        assert_eq!(classify_marker("maven-surefire-plugin"), SegmentKind::Surefire);
-        assert_eq!(classify_marker("maven-failsafe-plugin"), SegmentKind::Failsafe);
-        assert_eq!(classify_marker("maven-checkstyle-plugin"), SegmentKind::Checkstyle);
+        assert_eq!(
+            classify_marker("maven-compiler-plugin"),
+            SegmentKind::Compile
+        );
+        assert_eq!(
+            classify_marker("maven-surefire-plugin"),
+            SegmentKind::Surefire
+        );
+        assert_eq!(
+            classify_marker("maven-failsafe-plugin"),
+            SegmentKind::Failsafe
+        );
+        assert_eq!(
+            classify_marker("maven-checkstyle-plugin"),
+            SegmentKind::Checkstyle
+        );
         // Short goal-prefix form (as seen in real logs)
         assert_eq!(classify_marker("surefire"), SegmentKind::Surefire);
         assert_eq!(classify_marker("failsafe"), SegmentKind::Failsafe);
         assert_eq!(classify_marker("checkstyle"), SegmentKind::Checkstyle);
         assert_eq!(classify_marker("clean"), SegmentKind::Clean);
         // Unrelated plugins → Other
-        assert_eq!(classify_marker("maven-resources-plugin"), SegmentKind::Other);
+        assert_eq!(
+            classify_marker("maven-resources-plugin"),
+            SegmentKind::Other
+        );
         assert_eq!(classify_marker("spring-boot"), SegmentKind::Other);
         assert_eq!(classify_marker("maven-jar-plugin"), SegmentKind::Other);
     }
@@ -8130,11 +8524,22 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
     fn test_filter_mvn_multi_verify_failure_stdout() {
         let input = include_str!("../../../tests/fixtures/mvn_multi_clean_verify_fail.txt");
         let output = filter_mvn_multi(input, "clean verify");
-        assert!(!output.contains("(multi-goal)"), "(multi-goal) marker leaked: {output}");
-        assert!(output.contains("[INFO] BUILD FAILURE"), "lost build failure: {output}");
-        assert!(output.contains("UserProvisioningIT") || output.contains("failed"),
-                "lost IT failure signal: {output}");
-        assert!(!output.contains("Total time"), "Total time leaked: {output}");
+        assert!(
+            !output.contains("(multi-goal)"),
+            "(multi-goal) marker leaked: {output}"
+        );
+        assert!(
+            output.contains("[INFO] BUILD FAILURE"),
+            "lost build failure: {output}"
+        );
+        assert!(
+            output.contains("UserProvisioningIT") || output.contains("failed"),
+            "lost IT failure signal: {output}"
+        );
+        assert!(
+            !output.contains("Total time"),
+            "Total time leaked: {output}"
+        );
         let savings = 100.0 - (count_tokens(&output) as f64 / count_tokens(input) as f64 * 100.0);
         assert!(savings >= 80.0, "expected ≥80%, got {:.1}%", savings);
         insta::assert_snapshot!(output);
@@ -8144,12 +8549,21 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
     fn multi_goal_has_no_rtk_markers() {
         let input = include_str!("../../../tests/fixtures/mvn_multi_clean_verify_fail.txt");
         let out = filter_mvn_multi(input, "clean verify");
-        assert!(!out.contains("(multi-goal)"), "(multi-goal) marker leaked:\n{out}");
+        assert!(
+            !out.contains("(multi-goal)"),
+            "(multi-goal) marker leaked:\n{out}"
+        );
         assert!(!out.contains("mvn: ok"), "mvn: ok marker leaked:\n{out}");
         assert!(!out.contains("Total time"), "Total time leaked:\n{out}");
-        assert!(out.contains("[INFO] BUILD FAILURE") || out.contains("[INFO] BUILD SUCCESS"),
-            "native BUILD line missing:\n{out}");
-        assert_eq!(out.matches("BUILD FAILURE").count(), 1, "duplicate BUILD lines:\n{out}");
+        assert!(
+            out.contains("[INFO] BUILD FAILURE") || out.contains("[INFO] BUILD SUCCESS"),
+            "native BUILD line missing:\n{out}"
+        );
+        assert_eq!(
+            out.matches("BUILD FAILURE").count(),
+            1,
+            "duplicate BUILD lines:\n{out}"
+        );
     }
 
     // --- Pure renderers for pass-run enrichment (Task 4) ---
@@ -8171,13 +8585,9 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         sf.summary.add(&entra.summary);
         sf.suites[0].module = Some("services".to_string());
 
-        let digest = super::render_classes_digest(
-            "test",
-            Some(&sf),
-            None,
-            &super::PluginMarkers::default(),
-        )
-            .expect("suites present -> digest");
+        let digest =
+            super::render_classes_digest("test", Some(&sf), None, &super::PluginMarkers::default())
+                .expect("suites present -> digest");
         insta::assert_snapshot!("pass_digest_snapshot", digest);
     }
 
@@ -8196,18 +8606,13 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         sf.skipped_tests.extend(entra.skipped_tests.clone());
         sf.summary.add(&entra.summary);
 
-        let digest = super::render_classes_digest(
-            "test",
-            Some(&sf),
-            None,
-            &super::PluginMarkers::default(),
-        )
-            .expect("suites present -> digest");
+        let digest =
+            super::render_classes_digest("test", Some(&sf), None, &super::PluginMarkers::default())
+                .expect("suites present -> digest");
         let header = digest.lines().next().expect("digest has a header line");
-        let maven_re = regex::Regex::new(
-            r"Tests run: (\d+), Failures: (\d+), Errors: (\d+), Skipped: (\d+)$",
-        )
-        .expect("valid regex");
+        let maven_re =
+            regex::Regex::new(r"Tests run: (\d+), Failures: (\d+), Errors: (\d+), Skipped: (\d+)$")
+                .expect("valid regex");
         let caps = maven_re
             .captures(header)
             .unwrap_or_else(|| panic!("header not maven-native: {header}"));
@@ -8242,12 +8647,8 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
                 sf.suites.reverse();
                 sf.skipped_tests.reverse();
             }
-            super::render_classes_digest(
-            "test",
-            Some(&sf),
-            None,
-            &super::PluginMarkers::default(),
-        ).expect("suites -> digest")
+            super::render_classes_digest("test", Some(&sf), None, &super::PluginMarkers::default())
+                .expect("suites -> digest")
         };
         assert_eq!(
             build([0.8, 0.0], false),
@@ -8272,19 +8673,19 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         sf.skipped_tests.extend(entra.skipped_tests.clone());
         sf.summary.add(&entra.summary);
 
-        let digest = super::render_classes_digest(
-            "test",
-            Some(&sf),
-            None,
-            &super::PluginMarkers::default(),
-        )
-            .expect("suites present -> digest");
+        let digest =
+            super::render_classes_digest("test", Some(&sf), None, &super::PluginMarkers::default())
+                .expect("suites present -> digest");
         let class_re =
             regex::Regex::new(r"^\[INFO\] Tests run: \d+(?:, Skipped: \d+)? -- in ([\w.$]+)$")
                 .expect("valid regex");
         let matched: Vec<&str> = digest
             .lines()
-            .filter_map(|l| class_re.captures(l).map(|c| c.get(1).expect("group").as_str()))
+            .filter_map(|l| {
+                class_re
+                    .captures(l)
+                    .map(|c| c.get(1).expect("group").as_str())
+            })
             .collect();
         assert_eq!(
             matched,
@@ -8343,7 +8744,9 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "one dropped class == aggregate header + its own line, got:\n{dropped:#?}"
         );
         assert!(
-            dropped.iter().any(|l| l.ends_with("-- in com.example.auth.user.UsersTest")),
+            dropped
+                .iter()
+                .any(|l| l.ends_with("-- in com.example.auth.user.UsersTest")),
             "the dropped class must be named on its own line: {dropped:#?}"
         );
     }
@@ -8468,7 +8871,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             !out.contains("Tests run: 0, Skipped: 1"),
             "no per-test line claiming the class ran nothing, got: {out}"
         );
-        assert!(needs_ref, "7 classes > MAX_INLINE_CLASSES still needs the digest");
+        assert!(
+            needs_ref,
+            "7 classes > MAX_INLINE_CLASSES still needs the digest"
+        );
         assert_eq!(out.lines().last(), Some("[INFO] BUILD SUCCESS"));
     }
 
@@ -8512,7 +8918,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // 8 skipped > MAX_INLINE_SKIPPED: names go to the digest only.
         let (out, needs_ref) =
             super::render_pass_inline("mvn test: 5 passed, 8 skipped (2.0 s)", Some(&sf), None);
-        assert!(needs_ref, "skipped names beyond inline cap require the digest reference");
+        assert!(
+            needs_ref,
+            "skipped names beyond inline cap require the digest reference"
+        );
         assert!(
             !out.contains("skipped: "),
             "no skipped-name lines inline when count > cap, got: {out}"
@@ -8569,12 +8978,22 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // this helper's actual fixture-derived numbers/FQCN; asserting the
         // real values here instead.
         assert!(
-            out.text.contains("[INFO] Tests run: 5 -- in com.example.auth.user.Suite0Test"),
+            out.text
+                .contains("[INFO] Tests run: 5 -- in com.example.auth.user.Suite0Test"),
             "surefire-shaped breakdown missing:\n{}",
             out.text
         );
-        assert_eq!(out.text.lines().last(), Some("[INFO] BUILD SUCCESS"), "\n{}", out.text);
-        assert!(!out.text.contains("Suite0Test:"), "old compact form leaked:\n{}", out.text);
+        assert_eq!(
+            out.text.lines().last(),
+            Some("[INFO] BUILD SUCCESS"),
+            "\n{}",
+            out.text
+        );
+        assert!(
+            !out.text.contains("Suite0Test:"),
+            "old compact form leaked:\n{}",
+            out.text
+        );
     }
 
     #[test]
@@ -8585,7 +9004,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             None,
         );
         assert!(out.contains("[ERROR] Failures:"), "\n{out}");
-        assert!(!out.contains("(from surefire-reports/)"), "path-tell leaked:\n{out}");
+        assert!(
+            !out.contains("(from surefire-reports/)"),
+            "path-tell leaked:\n{out}"
+        );
         assert!(!out.contains("1. "), "RTK numbering leaked:\n{out}");
     }
 
@@ -8594,7 +9016,8 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // Real incident 2026-08-07: JDTLS could not see jOOQ generated
         // sources, wrote ECJ stubs into data/target/classes, and 14 tests
         // died at context load with `INVITATION cannot be resolved`.
-        let failure = |method: &str| TestFailure {
+        let failure = |method: &str| {
+            TestFailure {
             test_class: "com.example.app.JooqContextTest".to_string(),
             test_method: method.to_string(),
             kind: FailureKind::Error,
@@ -8607,6 +9030,7 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
                     .to_string(),
             ),
             test_output: None,
+        }
         };
         let sf = SurefireResult {
             failures: vec![failure("loadsContext"), failure("loadsBeans")],
@@ -8618,7 +9042,8 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             None,
         );
         assert_eq!(
-            out.matches("[hint: 'Unresolved compilation problem'").count(),
+            out.matches("[hint: 'Unresolved compilation problem'")
+                .count(),
             1,
             "exactly one stale-ECJ hint expected:\n{out}"
         );
@@ -8649,7 +9074,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "test",
         );
         let text = super::finalize_enriched(out, "mvn_test");
-        assert!(text.contains("[full per-class report:"), "tee-hint-style ref missing:\n{text}");
+        assert!(
+            text.contains("[full per-class report:"),
+            "tee-hint-style ref missing:\n{text}"
+        );
         assert!(!text.contains("classes:"), "old RTK ref leaked:\n{text}");
     }
 
@@ -8682,7 +9110,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         // a marker line on the ~600 green `mvn test` runs a fortnight sees.
         let input = include_str!("../../../tests/fixtures/mvn_test_pass_slice_raw.txt");
         let output = filter_mvn_test(input);
-        assert!(!output.contains("--- surefire"), "marker leaked on a test-only run:\n{output}");
+        assert!(
+            !output.contains("--- surefire"),
+            "marker leaked on a test-only run:\n{output}"
+        );
         assert_eq!(output.matches("Tests run:").count(), 1, "{output}");
     }
 
@@ -8702,7 +9133,10 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             output.contains("[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---\n[ERROR] Tests run: 6, Failures: 1, Errors: 0, Skipped: 0\n"),
             "failsafe total under its marker:\n{output}"
         );
-        assert!(!output.contains("Tests run: 68,"), "summed total must go:\n{output}");
+        assert!(
+            !output.contains("Tests run: 68,"),
+            "summed total must go:\n{output}"
+        );
     }
 
     #[test]
@@ -8743,13 +9177,21 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         ));
         let markers = super::PluginMarkers {
             surefire: Some("[INFO] --- surefire:3.5.5:test (default-test) @ app ---".to_string()),
-            failsafe: Some("[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---".to_string()),
+            failsafe: Some(
+                "[INFO] --- failsafe:3.5.5:integration-test (default) @ app ---".to_string(),
+            ),
         };
-        let digest = super::render_classes_digest("verify", Some(&sf), Some(&fs), &markers)
-            .expect("digest");
+        let digest =
+            super::render_classes_digest("verify", Some(&sf), Some(&fs), &markers).expect("digest");
         let lines: Vec<&str> = digest.lines().collect();
-        assert_eq!(lines[0], "[INFO] --- surefire:3.5.5:test (default-test) @ app ---");
-        assert!(lines[1].starts_with("[INFO] Tests run: 5, Failures: 0"), "{digest}");
+        assert_eq!(
+            lines[0],
+            "[INFO] --- surefire:3.5.5:test (default-test) @ app ---"
+        );
+        assert!(
+            lines[1].starts_with("[INFO] Tests run: 5, Failures: 0"),
+            "{digest}"
+        );
         let i_fs = lines
             .iter()
             .position(|l| l.starts_with("[INFO] --- failsafe:"))
@@ -8786,10 +9228,12 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             &super::PluginMarkers::default(),
         )
         .expect("digest");
-        assert!(digest.starts_with("[ERROR] Tests run: 7, Failures: 0, Errors: 1"), "{digest}");
+        assert!(
+            digest.starts_with("[ERROR] Tests run: 7, Failures: 0, Errors: 1"),
+            "{digest}"
+        );
         assert_eq!(digest.matches(", Failures: ").count(), 1, "{digest}");
     }
-
 }
 
 /// Truncation-aware savings audit over every mvn fixture.

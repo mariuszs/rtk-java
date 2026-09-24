@@ -28,7 +28,7 @@ use rusqlite::{Connection, OpenFlags};
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use crate::core::tracking::{get_db_path, DEFAULT_AGENT_OUTPUT_LIMIT};
+use crate::core::tracking::{DEFAULT_AGENT_OUTPUT_LIMIT, get_db_path};
 
 /// Truncation limit in characters, honouring `RTK_AUDIT_LIMIT`.
 pub(crate) fn limit() -> usize {
@@ -98,10 +98,10 @@ fn pct(base: u64, actual: u64) -> f64 {
 /// second word is the filter; fall back to the raw command when it is missing.
 fn command_name(rtk_cmd: &str, original_cmd: &str) -> String {
     let mut words = rtk_cmd.split_whitespace();
-    if words.next() == Some("rtk") {
-        if let Some(name) = words.next() {
-            return name.to_string();
-        }
+    if words.next() == Some("rtk")
+        && let Some(name) = words.next()
+    {
+        return name.to_string();
     }
     original_cmd
         .split_whitespace()

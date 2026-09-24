@@ -6,8 +6,8 @@
 //!    common package prefix (e.g. `src/main/java/com/example/app/` → `com.example.app`),
 //!    in `cwd` and in each depth-1 reactor module (a child dir with a `pom.xml`).
 
-use quick_xml::events::Event;
 use quick_xml::Reader;
+use quick_xml::events::Event;
 use std::path::Path;
 
 /// Detect application packages from `cwd`.
@@ -114,15 +114,13 @@ pub(crate) fn extract_groupid(xml: &str) -> Option<String> {
                 }
             }
             Ok(Event::Text(t)) => {
-                if capturing {
-                    if let Ok(text) = t.unescape() {
-                        let text = text.trim();
-                        if !text.is_empty() {
-                            if is_top_level_groupid(&stack) && top_level_groupid.is_none() {
-                                top_level_groupid = Some(text.to_string());
-                            } else if is_parent_groupid(&stack) && parent_groupid.is_none() {
-                                parent_groupid = Some(text.to_string());
-                            }
+                if capturing && let Ok(text) = t.unescape() {
+                    let text = text.trim();
+                    if !text.is_empty() {
+                        if is_top_level_groupid(&stack) && top_level_groupid.is_none() {
+                            top_level_groupid = Some(text.to_string());
+                        } else if is_parent_groupid(&stack) && parent_groupid.is_none() {
+                            parent_groupid = Some(text.to_string());
                         }
                     }
                 }
@@ -149,10 +147,7 @@ fn is_top_level_groupid(stack: &[String]) -> bool {
 }
 
 fn is_parent_groupid(stack: &[String]) -> bool {
-    stack.len() == 3
-        && stack[0] == "project"
-        && stack[1] == "parent"
-        && stack[2] == "groupId"
+    stack.len() == 3 && stack[0] == "project" && stack[1] == "parent" && stack[2] == "groupId"
 }
 
 #[cfg(test)]
@@ -205,8 +200,11 @@ mod tests {
         let pkg_dir = tmp.path().join("src/main/java/com/example/myapp/service");
         std::fs::create_dir_all(&pkg_dir).unwrap();
         // Also add a sibling so myapp has 2 children → walk stops at myapp
-        std::fs::create_dir_all(tmp.path().join("src/main/java/com/example/myapp/controller"))
-            .unwrap();
+        std::fs::create_dir_all(
+            tmp.path()
+                .join("src/main/java/com/example/myapp/controller"),
+        )
+        .unwrap();
         assert_eq!(detect(tmp.path()), vec!["com.example.myapp"]);
     }
 
@@ -238,8 +236,7 @@ mod tests {
         // but sources live under pl.company.project
         let pkg_dir = tmp.path().join("src/main/java/pl/company/project/service");
         std::fs::create_dir_all(&pkg_dir).unwrap();
-        std::fs::create_dir_all(tmp.path().join("src/main/java/pl/company/project/model"))
-            .unwrap();
+        std::fs::create_dir_all(tmp.path().join("src/main/java/pl/company/project/model")).unwrap();
         let result = detect(tmp.path());
         assert_eq!(result, vec!["com.example.app", "pl.company.project"]);
     }

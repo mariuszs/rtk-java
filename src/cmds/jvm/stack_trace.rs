@@ -132,7 +132,12 @@ fn truncate_lines(text: &str, first: fn(&str) -> String) -> String {
         }
     };
     if lines.len() <= MAX_MESSAGE_LINES {
-        return lines.iter().enumerate().map(capped).collect::<Vec<_>>().join("\n");
+        return lines
+            .iter()
+            .enumerate()
+            .map(capped)
+            .collect::<Vec<_>>()
+            .join("\n");
     }
     let half = MAX_MESSAGE_LINES / 2;
     let tail_start = lines.len() - half;
@@ -222,10 +227,7 @@ fn is_structural_line(line: &str) -> bool {
     if trimmed.starts_with("Caused by:") {
         // Only structural when indented (nested in suppressed). Top-level
         // Caused by: is handled by parse_segments, not here.
-        return line
-            .chars()
-            .next()
-            .is_some_and(char::is_whitespace);
+        return line.chars().next().is_some_and(char::is_whitespace);
     }
     false
 }
@@ -308,7 +310,9 @@ pub(crate) fn process(raw: &str, app_packages: &[String], max_lines: usize) -> O
             push_wrapper_header(&mut out, &seg.header);
             add_frames(&mut out, &seg.frames, app_packages, None);
         }
-        let root = segments.last().expect("segments.len() > 1 guaranteed by branch");
+        let root = segments
+            .last()
+            .expect("segments.len() > 1 guaranteed by branch");
         out.push(truncate_root_header(&root.header));
         add_frames(
             &mut out,
@@ -377,11 +381,11 @@ fn apply_hard_cap(out: Vec<String>, segments: &[Segment], max_lines: usize) -> V
         return truncate_to_lines(out, max_lines);
     }
 
-    let root = segments.last().expect("segments.len() > 1 guaranteed by guard");
+    let root = segments
+        .last()
+        .expect("segments.len() > 1 guaranteed by guard");
     let truncated_root_header = truncate_root_header(&root.header);
-    let root_idx = out
-        .iter()
-        .rposition(|line| line == &truncated_root_header);
+    let root_idx = out.iter().rposition(|line| line == &truncated_root_header);
 
     let Some(idx) = root_idx else {
         return truncate_to_lines(out, max_lines);
@@ -522,7 +526,10 @@ mod tests {
         let lines: Vec<String> = (1..=40).map(|i| format!("line {i}")).collect();
         let out = truncate_header(&lines.join("\n"));
         assert!(out.starts_with("line 1\nline 2\n"), "{out}");
-        assert!(out.ends_with("line 39\nline 40"), "the end carries the answer: {out}");
+        assert!(
+            out.ends_with("line 39\nline 40"),
+            "the end carries the answer: {out}"
+        );
         assert!(out.contains("... (24 lines elided)"), "{out}");
         assert_eq!(out.lines().count(), MAX_MESSAGE_LINES + 1, "{out}");
     }
@@ -578,7 +585,10 @@ mod tests {
 
     #[test]
     fn truncate_root_header_elides_the_middle_so_the_actual_value_survives() {
-        let s = format!("AssertionError: expected:<{}> but was:<actual>", "x".repeat(2000));
+        let s = format!(
+            "AssertionError: expected:<{}> but was:<actual>",
+            "x".repeat(2000)
+        );
         let out = truncate_root_header(&s);
         assert!(out.starts_with("AssertionError: expected:<xxx"), "{out}");
         assert!(out.ends_with("> but was:<actual>"), "{out}");
@@ -614,8 +624,14 @@ mod tests {
 
     #[test]
     fn is_app_frame_no_filter_accepts_everything() {
-        assert!(is_application_frame("\tat com.example.A.foo(A.java:1)", &[]));
-        assert!(is_application_frame("\tat org.springframework.boot.Run(Run.java:1)", &[]));
+        assert!(is_application_frame(
+            "\tat com.example.A.foo(A.java:1)",
+            &[]
+        ));
+        assert!(is_application_frame(
+            "\tat org.springframework.boot.Run(Run.java:1)",
+            &[]
+        ));
         assert!(is_application_frame("\t... 42 more", &[]));
     }
 
@@ -710,7 +726,11 @@ mod tests {
         frames.push("\tat com.example.Z.zzz(Z.java:99)".to_string()); // 11th app — dropped
         let frame_refs: Vec<&str> = frames.iter().map(|s| s.as_str()).collect();
         let out = collect_root_cause(&frame_refs, &pkgs("com.example"));
-        assert_eq!(out.len(), 11, "10 app frames + 1 structural, 11th app dropped");
+        assert_eq!(
+            out.len(),
+            11,
+            "10 app frames + 1 structural, 11th app dropped"
+        );
         assert!(out.contains(&"\tSuppressed: x".to_string()));
     }
 
@@ -881,7 +901,11 @@ mod tests {
         // out.len() = 9. With max_lines = 5, root_idx = 5, 5 >= 5-1=4 → synthetic.
         let out = process(trace, &pkgs("com.example"), 5).unwrap();
         let lines: Vec<&str> = out.lines().collect();
-        assert_eq!(lines.len(), 5, "must fit exactly in max_lines=5, got: {out}");
+        assert_eq!(
+            lines.len(),
+            5,
+            "must fit exactly in max_lines=5, got: {out}"
+        );
         assert_eq!(lines[0], "java.lang.RuntimeException: outer");
         assert_eq!(lines[1], "\t... (intermediate frames truncated)");
         assert_eq!(lines[2], "Caused by: java.io.IOException: real cause");

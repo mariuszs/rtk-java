@@ -4,8 +4,8 @@
 //! reports from previous runs.
 
 use crate::cmds::jvm::stack_trace;
-use quick_xml::events::{BytesStart, Event};
 use quick_xml::Reader;
+use quick_xml::events::{BytesStart, Event};
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
@@ -85,11 +85,7 @@ fn local_name(name: &[u8]) -> &[u8] {
     name.rsplit(|b| *b == b':').next().unwrap_or(name)
 }
 
-fn extract_attr(
-    reader: &Reader<&[u8]>,
-    start: &BytesStart<'_>,
-    key: &[u8],
-) -> Option<String> {
+fn extract_attr(reader: &Reader<&[u8]>, start: &BytesStart<'_>, key: &[u8]) -> Option<String> {
     for attr in start.attributes().flatten() {
         if local_name(attr.key.as_ref()) != key {
             continue;
@@ -220,13 +216,13 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                 }
             }
             Ok(Event::Text(t)) => {
-                if let Some(field) = capture {
-                    if let Ok(text) = t.unescape() {
-                        match field {
-                            CaptureField::StackTrace => stack_buf.push_str(&text),
-                            CaptureField::SystemOut => stdout_buf.push_str(&text),
-                            CaptureField::SystemErr => stderr_buf.push_str(&text),
-                        }
+                if let Some(field) = capture
+                    && let Ok(text) = t.unescape()
+                {
+                    match field {
+                        CaptureField::StackTrace => stack_buf.push_str(&text),
+                        CaptureField::SystemOut => stdout_buf.push_str(&text),
+                        CaptureField::SystemErr => stderr_buf.push_str(&text),
                     }
                 }
             }
@@ -258,16 +254,13 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                             test_class: current_class.clone().unwrap_or_default(),
                             test_method: current_method.clone().unwrap_or_default(),
                             kind: pending_kind.take().unwrap_or(FailureKind::Failure),
-                            message: pending_message
-                                .take()
-                                .filter(|s| !s.is_empty())
-                                .map(|s| {
-                                    // AssertJ opens and closes its message
-                                    // with a newline.
-                                    stack_trace::truncate_header(
-                                        s.trim_matches(|c| c == '\n' || c == '\r'),
-                                    )
-                                }),
+                            message: pending_message.take().filter(|s| !s.is_empty()).map(|s| {
+                                // AssertJ opens and closes its message
+                                // with a newline.
+                                stack_trace::truncate_header(
+                                    s.trim_matches(|c| c == '\n' || c == '\r'),
+                                )
+                            }),
                             failure_type: pending_type.take().filter(|s| !s.is_empty()),
                             stack_trace: processed,
                             test_output: None,
@@ -285,15 +278,12 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                         );
                         stdout_buf.clear();
                         stderr_buf.clear();
-                        if let Some(combined) = combined {
-                            if let Some(last) = result.failures.last_mut() {
-                                if current_class.as_deref() == Some(last.test_class.as_str())
-                                    && current_method.as_deref()
-                                        == Some(last.test_method.as_str())
-                                {
-                                    last.test_output = Some(combined);
-                                }
-                            }
+                        if let Some(combined) = combined
+                            && let Some(last) = result.failures.last_mut()
+                            && current_class.as_deref() == Some(last.test_class.as_str())
+                            && current_method.as_deref() == Some(last.test_method.as_str())
+                        {
+                            last.test_output = Some(combined);
                         }
                         current_class = None;
                         current_method = None;
@@ -339,7 +329,10 @@ fn combine_test_output(stdout: &str, stderr: &str, per_test_limit: usize) -> Opt
         }
         combined.push_str(stderr);
     }
-    Some(truncate_test_output(&collapse_blank_runs(&combined), per_test_limit))
+    Some(truncate_test_output(
+        &collapse_blank_runs(&combined),
+        per_test_limit,
+    ))
 }
 
 /// Console colour codes as they survive into a surefire report. Surefire
@@ -451,7 +444,8 @@ static CAPTURED_FRAME_RE: LazyLock<Regex> = LazyLock::new(|| {
 /// [`collapse_repeated_log_lines`] — two emissions of the same logger event
 /// differ only in the stamp.
 static CAPTURED_LOG_STAMP_RE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\s*(?:\d{4}-\d{2}-\d{2}[ T])?\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?<rest>.+)$").unwrap()
+    Regex::new(r"^\s*(?:\d{4}-\d{2}-\d{2}[ T])?\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?<rest>.+)$")
+        .unwrap()
 });
 
 /// Render a log line that an infrastructure component repeats verbatim once,
@@ -538,7 +532,9 @@ fn clean_captured(text: &str) -> String {
         if CAPTURED_DEBUG_LINE_RE.is_match(line)
             || CAPTURED_FRAME_RE.is_match(line)
             || CAPTURED_BOOTSTRAP_NOISE.iter().any(|p| line.contains(p))
-            || CAPTURED_METRICS_EXPORT_NOISE.iter().any(|p| line.contains(p))
+            || CAPTURED_METRICS_EXPORT_NOISE
+                .iter()
+                .any(|p| line.contains(p))
         {
             continue;
         }
@@ -568,10 +564,7 @@ fn is_banner_rule(line: &str) -> bool {
 /// output block. Returns the input unchanged (no reallocation churn beyond
 /// the single rebuild) when nothing matches.
 fn drop_jvm_runtime_noise(text: &str) -> String {
-    if !text
-        .lines()
-        .any(stack_trace::is_jvm_runtime_noise)
-    {
+    if !text.lines().any(stack_trace::is_jvm_runtime_noise) {
         return text.to_string();
     }
     text.lines()
@@ -609,7 +602,8 @@ fn rescued_from_cut<'a>(cut: &[&'a str]) -> Vec<&'a str> {
     let mut rescued = Vec::new();
     for pair in cut.windows(2) {
         let (head, next) = (pair[0].trim(), pair[1].trim());
-        if head == "Resolved Exception:" && next.starts_with("Type = ") && !next.ends_with("= null") {
+        if head == "Resolved Exception:" && next.starts_with("Type = ") && !next.ends_with("= null")
+        {
             rescued.push(pair[0]);
             rescued.push(pair[1]);
         }
@@ -653,9 +647,8 @@ fn truncate_test_output(output: &str, max_chars: usize) -> String {
 
 /// `[INFO] Running com.example.FooTest`, optionally behind mvnd `[module]`
 /// tags. Surefire prints `"Running " + class.getName()`.
-static RUNNING_CLASS: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?m)^(?:\[[^\]\n]*\] )*\[INFO\] Running ([\w.$]+)\s*$").unwrap()
-});
+static RUNNING_CLASS: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"(?m)^(?:\[[^\]\n]*\] )*\[INFO\] Running ([\w.$]+)\s*$").unwrap());
 
 /// Which report files belong to the run being rendered. `since` alone keeps
 /// out a previous run's files; `until` and `suites` keep out a concurrent
@@ -833,12 +826,14 @@ mod tests {
 
     #[test]
     fn parse_dir_missing_returns_none() {
-        assert!(super::parse_dir(
-            std::path::Path::new("/definitely/does/not/exist/rtk-test"),
-            None,
-            &[]
-        )
-        .is_none());
+        assert!(
+            super::parse_dir(
+                std::path::Path::new("/definitely/does/not/exist/rtk-test"),
+                None,
+                &[]
+            )
+            .is_none()
+        );
     }
 
     #[test]
@@ -951,7 +946,11 @@ mod tests {
     #[test]
     fn report_scope_without_running_lines_does_not_scope_by_class() {
         let raw = "[ERROR] Tests run: 1, Failures: 1\n[INFO] BUILD FAILURE\n";
-        assert!(ReportScope::for_run(SystemTime::now(), raw).suites.is_none());
+        assert!(
+            ReportScope::for_run(SystemTime::now(), raw)
+                .suites
+                .is_none()
+        );
     }
 
     #[test]
@@ -1193,7 +1192,10 @@ Unconditional classes:
 
     org.springframework.boot.autoconfigure.availability.ApplicationAvailabilityAutoConfiguration";
         let out = super::combine_test_output(stdout, "", 2000).expect("captured output");
-        assert_eq!(out, "11:54:22.212 [main] WARN  c.d.a.u.p.PasswordResetService - Cannot find requested user");
+        assert_eq!(
+            out,
+            "11:54:22.212 [main] WARN  c.d.a.u.p.PasswordResetService - Cannot find requested user"
+        );
     }
 
     #[test]
@@ -1216,8 +1218,14 @@ Unconditional classes:
 11:54:22.212 [main] WARN  c.d.a.u.p.PasswordResetService - Cannot find requested user test.user@no-encryptor.example.com";
         let out = super::combine_test_output(stdout, "", 2000).expect("captured output");
         assert!(!out.contains("loading user cache"), "DEBUG kept: {out}");
-        assert!(out.contains("Password reset requested"), "INFO dropped: {out}");
-        assert!(out.contains("Cannot find requested user"), "WARN dropped: {out}");
+        assert!(
+            out.contains("Password reset requested"),
+            "INFO dropped: {out}"
+        );
+        assert!(
+            out.contains("Cannot find requested user"),
+            "WARN dropped: {out}"
+        );
     }
 
     #[test]
@@ -1324,7 +1332,10 @@ WARNING: If a serviceability tool is not in use, please run with -Djdk.instrumen
 WARNING: Dynamic loading of agents will be disallowed by default in a future release
 real stderr content the agent needs";
         let out = super::combine_test_output("", stderr, 2000).expect("captured output");
-        assert!(out.contains("real stderr content"), "real line dropped: {out}");
+        assert!(
+            out.contains("real stderr content"),
+            "real line dropped: {out}"
+        );
         assert!(
             !out.contains("Mockito is currently self-attaching"),
             "Mockito banner leaked: {out}"
@@ -1386,7 +1397,10 @@ WARNING: A Java agent has been loaded dynamically (/x/byte-buddy-agent.jar)
 WARNING: Dynamic loading of agents will be disallowed by default in a future release";
         let out = super::combine_test_output("stdout line", stderr, 2000).expect("captured output");
         assert!(out.contains("stdout line"));
-        assert!(!out.contains("[STDERR]"), "empty STDERR block leaked: {out}");
+        assert!(
+            !out.contains("[STDERR]"),
+            "empty STDERR block leaked: {out}"
+        );
     }
 
     #[test]
@@ -1494,10 +1508,17 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
         assert_eq!(result.failures.len(), 2, "{:?}", result.failures);
         assert_eq!(result.failures[0].test_method, "fails");
         assert_eq!(result.failures[0].kind, FailureKind::Failure);
-        assert_eq!(result.failures[0].message.as_deref(), Some("expected: <1> but was: <2>"));
+        assert_eq!(
+            result.failures[0].message.as_deref(),
+            Some("expected: <1> but was: <2>")
+        );
         assert_eq!(result.failures[1].test_method, "errors");
         assert_eq!(result.failures[1].kind, FailureKind::Error);
-        assert!(result.failures[1].stack_trace.is_none(), "{:?}", result.failures[1]);
+        assert!(
+            result.failures[1].stack_trace.is_none(),
+            "{:?}",
+            result.failures[1]
+        );
     }
 
     /// JUnit 5 `@Nested` classes with a `@DisplayName`: Surefire writes the
@@ -1610,7 +1631,10 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
         let r = parse_content(xml, &[]).expect("real fixture must parse");
         assert_eq!(r.skipped_tests.len(), 8);
         let st = &r.skipped_tests[0];
-        assert_eq!(st.class, "com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test");
+        assert_eq!(
+            st.class,
+            "com.example.auth.partners.entraid.MicrosoftEntraIdClient2Test"
+        );
         assert!(!st.method.is_empty());
     }
 
@@ -1633,7 +1657,9 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
             .expect("captured output present");
         assert!(
             output.contains("Resolved Exception:")
-                && output.contains("Type = org.springframework.http.converter.HttpMessageNotReadableException"),
+                && output.contains(
+                    "Type = org.springframework.http.converter.HttpMessageNotReadableException"
+                ),
             "the resolved exception must survive the tail cut:\n{output}"
         );
         assert!(
@@ -1654,7 +1680,10 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
         let i_marker = output.find("lines truncated").expect("marker");
         let i_resolved = output.find("Resolved Exception:").expect("resolved");
         let i_flash = output.find("FlashMap:").expect("tail");
-        assert!(i_marker < i_resolved && i_resolved < i_flash, "order:\n{output}");
+        assert!(
+            i_marker < i_resolved && i_resolved < i_flash,
+            "order:\n{output}"
+        );
     }
 
     #[test]
@@ -1663,12 +1692,18 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
         // nothing and must not spend two lines of the window.
         let block: String = (0..20)
             .map(|i| format!("line {i}"))
-            .chain(["Resolved Exception:".to_string(), "             Type = null".to_string()])
+            .chain([
+                "Resolved Exception:".to_string(),
+                "             Type = null".to_string(),
+            ])
             .chain((20..40).map(|i| format!("line {i}")))
             .collect::<Vec<_>>()
             .join("\n");
         let out = keep_last_lines(&block, 12);
-        assert!(!out.contains("Resolved Exception"), "null section promoted:\n{out}");
+        assert!(
+            !out.contains("Resolved Exception"),
+            "null section promoted:\n{out}"
+        );
         assert_eq!(out.lines().count(), 13, "{out}");
     }
 }
