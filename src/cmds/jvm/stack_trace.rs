@@ -318,7 +318,7 @@ pub(crate) fn process(raw: &str, app_packages: &[String], max_lines: usize) -> O
         );
     }
 
-    if max_lines > 0 && out.len() > max_lines {
+    if max_lines > 0 && rendered_lines(&out) > max_lines {
         out = apply_hard_cap(out, &segments, max_lines);
     }
 
@@ -343,19 +343,38 @@ pub(crate) fn wrapper_header(header: &str) -> Vec<String> {
     out
 }
 
-/// Apply a hard cap while preserving the root cause.
+/// Lines `out` renders to. A multi-line root message is one entry, so the
+/// entry count undercounts by up to `MAX_MESSAGE_LINES`.
+fn rendered_lines(out: &[String]) -> usize {
+    out.iter().map(|entry| entry.lines().count().max(1)).sum()
+}
+
+/// Keep whole entries while they fit in `max_lines` rendered lines.
+fn truncate_to_lines(mut out: Vec<String>, max_lines: usize) -> Vec<String> {
+    let mut used = 0;
+    let keep = out
+        .iter()
+        .take_while(|entry| {
+            used += entry.lines().count().max(1);
+            used <= max_lines
+        })
+        .count();
+    out.truncate(keep);
+    out
+}
+
+/// Apply a hard cap while preserving the root cause. `max_lines` counts
+/// rendered lines, not `out` entries.
 ///
 /// - For a single segment: straight truncate to `max_lines`.
 /// - For multiple segments:
-///   - If the root-cause header's index in `out` is already beyond the cap,
-///     build a synthetic output: `[top_header, "... (intermediate frames
-///     truncated)", root_header, root frames until cap]`.
-///   - Otherwise (root-cause header within the cap): straight truncate.
+///   - If the root-cause header does not fit within the cap with room for a
+///     frame, build a synthetic output: `[top_header, "... (intermediate
+///     frames truncated)", root_header, root frames until cap]`.
+///   - Otherwise: straight truncate.
 fn apply_hard_cap(out: Vec<String>, segments: &[Segment], max_lines: usize) -> Vec<String> {
     if segments.len() <= 1 {
-        let mut out = out;
-        out.truncate(max_lines);
-        return out;
+        return truncate_to_lines(out, max_lines);
     }
 
     let root = segments.last().expect("segments.len() > 1 guaranteed by guard");
@@ -365,15 +384,11 @@ fn apply_hard_cap(out: Vec<String>, segments: &[Segment], max_lines: usize) -> V
         .rposition(|line| line == &truncated_root_header);
 
     let Some(idx) = root_idx else {
-        let mut out = out;
-        out.truncate(max_lines);
-        return out;
+        return truncate_to_lines(out, max_lines);
     };
 
-    if idx < max_lines.saturating_sub(1) {
-        let mut out = out;
-        out.truncate(max_lines);
-        return out;
+    if rendered_lines(&out[..=idx]) < max_lines {
+        return truncate_to_lines(out, max_lines);
     }
 
     // Root cause beyond the cap — build synthetic layout.
@@ -386,14 +401,8 @@ fn apply_hard_cap(out: Vec<String>, segments: &[Segment], max_lines: usize) -> V
     }
     result.push(truncated_root_header.clone());
 
-    let mut remaining = max_lines.saturating_sub(result.len());
-    for line in &out[(idx + 1)..] {
-        if remaining == 0 {
-            break;
-        }
-        result.push(line.clone());
-        remaining -= 1;
-    }
+    let remaining = max_lines.saturating_sub(rendered_lines(&result));
+    result.extend(out[(idx + 1)..].iter().take(remaining).cloned());
     result
 }
 
@@ -896,6 +905,48 @@ mod tests {
                      \tat com.example.B.corge(B.java:5)";
         let out = process(trace, &pkgs("com.example"), 6).unwrap();
         assert_eq!(out.lines().count(), 6);
+    }
+
+    /// A root message of ten lines, as ArchUnit or AssertJ print one.
+    fn ten_line_root(header: &str) -> String {
+        let mut s = String::from(header);
+        for i in 1..10 {
+            s.push_str(&format!("\n  - violation {i}"));
+        }
+        s
+    }
+
+    #[test]
+    fn hard_cap_counts_the_lines_of_a_multi_line_root_message() {
+        // The cap counted `out` entries, and a multi-line root message is one
+        // entry: 10 message lines + 20 frames rendered 24 lines under a cap
+        // of 15.
+        let mut trace = ten_line_root("java.lang.AssertionError: rules broken");
+        for i in 0..20 {
+            trace.push_str(&format!("\n\tat com.example.A.m{i}(A.java:{i})"));
+        }
+        let out = process(&trace, &pkgs("com.example"), 15).unwrap();
+        assert_eq!(out.lines().count(), 15, "{out}");
+        assert!(out.contains("  - violation 9"), "{out}");
+    }
+
+    #[test]
+    fn hard_cap_synthetic_layout_counts_the_root_message_lines() {
+        let mut trace = String::from("java.lang.RuntimeException: outer");
+        for i in 0..20 {
+            trace.push_str(&format!("\n\tat com.example.A.m{i}(A.java:{i})"));
+        }
+        trace.push('\n');
+        trace.push_str(&ten_line_root("Caused by: java.lang.AssertionError: rules"));
+        for i in 0..20 {
+            trace.push_str(&format!("\n\tat com.example.B.m{i}(B.java:{i})"));
+        }
+        let out = process(&trace, &pkgs("com.example"), 15).unwrap();
+        let lines: Vec<&str> = out.lines().collect();
+        assert_eq!(lines.len(), 15, "{out}");
+        assert_eq!(lines[1], "\t... (intermediate frames truncated)");
+        assert_eq!(lines[11], "  - violation 9");
+        assert!(lines[12].contains("com.example.B.m0"), "{out}");
     }
 
     #[test]
