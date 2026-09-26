@@ -13,7 +13,7 @@ use crate::core::tracking;
 use crate::core::utils::{exit_code_from_status, resolved_command, strip_ansi, truncate};
 use anyhow::{Context, Result};
 use regex::Regex;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::ffi::OsString;
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -3079,7 +3079,125 @@ fn filter_mvn_compile(output: &str) -> String {
         return "[INFO] BUILD SUCCESS".to_string();
     }
 
-    cap_compile_lines(&clean, result)
+    cap_compile_lines(&clean, collapse_missing_symbol_cascade(result))
+}
+
+const MISSING_SYMBOL: &str = "cannot find symbol";
+
+/// Occurrences of one missing symbol kept verbatim inside a cascade.
+const MAX_MISSING_SYMBOL_REPEATS: usize = 3;
+
+/// Collapse javac's `cannot find symbol` cascade behind a root error.
+///
+/// One real error that stops annotation processing — a misplaced type
+/// annotation, say — leaves every Lombok-generated `log` and getter
+/// unresolved, and javac spends its whole 100-error budget on them. A real
+/// skiller run rendered ~26k chars of that; the agent tailed past the root
+/// error and grepped the tee log for it. Each missing symbol keeps its first
+/// occurrences verbatim and the rest become one counted `... +N more` line.
+///
+/// Only behind a root error: when every error is a missing symbol there is no
+/// cascade to read past, and a method renamed away from twelve call sites is
+/// twelve places to fix.
+fn collapse_missing_symbol_cascade(result: String) -> String {
+    let lines: Vec<&str> = result.lines().collect();
+    let is_error = |l: &str| COMPILE_ERROR_LOCATION_RE.is_match(l);
+    if !lines
+        .iter()
+        .any(|l| is_error(l) && !l.contains(MISSING_SYMBOL))
+    {
+        return result;
+    }
+    fn context(line: &str) -> Option<&str> {
+        let t = strip_maven_prefix(line).trim_start();
+        (t.starts_with("symbol:") || t.starts_with("location:")).then_some(t)
+    }
+
+    // (first line, end, symbol) per missing-symbol error block.
+    let mut blocks: Vec<(usize, usize, &str)> = Vec::new();
+    let mut i = 0;
+    while i < lines.len() {
+        if !(is_error(lines[i]) && lines[i].contains(MISSING_SYMBOL)) {
+            i += 1;
+            continue;
+        }
+        let mut end = i + 1;
+        let mut symbol = None;
+        while let Some(t) = lines.get(end).and_then(|l| context(l)) {
+            if let Some(s) = t.strip_prefix("symbol:") {
+                symbol = Some(s.trim());
+            }
+            end += 1;
+        }
+        if let Some(symbol) = symbol {
+            blocks.push((i, end, symbol));
+        }
+        i = end;
+    }
+
+    // Per symbol: the dropped count and the files it was dropped from.
+    let mut seen: HashMap<&str, usize> = HashMap::new();
+    let mut dropped: HashMap<&str, (usize, HashSet<&str>)> = HashMap::new();
+    let mut drop_ranges: Vec<(usize, usize)> = Vec::new();
+    let mut last_kept: HashMap<&str, usize> = HashMap::new();
+    let mut order: Vec<&str> = Vec::new();
+    for &(start, end, symbol) in &blocks {
+        if !seen.contains_key(symbol) {
+            order.push(symbol);
+        }
+        let n = seen.entry(symbol).or_insert(0);
+        *n += 1;
+        if *n <= MAX_MISSING_SYMBOL_REPEATS {
+            last_kept.insert(symbol, end);
+            continue;
+        }
+        let entry = dropped.entry(symbol).or_default();
+        entry.0 += 1;
+        if let Some(path) = COMPILE_ERROR_LOCATION_RE
+            .captures(lines[start])
+            .and_then(|c| c.get(1))
+        {
+            entry.1.insert(path.as_str());
+        }
+        drop_ranges.push((start, end));
+    }
+    if drop_ranges.is_empty() {
+        return result;
+    }
+
+    // The count lands right after the last occurrence kept of its symbol.
+    let mut elision_at: HashMap<usize, Vec<String>> = HashMap::new();
+    for symbol in &order {
+        if let Some((count, files)) = dropped.get(symbol)
+            && let Some(&at) = last_kept.get(symbol)
+        {
+            elision_at.entry(at).or_default().push(format!(
+                "[ERROR]   ... +{count} more {MISSING_SYMBOL}: {symbol} (in {} files)",
+                files.len()
+            ));
+        }
+    }
+    let mut out: Vec<String> = Vec::with_capacity(lines.len());
+    let mut ranges = drop_ranges.iter().peekable();
+    for (idx, line) in lines.iter().enumerate() {
+        if let Some(elisions) = elision_at.get(&idx) {
+            out.extend(elisions.iter().cloned());
+        }
+        while ranges.peek().is_some_and(|&&(_, end)| end <= idx) {
+            ranges.next();
+        }
+        if ranges
+            .peek()
+            .is_some_and(|&&(start, end)| (start..end).contains(&idx))
+        {
+            continue;
+        }
+        out.push((*line).to_string());
+    }
+    if let Some(elisions) = elision_at.get(&lines.len()) {
+        out.extend(elisions.iter().cloned());
+    }
+    out.join("\n")
 }
 
 /// Safety net for the hook's dropped trailing `| tail -N`: an unknown plugin —
@@ -5303,6 +5421,82 @@ mod tests {
             output.contains("... +"),
             "elision line must report suppressed line count, got:\n{output}"
         );
+    }
+
+    /// Real 2026-09-25 skiller run: one misplaced JSpecify `@Nullable` stopped
+    /// Lombok, and javac filled its 100-error budget with `cannot find symbol`
+    /// for every `log` and generated getter — a ~26k-char render in which the
+    /// agent tailed past the real error and grepped the tee log for it. Raw
+    /// log of the same shape reproduced on Lombok 1.18.42 / JDK 26.
+    #[test]
+    fn test_compile_failure_collapses_a_missing_symbol_cascade() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_lombok_cascade_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        assert_eq!(
+            output.matches("is not expected here").count(),
+            3,
+            "every root error must survive:\n{output}"
+        );
+        assert!(
+            output.contains("(to annotate a qualified type, write"),
+            "javac's fix hint for the root error must survive:\n{output}"
+        );
+        assert_eq!(
+            output.matches("symbol:   variable log").count(),
+            3,
+            "{output}"
+        );
+        assert_eq!(
+            output.matches("symbol:   method getName()").count(),
+            3,
+            "{output}"
+        );
+        assert!(
+            output
+                .contains("[ERROR]   ... +62 more cannot find symbol: variable log (in 32 files)"),
+            "the cascade must be counted, not dropped silently:\n{output}"
+        );
+        assert!(
+            output.contains(
+                "[ERROR]   ... +29 more cannot find symbol: method getName() (in 29 files)"
+            ),
+            "{output}"
+        );
+        assert!(output.contains("BUILD FAILURE"), "{output}");
+        assert!(
+            output
+                .contains("Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin"),
+            "{output}"
+        );
+        assert!(
+            output.len() < 5_000,
+            "cascade must not dominate the render ({} chars):\n{output}",
+            output.len()
+        );
+    }
+
+    /// Without a root error there is no cascade to read past: a renamed method
+    /// missing at twelve call sites is twelve places to fix, all of them kept.
+    #[test]
+    fn test_compile_failure_keeps_every_missing_symbol_without_a_root_error() {
+        let errors: String = (0..12)
+            .map(|i| {
+                format!(
+                    "[ERROR] /src/Foo{i}.java:[{i},5] cannot find symbol\n  \
+                     symbol:   method oldName()\n  location: class Foo{i}\n"
+                )
+            })
+            .collect();
+        let input = format!("[ERROR] COMPILATION ERROR : \n{errors}[INFO] BUILD FAILURE\n");
+        let output = filter_mvn_compile(&input);
+
+        assert_eq!(
+            output.matches("symbol:   method oldName()").count(),
+            12,
+            "{output}"
+        );
+        assert!(!output.contains("more cannot find symbol"), "{output}");
     }
 
     #[test]

@@ -1,0 +1,626 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< com.example:lombok-cascade >---------------------
+[INFO] Building lombok-cascade 1.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ lombok-cascade ---
+[INFO] skip non existing resourceDirectory /home/user/work/lombok/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ lombok-cascade ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 42 source files with javac [debug release 21] to target/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/user/work/lombok/src/main/java/com/example/flow/FlowYaml.java:[7,40] type annotation @org.jspecify.annotations.Nullable is not expected here
+  (to annotate a qualified type, write com.example.flow.InterviewFlow.@org.jspecify.annotations.Nullable com.example.flow.InterviewFlow.Tone)
+[ERROR] /home/user/work/lombok/src/main/java/com/example/flow/FlowYaml.java:[9,40] type annotation @org.jspecify.annotations.Nullable is not expected here
+  (to annotate a qualified type, write com.example.flow.InterviewFlow.@org.jspecify.annotations.Nullable com.example.flow.InterviewFlow.Tone)
+[ERROR] /home/user/work/lombok/src/main/java/com/example/flow/FlowYaml.java:[11,39] type annotation @org.jspecify.annotations.Nullable is not expected here
+  (to annotate a qualified type, write com.example.flow.InterviewFlow.@org.jspecify.annotations.Nullable com.example.flow.InterviewFlow.Tone)
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service00.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service00
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service00.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service00
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service00.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service00
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service01.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service01
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service01.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service01
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service01.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service01
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service02.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service02
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service02.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service02
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service02.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service02
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service03.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service03
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service03.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service03
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service03.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service03
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service04.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service04
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service04.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service04
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service04.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service04
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service05.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service05
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service05.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service05
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service05.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service05
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service06.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service06
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service06.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service06
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service06.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service06
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service07.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service07
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service07.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service07
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service07.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service07
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service08.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service08
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service08.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service08
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service08.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service08
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service09.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service09
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service09.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service09
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service09.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service09
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service10.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service10
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service10.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service10
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service10.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service10
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service11.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service11
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service11.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service11
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service11.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service11
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service12.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service12
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service12.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service12
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service12.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service12
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service13.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service13
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service13.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service13
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service13.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service13
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service14.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service14
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service14.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service14
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service14.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service14
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service15.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service15
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service15.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service15
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service15.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service15
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service16.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service16
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service16.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service16
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service16.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service16
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service17.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service17
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service17.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service17
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service17.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service17
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service18.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service18
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service18.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service18
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service18.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service18
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service19.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service19
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service19.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service19
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service19.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service19
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service20.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service20
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service20.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service20
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service20.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service20
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service21.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service21
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service21.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service21
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service21.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service21
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service22.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service22
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service22.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service22
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service22.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service22
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service23.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service23
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service23.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service23
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service23.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service23
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service24.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service24
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service24.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service24
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service24.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service24
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service25.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service25
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service25.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service25
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service25.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service25
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service26.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service26
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service26.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service26
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service26.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service26
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service27.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service27
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service27.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service27
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service27.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service27
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service28.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service28
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service28.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service28
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service28.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service28
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service29.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service29
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service29.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service29
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service29.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service29
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service30.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service30
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service30.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service30
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service30.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service30
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service31.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service31
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service31.java:[17,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service31
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service31.java:[17,41] cannot find symbol
+  symbol:   method getName()
+  location: class com.example.svc.Service31
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service32.java:[13,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Service32
+[INFO] 100 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.438 s
+[INFO] Finished at: 2026-09-26T11:04:27+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.0:compile (default-compile) on project lombok-cascade: Compilation failure: Compilation failure: 
+[ERROR] /home/user/work/lombok/src/main/java/com/example/flow/FlowYaml.java:[7,40] type annotation @org.jspecify.annotations.Nullable is not expected here
+[ERROR]   (to annotate a qualified type, write com.example.flow.InterviewFlow.@org.jspecify.annotations.Nullable com.example.flow.InterviewFlow.Tone)
+[ERROR] /home/user/work/lombok/src/main/java/com/example/flow/FlowYaml.java:[9,40] type annotation @org.jspecify.annotations.Nullable is not expected here
+[ERROR]   (to annotate a qualified type, write com.example.flow.InterviewFlow.@org.jspecify.annotations.Nullable com.example.flow.InterviewFlow.Tone)
+[ERROR] /home/user/work/lombok/src/main/java/com/example/flow/FlowYaml.java:[11,39] type annotation @org.jspecify.annotations.Nullable is not expected here
+[ERROR]   (to annotate a qualified type, write com.example.flow.InterviewFlow.@org.jspecify.annotations.Nullable com.example.flow.InterviewFlow.Tone)
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service00.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service00
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service00.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service00
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service00.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service00
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service01.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service01
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service01.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service01
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service01.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service01
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service02.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service02
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service02.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service02
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service02.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service02
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service03.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service03
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service03.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service03
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service03.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service03
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service04.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service04
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service04.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service04
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service04.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service04
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service05.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service05
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service05.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service05
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service05.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service05
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service06.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service06
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service06.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service06
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service06.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service06
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service07.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service07
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service07.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service07
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service07.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service07
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service08.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service08
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service08.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service08
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service08.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service08
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service09.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service09
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service09.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service09
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service09.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service09
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service10.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service10
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service10.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service10
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service10.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service10
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service11.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service11
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service11.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service11
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service11.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service11
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service12.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service12
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service12.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service12
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service12.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service12
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service13.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service13
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service13.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service13
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service13.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service13
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service14.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service14
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service14.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service14
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service14.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service14
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service15.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service15
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service15.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service15
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service15.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service15
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service16.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service16
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service16.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service16
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service16.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service16
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service17.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service17
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service17.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service17
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service17.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service17
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service18.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service18
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service18.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service18
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service18.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service18
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service19.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service19
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service19.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service19
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service19.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service19
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service20.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service20
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service20.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service20
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service20.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service20
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service21.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service21
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service21.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service21
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service21.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service21
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service22.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service22
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service22.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service22
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service22.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service22
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service23.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service23
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service23.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service23
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service23.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service23
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service24.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service24
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service24.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service24
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service24.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service24
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service25.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service25
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service25.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service25
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service25.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service25
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service26.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service26
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service26.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service26
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service26.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service26
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service27.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service27
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service27.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service27
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service27.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service27
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service28.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service28
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service28.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service28
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service28.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service28
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service29.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service29
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service29.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service29
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service29.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service29
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service30.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service30
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service30.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service30
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service30.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service30
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service31.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service31
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service31.java:[17,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service31
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service31.java:[17,41] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: class com.example.svc.Service31
+[ERROR] /home/user/work/lombok/src/main/java/com/example/svc/Service32.java:[13,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Service32
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
