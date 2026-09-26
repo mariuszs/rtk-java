@@ -107,10 +107,23 @@ fn without_trailing_blank_lines(mut header: String) -> String {
 }
 
 /// A line that belongs to the frame section of a trace rather than to the
-/// exception message above it.
+/// exception message above it. The `... (N lines elided)` marker that
+/// `truncate_lines` leaves inside a capped message shares the frames' `... `
+/// prefix but stands for message lines — read as a frame, it ended the
+/// message block early and the tail below it rendered twice.
 pub(crate) fn is_frame_like(line: &str) -> bool {
     let t = line.trim_start();
-    t.starts_with("at ") || t.starts_with("... ") || is_structural_line(line)
+    t.starts_with("at ")
+        || (t.starts_with("... ") && !is_message_elision(t))
+        || is_structural_line(line)
+}
+
+/// The marker `truncate_lines` puts in place of a capped message's middle.
+pub(crate) fn is_message_elision(line: &str) -> bool {
+    line.trim()
+        .strip_prefix("... (")
+        .and_then(|rest| rest.strip_suffix(" lines elided)"))
+        .is_some_and(|n| !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit()))
 }
 
 /// Lines kept of a multi-line exception message; the middle of a longer one

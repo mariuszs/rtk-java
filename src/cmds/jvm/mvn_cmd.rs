@@ -1871,8 +1871,12 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
                 writeln!(out, "[ERROR]       ... same failure as {first} above").ok();
             }
             None => {
+                // A multi-line message tags every line, as the stdout path
+                // does: agents grep the render by its level prefix.
                 if let Some(kind_label) = failure_kind_label(f) {
-                    writeln!(out, "[ERROR]     {kind_label}").ok();
+                    for line in kind_label.lines() {
+                        writeln!(out, "[ERROR]     {line}").ok();
+                    }
                 }
                 if let Some(sig) = signature {
                     seen_bodies.push((sig, format!("{}.{}", f.test_class, f.test_method)));
@@ -2012,6 +2016,11 @@ fn trim_blank_edges<'s, 'a>(lines: &'s [&'a str]) -> &'s [&'a str] {
 /// message is either empty or a prefix of the label's (surefire truncates the
 /// message attribute with a trailing `...`, and the untruncated header must
 /// then survive).
+///
+/// A multi-line message is judged line by line: the label and the header
+/// are capped separately, so past 16 lines each elides a different middle
+/// (the header carries the type's own line on top) and the two blocks never
+/// match as a whole — every line the header shows must be in the label.
 fn header_duplicates_label(header: &str, f: &TestFailure) -> bool {
     let header = header.trim();
     let (header_type, header_msg) = match header.split_once(':') {
@@ -2026,7 +2035,14 @@ fn header_duplicates_label(header: &str, f: &TestFailure) -> bool {
         return false;
     }
     let label_msg = f.message.as_deref().unwrap_or("").trim();
-    header_msg.is_empty() || label_msg.contains(header_msg)
+    if !header_msg.contains('\n') {
+        return header_msg.is_empty() || label_msg.contains(header_msg);
+    }
+    header_msg
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty() && !stack_trace::is_message_elision(l))
+        .all(|l| label_msg.contains(l))
 }
 
 /// `... (N lines truncated)` / `... (N chars truncated)` markers inserted by
@@ -7483,11 +7499,11 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         ));
         let listed = out
             .lines()
-            .filter(|l| l.starts_with("Method <com.example.api."))
+            .filter(|l| l.starts_with("[ERROR]     Method <com.example.api."))
             .count();
         assert_eq!(
             listed, 10,
-            "every violation must be listed exactly once:\n{out}"
+            "every violation must be listed exactly once, tagged:\n{out}"
         );
         assert!(
             out.contains("\t... 3 framework frames omitted"),
@@ -7523,6 +7539,43 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
                 "{needle} must render once:\n{out}"
             );
         }
+    }
+
+    /// Real 2026-09-25 git run (`GitPushRulesTest`, three failures): a message
+    /// past the 16-line cap is middle-elided in both the label and the trace
+    /// header, and the trace's `... (N lines elided)` marker read as a frame.
+    /// The header block ended there, only its head was matched against the
+    /// label, and the tail of every message rendered a second time. The
+    /// label's continuation lines also lost their `[ERROR]` tag. Fixture: the
+    /// same assertion reproduced on AssertJ 3.27.3 / Surefire 3.5.3.
+    #[test]
+    fn render_failure_block_renders_an_elided_multiline_message_once() {
+        let out = render_real_report(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.PushRulesTest.xml"
+        ));
+        for needle in [
+            "To do so, use the following command.",
+            "git commit -am 'Restoring forbidden files'",
+            "to contain:",
+            "\"Please use master branch only!\"",
+        ] {
+            assert_eq!(
+                out.matches(needle).count(),
+                1,
+                "{needle} must render once:\n{out}"
+            );
+        }
+        assert!(
+            out.contains(
+                "PushRulesTest.shouldRejectPushToBranchOtherThanMaster(PushRulesTest.java:29)"
+            ),
+            "the test's own frame must survive:\n{out}"
+        );
+        assert!(
+            out.lines()
+                .all(|l| l.is_empty() || l.starts_with("[ERROR]")),
+            "every line keeps the [ERROR] tag:\n{out}"
+        );
     }
 
     #[test]
