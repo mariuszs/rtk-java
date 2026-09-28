@@ -3079,79 +3079,105 @@ fn filter_mvn_compile(output: &str) -> String {
         return "[INFO] BUILD SUCCESS".to_string();
     }
 
-    cap_compile_lines(&clean, collapse_missing_symbol_cascade(result))
+    cap_compile_lines(&clean, collapse_lombok_cascade(result))
 }
 
 const MISSING_SYMBOL: &str = "cannot find symbol";
 
-/// Occurrences of one missing symbol kept verbatim inside a cascade.
-const MAX_MISSING_SYMBOL_REPEATS: usize = 3;
+/// javac's verdict on a call site that passes arguments to a constructor it
+/// cannot match; with `required: no arguments` it is a missing
+/// `@RequiredArgsConstructor`/`@AllArgsConstructor`.
+const CONSTRUCTOR_MISMATCH: &str = " cannot be applied to given types;";
 
-/// Collapse javac's `cannot find symbol` cascade behind a root error.
+/// Occurrences of one missing member kept verbatim inside a cascade.
+const MAX_CASCADE_REPEATS: usize = 3;
+
+/// Collapse the javac cascade Lombok leaves behind a root error.
 ///
 /// One real error that stops annotation processing — a misplaced type
-/// annotation, say — leaves every Lombok-generated `log` and getter
-/// unresolved, and javac spends its whole 100-error budget on them. A real
-/// skiller run rendered ~26k chars of that; the agent tailed past the root
-/// error and grepped the tee log for it. Each missing symbol keeps its first
-/// occurrences verbatim and the rest become one counted `... +N more` line.
+/// annotation, a missing jOOQ table — leaves every Lombok-generated `log`,
+/// getter and constructor unresolved, and javac spends its whole 100-error
+/// budget on them. A real skiller run rendered ~26k chars of `cannot find
+/// symbol`; the agent tailed past the root error and grepped the tee log for
+/// it. Three map/workspace-manager runs added `required: no arguments` at
+/// every constructor call site and were middle-cut by the host at 10k. Each
+/// missing member keeps its first occurrences verbatim and the rest become one
+/// counted `... +N more` line.
 ///
-/// Only behind a root error: when every error is a missing symbol there is no
-/// cascade to read past, and a method renamed away from twelve call sites is
-/// twelve places to fix.
-fn collapse_missing_symbol_cascade(result: String) -> String {
+/// Only behind a root error: when every error is a missing symbol or a
+/// no-argument constructor there is no cascade to read past, and a method
+/// renamed away from twelve call sites is twelve places to fix.
+fn collapse_lombok_cascade(result: String) -> String {
     let lines: Vec<&str> = result.lines().collect();
-    let is_error = |l: &str| COMPILE_ERROR_LOCATION_RE.is_match(l);
-    if !lines
-        .iter()
-        .any(|l| is_error(l) && !l.contains(MISSING_SYMBOL))
-    {
-        return result;
-    }
     fn context(line: &str) -> Option<&str> {
         let t = strip_maven_prefix(line).trim_start();
-        (t.starts_with("symbol:") || t.starts_with("location:")).then_some(t)
+        ["symbol:", "location:", "required:", "found:", "reason:"]
+            .iter()
+            .any(|p| t.starts_with(p))
+            .then_some(t)
     }
 
-    // (first line, end, symbol) per missing-symbol error block.
-    let mut blocks: Vec<(usize, usize, &str)> = Vec::new();
+    // (first line, end, key) per cascade error block; the key names the
+    // missing member the way the `... +N more` line prints it.
+    let mut blocks: Vec<(usize, usize, String)> = Vec::new();
+    let mut has_root_error = false;
     let mut i = 0;
     while i < lines.len() {
-        if !(is_error(lines[i]) && lines[i].contains(MISSING_SYMBOL)) {
+        let Some(location) = COMPILE_ERROR_LOCATION_RE.find(lines[i]) else {
             i += 1;
             continue;
-        }
+        };
+        let message = lines[i][location.end()..].trim();
         let mut end = i + 1;
         let mut symbol = None;
+        let mut no_arguments = false;
         while let Some(t) = lines.get(end).and_then(|l| context(l)) {
             if let Some(s) = t.strip_prefix("symbol:") {
                 symbol = Some(s.trim());
             }
+            no_arguments |= t.strip_prefix("required:").map(str::trim) == Some("no arguments");
             end += 1;
         }
-        if let Some(symbol) = symbol {
-            blocks.push((i, end, symbol));
+        let key = if message.contains(MISSING_SYMBOL) {
+            symbol.map(|s| format!("{MISSING_SYMBOL}: {s}"))
+        } else if let Some(constructor) = message
+            .strip_suffix(CONSTRUCTOR_MISMATCH)
+            .filter(|c| no_arguments && c.starts_with("constructor "))
+        {
+            Some(format!(
+                "{constructor}{}",
+                CONSTRUCTOR_MISMATCH.trim_end_matches(';')
+            ))
+        } else {
+            has_root_error = true;
+            None
+        };
+        if let Some(key) = key {
+            blocks.push((i, end, key));
         }
         i = end;
     }
+    if !has_root_error {
+        return result;
+    }
 
-    // Per symbol: the dropped count and the files it was dropped from.
+    // Per key: the dropped count and the files it was dropped from.
     let mut seen: HashMap<&str, usize> = HashMap::new();
     let mut dropped: HashMap<&str, (usize, HashSet<&str>)> = HashMap::new();
     let mut drop_ranges: Vec<(usize, usize)> = Vec::new();
     let mut last_kept: HashMap<&str, usize> = HashMap::new();
     let mut order: Vec<&str> = Vec::new();
-    for &(start, end, symbol) in &blocks {
-        if !seen.contains_key(symbol) {
-            order.push(symbol);
+    for (start, end, key) in blocks.iter().map(|(s, e, k)| (*s, *e, k.as_str())) {
+        if !seen.contains_key(key) {
+            order.push(key);
         }
-        let n = seen.entry(symbol).or_insert(0);
+        let n = seen.entry(key).or_insert(0);
         *n += 1;
-        if *n <= MAX_MISSING_SYMBOL_REPEATS {
-            last_kept.insert(symbol, end);
+        if *n <= MAX_CASCADE_REPEATS {
+            last_kept.insert(key, end);
             continue;
         }
-        let entry = dropped.entry(symbol).or_default();
+        let entry = dropped.entry(key).or_default();
         entry.0 += 1;
         if let Some(path) = COMPILE_ERROR_LOCATION_RE
             .captures(lines[start])
@@ -3165,14 +3191,14 @@ fn collapse_missing_symbol_cascade(result: String) -> String {
         return result;
     }
 
-    // The count lands right after the last occurrence kept of its symbol.
+    // The count lands right after the last occurrence kept of its key.
     let mut elision_at: HashMap<usize, Vec<String>> = HashMap::new();
-    for symbol in &order {
-        if let Some((count, files)) = dropped.get(symbol)
-            && let Some(&at) = last_kept.get(symbol)
+    for key in &order {
+        if let Some((count, files)) = dropped.get(key)
+            && let Some(&at) = last_kept.get(key)
         {
             elision_at.entry(at).or_default().push(format!(
-                "[ERROR]   ... +{count} more {MISSING_SYMBOL}: {symbol} (in {} files)",
+                "[ERROR]   ... +{count} more {key} (in {} files)",
                 files.len()
             ));
         }
@@ -5497,6 +5523,77 @@ mod tests {
             "{output}"
         );
         assert!(!output.contains("more cannot find symbol"), "{output}");
+    }
+
+    /// Real map/workspace-manager runs (09-14, 09-21, 09-28): Lombok stopped
+    /// behind a missing jOOQ table, and besides `log` and getters every
+    /// `@RequiredArgsConstructor` call site failed with `required: no
+    /// arguments` — ~18k chars, all three middle-cut by the host at 10k.
+    /// Raw log of the same shape reproduced on Lombok 1.18.42 / JDK 26.
+    #[test]
+    fn test_compile_failure_collapses_a_no_arg_constructor_cascade() {
+        let input = include_str!("../../../tests/fixtures/mvn_compile_lombok_ctor_cascade_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        assert!(
+            output.contains("symbol:   static PERSON_PERMISSION"),
+            "the error that stopped Lombok must survive:\n{output}"
+        );
+        assert_eq!(
+            output.matches("invalid method reference").count(),
+            3,
+            "{output}"
+        );
+        assert_eq!(
+            output
+                .matches("constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;")
+                .count(),
+            3,
+            "{output}"
+        );
+        assert!(
+            output.contains(
+                "[ERROR]   ... +15 more constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types (in 15 files)"
+            ),
+            "the cascade must be counted, not dropped silently:\n{output}"
+        );
+        assert!(
+            output
+                .contains("[ERROR]   ... +15 more cannot find symbol: variable log (in 15 files)"),
+            "{output}"
+        );
+        assert!(output.contains("BUILD FAILURE"), "{output}");
+        // 12.7k before, past the host's 10k middle cut.
+        assert!(
+            output.len() < 6_000,
+            "cascade must not dominate the render ({} chars):\n{output}",
+            output.len()
+        );
+    }
+
+    /// A constructor whose parameters were removed on purpose fails at every
+    /// call site with `required: no arguments` too — without a root error each
+    /// of them is a place to fix, all kept.
+    #[test]
+    fn test_compile_failure_keeps_every_no_arg_constructor_mismatch_without_a_root_error() {
+        let errors: String = (0..12)
+            .map(|i| {
+                format!(
+                    "[ERROR] /src/Foo{i}.java:[{i},5] constructor Bar in class Bar cannot be applied to given types;\n  \
+                     required: no arguments\n  found:    int\n  \
+                     reason: actual and formal argument lists differ in length\n"
+                )
+            })
+            .collect();
+        let input = format!("[ERROR] COMPILATION ERROR : \n{errors}[INFO] BUILD FAILURE\n");
+        let output = filter_mvn_compile(&input);
+
+        assert_eq!(
+            output.matches("required: no arguments").count(),
+            12,
+            "{output}"
+        );
+        assert!(!output.contains("more constructor"), "{output}");
     }
 
     #[test]

@@ -1,0 +1,608 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.example:lombok-ctor-cascade >-------------------
+[INFO] Building lombok-ctor-cascade 1.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ lombok-ctor-cascade ---
+[INFO] skip non existing resourceDirectory /home/user/work/lombok-ctor/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ lombok-ctor-cascade ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 25 source files with javac [debug release 21] to target/classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/db/PersonPermissionView.java:[3,1] cannot find symbol
+  symbol:   static PERSON_PERMISSION
+  location: class com.example.db.Tables
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/db/PersonPermissionView.java:[7,16] cannot find symbol
+  symbol:   variable PERSON_PERMISSION
+  location: class com.example.db.PersonPermissionView
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/fixture/Containers.java:[6,63] invalid method reference
+  cannot find symbol
+    symbol:   method getSchema(com.example.fixture.TestTenant)
+    location: class com.example.fixture.TestTenant
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/fixture/Containers.java:[7,65] invalid method reference
+  cannot find symbol
+    symbol:   method getUsername(com.example.fixture.TestTenant)
+    location: class com.example.fixture.TestTenant
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/fixture/Containers.java:[8,65] invalid method reference
+  cannot find symbol
+    symbol:   method getPassword(com.example.fixture.TestTenant)
+    location: class com.example.fixture.TestTenant
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case00.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case00
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case00.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case00.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case00.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case01.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case01
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case01.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case01.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case01.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case02.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case02
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case02.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case02.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case02.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case03.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case03
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case03.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case03.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case03.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case04.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case04
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case04.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case04.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case04.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case05.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case05
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case05.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case05.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case05.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case06.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case06
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case06.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case06.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case06.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case07.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case07
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case07.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case07.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case07.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case08.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case08
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case08.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case08.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case08.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case09.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case09
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case09.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case09.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case09.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case10.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case10
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case10.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case10.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case10.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case11.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case11
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case11.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case11.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case11.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case12.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case12
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case12.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case12.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case12.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case13.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case13
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case13.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case13.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case13.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case14.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case14
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case14.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case14.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case14.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case15.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case15
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case15.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case15.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case15.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case16.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case16
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case16.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case16.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case16.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case17.java:[11,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.svc.Case17
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case17.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case17.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case17.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+  required: no arguments
+  found:    java.lang.String,java.lang.String
+  reason: actual and formal argument lists differ in length
+[INFO] 77 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.417 s
+[INFO] Finished at: 2026-09-28T19:17:14+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.0:compile (default-compile) on project lombok-ctor-cascade: Compilation failure: Compilation failure: 
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/db/PersonPermissionView.java:[3,1] cannot find symbol
+[ERROR]   symbol:   static PERSON_PERMISSION
+[ERROR]   location: class com.example.db.Tables
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/db/PersonPermissionView.java:[7,16] cannot find symbol
+[ERROR]   symbol:   variable PERSON_PERMISSION
+[ERROR]   location: class com.example.db.PersonPermissionView
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/fixture/Containers.java:[6,63] invalid method reference
+[ERROR]   cannot find symbol
+[ERROR]     symbol:   method getSchema(com.example.fixture.TestTenant)
+[ERROR]     location: class com.example.fixture.TestTenant
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/fixture/Containers.java:[7,65] invalid method reference
+[ERROR]   cannot find symbol
+[ERROR]     symbol:   method getUsername(com.example.fixture.TestTenant)
+[ERROR]     location: class com.example.fixture.TestTenant
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/fixture/Containers.java:[8,65] invalid method reference
+[ERROR]   cannot find symbol
+[ERROR]     symbol:   method getPassword(com.example.fixture.TestTenant)
+[ERROR]     location: class com.example.fixture.TestTenant
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case00.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case00
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case00.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case00.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case00.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case01.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case01
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case01.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case01.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case01.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case02.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case02
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case02.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case02.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case02.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case03.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case03
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case03.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case03.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case03.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case04.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case04
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case04.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case04.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case04.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case05.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case05
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case05.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case05.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case05.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case06.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case06
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case06.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case06.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case06.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case07.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case07
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case07.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case07.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case07.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case08.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case08
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case08.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case08.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case08.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case09.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case09
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case09.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case09.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case09.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case10.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case10
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case10.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case10.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case10.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case11.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case11
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case11.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case11.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case11.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case12.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case12
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case12.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case12.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case12.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case13.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case13
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case13.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case13.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case13.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case14.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case14
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case14.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case14.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case14.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case15.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case15
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case15.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case15.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case15.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case16.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case16
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case16.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case16.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case16.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case17.java:[11,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.svc.Case17
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case17.java:[12,20] constructor SecurityUserBuilder in class com.example.fixture.SecurityUserBuilder cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case17.java:[13,20] constructor PersonDataFactory in class com.example.fixture.PersonDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /home/user/work/lombok-ctor/src/main/java/com/example/svc/Case17.java:[14,20] constructor DictionaryDataFactory in class com.example.fixture.DictionaryDataFactory cannot be applied to given types;
+[ERROR]   required: no arguments
+[ERROR]   found:    java.lang.String,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
