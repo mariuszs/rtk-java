@@ -2182,6 +2182,10 @@ fn failure_kind_label(f: &TestFailure) -> Option<String> {
         .as_deref()
         .and_then(|t| t.rsplit('.').next())
         .unwrap_or("");
+    // Surefire takes `type` from the text before the trace's first `:`. For
+    // Mockito's `Wanted but not invoked:` or Spock's `Condition not
+    // satisfied:` that is a sentence the message itself opens with.
+    let ty = if msg.starts_with(ty) { "" } else { ty };
     match (ty.is_empty(), msg.is_empty()) {
         (true, true) => None,
         (true, false) => Some(msg.to_string()),
@@ -6845,6 +6849,44 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "skipped names in digest, got: {digest}"
         );
         assert!(out.reference, "8 skipped > inline cap");
+    }
+
+    /// Surefire writes `type="Wanted but not invoked"` for Mockito — the text
+    /// before the first `:` of the trace, not a class — and the message opens
+    /// with that same sentence. 13 real auth renders printed it twice; Spock's
+    /// `Condition not satisfied:` has the same shape.
+    #[test]
+    fn enrich_failure_does_not_double_a_sentence_type_label() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join("TEST-com.example.audit.SecurityLogServiceTest.xml"),
+            include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.audit.SecurityLogServiceTest.xml"
+            ),
+        )
+        .unwrap();
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        );
+        assert_eq!(
+            out.text.matches("Wanted but not invoked:").count(),
+            1,
+            "{}",
+            out.text
+        );
+        assert!(
+            out.text
+                .contains("[ERROR]     Wanted but not invoked:\n[ERROR]     repository.save(\"u-1: bad password\");"),
+            "{}",
+            out.text
+        );
     }
 
     #[test]
