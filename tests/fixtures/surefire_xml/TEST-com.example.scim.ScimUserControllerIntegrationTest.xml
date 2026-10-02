@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.scim.ScimUserControllerIntegrationTest" time="0.072" tests="8" errors="0" skipped="0" failures="8" flakes="0">
+  <properties>
+    <property name="java.specification.version" value="26"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/home/user/scim/target/test-classes:/home/user/scim/target/classes:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter/6.0.3/junit-jupiter-6.0.3.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.jar:/home/user/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.jar:/home/user/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/user/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.jar:/home/user/.m2/repository/org/mockito/mockito-junit-jupiter/5.23.0/mockito-junit-jupiter-5.23.0.jar:/home/user/.m2/repository/org/mockito/mockito-core/5.23.0/mockito-core-5.23.0.jar:/home/user/.m2/repository/net/bytebuddy/byte-buddy/1.17.7/byte-buddy-1.17.7.jar:/home/user/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.7/byte-buddy-agent-1.17.7.jar:/home/user/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar"/>
+    <property name="java.vm.vendor" value="Eclipse Adoptium"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://adoptium.net/"/>
+    <property name="os.name" value="Linux"/>
+    <property name="java.vm.specification.version" value="26"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/home/user/.sdkman/candidates/java/26.0.1-tem/lib"/>
+    <property name="sun.java.command" value="/home/user/scim/target/surefire/surefirebooter-20261002143357769_3.jar /home/user/scim/target/surefire 2026-10-02T14-33-57_738-jvmRun1 surefire-20261002143357769_1tmp surefire_0-20261002143357769_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/home/user/scim/target/test-classes:/home/user/scim/target/classes:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter/6.0.3/junit-jupiter-6.0.3.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-api/6.0.3/junit-jupiter-api-6.0.3.jar:/home/user/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-commons/6.0.3/junit-platform-commons-6.0.3.jar:/home/user/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/user/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-params/6.0.3/junit-jupiter-params-6.0.3.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-engine/6.0.3/junit-jupiter-engine-6.0.3.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.jar:/home/user/.m2/repository/org/mockito/mockito-junit-jupiter/5.23.0/mockito-junit-jupiter-5.23.0.jar:/home/user/.m2/repository/org/mockito/mockito-core/5.23.0/mockito-core-5.23.0.jar:/home/user/.m2/repository/net/bytebuddy/byte-buddy/1.17.7/byte-buddy-1.17.7.jar:/home/user/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.7/byte-buddy-agent-1.17.7.jar:/home/user/.m2/repository/org/objenesis/objenesis/3.3/objenesis-3.3.jar"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/home/user"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-04-21"/>
+    <property name="java.home" value="/home/user/.sdkman/candidates/java/26.0.1-tem"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/home/user/scim"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="surefire.real.class.path" value="/home/user/scim/target/surefire/surefirebooter-20261002143357769_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="26.0.1+8"/>
+    <property name="user.name" value="user"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="7.2.8-200.fc44.x86_64"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Temurin-26.0.1+8"/>
+    <property name="localRepository" value="/home/user/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="java.version" value="26.0.1"/>
+    <property name="user.dir" value="/home/user/scim"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="aether.enhancedLocalRepository.trackingFilename" value="_none"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Eclipse Adoptium"/>
+    <property name="java.vm.version" value="26.0.1+8"/>
+    <property name="stdin.encoding" value="UTF-8"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="70.0"/>
+  </properties>
+  <testcase name="should_pick_the_work_email_from_a_pathless_patch" classname="com.example.scim.ScimUserControllerIntegrationTest" time="0.032">
+    <failure message="JSON path &quot;$.userName&quot; ==&gt; expected: &lt;test.user-upn@example.com&gt; but was: &lt;test.user-home@example.com&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: JSON path "$.userName" ==> expected: <test.user-upn@example.com> but was: <test.user-home@example.com>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:184)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1199)
+	at com.example.scim.ScimUserControllerIntegrationTest.should_pick_the_work_email_from_a_pathless_patch(ScimUserControllerIntegrationTest.java:23)
+]]></failure>
+    <system-out><![CDATA[14:49:40.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 4038a571-22a8-41e1-856b-d8e3789fff91
+14:49:40.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:40.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=0 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:40.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 4038a571-22a8-41e1-856b-d8e3789fff91 to team 07805993-ede4-4799-af9d-569fb8c30dee
+14:49:41.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 4038a571-22a8-41e1-856b-d8e3789fff91
+14:49:41.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:41.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=1 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:41.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 4038a571-22a8-41e1-856b-d8e3789fff91 to team 07805993-ede4-4799-af9d-569fb8c30dee
+14:49:42.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 4038a571-22a8-41e1-856b-d8e3789fff91
+14:49:42.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:42.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=2 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:42.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 4038a571-22a8-41e1-856b-d8e3789fff91 to team 07805993-ede4-4799-af9d-569fb8c30dee
+14:49:43.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 4038a571-22a8-41e1-856b-d8e3789fff91
+14:49:43.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:43.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=3 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:43.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 4038a571-22a8-41e1-856b-d8e3789fff91 to team 07805993-ede4-4799-af9d-569fb8c30dee
+14:49:44.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 4038a571-22a8-41e1-856b-d8e3789fff91
+14:49:44.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:44.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=4 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:44.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 4038a571-22a8-41e1-856b-d8e3789fff91 to team 07805993-ede4-4799-af9d-569fb8c30dee
+14:49:45.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 4038a571-22a8-41e1-856b-d8e3789fff91
+14:49:45.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:45.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=5 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:45.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 4038a571-22a8-41e1-856b-d8e3789fff91 to team 07805993-ede4-4799-af9d-569fb8c30dee
+14:49:49.960 [main] INFO  c.e.auth.user.UserLookupService - get user 4038a571-22a8-41e1-856b-d8e3789fff91 for company CompanyId[uuid=00000000-87b6-b399-cb5e-c7d44cfb67dd] email=a@example.com
+]]></system-out>
+  </testcase>
+  <testcase name="should_clear_the_work_email_on_a_remove_patch" classname="com.example.scim.ScimUserControllerIntegrationTest" time="0.007">
+    <failure message="JSON path &quot;$.emails&quot; ==&gt; expected: &lt;null&gt; but was: &lt;test.user@example.com&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: JSON path "$.emails" ==> expected: <null> but was: <test.user@example.com>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:184)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1199)
+	at com.example.scim.ScimUserControllerIntegrationTest.should_clear_the_work_email_on_a_remove_patch(ScimUserControllerIntegrationTest.java:30)
+]]></failure>
+    <system-out><![CDATA[14:49:40.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 46aff54b-99a1-4872-a504-c7138276ed77
+14:49:40.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:40.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=0 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:40.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 46aff54b-99a1-4872-a504-c7138276ed77 to team af943648-3194-4b10-8806-54697e8cf512
+14:49:41.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 46aff54b-99a1-4872-a504-c7138276ed77
+14:49:41.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:41.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=1 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:41.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 46aff54b-99a1-4872-a504-c7138276ed77 to team af943648-3194-4b10-8806-54697e8cf512
+14:49:42.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 46aff54b-99a1-4872-a504-c7138276ed77
+14:49:42.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:42.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=2 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:42.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 46aff54b-99a1-4872-a504-c7138276ed77 to team af943648-3194-4b10-8806-54697e8cf512
+14:49:43.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 46aff54b-99a1-4872-a504-c7138276ed77
+14:49:43.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:43.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=3 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:43.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 46aff54b-99a1-4872-a504-c7138276ed77 to team af943648-3194-4b10-8806-54697e8cf512
+14:49:44.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 46aff54b-99a1-4872-a504-c7138276ed77
+14:49:44.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:44.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=4 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:44.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 46aff54b-99a1-4872-a504-c7138276ed77 to team af943648-3194-4b10-8806-54697e8cf512
+14:49:45.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 46aff54b-99a1-4872-a504-c7138276ed77
+14:49:45.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:45.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=5 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:45.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 46aff54b-99a1-4872-a504-c7138276ed77 to team af943648-3194-4b10-8806-54697e8cf512
+14:49:49.960 [main] INFO  c.e.auth.user.UserLookupService - get user 46aff54b-99a1-4872-a504-c7138276ed77 for company CompanyId[uuid=00000000-87b6-b399-cb5e-c7d44cfb67dd] email=h@example.com
+]]></system-out>
+  </testcase>
+  <testcase name="should_converge_when_userName_is_patched_onto_a_user_holding_mail" classname="com.example.scim.ScimUserControllerIntegrationTest" time="0.006">
+    <failure message="JSON path &quot;$.userName&quot; ==&gt; expected: &lt;test.user-upn@example.com&gt; but was: &lt;test.user@example.com&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: JSON path "$.userName" ==> expected: <test.user-upn@example.com> but was: <test.user@example.com>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:184)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1199)
+	at com.example.scim.ScimUserControllerIntegrationTest.should_converge_when_userName_is_patched_onto_a_user_holding_mail(ScimUserControllerIntegrationTest.java:24)
+]]></failure>
+    <system-out><![CDATA[14:49:40.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 3c3b70f1-4313-4934-b719-fd4c6121dace
+14:49:40.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:40.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=0 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:40.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 3c3b70f1-4313-4934-b719-fd4c6121dace to team a283a1fd-e31b-405a-b817-95fb25db3265
+14:49:41.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 3c3b70f1-4313-4934-b719-fd4c6121dace
+14:49:41.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:41.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=1 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:41.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 3c3b70f1-4313-4934-b719-fd4c6121dace to team a283a1fd-e31b-405a-b817-95fb25db3265
+14:49:42.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 3c3b70f1-4313-4934-b719-fd4c6121dace
+14:49:42.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:42.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=2 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:42.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 3c3b70f1-4313-4934-b719-fd4c6121dace to team a283a1fd-e31b-405a-b817-95fb25db3265
+14:49:43.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 3c3b70f1-4313-4934-b719-fd4c6121dace
+14:49:43.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:43.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=3 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:43.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 3c3b70f1-4313-4934-b719-fd4c6121dace to team a283a1fd-e31b-405a-b817-95fb25db3265
+14:49:44.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 3c3b70f1-4313-4934-b719-fd4c6121dace
+14:49:44.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:44.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=4 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:44.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 3c3b70f1-4313-4934-b719-fd4c6121dace to team a283a1fd-e31b-405a-b817-95fb25db3265
+14:49:45.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 3c3b70f1-4313-4934-b719-fd4c6121dace
+14:49:45.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:45.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=5 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:45.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 3c3b70f1-4313-4934-b719-fd4c6121dace to team a283a1fd-e31b-405a-b817-95fb25db3265
+14:49:49.960 [main] INFO  c.e.auth.user.UserLookupService - get user 3c3b70f1-4313-4934-b719-fd4c6121dace for company CompanyId[uuid=00000000-87b6-b399-cb5e-c7d44cfb67dd] email=b@example.com
+]]></system-out>
+  </testcase>
+  <testcase name="should_create_a_user_with_the_login_from_userName_and_the_email_from_work_email" classname="com.example.scim.ScimUserControllerIntegrationTest" time="0.005">
+    <failure message="JSON path &quot;$.emails[0].value&quot; ==&gt; expected: &lt;test.user@example.com&gt; but was: &lt;test.user-upn@example.com&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: JSON path "$.emails[0].value" ==> expected: <test.user@example.com> but was: <test.user-upn@example.com>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:184)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1199)
+	at com.example.scim.ScimUserControllerIntegrationTest.should_create_a_user_with_the_login_from_userName_and_the_email_from_work_email(ScimUserControllerIntegrationTest.java:25)
+]]></failure>
+    <system-out><![CDATA[14:49:40.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd
+14:49:40.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:40.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=0 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:40.543 [main] INFO  c.e.auth.user.team.TeamService - Add user cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd to team 0aebb513-6454-4ce9-92dc-0dbd4176d1d9
+14:49:41.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd
+14:49:41.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:41.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=1 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:41.543 [main] INFO  c.e.auth.user.team.TeamService - Add user cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd to team 0aebb513-6454-4ce9-92dc-0dbd4176d1d9
+14:49:42.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd
+14:49:42.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:42.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=2 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:42.543 [main] INFO  c.e.auth.user.team.TeamService - Add user cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd to team 0aebb513-6454-4ce9-92dc-0dbd4176d1d9
+14:49:43.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd
+14:49:43.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:43.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=3 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:43.543 [main] INFO  c.e.auth.user.team.TeamService - Add user cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd to team 0aebb513-6454-4ce9-92dc-0dbd4176d1d9
+14:49:44.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd
+14:49:44.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:44.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=4 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:44.543 [main] INFO  c.e.auth.user.team.TeamService - Add user cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd to team 0aebb513-6454-4ce9-92dc-0dbd4176d1d9
+14:49:45.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd
+14:49:45.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:45.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=5 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:45.543 [main] INFO  c.e.auth.user.team.TeamService - Add user cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd to team 0aebb513-6454-4ce9-92dc-0dbd4176d1d9
+14:49:49.960 [main] INFO  c.e.auth.user.UserLookupService - get user cb8ce6c1-1a3b-45e3-95a5-2bef50c7d9bd for company CompanyId[uuid=00000000-87b6-b399-cb5e-c7d44cfb67dd] email=c@example.com
+]]></system-out>
+  </testcase>
+  <testcase name="should_reject_a_duplicate_work_email" classname="com.example.scim.ScimUserControllerIntegrationTest" time="0.004">
+    <failure message="Status ==&gt; expected: &lt;409&gt; but was: &lt;201&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: Status ==> expected: <409> but was: <201>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+	at com.example.scim.ScimUserControllerIntegrationTest.should_reject_a_duplicate_work_email(ScimUserControllerIntegrationTest.java:27)
+]]></failure>
+    <system-out><![CDATA[14:49:40.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 5d4b489d-96ef-48b7-b473-be1f9966d70b
+14:49:40.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:40.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=0 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:40.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 5d4b489d-96ef-48b7-b473-be1f9966d70b to team bdaa5e80-099a-43fb-a9fb-084bcc48b50e
+14:49:41.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 5d4b489d-96ef-48b7-b473-be1f9966d70b
+14:49:41.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:41.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=1 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:41.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 5d4b489d-96ef-48b7-b473-be1f9966d70b to team bdaa5e80-099a-43fb-a9fb-084bcc48b50e
+14:49:42.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 5d4b489d-96ef-48b7-b473-be1f9966d70b
+14:49:42.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:42.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=2 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:42.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 5d4b489d-96ef-48b7-b473-be1f9966d70b to team bdaa5e80-099a-43fb-a9fb-084bcc48b50e
+14:49:43.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 5d4b489d-96ef-48b7-b473-be1f9966d70b
+14:49:43.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:43.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=3 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:43.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 5d4b489d-96ef-48b7-b473-be1f9966d70b to team bdaa5e80-099a-43fb-a9fb-084bcc48b50e
+14:49:44.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 5d4b489d-96ef-48b7-b473-be1f9966d70b
+14:49:44.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:44.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=4 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:44.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 5d4b489d-96ef-48b7-b473-be1f9966d70b to team bdaa5e80-099a-43fb-a9fb-084bcc48b50e
+14:49:45.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 5d4b489d-96ef-48b7-b473-be1f9966d70b
+14:49:45.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:45.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=5 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:45.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 5d4b489d-96ef-48b7-b473-be1f9966d70b to team bdaa5e80-099a-43fb-a9fb-084bcc48b50e
+14:49:49.960 [main] INFO  c.e.auth.user.UserLookupService - get user 5d4b489d-96ef-48b7-b473-be1f9966d70b for company CompanyId[uuid=00000000-87b6-b399-cb5e-c7d44cfb67dd] email=e@example.com
+]]></system-out>
+  </testcase>
+  <testcase name="should_return_409_when_userName_is_another_users_login" classname="com.example.scim.ScimUserControllerIntegrationTest" time="0.003">
+    <failure message="Status ==&gt; expected: &lt;409&gt; but was: &lt;201&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: Status ==> expected: <409> but was: <201>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:152)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:590)
+	at com.example.scim.ScimUserControllerIntegrationTest.should_return_409_when_userName_is_another_users_login(ScimUserControllerIntegrationTest.java:28)
+]]></failure>
+    <system-out><![CDATA[14:49:40.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 6e852bf3-d539-41bf-974d-0c77727b2e59
+14:49:40.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:40.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=0 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:40.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 6e852bf3-d539-41bf-974d-0c77727b2e59 to team 6498f49f-ef41-42ef-b4a2-4ce5372a59a1
+14:49:41.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 6e852bf3-d539-41bf-974d-0c77727b2e59
+14:49:41.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:41.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=1 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:41.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 6e852bf3-d539-41bf-974d-0c77727b2e59 to team 6498f49f-ef41-42ef-b4a2-4ce5372a59a1
+14:49:42.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 6e852bf3-d539-41bf-974d-0c77727b2e59
+14:49:42.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:42.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=2 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:42.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 6e852bf3-d539-41bf-974d-0c77727b2e59 to team 6498f49f-ef41-42ef-b4a2-4ce5372a59a1
+14:49:43.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 6e852bf3-d539-41bf-974d-0c77727b2e59
+14:49:43.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:43.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=3 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:43.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 6e852bf3-d539-41bf-974d-0c77727b2e59 to team 6498f49f-ef41-42ef-b4a2-4ce5372a59a1
+14:49:44.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 6e852bf3-d539-41bf-974d-0c77727b2e59
+14:49:44.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:44.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=4 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:44.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 6e852bf3-d539-41bf-974d-0c77727b2e59 to team 6498f49f-ef41-42ef-b4a2-4ce5372a59a1
+14:49:45.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 6e852bf3-d539-41bf-974d-0c77727b2e59
+14:49:45.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:45.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=5 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:45.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 6e852bf3-d539-41bf-974d-0c77727b2e59 to team 6498f49f-ef41-42ef-b4a2-4ce5372a59a1
+14:49:49.960 [main] INFO  c.e.auth.user.UserLookupService - get user 6e852bf3-d539-41bf-974d-0c77727b2e59 for company CompanyId[uuid=00000000-87b6-b399-cb5e-c7d44cfb67dd] email=f@example.com
+]]></system-out>
+  </testcase>
+  <testcase name="should_keep_the_login_when_only_the_work_email_changes" classname="com.example.scim.ScimUserControllerIntegrationTest" time="0.002">
+    <failure message="JSON path &quot;$.userName&quot; ==&gt; expected: &lt;test.user-upn@example.com&gt; but was: &lt;test.user-new@example.com&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: JSON path "$.userName" ==> expected: <test.user-upn@example.com> but was: <test.user-new@example.com>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:184)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1199)
+	at com.example.scim.ScimUserControllerIntegrationTest.should_keep_the_login_when_only_the_work_email_changes(ScimUserControllerIntegrationTest.java:26)
+]]></failure>
+    <system-out><![CDATA[14:49:40.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: f8dc61dd-bb83-471e-96bf-c07843455c8d
+14:49:40.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:40.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=0 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:40.543 [main] INFO  c.e.auth.user.team.TeamService - Add user f8dc61dd-bb83-471e-96bf-c07843455c8d to team 2734f8fc-279b-463f-9e36-1ce7307c0860
+14:49:41.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: f8dc61dd-bb83-471e-96bf-c07843455c8d
+14:49:41.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:41.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=1 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:41.543 [main] INFO  c.e.auth.user.team.TeamService - Add user f8dc61dd-bb83-471e-96bf-c07843455c8d to team 2734f8fc-279b-463f-9e36-1ce7307c0860
+14:49:42.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: f8dc61dd-bb83-471e-96bf-c07843455c8d
+14:49:42.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:42.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=2 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:42.543 [main] INFO  c.e.auth.user.team.TeamService - Add user f8dc61dd-bb83-471e-96bf-c07843455c8d to team 2734f8fc-279b-463f-9e36-1ce7307c0860
+14:49:43.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: f8dc61dd-bb83-471e-96bf-c07843455c8d
+14:49:43.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:43.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=3 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:43.543 [main] INFO  c.e.auth.user.team.TeamService - Add user f8dc61dd-bb83-471e-96bf-c07843455c8d to team 2734f8fc-279b-463f-9e36-1ce7307c0860
+14:49:44.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: f8dc61dd-bb83-471e-96bf-c07843455c8d
+14:49:44.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:44.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=4 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:44.543 [main] INFO  c.e.auth.user.team.TeamService - Add user f8dc61dd-bb83-471e-96bf-c07843455c8d to team 2734f8fc-279b-463f-9e36-1ce7307c0860
+14:49:45.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: f8dc61dd-bb83-471e-96bf-c07843455c8d
+14:49:45.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:45.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=5 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:45.543 [main] INFO  c.e.auth.user.team.TeamService - Add user f8dc61dd-bb83-471e-96bf-c07843455c8d to team 2734f8fc-279b-463f-9e36-1ce7307c0860
+14:49:49.960 [main] INFO  c.e.auth.user.UserLookupService - get user f8dc61dd-bb83-471e-96bf-c07843455c8d for company CompanyId[uuid=00000000-87b6-b399-cb5e-c7d44cfb67dd] email=d@example.com
+]]></system-out>
+  </testcase>
+  <testcase name="should_move_the_upn_held_in_email_to_login_when_work_email_is_patched" classname="com.example.scim.ScimUserControllerIntegrationTest" time="0.003">
+    <failure message="JSON path &quot;$.userName&quot; ==&gt; expected: &lt;test.user-upn@example.com&gt; but was: &lt;test.user@example.com&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: JSON path "$.userName" ==> expected: <test.user-upn@example.com> but was: <test.user@example.com>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:158)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:139)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:201)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:184)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:1199)
+	at com.example.scim.ScimUserControllerIntegrationTest.should_move_the_upn_held_in_email_to_login_when_work_email_is_patched(ScimUserControllerIntegrationTest.java:29)
+]]></failure>
+    <system-out><![CDATA[14:49:40.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 476a49f6-310a-4da3-b309-d8b6850d0d28
+14:49:40.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:40.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=0 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:40.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 476a49f6-310a-4da3-b309-d8b6850d0d28 to team f3fc38c7-f199-4c0c-b684-dda8ac1055c3
+14:49:41.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 476a49f6-310a-4da3-b309-d8b6850d0d28
+14:49:41.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:41.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=1 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:41.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 476a49f6-310a-4da3-b309-d8b6850d0d28 to team f3fc38c7-f199-4c0c-b684-dda8ac1055c3
+14:49:42.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 476a49f6-310a-4da3-b309-d8b6850d0d28
+14:49:42.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:42.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=2 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:42.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 476a49f6-310a-4da3-b309-d8b6850d0d28 to team f3fc38c7-f199-4c0c-b684-dda8ac1055c3
+14:49:43.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 476a49f6-310a-4da3-b309-d8b6850d0d28
+14:49:43.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:43.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=3 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:43.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 476a49f6-310a-4da3-b309-d8b6850d0d28 to team f3fc38c7-f199-4c0c-b684-dda8ac1055c3
+14:49:44.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 476a49f6-310a-4da3-b309-d8b6850d0d28
+14:49:44.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:44.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=4 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:44.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 476a49f6-310a-4da3-b309-d8b6850d0d28 to team f3fc38c7-f199-4c0c-b684-dda8ac1055c3
+14:49:45.540 [main] INFO  c.e.auth.scim.ScimUserService - SCIM updating user: 476a49f6-310a-4da3-b309-d8b6850d0d28
+14:49:45.541 [main] INFO  c.e.auth.scim.ScimUserService - SCIM patch created UserImport: note=null, patchedFields=[EMAIL], active=null
+14:49:45.542 [main] INFO  c.e.auth.sync.ImportProcessor - Importing user_import id=5 externalId=null using DefaultUserImporter (clientId=UNSPECIFIED)
+14:49:45.543 [main] INFO  c.e.auth.user.team.TeamService - Add user 476a49f6-310a-4da3-b309-d8b6850d0d28 to team f3fc38c7-f199-4c0c-b684-dda8ac1055c3
+14:49:49.960 [main] INFO  c.e.auth.user.UserLookupService - get user 476a49f6-310a-4da3-b309-d8b6850d0d28 for company CompanyId[uuid=00000000-87b6-b399-cb5e-c7d44cfb67dd] email=g@example.com
+]]></system-out>
+  </testcase>
+</testsuite>

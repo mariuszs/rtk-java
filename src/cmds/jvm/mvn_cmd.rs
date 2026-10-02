@@ -32,6 +32,18 @@ const MAX_FAILURES_PER_SOURCE: usize = 10;
 /// and spent three greps recovering the names (real run, 2026-08-01).
 const MAX_FAILURE_NAMES: usize = 40;
 
+/// Chars an enriched failure render may take before its captured output is
+/// shrunk. Claude Code middle-cuts a Bash result past ~10k chars (seen at
+/// exactly 10039 on every oversized render since 2026-09), and the cut lands
+/// on the middle failures — names and messages included. The margin leaves
+/// room for the tee trailers appended after the render.
+const RENDER_BUDGET: usize = 9_000;
+
+/// Captured-output lines kept per failure, tried in order until the render
+/// fits [`RENDER_BUDGET`]. The tail is kept: it is what ran right before the
+/// assertion.
+const CAPTURED_LINE_STEPS: [usize; 4] = [8, 4, 2, 0];
+
 static TESTS_RUN_RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"Tests run:\s*(\d+),\s*Failures:\s*(\d+),\s*Errors:\s*(\d+),\s*Skipped:\s*(\d+)")
         .unwrap()
@@ -1767,6 +1779,33 @@ fn render_enriched(
     surefire: Option<&SurefireResult>,
     failsafe: Option<&SurefireResult>,
 ) -> String {
+    let full = render_enriched_capped(text_summary, surefire, failsafe, None);
+    let has_output = [surefire, failsafe].into_iter().flatten().any(|r| {
+        r.failures
+            .iter()
+            .any(|f| f.test_output.as_deref().is_some_and(|o| !o.is_empty()))
+    });
+    if full.len() <= RENDER_BUDGET || !has_output {
+        return full;
+    }
+    // Shrink every failure's captured output alike, so each failure keeps its
+    // name, message and frames instead of the host cutting whole ones out.
+    let mut capped = full;
+    for cap in CAPTURED_LINE_STEPS {
+        capped = render_enriched_capped(text_summary, surefire, failsafe, Some(cap));
+        if capped.len() <= RENDER_BUDGET {
+            break;
+        }
+    }
+    capped
+}
+
+fn render_enriched_capped(
+    text_summary: &str,
+    surefire: Option<&SurefireResult>,
+    failsafe: Option<&SurefireResult>,
+    captured_cap: Option<usize>,
+) -> String {
     let sf_has_failures = surefire.is_some_and(|sf| !sf.failures.is_empty());
     let fs_has_failures = failsafe.is_some_and(|fs| !fs.failures.is_empty());
 
@@ -1782,14 +1821,14 @@ fn render_enriched(
         && !sf.failures.is_empty()
     {
         out.push_str("\n\n[ERROR] Failures:\n");
-        render_failure_block(&mut out, &sf.failures);
+        render_failure_block_capped(&mut out, &sf.failures, captured_cap);
     }
 
     if let Some(fs) = failsafe
         && !fs.failures.is_empty()
     {
         out.push_str("\n\n[ERROR] Integration failures:\n");
-        render_failure_block(&mut out, &fs.failures);
+        render_failure_block_capped(&mut out, &fs.failures, captured_cap);
     }
 
     let footer = render_footer(surefire, failsafe);
@@ -1820,7 +1859,16 @@ fn strip_text_failures_block(text_summary: &str) -> String {
     }
 }
 
+#[cfg(test)]
 fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
+    render_failure_block_capped(out, failures, None);
+}
+
+fn render_failure_block_capped(
+    out: &mut String,
+    failures: &[TestFailure],
+    captured_cap: Option<usize>,
+) {
     let shown = failures.iter().take(MAX_FAILURES_PER_SOURCE);
     // Diagnostic-body identity -> name of the first test that rendered it.
     // One broken dependency routinely fails many tests with the same cause;
@@ -1882,7 +1930,7 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
                     seen_bodies.push((sig, format!("{}.{}", f.test_class, f.test_method)));
                 }
                 if !is_context_failure_cascade(f) {
-                    render_failure_body(out, f);
+                    render_failure_body_capped(out, f, captured_cap);
                 }
             }
         }
@@ -1915,9 +1963,15 @@ fn render_failure_block(out: &mut String, failures: &[TestFailure]) {
     }
 }
 
-/// Render one failure's diagnostic body: enriched stack trace, then the
-/// captured-output block.
+#[cfg(test)]
 fn render_failure_body(out: &mut String, f: &TestFailure) {
+    render_failure_body_capped(out, f, None);
+}
+
+/// Render one failure's diagnostic body: enriched stack trace, then the
+/// captured-output block — with `captured_cap`, only its last lines behind one
+/// `... (N lines truncated)` marker.
+fn render_failure_body_capped(out: &mut String, f: &TestFailure, captured_cap: Option<usize>) {
     // Cause headers already printed as the trace. When a Spring context fails
     // the framework *logs* the same chain into `<system-out>`, so the report
     // carries it twice — once in `<failure>` (rendered above, elided) and once
@@ -1960,7 +2014,12 @@ fn render_failure_body(out: &mut String, f: &TestFailure) {
         // read as "the test logged nothing", which is not what happened.
         if kept.iter().any(|l| !l.trim().is_empty()) {
             writeln!(out, "[ERROR]     captured output:").ok();
-            for line in trim_blank_edges(&kept) {
+            let lines = trim_blank_edges(&kept);
+            let lines = match captured_cap {
+                Some(cap) => keep_captured_tail(lines, cap),
+                None => lines.iter().map(|l| l.to_string()).collect(),
+            };
+            for line in lines {
                 writeln!(out, "[ERROR]       {line}").ok();
             }
         }
@@ -2002,6 +2061,37 @@ fn repeats_a_trace_cause(line: &str, trace_causes: &HashSet<&str>) -> bool {
 const MIN_CAUSE_PREFIX_MATCH: usize = 80;
 
 /// Drop leading and trailing blank lines left behind after filtering.
+/// `... (N lines truncated)` / `... (N repeated log lines omitted)` — markers
+/// already standing for `N` captured lines.
+static CAPTURED_ELISION_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\.\.\. \((\d+) (?:lines truncated|repeated log lines? omitted)\)$").unwrap()
+});
+
+/// The last `cap` captured lines behind one `... (N lines truncated)` marker,
+/// `N` counting the lines earlier markers in the cut stood for. The MockMvc
+/// `Resolved Exception:` pair is pulled back out of the cut, as on the first
+/// truncation.
+fn keep_captured_tail(lines: &[&str], cap: usize) -> Vec<String> {
+    if lines.len() <= cap {
+        return lines.iter().map(|l| l.to_string()).collect();
+    }
+    let (cut, tail) = lines.split_at(lines.len() - cap);
+    let rescued = surefire_reports::rescued_from_cut(cut);
+    let dropped: usize = cut
+        .iter()
+        .map(|l| {
+            CAPTURED_ELISION_RE
+                .captures(l.trim())
+                .and_then(|c| c[1].parse().ok())
+                .unwrap_or(1)
+        })
+        .sum::<usize>()
+        - rescued.len();
+    std::iter::once(format!("... ({dropped} lines truncated)"))
+        .chain(rescued.iter().chain(tail).map(|l| l.to_string()))
+        .collect()
+}
+
 fn trim_blank_edges<'s, 'a>(lines: &'s [&'a str]) -> &'s [&'a str] {
     let start = lines.iter().position(|l| !l.trim().is_empty()).unwrap_or(0);
     let end = lines
@@ -6887,6 +6977,117 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "{}",
             out.text
         );
+    }
+
+    /// Real auth runs (09-29, 09-30): 7 and 8 failures, each with ~1.5k of
+    /// captured app log, rendered 15k and 13.7k. Claude Code middle-cuts a
+    /// Bash result past ~10k, which deleted the middle failures — names and
+    /// messages included. Reproduced as 8 failing tests logging the same
+    /// shape (installed render: 14240 chars).
+    #[test]
+    fn enrich_failure_shrinks_captured_output_to_fit_the_render_budget() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join("TEST-com.example.scim.ScimUserControllerIntegrationTest.xml"),
+            include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.scim.ScimUserControllerIntegrationTest.xml"
+            ),
+        )
+        .unwrap();
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "[ERROR] Tests run: 8, Failures: 8, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        )
+        .text;
+
+        assert!(
+            out.len() <= RENDER_BUDGET,
+            "render must fit the host's window ({} chars):\n{out}",
+            out.len()
+        );
+        for (method, email) in [
+            ("should_pick_the_work_email_from_a_pathless_patch", "a"),
+            (
+                "should_converge_when_userName_is_patched_onto_a_user_holding_mail",
+                "b",
+            ),
+            (
+                "should_create_a_user_with_the_login_from_userName_and_the_email_from_work_email",
+                "c",
+            ),
+            (
+                "should_keep_the_login_when_only_the_work_email_changes",
+                "d",
+            ),
+            ("should_reject_a_duplicate_work_email", "e"),
+            (
+                "should_return_409_when_userName_is_another_users_login",
+                "f",
+            ),
+            (
+                "should_move_the_upn_held_in_email_to_login_when_work_email_is_patched",
+                "g",
+            ),
+            ("should_clear_the_work_email_on_a_remove_patch", "h"),
+        ] {
+            assert!(
+                out.contains(&format!(
+                    "[ERROR]   com.example.scim.ScimUserControllerIntegrationTest.{method} <<< FAILURE!"
+                )),
+                "lost failure `{method}`:\n{out}"
+            );
+            assert!(
+                out.contains(&format!(
+                    "at com.example.scim.ScimUserControllerIntegrationTest.{method}("
+                )),
+                "lost the frame of `{method}`:\n{out}"
+            );
+            // The tail of the log is what ran right before the assertion.
+            assert!(
+                out.contains(&format!("email={email}@example.com")),
+                "lost the last captured line of `{method}`:\n{out}"
+            );
+        }
+        assert_eq!(out.matches("AssertionFailedError: ").count(), 8, "{out}");
+        assert!(out.contains("lines truncated)"), "{out}");
+        assert_eq!(out.matches("captured output:").count(), 8, "{out}");
+    }
+
+    #[test]
+    fn enrich_failure_under_the_budget_keeps_captured_output_whole() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&dir).unwrap();
+        // Two of the eight failures: well inside the window.
+        let xml = include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-com.example.scim.ScimUserControllerIntegrationTest.xml"
+        );
+        let start = xml.find("  <testcase name=\"should_converge").unwrap();
+        let end = xml.find("</testsuite>").unwrap();
+        let mut two = xml[..start].to_string();
+        two.push_str(&xml[end..]);
+        std::fs::write(
+            dir.join("TEST-com.example.scim.ScimUserControllerIntegrationTest.xml"),
+            two,
+        )
+        .unwrap();
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        )
+        .text;
+        assert!(out.contains("<<< FAILURE!"), "{out}");
+        assert!(!out.contains("lines truncated)"), "{out}");
     }
 
     #[test]

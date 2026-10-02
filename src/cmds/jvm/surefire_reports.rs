@@ -18,7 +18,6 @@ pub const DEFAULT_PER_TEST_OUTPUT_LIMIT: usize = 2000;
 /// failure dumps its `CONDITIONS EVALUATION REPORT` into `system-out`: short
 /// lines, so the char cap alone still lets ~70 of them through.
 pub const DEFAULT_PER_TEST_OUTPUT_LINES: usize = 12;
-const DEFAULT_TOTAL_OUTPUT_LIMIT: usize = 10_000;
 
 #[derive(Debug, Default, PartialEq)]
 pub struct TestSummary {
@@ -598,7 +597,7 @@ fn keep_last_lines(text: &str, max_lines: usize) -> String {
 /// sits in the middle. A real 2026-09-04 run cost three raw-log reads for
 /// it. `Type = null` (printed on every request) carries nothing and stays
 /// cut.
-fn rescued_from_cut<'a>(cut: &[&'a str]) -> Vec<&'a str> {
+pub(crate) fn rescued_from_cut<'a>(cut: &[&'a str]) -> Vec<&'a str> {
     let mut rescued = Vec::new();
     for pair in cut.windows(2) {
         let (head, next) = (pair[0].trim(), pair[1].trim());
@@ -780,28 +779,10 @@ pub fn parse_dir(
         return None;
     }
 
-    apply_total_output_limit(&mut aggregate.failures, DEFAULT_TOTAL_OUTPUT_LIMIT);
+    // No run-wide captured-output cap here: `mvn_cmd`'s render budget shrinks
+    // every failure's block alike, where a cap at parse time dropped the
+    // later failures' output whole.
     Some(aggregate)
-}
-
-fn apply_total_output_limit(failures: &mut [TestFailure], total_limit: usize) {
-    let mut budget = total_limit;
-    let mut exhausted = false;
-    for failure in failures.iter_mut() {
-        if exhausted {
-            failure.test_output = None;
-            continue;
-        }
-        if let Some(out) = &failure.test_output {
-            let len = out.chars().count();
-            if len > budget {
-                failure.test_output = None;
-                exhausted = true;
-            } else {
-                budget -= len;
-            }
-        }
-    }
 }
 
 #[cfg(test)]
@@ -1566,46 +1547,6 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
         );
         let result = parse_content(xml, &[]).expect("parses");
         assert!(result.summary.skipped > 0);
-    }
-
-    #[test]
-    fn apply_total_output_limit_nulls_out_excess() {
-        let mut failures = vec![
-            TestFailure {
-                test_class: "A".into(),
-                test_method: "m1".into(),
-                kind: FailureKind::Failure,
-                message: None,
-                failure_type: None,
-                stack_trace: None,
-                test_output: Some("a".repeat(4000)),
-            },
-            TestFailure {
-                test_class: "A".into(),
-                test_method: "m2".into(),
-                kind: FailureKind::Failure,
-                message: None,
-                failure_type: None,
-                stack_trace: None,
-                test_output: Some("b".repeat(4000)),
-            },
-            TestFailure {
-                test_class: "A".into(),
-                test_method: "m3".into(),
-                kind: FailureKind::Failure,
-                message: None,
-                failure_type: None,
-                stack_trace: None,
-                test_output: Some("c".repeat(4000)),
-            },
-        ];
-        super::apply_total_output_limit(&mut failures, 10_000);
-        assert!(failures[0].test_output.is_some());
-        assert!(failures[1].test_output.is_some());
-        assert!(
-            failures[2].test_output.is_none(),
-            "third should exceed 10k cumulative"
-        );
     }
 
     #[test]
