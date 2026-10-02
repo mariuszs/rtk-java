@@ -3079,7 +3079,82 @@ fn filter_mvn_compile(output: &str) -> String {
         return "[INFO] BUILD SUCCESS".to_string();
     }
 
-    cap_compile_lines(&clean, collapse_lombok_cascade(result))
+    cap_compile_lines(
+        &clean,
+        collapse_lombok_cascade(collapse_overload_candidates(result)),
+    )
+}
+
+/// Overload candidates kept verbatim under one `no suitable method found`.
+const MAX_OVERLOAD_CANDIDATES: usize = 2;
+
+/// Count the overload candidates javac lists past the first few.
+///
+/// On a failed overload resolution javac prints every candidate with its
+/// reason. One jOOQ `set(Field<?>, Object)` lists `UpdateSetFirstStep`'s
+/// `Row1..Row22` variants twice over: a real map run rendered ~21k chars for
+/// one error and the host middle-cut it at 10k. The first candidates carry the
+/// overload the call was meant for (`equality constraints: …` / `lower bounds:
+/// …`); the tail is noise past them.
+fn collapse_overload_candidates(result: String) -> String {
+    fn is_candidate(line: &str) -> bool {
+        let t = strip_maven_prefix(line).trim_start();
+        (t.starts_with("method ") || t.starts_with("constructor "))
+            && t.ends_with(" is not applicable")
+    }
+    fn paren_depth(line: &str) -> isize {
+        line.chars().fold(0, |d, c| match c {
+            '(' => d + 1,
+            ')' => d - 1,
+            _ => d,
+        })
+    }
+    if !result.lines().any(is_candidate) {
+        return result;
+    }
+
+    let lines: Vec<&str> = result.lines().collect();
+    let mut out: Vec<String> = Vec::with_capacity(lines.len());
+    let mut i = 0;
+    while i < lines.len() {
+        if !is_candidate(lines[i]) {
+            out.push(lines[i].to_string());
+            i += 1;
+            continue;
+        }
+        // One run of candidates: each is its header plus the reason lines up
+        // to where its parentheses balance again.
+        let prefix_len = lines[i].len() - strip_maven_prefix(lines[i]).trim_start().len();
+        let prefix = &lines[i][..prefix_len];
+        let mut candidates = 0;
+        while i < lines.len() && is_candidate(lines[i]) {
+            candidates += 1;
+            let keep = candidates <= MAX_OVERLOAD_CANDIDATES;
+            if keep {
+                out.push(lines[i].to_string());
+            }
+            i += 1;
+            let mut depth = 0;
+            while let Some(line) = lines.get(i) {
+                let t = strip_maven_prefix(line).trim_start();
+                if depth <= 0 && !t.starts_with('(') {
+                    break;
+                }
+                depth += paren_depth(t);
+                if keep {
+                    out.push(line.to_string());
+                }
+                i += 1;
+            }
+        }
+        if candidates > MAX_OVERLOAD_CANDIDATES {
+            out.push(format!(
+                "{prefix}... +{} more candidates not applicable",
+                candidates - MAX_OVERLOAD_CANDIDATES
+            ));
+        }
+    }
+    out.join("\n")
 }
 
 const MISSING_SYMBOL: &str = "cannot find symbol";
@@ -5569,6 +5644,51 @@ mod tests {
             "cascade must not dominate the render ({} chars):\n{output}",
             output.len()
         );
+    }
+
+    /// Real map runs (09-29): one jOOQ `set(Field<?>, Object)` made javac list
+    /// every overload of `UpdateSetStep`/`UpdateSetFirstStep` — `Row1..Row22`
+    /// twice over, ~21k chars for one error, middle-cut by the host at 10k.
+    /// Raw log reproduced on jOOQ 3.20.9 / maven-compiler-plugin 3.16.0.
+    #[test]
+    fn test_compile_failure_collapses_overload_candidates() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_compile_jooq_overload_candidates_raw.txt");
+        for (path, output) in [
+            ("compile", filter_mvn_compile(input)),
+            ("test", filter_mvn_test(input)),
+            ("piped", filter_mvn_piped(input)),
+        ] {
+            for needle in [
+                "[21,35] no suitable method found for set(org.jooq.Field<capture#1 of ?>,java.lang.Object)",
+                "[25,39] no suitable method found for set(org.jooq.Field<com.example.purge.PurgeStepExecutor.KeyType>,java.lang.String)",
+                // The first candidate carries the type the call was meant for.
+                "equality constraints: com.example.purge.PurgeStepExecutor.KeyType",
+                "lower bounds: java.lang.String)",
+                "method org.jooq.UpdateSetStep.<T>set(org.jooq.Field<T>,T) is not applicable",
+            ] {
+                assert!(
+                    output.contains(needle),
+                    "{path}: lost `{needle}`:\n{output}"
+                );
+            }
+            assert!(
+                output.contains("... +47 more candidates not applicable"),
+                "{path}: the dropped candidates must be counted:\n{output}"
+            );
+            assert!(
+                output.contains("... +2 more candidates not applicable"),
+                "{path}: {output}"
+            );
+            assert!(!output.contains("Row22"), "{path}: {output}");
+            assert!(output.contains("BUILD FAILURE"), "{path}: {output}");
+            // ~16k before, past the host's 10k middle cut.
+            assert!(
+                output.len() < 3_000,
+                "{path}: candidates must not dominate the render ({} chars):\n{output}",
+                output.len()
+            );
+        }
     }
 
     /// A constructor whose parameters were removed on purpose fails at every

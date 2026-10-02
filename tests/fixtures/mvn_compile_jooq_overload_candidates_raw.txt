@@ -1,0 +1,353 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.example:purge >--------------------------
+[INFO] Building purge 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ purge ---
+[INFO] skip non existing resourceDirectory /home/user/purge/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.16.0:compile (default-compile) @ purge ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 1 source file with javac [debug release 21] to target/classes
+[INFO] Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/user/purge/src/main/java/com/example/purge/PurgeStepExecutor.java:[21,35] no suitable method found for set(org.jooq.Field<capture#1 of ?>,java.lang.Object)
+    method org.jooq.UpdateSetStep.<T>set(org.jooq.Field<T>,T) is not applicable
+      (inference variable T has incompatible bounds
+        equality constraints: capture#1 of ?
+        lower bounds: java.lang.Object)
+    method org.jooq.UpdateSetStep.<T>set(org.jooq.Field<T>,org.jooq.Field<T>) is not applicable
+      (cannot infer type-variable(s) T
+        (argument mismatch; java.lang.Object cannot be converted to org.jooq.Field<T>))
+    method org.jooq.UpdateSetStep.<T>set(org.jooq.Field<T>,org.jooq.Select<? extends org.jooq.Record1<T>>) is not applicable
+      (cannot infer type-variable(s) T
+        (argument mismatch; java.lang.Object cannot be converted to org.jooq.Select<? extends org.jooq.Record1<T>>))
+    method org.jooq.UpdateSetFirstStep.set(org.jooq.RowN,org.jooq.RowN) is not applicable
+      (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.RowN)
+    method org.jooq.UpdateSetFirstStep.<T1>set(org.jooq.Row1<T1>,org.jooq.Row1<T1>) is not applicable
+      (cannot infer type-variable(s) T1
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row1<T1>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2>set(org.jooq.Row2<T1,T2>,org.jooq.Row2<T1,T2>) is not applicable
+      (cannot infer type-variable(s) T1,T2
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row2<T1,T2>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3>set(org.jooq.Row3<T1,T2,T3>,org.jooq.Row3<T1,T2,T3>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row3<T1,T2,T3>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4>set(org.jooq.Row4<T1,T2,T3,T4>,org.jooq.Row4<T1,T2,T3,T4>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row4<T1,T2,T3,T4>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5>set(org.jooq.Row5<T1,T2,T3,T4,T5>,org.jooq.Row5<T1,T2,T3,T4,T5>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row5<T1,T2,T3,T4,T5>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6>set(org.jooq.Row6<T1,T2,T3,T4,T5,T6>,org.jooq.Row6<T1,T2,T3,T4,T5,T6>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row6<T1,T2,T3,T4,T5,T6>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7>set(org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>,org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8>set(org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>,org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9>set(org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>,org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>set(org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>,org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>set(org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>,org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>set(org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>,org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>set(org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>,org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>set(org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>,org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>set(org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>,org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>set(org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>,org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>set(org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>,org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>set(org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>,org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>set(org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>,org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>set(org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>,org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>set(org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>,org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>set(org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>,org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>))
+    method org.jooq.UpdateSetFirstStep.set(org.jooq.RowN,org.jooq.Select<? extends org.jooq.Record>) is not applicable
+      (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.RowN)
+    method org.jooq.UpdateSetFirstStep.<T1>set(org.jooq.Row1<T1>,org.jooq.Select<? extends org.jooq.Record1<T1>>) is not applicable
+      (cannot infer type-variable(s) T1
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row1<T1>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2>set(org.jooq.Row2<T1,T2>,org.jooq.Select<? extends org.jooq.Record2<T1,T2>>) is not applicable
+      (cannot infer type-variable(s) T1,T2
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row2<T1,T2>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3>set(org.jooq.Row3<T1,T2,T3>,org.jooq.Select<? extends org.jooq.Record3<T1,T2,T3>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row3<T1,T2,T3>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4>set(org.jooq.Row4<T1,T2,T3,T4>,org.jooq.Select<? extends org.jooq.Record4<T1,T2,T3,T4>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row4<T1,T2,T3,T4>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5>set(org.jooq.Row5<T1,T2,T3,T4,T5>,org.jooq.Select<? extends org.jooq.Record5<T1,T2,T3,T4,T5>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row5<T1,T2,T3,T4,T5>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6>set(org.jooq.Row6<T1,T2,T3,T4,T5,T6>,org.jooq.Select<? extends org.jooq.Record6<T1,T2,T3,T4,T5,T6>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row6<T1,T2,T3,T4,T5,T6>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7>set(org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>,org.jooq.Select<? extends org.jooq.Record7<T1,T2,T3,T4,T5,T6,T7>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8>set(org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>,org.jooq.Select<? extends org.jooq.Record8<T1,T2,T3,T4,T5,T6,T7,T8>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9>set(org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>,org.jooq.Select<? extends org.jooq.Record9<T1,T2,T3,T4,T5,T6,T7,T8,T9>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>set(org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>,org.jooq.Select<? extends org.jooq.Record10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>set(org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>,org.jooq.Select<? extends org.jooq.Record11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>set(org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>,org.jooq.Select<? extends org.jooq.Record12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>set(org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>,org.jooq.Select<? extends org.jooq.Record13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>set(org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>,org.jooq.Select<? extends org.jooq.Record14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>set(org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>,org.jooq.Select<? extends org.jooq.Record15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>set(org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>,org.jooq.Select<? extends org.jooq.Record16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>set(org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>,org.jooq.Select<? extends org.jooq.Record17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>set(org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>,org.jooq.Select<? extends org.jooq.Record18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>set(org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>,org.jooq.Select<? extends org.jooq.Record19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>set(org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>,org.jooq.Select<? extends org.jooq.Record20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>set(org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>,org.jooq.Select<? extends org.jooq.Record21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>))
+    method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>set(org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>,org.jooq.Select<? extends org.jooq.Record22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>>) is not applicable
+      (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22
+        (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>))
+[ERROR] /home/user/purge/src/main/java/com/example/purge/PurgeStepExecutor.java:[25,39] no suitable method found for set(org.jooq.Field<com.example.purge.PurgeStepExecutor.KeyType>,java.lang.String)
+    method org.jooq.InsertSetStep.<T>set(org.jooq.Field<T>,T) is not applicable
+      (inference variable T has incompatible bounds
+        equality constraints: com.example.purge.PurgeStepExecutor.KeyType
+        lower bounds: java.lang.String)
+    method org.jooq.InsertSetStep.<T>set(org.jooq.Field<T>,org.jooq.Field<T>) is not applicable
+      (cannot infer type-variable(s) T
+        (argument mismatch; java.lang.String cannot be converted to org.jooq.Field<T>))
+    method org.jooq.InsertSetStep.<T>set(org.jooq.Field<T>,org.jooq.Select<? extends org.jooq.Record1<T>>) is not applicable
+      (cannot infer type-variable(s) T
+        (argument mismatch; java.lang.String cannot be converted to org.jooq.Select<? extends org.jooq.Record1<T>>))
+    method org.jooq.InsertSetStep.set(org.jooq.Record...) is not applicable
+      (varargs mismatch; org.jooq.Field<com.example.purge.PurgeStepExecutor.KeyType> cannot be converted to org.jooq.Record)
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.706 s
+[INFO] Finished at: 2026-10-02T13:55:41+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.16.0:compile (default-compile) on project purge: Compilation failure: Compilation failure: 
+[ERROR] /home/user/purge/src/main/java/com/example/purge/PurgeStepExecutor.java:[21,35] no suitable method found for set(org.jooq.Field<capture#1 of ?>,java.lang.Object)
+[ERROR]     method org.jooq.UpdateSetStep.<T>set(org.jooq.Field<T>,T) is not applicable
+[ERROR]       (inference variable T has incompatible bounds
+[ERROR]         equality constraints: capture#1 of ?
+[ERROR]         lower bounds: java.lang.Object)
+[ERROR]     method org.jooq.UpdateSetStep.<T>set(org.jooq.Field<T>,org.jooq.Field<T>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T
+[ERROR]         (argument mismatch; java.lang.Object cannot be converted to org.jooq.Field<T>))
+[ERROR]     method org.jooq.UpdateSetStep.<T>set(org.jooq.Field<T>,org.jooq.Select<? extends org.jooq.Record1<T>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T
+[ERROR]         (argument mismatch; java.lang.Object cannot be converted to org.jooq.Select<? extends org.jooq.Record1<T>>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.set(org.jooq.RowN,org.jooq.RowN) is not applicable
+[ERROR]       (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.RowN)
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1>set(org.jooq.Row1<T1>,org.jooq.Row1<T1>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row1<T1>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2>set(org.jooq.Row2<T1,T2>,org.jooq.Row2<T1,T2>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row2<T1,T2>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3>set(org.jooq.Row3<T1,T2,T3>,org.jooq.Row3<T1,T2,T3>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row3<T1,T2,T3>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4>set(org.jooq.Row4<T1,T2,T3,T4>,org.jooq.Row4<T1,T2,T3,T4>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row4<T1,T2,T3,T4>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5>set(org.jooq.Row5<T1,T2,T3,T4,T5>,org.jooq.Row5<T1,T2,T3,T4,T5>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row5<T1,T2,T3,T4,T5>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6>set(org.jooq.Row6<T1,T2,T3,T4,T5,T6>,org.jooq.Row6<T1,T2,T3,T4,T5,T6>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row6<T1,T2,T3,T4,T5,T6>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7>set(org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>,org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8>set(org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>,org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9>set(org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>,org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>set(org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>,org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>set(org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>,org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>set(org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>,org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>set(org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>,org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>set(org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>,org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>set(org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>,org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>set(org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>,org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>set(org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>,org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>set(org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>,org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>set(org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>,org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>set(org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>,org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>set(org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>,org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>set(org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>,org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.set(org.jooq.RowN,org.jooq.Select<? extends org.jooq.Record>) is not applicable
+[ERROR]       (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.RowN)
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1>set(org.jooq.Row1<T1>,org.jooq.Select<? extends org.jooq.Record1<T1>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row1<T1>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2>set(org.jooq.Row2<T1,T2>,org.jooq.Select<? extends org.jooq.Record2<T1,T2>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row2<T1,T2>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3>set(org.jooq.Row3<T1,T2,T3>,org.jooq.Select<? extends org.jooq.Record3<T1,T2,T3>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row3<T1,T2,T3>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4>set(org.jooq.Row4<T1,T2,T3,T4>,org.jooq.Select<? extends org.jooq.Record4<T1,T2,T3,T4>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row4<T1,T2,T3,T4>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5>set(org.jooq.Row5<T1,T2,T3,T4,T5>,org.jooq.Select<? extends org.jooq.Record5<T1,T2,T3,T4,T5>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row5<T1,T2,T3,T4,T5>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6>set(org.jooq.Row6<T1,T2,T3,T4,T5,T6>,org.jooq.Select<? extends org.jooq.Record6<T1,T2,T3,T4,T5,T6>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row6<T1,T2,T3,T4,T5,T6>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7>set(org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>,org.jooq.Select<? extends org.jooq.Record7<T1,T2,T3,T4,T5,T6,T7>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row7<T1,T2,T3,T4,T5,T6,T7>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8>set(org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>,org.jooq.Select<? extends org.jooq.Record8<T1,T2,T3,T4,T5,T6,T7,T8>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row8<T1,T2,T3,T4,T5,T6,T7,T8>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9>set(org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>,org.jooq.Select<? extends org.jooq.Record9<T1,T2,T3,T4,T5,T6,T7,T8,T9>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row9<T1,T2,T3,T4,T5,T6,T7,T8,T9>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>set(org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>,org.jooq.Select<? extends org.jooq.Record10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row10<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>set(org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>,org.jooq.Select<? extends org.jooq.Record11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row11<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>set(org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>,org.jooq.Select<? extends org.jooq.Record12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row12<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>set(org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>,org.jooq.Select<? extends org.jooq.Record13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row13<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>set(org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>,org.jooq.Select<? extends org.jooq.Record14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row14<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>set(org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>,org.jooq.Select<? extends org.jooq.Record15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row15<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>set(org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>,org.jooq.Select<? extends org.jooq.Record16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row16<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>set(org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>,org.jooq.Select<? extends org.jooq.Record17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row17<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>set(org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>,org.jooq.Select<? extends org.jooq.Record18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row18<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>set(org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>,org.jooq.Select<? extends org.jooq.Record19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row19<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>set(org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>,org.jooq.Select<? extends org.jooq.Record20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row20<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>set(org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>,org.jooq.Select<? extends org.jooq.Record21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row21<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21>))
+[ERROR]     method org.jooq.UpdateSetFirstStep.<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>set(org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>,org.jooq.Select<? extends org.jooq.Record22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22
+[ERROR]         (argument mismatch; org.jooq.Field<capture#1 of ?> cannot be converted to org.jooq.Row22<T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13,T14,T15,T16,T17,T18,T19,T20,T21,T22>))
+[ERROR] /home/user/purge/src/main/java/com/example/purge/PurgeStepExecutor.java:[25,39] no suitable method found for set(org.jooq.Field<com.example.purge.PurgeStepExecutor.KeyType>,java.lang.String)
+[ERROR]     method org.jooq.InsertSetStep.<T>set(org.jooq.Field<T>,T) is not applicable
+[ERROR]       (inference variable T has incompatible bounds
+[ERROR]         equality constraints: com.example.purge.PurgeStepExecutor.KeyType
+[ERROR]         lower bounds: java.lang.String)
+[ERROR]     method org.jooq.InsertSetStep.<T>set(org.jooq.Field<T>,org.jooq.Field<T>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T
+[ERROR]         (argument mismatch; java.lang.String cannot be converted to org.jooq.Field<T>))
+[ERROR]     method org.jooq.InsertSetStep.<T>set(org.jooq.Field<T>,org.jooq.Select<? extends org.jooq.Record1<T>>) is not applicable
+[ERROR]       (cannot infer type-variable(s) T
+[ERROR]         (argument mismatch; java.lang.String cannot be converted to org.jooq.Select<? extends org.jooq.Record1<T>>))
+[ERROR]     method org.jooq.InsertSetStep.set(org.jooq.Record...) is not applicable
+[ERROR]       (varargs mismatch; org.jooq.Field<com.example.purge.PurgeStepExecutor.KeyType> cannot be converted to org.jooq.Record)
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
