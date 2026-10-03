@@ -137,6 +137,11 @@ static PREFIX_LOAD_RE: LazyLock<Regex> =
 /// input already passed through `strip_maven_prefix`.
 static ENFORCER_RULE_PASSED_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^Rule \d+: \S+ passed").unwrap());
+/// maven-enforcer rule that failed under `fail=false`, so Maven tags it
+/// `[WARNING]`: `Rule <n>: <fqcn> failed with message:`, the rule's message on
+/// the lines after it. Expects input already passed through `strip_maven_prefix`.
+static ENFORCER_RULE_FAILED_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^Rule \d+: \S+ failed with message:").unwrap());
 
 /// JVM warning lines emitted by Java 24+ (restricted methods, native access,
 /// terminally-deprecated Unsafe). These have NO `[INFO]/[ERROR]/[WARNING]`
@@ -899,6 +904,7 @@ fn extract_build_block(raw: &str) -> String {
 fn filter_segments(raw: &str) -> MultiParts {
     let segments = split_segments(raw);
     let mut parts = MultiParts::default();
+    let failed = raw.contains("BUILD FAILURE");
 
     let mut compile_buf = String::new();
     let mut test_buf = String::new();
@@ -924,9 +930,22 @@ fn filter_segments(raw: &str) -> MultiParts {
             SegmentKind::Checkstyle => checkstyle_buf.push_str(&seg.body),
             SegmentKind::Clean | SegmentKind::Preamble => {} // dropped as noise
             SegmentKind::Other => {
+                // A failed `fail=false` enforcer rule is a `[WARNING]` plus its
+                // message lines; on a failed build it is kept as a cause, the
+                // way `filter_mvn_compile` keeps it.
+                let mut in_enforcer_warning = false;
                 for l in seg.body.lines() {
-                    if strip_ansi(l).trim_start().starts_with(ERROR_TAG) {
-                        parts.stray_errors.push(strip_ansi(l).trim().to_string());
+                    let l = strip_ansi(l);
+                    let t = l.trim();
+                    if in_enforcer_warning && !t.is_empty() && !t.starts_with('[') {
+                        parts.stray_errors.push(t.to_string());
+                        continue;
+                    }
+                    in_enforcer_warning = failed
+                        && t.starts_with(WARNING_TAG)
+                        && ENFORCER_RULE_FAILED_RE.is_match(strip_maven_prefix(t));
+                    if in_enforcer_warning || t.starts_with(ERROR_TAG) {
+                        parts.stray_errors.push(t.to_string());
                     }
                 }
             }
@@ -3074,6 +3093,12 @@ fn filter_mvn_compile(output: &str) -> String {
     // `[WARNING] path:[l,c] …` diagnostic. The header is dropped, so its
     // context must go too — orphaned code fragments read as garbage.
     let mut swallow_warning_context = false;
+    // An enforcer rule with `fail=false` reports its verdict as a `[WARNING]`
+    // followed by the rule's own message lines. On a failed build it is often
+    // the cause — a wrong JDK leaves Lombok generating nothing, and javac
+    // reports only the missing `log` — so it is kept, message and all.
+    let failed = clean.contains("BUILD FAILURE");
+    let mut in_enforcer_warning = false;
     let mut result = String::with_capacity(clean.len() / 4);
 
     let push = |dst: &mut String, line: &str| {
@@ -3154,6 +3179,19 @@ fn filter_mvn_compile(output: &str) -> String {
 
         if let Some(short) = shorten_unknown_phase_error(stripped) {
             push(&mut result, &short);
+            continue;
+        }
+
+        if in_enforcer_warning {
+            if !line.is_empty() && !line.starts_with('[') {
+                push(&mut result, line);
+                continue;
+            }
+            in_enforcer_warning = false;
+        }
+        if failed && line.starts_with(WARNING_TAG) && ENFORCER_RULE_FAILED_RE.is_match(stripped) {
+            in_enforcer_warning = true;
+            push(&mut result, line);
             continue;
         }
 
@@ -6061,6 +6099,49 @@ mod tests {
             1,
             "{output}"
         );
+    }
+
+    /// Live smoke 10-03: `cd toolkit && rtk mvn test` kept the caller's JDK 26;
+    /// the enforcer's `RequireJavaVersion` rule runs with `fail=false`, so its
+    /// verdict is a `[WARNING]`, and Lombok 1.18.36 on that JDK generated no
+    /// `log` — 58 `cannot find symbol`. The warning naming the cause was the
+    /// one line dropped. Real raw log.
+    #[test]
+    fn test_compile_failure_keeps_a_failed_enforcer_rule_warning() {
+        let input = include_str!(
+            "../../../tests/fixtures/mvn_compile_enforcer_java_version_warning_raw.txt"
+        );
+        for (path, output) in [
+            ("compile", filter_mvn_compile(input)),
+            ("test", filter_mvn_test(input)),
+            ("piped", filter_mvn_piped(input)),
+        ] {
+            for needle in [
+                "[WARNING] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion failed with message:",
+                "Java 17 is required to build this project.",
+                "Please install Java 17 or set JAVA_HOME to point to JDK 17.",
+                "symbol:   variable log",
+                "BUILD FAILURE",
+            ] {
+                assert!(
+                    output.contains(needle),
+                    "{path}: lost `{needle}`:\n{output}"
+                );
+            }
+        }
+    }
+
+    /// On a green build the same warning is not a cause of anything.
+    #[test]
+    fn test_compile_success_drops_a_failed_enforcer_rule_warning() {
+        let input = "[INFO] --- enforcer:3.4.1:enforce (enforce-java) @ toolkit ---\n\
+            [WARNING] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion failed with message:\n\
+            Java 17 is required to build this project.\n\
+            [INFO] BUILD SUCCESS\n";
+        let output = filter_mvn_compile(input);
+
+        assert!(!output.contains("RequireJavaVersion"), "{output}");
+        assert!(!output.contains("Java 17 is required"), "{output}");
     }
 
     /// Checkstyle prints `File.java:[12]` without a column too; two rules on

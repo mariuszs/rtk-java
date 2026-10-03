@@ -1,0 +1,402 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.example:toolkit >-----------------------
+[INFO] Building toolkit 1.3-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- enforcer:3.4.1:enforce (enforce-java) @ toolkit ---
+[INFO] Rule 1: org.apache.maven.enforcer.rules.version.RequireMavenVersion passed
+[WARNING] Rule 0: org.apache.maven.enforcer.rules.version.RequireJavaVersion failed with message:
+⚠️  Java 17 is required to build this project.
+                                        Please install Java 17 or set JAVA_HOME to point to JDK 17.
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ toolkit ---
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ toolkit ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 51 source files with javac [debug release 17] to target/classes
+[INFO] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/Jwt.java: /home/user/toolkit/src/main/java/com/example/toolkit/jwt/Jwt.java uses or overrides a deprecated API.
+[INFO] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/Jwt.java: Recompile with -Xlint:deprecation for details.
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] unknown enum constant javax.annotation.meta.When.MAYBE
+  reason: class file for javax.annotation.meta.When not found
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilesUtils.java:[58,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.FilesUtils
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilesUtils.java:[76,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.FilesUtils
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/RoleHelper.java:[47,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.RoleHelper
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[29,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[33,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[41,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[45,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[51,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[58,41] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[61,33] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[80,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/ExpiredApplicationJwtAccessTokenRetryer.java:[25,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.ExpiredApplicationJwtAccessTokenRetryer
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[41,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[57,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[73,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[93,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[95,33] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[100,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[113,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtClientAuthentication.java:[25,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtClientAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/beacon/BeaconClient.java:[36,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.beacon.BeaconClient
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/beacon/BeaconClient.java:[38,9] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.beacon.BeaconClient
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFeignErrorDecoder.java:[21,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFeignErrorDecoder
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/url/HostValidator.java:[17,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.url.HostValidator
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/url/HostValidator.java:[27,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.url.HostValidator
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtAuthentication.java:[25,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtAuthentication.java:[28,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtAuthentication.java:[30,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtRunAsAuthentication.java:[25,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtRunAsAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtRunAsAuthentication.java:[27,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtRunAsAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtRunAsAuthentication.java:[34,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtRunAsAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtRunAsAuthentication.java:[53,33] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtRunAsAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AcceptedScopes.java:[106,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AcceptedScopes
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[40,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[45,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[54,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[67,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[75,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[84,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[87,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[101,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[109,33] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[136,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[139,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[160,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[164,41] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[167,41] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[172,33] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[179,33] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[183,33] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[190,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[205,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[207,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[225,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtFilter.DefaultBadJwtHandler
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilteredCopyFileVisitor.java:[53,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.FilteredCopyFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilteredCopyFileVisitor.java:[58,25] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.FilteredCopyFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilteredCopyFileVisitor.java:[65,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.files.FilteredCopyFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtAuthorizedAppAuthentication.java:[29,17] cannot find symbol
+  symbol:   variable log
+  location: class com.example.toolkit.jwt.JwtAuthorizedAppAuthentication
+[INFO] 58 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.963 s
+[INFO] Finished at: 2026-10-03T14:01:36+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project toolkit: Compilation failure: Compilation failure: 
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilesUtils.java:[58,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.FilesUtils
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilesUtils.java:[76,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.FilesUtils
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/RoleHelper.java:[47,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.RoleHelper
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[29,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[33,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[41,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[45,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[51,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[58,41] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[61,33] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/DeleteFileVisitor.java:[80,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.DeleteFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/ExpiredApplicationJwtAccessTokenRetryer.java:[25,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.ExpiredApplicationJwtAccessTokenRetryer
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[41,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[57,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[73,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[93,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[95,33] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[100,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtTokensFeignRequestInterceptor.java:[113,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtTokensFeignRequestInterceptor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtClientAuthentication.java:[25,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtClientAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/beacon/BeaconClient.java:[36,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.beacon.BeaconClient
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/beacon/BeaconClient.java:[38,9] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.beacon.BeaconClient
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFeignErrorDecoder.java:[21,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFeignErrorDecoder
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/url/HostValidator.java:[17,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.url.HostValidator
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/url/HostValidator.java:[27,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.url.HostValidator
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtAuthentication.java:[25,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtAuthentication.java:[28,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtAuthentication.java:[30,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtRunAsAuthentication.java:[25,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtRunAsAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtRunAsAuthentication.java:[27,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtRunAsAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtRunAsAuthentication.java:[34,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtRunAsAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtRunAsAuthentication.java:[53,33] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtRunAsAuthentication
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AcceptedScopes.java:[106,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AcceptedScopes
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[40,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[45,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[54,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[67,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[75,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[84,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[87,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[101,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/AuthenticationProvider.java:[109,33] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.AuthenticationProvider
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[136,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[139,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[160,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[164,41] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[167,41] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[172,33] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[179,33] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[183,33] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[190,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[205,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[207,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtFilter.java:[225,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtFilter.DefaultBadJwtHandler
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilteredCopyFileVisitor.java:[53,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.FilteredCopyFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilteredCopyFileVisitor.java:[58,25] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.FilteredCopyFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/files/FilteredCopyFileVisitor.java:[65,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.files.FilteredCopyFileVisitor
+[ERROR] /home/user/toolkit/src/main/java/com/example/toolkit/jwt/JwtAuthorizedAppAuthentication.java:[29,17] cannot find symbol
+[ERROR]   symbol:   variable log
+[ERROR]   location: class com.example.toolkit.jwt.JwtAuthorizedAppAuthentication
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::staticFieldBase has been called by com.google.inject.internal.aop.HiddenClassDefiner (file:/home/user/.m2/wrapper/dists/apache-maven-3.9.11/a2d47e15/lib/guice-5.1.0-classes.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.inject.internal.aop.HiddenClassDefiner
+WARNING: sun.misc.Unsafe::staticFieldBase will be removed in a future release
+WARNING: Final field _cipher in class org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher has been mutated reflectively by class org.eclipse.sisu.bean.BeanPropertyField in unnamed module @2133814f (file:/home/user/.m2/wrapper/dists/apache-maven-3.9.11/a2d47e15/lib/org.eclipse.sisu.inject-0.9.0.M4.jar)
+WARNING: Use --enable-final-field-mutation=ALL-UNNAMED to avoid a warning
+WARNING: Mutating final fields will be blocked in a future release unless final field mutation is enabled
