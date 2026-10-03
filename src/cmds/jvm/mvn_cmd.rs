@@ -87,8 +87,13 @@ static REACTOR_SUMMARY_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
 });
 /// Javac error location: `[ERROR] /path/File.java:[line,col] message`
 /// Capture groups: 1=path, 2=line, 3=col. Used for error dedup.
+///
+/// `forceLegacyJavacApi` reports an error on a Lombok-generated member with
+/// no column — `File.java:[18] error: …` — and only that `error:` form is
+/// matched without one: checkstyle prints `File.java:[12] (sizes) Rule: …`,
+/// and two rules on one line must not dedup as one location.
 static COMPILE_ERROR_LOCATION_RE: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^\[ERROR\]\s+(\S+?):\[(\d+),(\d+)\]").unwrap());
+    LazyLock::new(|| Regex::new(r"^\[ERROR\]\s+(\S+?):\[(\d+)(?:,(\d+)\]|\] error:)").unwrap());
 /// Javac context line attached to a previous error, as reprinted with the
 /// `[ERROR]` tag in Maven's post-footer epilogue:
 /// `[ERROR]   symbol:   ...`, `[ERROR]   location: ...`, required/found/reason,
@@ -984,11 +989,36 @@ fn normalize_rendered(rendered: &str) -> String {
 ///
 /// `rendered` must already be `normalize_rendered`'d — normalizing it once per
 /// report rather than once per candidate line.
+/// Whether a normalized javac error was folded into an earlier occurrence by
+/// `group_repeated_compile_errors`: the same file and message rendered at
+/// another position, with this position on its `... +N more at` line.
+fn rendered_as_repeat(err: &str, rendered: &str) -> bool {
+    static NORMALIZED_LOCATION_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^(\S+?):(\[\d+(?:,\d+)?\]) (.*)$").unwrap());
+    let Some(c) = NORMALIZED_LOCATION_RE.captures(err) else {
+        return false;
+    };
+    let (path, position, message) = (&c[1], &c[2], &c[3]);
+    let mut in_group = false;
+    for line in rendered.lines() {
+        if let Some(l) = NORMALIZED_LOCATION_RE.captures(line) {
+            in_group = &l[1] == path && &l[3] == message;
+        } else if in_group
+            && line.starts_with("... +")
+            && line.split_whitespace().any(|t| t == position)
+        {
+            return true;
+        }
+    }
+    false
+}
+
 fn footer_error_already_rendered(err: &str, rendered: &str) -> bool {
     // javac diagnostics come back verbatim; the inline copy is already deduped
     // by (path, line, col), so match on that key rather than the whole line.
     if let Some(m) = COMPILE_ERROR_LOCATION_RE.find(err) {
-        return rendered.contains(&normalize_epilogue_line(m.as_str()));
+        return rendered.contains(&normalize_epilogue_line(m.as_str()))
+            || rendered_as_repeat(&normalize_epilogue_line(err), rendered);
     }
     // `… on project X: Compilation failure` is the compile-goal twin of
     // `… : There are test failures.` — a pointer to detail rendered
@@ -3175,8 +3205,101 @@ fn filter_mvn_compile(output: &str) -> String {
 
     cap_compile_lines(
         &clean,
-        collapse_lombok_cascade(collapse_overload_candidates(result)),
+        group_repeated_compile_errors(collapse_lombok_cascade(collapse_overload_candidates(
+            result,
+        ))),
     )
+}
+
+/// Fold an error javac repeats in one file onto its first occurrence.
+///
+/// A TDD red step that references a class not yet written fails at every use
+/// with the same `cannot find symbol` / `symbol:` / `location:` block; a new
+/// varargs overload makes every call site `ambiguous` under the same
+/// two-method body. Real toolkit runs rendered 6k and 7.5k chars of that. The
+/// first occurrence stays verbatim and the rest become their positions —
+/// `... +N more at [13,30] [18,30]` — so every place to fix survives.
+///
+/// Grouped by file, message and body: the same error in another file, or with
+/// another symbol, is its own entry.
+fn group_repeated_compile_errors(result: String) -> String {
+    static POSITION_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^\[ERROR\]\s+\S+?:(\[\d+(?:,\d+)?\])").unwrap());
+    let lines: Vec<&str> = result.lines().collect();
+    let is_body = |line: &str| {
+        !line.is_empty()
+            && !COMPILE_ERROR_LOCATION_RE.is_match(line)
+            && (!line.starts_with('[') || COMPILE_ERROR_CONTEXT_RE.is_match(line))
+    };
+
+    // (first line, end, position) per error block, in render order.
+    let mut blocks: Vec<(usize, usize, &str)> = Vec::new();
+    let mut groups: HashMap<(&str, &str, Vec<&str>), usize> = HashMap::new();
+    let mut members: Vec<Vec<usize>> = Vec::new();
+    let mut i = 0;
+    while i < lines.len() {
+        let (Some(location), Some(position)) = (
+            COMPILE_ERROR_LOCATION_RE.captures(lines[i]),
+            POSITION_RE.captures(lines[i]).and_then(|c| c.get(1)),
+        ) else {
+            i += 1;
+            continue;
+        };
+        let path = location.get(1).map_or("", |m| m.as_str());
+        let message = lines[i][position.end()..].trim();
+        let mut end = i + 1;
+        while lines.get(end).is_some_and(|l| is_body(l)) {
+            end += 1;
+        }
+        let body = lines[i + 1..end]
+            .iter()
+            .map(|l| strip_maven_prefix(l).trim())
+            .collect();
+        let group = *groups.entry((path, message, body)).or_insert_with(|| {
+            members.push(Vec::new());
+            members.len() - 1
+        });
+        members[group].push(blocks.len());
+        blocks.push((i, end, position.as_str()));
+        i = end;
+    }
+
+    // Line after each kept block's body → its elision; repeats are dropped.
+    let mut elision_at: HashMap<usize, String> = HashMap::new();
+    let mut dropped = vec![false; lines.len()];
+    for group in members.iter().filter(|m| m.len() > 1) {
+        let (_, first_end, _) = blocks[group[0]];
+        let positions: Vec<&str> = group[1..].iter().map(|&b| blocks[b].2).collect();
+        elision_at.insert(
+            first_end,
+            format!(
+                "[ERROR]   ... +{} more at {}",
+                positions.len(),
+                positions.join(" ")
+            ),
+        );
+        for &b in &group[1..] {
+            let (start, end, _) = blocks[b];
+            dropped[start..end].iter_mut().for_each(|d| *d = true);
+        }
+    }
+    if elision_at.is_empty() {
+        return result;
+    }
+
+    let mut out: Vec<String> = Vec::with_capacity(lines.len());
+    for (idx, line) in lines.iter().enumerate() {
+        if let Some(elision) = elision_at.get(&idx) {
+            out.push(elision.clone());
+        }
+        if !dropped[idx] {
+            out.push((*line).to_string());
+        }
+    }
+    if let Some(elision) = elision_at.get(&lines.len()) {
+        out.push(elision.clone());
+    }
+    out.join("\n")
 }
 
 /// Overload candidates kept verbatim under one `no suitable method found`.
@@ -5628,18 +5751,33 @@ mod tests {
         let input = include_str!("../../../tests/fixtures/mvn_compile_lombok_cascade_raw.txt");
         let output = filter_mvn_compile(input);
 
+        // The three root errors sit in one file: the first verbatim, the
+        // others as positions.
         assert_eq!(
             output.matches("is not expected here").count(),
-            3,
+            1,
+            "{output}"
+        );
+        assert!(
+            output.contains("FlowYaml.java:[7,40] type annotation @org.jspecify.annotations.Nullable is not expected here"),
             "every root error must survive:\n{output}"
+        );
+        assert!(
+            output.contains("[ERROR]   ... +2 more at [9,40] [11,39]"),
+            "{output}"
         );
         assert!(
             output.contains("(to annotate a qualified type, write"),
             "javac's fix hint for the root error must survive:\n{output}"
         );
+        // Two of the three kept occurrences share Service00.java.
         assert_eq!(
             output.matches("symbol:   variable log").count(),
-            3,
+            2,
+            "{output}"
+        );
+        assert!(
+            output.contains("[ERROR]   ... +1 more at [17,17]"),
             "{output}"
         );
         assert_eq!(
@@ -5808,6 +5946,134 @@ mod tests {
             "{output}"
         );
         assert!(!output.contains("more constructor"), "{output}");
+    }
+
+    /// Real toolkit runs (10-03): a TDD red step referencing a class not yet
+    /// written repeated one `cannot find symbol` 22 times in one test file
+    /// (6k chars), and a new varargs overload made 18 call sites `ambiguous`
+    /// with the same two-method body under each (7.5k). Raw log of the same
+    /// shape reproduced on maven-compiler-plugin 3.11.0 / JDK 26.
+    #[test]
+    fn test_compile_failure_groups_an_error_repeated_in_one_file() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_test_compile_repeated_errors_raw.txt");
+        for (path, output) in [
+            ("compile", filter_mvn_compile(input)),
+            ("test", filter_mvn_test(input)),
+            ("piped", filter_mvn_piped(input)),
+        ] {
+            for needle in [
+                "ConsentScopesTest.java:[8,30] cannot find symbol",
+                "[ERROR]   ... +2 more at [13,30] [18,30]",
+                "ConsentScopesTest.java:[23,29] package ConsentScopes does not exist",
+                "[ERROR]   ... +2 more at [27,29] [31,29]",
+                "JwtFilterTest.java:[14,24] reference to scopedToken is ambiguous",
+                // Every place to fix survives, as a position.
+                "[ERROR]   ... +4 more at [19,24] [24,24] [29,24] [34,39]",
+                "BUILD FAILURE",
+            ] {
+                assert!(
+                    output.contains(needle),
+                    "{path}: lost `{needle}`:\n{output}"
+                );
+            }
+            // The piped path drops the `Compilation failure` pointer once the
+            // errors are rendered; the others keep Maven's line.
+            if path != "piped" {
+                assert!(
+                    output.contains(
+                        "Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin"
+                    ),
+                    "{path}: {output}"
+                );
+            }
+            // Maven's post-footer copies are deduped against the grouped positions.
+            assert_eq!(output.matches("[19,24]").count(), 1, "{path}: {output}");
+            assert_eq!(
+                output.matches("symbol:   variable ConsentScopes").count(),
+                1,
+                "{path}: {output}"
+            );
+            assert_eq!(
+                output.matches("both method scopedToken").count(),
+                1,
+                "{path}: {output}"
+            );
+            // 3.6k before.
+            assert!(
+                output.len() < 1_800,
+                "{path}: repeats must not dominate the render ({} chars):\n{output}",
+                output.len()
+            );
+        }
+    }
+
+    /// The same error in two files is two places with their own context —
+    /// grouping stays inside one file.
+    #[test]
+    fn test_compile_failure_keeps_a_repeated_error_per_file() {
+        let input = "[ERROR] COMPILATION ERROR : \n\
+            [ERROR] /src/A.java:[3,5] cannot find symbol\n  symbol:   class Gone\n  location: class A\n\
+            [ERROR] /src/B.java:[3,5] cannot find symbol\n  symbol:   class Gone\n  location: class A\n\
+            [INFO] BUILD FAILURE\n";
+        let output = filter_mvn_compile(input);
+
+        assert_eq!(
+            output.matches("symbol:   class Gone").count(),
+            2,
+            "{output}"
+        );
+        assert!(!output.contains("more at"), "{output}");
+    }
+
+    /// Real skiller runs (10-03) compile through `forceLegacyJavacApi`, which
+    /// reports an error on a Lombok-generated member as `File.java:[18] error:`
+    /// with no column. The `[line,col]` dedup missed that shape, so Maven's
+    /// post-footer copy came back with its `symbol:`/`location:` lines.
+    /// Raw log reproduced on maven-compiler-plugin 3.14.0 / Lombok 1.18.42.
+    #[test]
+    fn test_compile_failure_dedups_a_legacy_javac_error_without_a_column() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_compile_legacy_javac_no_column_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        assert_eq!(
+            output
+                .matches("InvitationRecoveryTools.java:[7] error:")
+                .count(),
+            0,
+            "the no-column copy groups under its first occurrence:\n{output}"
+        );
+        for needle in [
+            "InvitationRecoveryTools.java:[10,18] error: cannot find symbol",
+            "[ERROR]   ... +1 more at [7]",
+            "InvitationRecoveryTools.java:[12,11] error: cannot find symbol",
+            "[ERROR]   ... +2 more at [16,11] [20,11]",
+            "[ERROR]   ... +1 more at [4,38]",
+            "BUILD FAILURE",
+        ] {
+            assert!(output.contains(needle), "lost `{needle}`:\n{output}");
+        }
+        assert_eq!(
+            output
+                .matches("symbol:   class InvitationRecoveryService")
+                .count(),
+            1,
+            "{output}"
+        );
+    }
+
+    /// Checkstyle prints `File.java:[12]` without a column too; two rules on
+    /// one line are two violations, not a duplicate.
+    #[test]
+    fn test_compile_dedup_keeps_two_checkstyle_rules_on_one_line() {
+        let input = "[ERROR] /src/A.java:[12] (javadoc) MissingJavadocMethod: Missing a Javadoc comment.\n\
+            [ERROR] /src/A.java:[12] (sizes) LineLength: Line is longer than 120 characters.\n\
+            [INFO] BUILD FAILURE\n";
+        let output = filter_mvn_compile(input);
+
+        assert!(output.contains("MissingJavadocMethod"), "{output}");
+        assert!(output.contains("LineLength"), "{output}");
     }
 
     #[test]

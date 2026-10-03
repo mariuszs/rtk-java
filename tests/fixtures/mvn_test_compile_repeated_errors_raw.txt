@@ -1,0 +1,83 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------------< com.example:toolkit >-------------------------
+[INFO] Building toolkit 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ toolkit ---
+[INFO] skip non existing resourceDirectory /home/user/toolkit/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ toolkit ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 1 source file with javac [debug release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ toolkit ---
+[INFO] skip non existing resourceDirectory /home/user/toolkit/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ toolkit ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 2 source files with javac [debug release 21] to target/test-classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[8,30] cannot find symbol
+  symbol:   variable ConsentScopes
+  location: class com.example.jwt.ConsentScopesTest
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[13,30] cannot find symbol
+  symbol:   variable ConsentScopes
+  location: class com.example.jwt.ConsentScopesTest
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[18,30] cannot find symbol
+  symbol:   variable ConsentScopes
+  location: class com.example.jwt.ConsentScopesTest
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[23,29] package ConsentScopes does not exist
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[27,29] package ConsentScopes does not exist
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[31,29] package ConsentScopes does not exist
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[14,24] reference to scopedToken is ambiguous
+  both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[19,24] reference to scopedToken is ambiguous
+  both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[24,24] reference to scopedToken is ambiguous
+  both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[29,24] reference to scopedToken is ambiguous
+  both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[34,39] reference to scopedToken is ambiguous
+  both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[INFO] 11 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.821 s
+[INFO] Finished at: 2026-10-03T13:53:04+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:testCompile (default-testCompile) on project toolkit: Compilation failure: Compilation failure: 
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[8,30] cannot find symbol
+[ERROR]   symbol:   variable ConsentScopes
+[ERROR]   location: class com.example.jwt.ConsentScopesTest
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[13,30] cannot find symbol
+[ERROR]   symbol:   variable ConsentScopes
+[ERROR]   location: class com.example.jwt.ConsentScopesTest
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[18,30] cannot find symbol
+[ERROR]   symbol:   variable ConsentScopes
+[ERROR]   location: class com.example.jwt.ConsentScopesTest
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[23,29] package ConsentScopes does not exist
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[27,29] package ConsentScopes does not exist
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/ConsentScopesTest.java:[31,29] package ConsentScopes does not exist
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[14,24] reference to scopedToken is ambiguous
+[ERROR]   both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[19,24] reference to scopedToken is ambiguous
+[ERROR]   both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[24,24] reference to scopedToken is ambiguous
+[ERROR]   both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[29,24] reference to scopedToken is ambiguous
+[ERROR]   both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[ERROR] /home/user/toolkit/src/test/java/com/example/jwt/JwtFilterTest.java:[34,39] reference to scopedToken is ambiguous
+[ERROR]   both method scopedToken(java.lang.String...) in com.example.jwt.JwtFilterTest and method scopedToken(java.lang.String,java.lang.String...) in com.example.jwt.JwtFilterTest match
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
