@@ -143,6 +143,9 @@ impl ApprovalOwner {
 /// normal rewrite. Callers that want it suppressed apply [`suppress_identity`].
 pub(crate) fn decide(cmd: &str, verdict: PermissionVerdict) -> HookDecision {
     let (excluded, transparent_prefixes) = crate::core::config::hook_rewrite_params();
+    if super::worktree_guard::session_is_isolated() {
+        return decide_in_session(cmd, verdict, &excluded, &transparent_prefixes, true);
+    }
     decide_with_params(cmd, verdict, &excluded, &transparent_prefixes)
 }
 
@@ -160,6 +163,24 @@ pub(crate) fn decide_with_params(
     excluded: &[String],
     transparent_prefixes: &[String],
 ) -> HookDecision {
+    decide_in_session(cmd, verdict, excluded, transparent_prefixes, false)
+}
+
+/// [`decide_with_params`] for a session that may be isolated in a Claude Code
+/// worktree.
+///
+/// Fork keep: an isolated session refuses an rtk call it cannot show is not
+/// git, though it runs the same read-only command plain — 490 refusals in 243
+/// sessions, each a wasted turn (measured 2026-10-07). In such a session a
+/// segment `worktree_guard` recognises stays as written; upstream has no
+/// counterpart.
+pub(crate) fn decide_in_session(
+    cmd: &str,
+    verdict: PermissionVerdict,
+    excluded: &[String],
+    transparent_prefixes: &[String],
+    worktree_isolated: bool,
+) -> HookDecision {
     if verdict == PermissionVerdict::Deny {
         return HookDecision::Deny;
     }
@@ -176,7 +197,12 @@ pub(crate) fn decide_with_params(
         return HookDecision::Defer;
     }
 
-    match rewrite_command(cmd, excluded, transparent_prefixes) {
+    let rewritten = if worktree_isolated {
+        super::worktree_guard::rewrite_command(cmd, excluded, transparent_prefixes)
+    } else {
+        rewrite_command(cmd, excluded, transparent_prefixes)
+    };
+    match rewritten {
         Some(rewritten) if verdict == PermissionVerdict::Allow && !heredoc_only => {
             HookDecision::AllowRewrite(rewritten)
         }

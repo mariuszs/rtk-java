@@ -16,6 +16,8 @@ pub mod permissions;
 pub mod rewrite_cmd;
 pub mod trust;
 pub mod verify_cmd;
+#[deny(clippy::print_stdout, clippy::print_stderr)]
+pub(crate) mod worktree_guard;
 
 fn is_rtk_binary(binary: &str) -> bool {
     let binary_name = binary.rsplit(['/', '\\']).next().unwrap_or(binary);

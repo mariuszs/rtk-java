@@ -1879,6 +1879,13 @@ fn producer_output_is_line_faithful(rtk_cmd: &str, cmd: &str) -> bool {
 pub(crate) enum ExcludePattern {
     Regex(Regex),
     Prefix(String),
+    /// Fork keep: a read-only segment Claude Code's worktree isolation would
+    /// refuse as rtk but run plain stays plain (490 refusals in 243 sessions,
+    /// measured 2026-10-07). Only `hooks::worktree_guard` builds it, and only
+    /// for an isolated session; see that module for the rule.
+    WorktreeGuard {
+        in_loop: bool,
+    },
 }
 
 pub(crate) fn compile_exclude_patterns(patterns: &[String]) -> Vec<ExcludePattern> {
@@ -1944,6 +1951,9 @@ fn is_excluded(cmd: &str, excluded: &[ExcludePattern]) -> bool {
     excluded.iter().any(|pat| match pat {
         ExcludePattern::Regex(re) => re.is_match(cmd),
         ExcludePattern::Prefix(prefix) => cmd.starts_with(prefix.as_str()),
+        ExcludePattern::WorktreeGuard { in_loop } => {
+            crate::hooks::worktree_guard::keep_plain(cmd, *in_loop)
+        }
     })
 }
 
