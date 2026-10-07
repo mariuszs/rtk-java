@@ -118,11 +118,13 @@ pub(crate) fn is_frame_like(line: &str) -> bool {
         || is_structural_line(line)
 }
 
-/// The marker `truncate_lines` puts in place of a capped message's middle.
+/// The marker `truncate_lines` puts in place of a capped message's middle,
+/// or of the lines both sides of an `expected:` / `but was:` pair share.
 pub(crate) fn is_message_elision(line: &str) -> bool {
     line.trim()
         .strip_prefix("... (")
         .and_then(|rest| rest.strip_suffix(" lines elided)"))
+        .map(|rest| rest.strip_suffix(" identical").unwrap_or(rest))
         .is_some_and(|n| !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit()))
 }
 
@@ -152,12 +154,82 @@ fn truncate_lines(text: &str, first: fn(&str) -> String) -> String {
             .collect::<Vec<_>>()
             .join("\n");
     }
+    if let Some(out) = elide_shared_sides(&lines, first) {
+        return out.join("\n");
+    }
     let half = MAX_MESSAGE_LINES / 2;
     let tail_start = lines.len() - half;
     let mut out: Vec<String> = lines[..half].iter().enumerate().map(capped).collect();
     out.push(format!("... ({} lines elided)", tail_start - half));
     out.extend(lines[tail_start..].iter().map(|l| truncate_line(l)));
     out.join("\n")
+}
+
+/// Cap an `expected:` / `but was:` message by what its two sides share.
+///
+/// AssertJ prints both values in full, one element per line, under a bare
+/// `expected:` and a bare `but was:`. Two 28-line lists that differed in one
+/// element (2026-10-06 mattimplement) kept the head of one and the tail of the
+/// other under the plain cap: the `but was:` line and the difference were both
+/// in the elided middle. The lines the sides share at either end go instead,
+/// and each side keeps where it differs. `None` when the message has no such
+/// pair, or the sides share nothing.
+fn elide_shared_sides(lines: &[&str], first: fn(&str) -> String) -> Option<Vec<String>> {
+    let expected = lines
+        .iter()
+        .position(|l| l.trim_end().ends_with("expected:"))?;
+    let but_was = expected
+        + 1
+        + lines[expected + 1..]
+            .iter()
+            .position(|l| l.trim() == "but was:")?;
+    let (want, got) = (&lines[expected + 1..but_was], &lines[but_was + 1..]);
+    if want.is_empty() || got.is_empty() {
+        return None;
+    }
+    let prefix = want.iter().zip(got).take_while(|(a, b)| a == b).count();
+    let room = want.len().min(got.len()) - prefix;
+    let suffix = want
+        .iter()
+        .rev()
+        .zip(got.iter().rev())
+        .take(room)
+        .take_while(|(a, b)| a == b)
+        .count();
+    if prefix + suffix == 0 {
+        return None;
+    }
+
+    let side = |out: &mut Vec<String>, side: &[&str]| {
+        if prefix > 0 {
+            out.push(format!("... ({prefix} identical lines elided)"));
+        }
+        let differ = &side[prefix..side.len() - suffix];
+        let half = MAX_MESSAGE_LINES / 4;
+        if differ.len() <= 2 * half {
+            out.extend(differ.iter().map(|l| truncate_line(l)));
+        } else {
+            out.extend(differ[..half].iter().map(|l| truncate_line(l)));
+            out.push(format!("... ({} lines elided)", differ.len() - 2 * half));
+            out.extend(
+                differ[differ.len() - half..]
+                    .iter()
+                    .map(|l| truncate_line(l)),
+            );
+        }
+        if suffix > 0 {
+            out.push(format!("... ({suffix} identical lines elided)"));
+        }
+    };
+    let mut out: Vec<String> = lines[..=expected]
+        .iter()
+        .enumerate()
+        .map(|(i, l)| if i == 0 { first(l) } else { truncate_line(l) })
+        .collect();
+    side(&mut out, want);
+    out.push(lines[but_was].to_string());
+    side(&mut out, got);
+    Some(out)
 }
 
 /// Truncate a header to `MAX_HEADER_LENGTH` **Unicode characters** (not bytes),

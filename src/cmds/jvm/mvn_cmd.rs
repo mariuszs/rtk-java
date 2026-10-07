@@ -8826,6 +8826,36 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         );
     }
 
+    /// Real 2026-10-06 mattimplement run, reproduced on AssertJ: two 28-line
+    /// lists that differ in one element. The 16-line cap kept the head of
+    /// `expected:` and the tail of `but was:`, so neither the `but was:` line
+    /// nor the one element that differed reached the agent, who grepped the
+    /// tee log for `but was`. The lines both sides share are what can go.
+    #[test]
+    fn render_failure_block_keeps_where_expected_and_actual_differ() {
+        let out = render_real_report(include_str!(
+            "../../../tests/fixtures/surefire_xml/TEST-io.github.example.epicloop.core.RunLogTest.xml"
+        ));
+        for needle in [
+            "expected:",
+            "but was:",
+            "Continue[instruction=committed it by hand?]",
+            "FailedUnit[cause=NothingCommitted[]]",
+        ] {
+            assert_eq!(
+                out.matches(needle).count(),
+                1,
+                "{needle} must render once:\n{out}"
+            );
+        }
+        assert!(
+            out.lines()
+                .all(|l| l.is_empty() || l.starts_with("[ERROR]")),
+            "every line keeps the [ERROR] tag:\n{out}"
+        );
+        assert!(out.len() < 3000, "got {} chars:\n{out}", out.len());
+    }
+
     #[test]
     fn signature_line_normalizes_only_where_the_failure_happened() {
         let a = "Failed to load ApplicationContext for [Web@77d4ac52 testClass = com.x.LongerNamedTest, locations = [], classes = [com.x.A...";

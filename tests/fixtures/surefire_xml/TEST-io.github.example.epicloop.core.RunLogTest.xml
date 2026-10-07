@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="io.github.example.epicloop.core.RunLogTest" time="0.267" tests="18" errors="0" skipped="0" failures="1" flakes="0">
+  <properties>
+    <property name="java.specification.version" value="26"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/home/user/project/core/target/test-classes:/home/user/project/core/target/classes:/home/user/.m2/repository/tools/jackson/core/jackson-databind/3.2.3/jackson-databind-3.2.3.jar:/home/user/.m2/repository/tools/jackson/core/jackson-core/3.2.3/jackson-core-3.2.3.jar:/home/user/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.22/jackson-annotations-2.22.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter/6.1.3/junit-jupiter-6.1.3.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-api/6.1.3/junit-jupiter-api-6.1.3.jar:/home/user/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-commons/6.1.3/junit-platform-commons-6.1.3.jar:/home/user/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/user/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-params/6.1.3/junit-jupiter-params-6.1.3.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-engine/6.1.3/junit-jupiter-engine-6.1.3.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-engine/6.1.3/junit-platform-engine-6.1.3.jar:/home/user/.m2/repository/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7.jar:/home/user/.m2/repository/net/bytebuddy/byte-buddy/1.18.3/byte-buddy-1.18.3.jar"/>
+    <property name="java.vm.vendor" value="Eclipse Adoptium"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://adoptium.net/"/>
+    <property name="os.name" value="Linux"/>
+    <property name="java.vm.specification.version" value="26"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/home/user/.sdkman/candidates/java/26-tem/lib"/>
+    <property name="sun.java.command" value="/home/user/project/core/target/surefire/surefirebooter-20261007163857345_3.jar /home/user/project/core/target/surefire 2026-10-07T16-38-57_304-jvmRun1 surefire-20261007163857345_1tmp surefire_0-20261007163857345_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="test" value="RunLogTest"/>
+    <property name="surefire.test.class.path" value="/home/user/project/core/target/test-classes:/home/user/project/core/target/classes:/home/user/.m2/repository/tools/jackson/core/jackson-databind/3.2.3/jackson-databind-3.2.3.jar:/home/user/.m2/repository/tools/jackson/core/jackson-core/3.2.3/jackson-core-3.2.3.jar:/home/user/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.22/jackson-annotations-2.22.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter/6.1.3/junit-jupiter-6.1.3.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-api/6.1.3/junit-jupiter-api-6.1.3.jar:/home/user/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-commons/6.1.3/junit-platform-commons-6.1.3.jar:/home/user/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/user/.m2/repository/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-params/6.1.3/junit-jupiter-params-6.1.3.jar:/home/user/.m2/repository/org/junit/jupiter/junit-jupiter-engine/6.1.3/junit-jupiter-engine-6.1.3.jar:/home/user/.m2/repository/org/junit/platform/junit-platform-engine/6.1.3/junit-platform-engine-6.1.3.jar:/home/user/.m2/repository/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7.jar:/home/user/.m2/repository/net/bytebuddy/byte-buddy/1.18.3/byte-buddy-1.18.3.jar"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/home/user"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2026-03-17"/>
+    <property name="java.home" value="/home/user/.sdkman/candidates/java/26-tem"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/home/user/project/core"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="surefire.real.class.path" value="/home/user/project/core/target/surefire/surefirebooter-20261007163857345_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="26+35"/>
+    <property name="user.name" value="user"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="7.2.8-200.fc44.x86_64"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="java.vendor.version" value="Temurin-26+35"/>
+    <property name="localRepository" value="/home/user/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://github.com/adoptium/adoptium-support/issues"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="java.version" value="26"/>
+    <property name="user.dir" value="/home/user/project/core"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Eclipse Adoptium"/>
+    <property name="java.vm.version" value="26+35"/>
+    <property name="stdin.encoding" value="UTF-8"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="70.0"/>
+  </properties>
+  <testcase name="everyFailureCauseAndAnswerIsReadBackAsWritten" classname="io.github.example.epicloop.core.RunLogTest" time="0.195">
+    <failure message="&#10;expected: &#10;  [RunStarted[epic=DEV-0, config=RunConfig[base=master, pullRequests=false, maxFixRounds=5, resumeFixes=3, maxGateFixes=2, finalReview=true, permissionMode=auto, budgetUsd=15.0, gate=./mvnw test -Dskip.npm &amp;&amp; ./mvnw checkstyle:check, implementModel=sonnet, reviewModel=opus, reReviewModel=sonnet, escalateModel=opus, finalModel=opus], subTasks=[SubTask[key=DEV-1, requirements=DEV-1.txt]]],&#10;      AttemptStarted[unit=DEV-1, attempt=1, base=master, branch=dev-1-slug],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c0, branch=dev-1, uncommitted=[], recovery=false],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=PhaseError[phase=IMPLEMENT, error=error_during_execution, output=DEV-1-implement.json, costUsd=0.0]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=Interrupted[], costUsd=0.0]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=GaveUp[reason=FooIT hangs the JVM, output=DEV-1-implement-recovery.json], costUsd=0.0]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=Erred[error=error_max_turns, output=DEV-1-implement-recovery.json], costUsd=0.0]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c0, branch=dev-1, uncommitted=[], recovery=true],&#10;      PhaseCompleted[unit=DEV-1, phase=IMPLEMENT, model=opus, sessionId=s1, costUsd=1.0, commits=0, output={&quot;status&quot;:&quot;done&quot;,&quot;summary&quot;:&quot;done&quot;}],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=committed it by hand?]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=committed it by hand]],&#10;      GateRan[unit=DEV-1, passed=false, log=gate-0.log],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=GateStillRed[log=gate-0.log]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=GATE_FIX, commit=c1, branch=dev-1, uncommitted=[], recovery=false],&#10;      PhaseCompleted[unit=DEV-1, phase=GATE_FIX, model=sonnet, sessionId=s1, costUsd=1.0, commits=1, output={&quot;status&quot;:&quot;done&quot;,&quot;summary&quot;:&quot;done&quot;}],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=UncommittedChanges[paths=[?? Foo.java]]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=NewAttempt[instruction=criterion 2 means the new API]],&#10;      AttemptStarted[unit=DEV-1, attempt=2, base=master, branch=dev-1-slug],&#10;      HumanDecisionRequested[unit=DEV-1, decision=BlockedSubTask[reason=which API?]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Abort[]]]&#10; but was: &#10;  [RunStarted[epic=DEV-0, config=RunConfig[base=master, pullRequests=false, maxFixRounds=5, resumeFixes=3, maxGateFixes=2, finalReview=true, permissionMode=auto, budgetUsd=15.0, gate=./mvnw test -Dskip.npm &amp;&amp; ./mvnw checkstyle:check, implementModel=sonnet, reviewModel=opus, reReviewModel=sonnet, escalateModel=opus, finalModel=opus], subTasks=[SubTask[key=DEV-1, requirements=DEV-1.txt]]],&#10;      AttemptStarted[unit=DEV-1, attempt=1, base=master, branch=dev-1-slug],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c0, branch=dev-1, uncommitted=[], recovery=false],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=PhaseError[phase=IMPLEMENT, error=error_during_execution, output=DEV-1-implement.json, costUsd=0.0]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=Interrupted[], costUsd=0.0]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=GaveUp[reason=FooIT hangs the JVM, output=DEV-1-implement-recovery.json], costUsd=0.0]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=Erred[error=error_max_turns, output=DEV-1-implement-recovery.json], costUsd=0.0]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c0, branch=dev-1, uncommitted=[], recovery=true],&#10;      PhaseCompleted[unit=DEV-1, phase=IMPLEMENT, model=opus, sessionId=s1, costUsd=1.0, commits=0, output={&quot;status&quot;:&quot;done&quot;,&quot;summary&quot;:&quot;done&quot;}],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=NothingCommitted[]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=committed it by hand]],&#10;      GateRan[unit=DEV-1, passed=false, log=gate-0.log],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=GateStillRed[log=gate-0.log]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],&#10;      PhaseStarted[unit=DEV-1, phase=GATE_FIX, commit=c1, branch=dev-1, uncommitted=[], recovery=false],&#10;      PhaseCompleted[unit=DEV-1, phase=GATE_FIX, model=sonnet, sessionId=s1, costUsd=1.0, commits=1, output={&quot;status&quot;:&quot;done&quot;,&quot;summary&quot;:&quot;done&quot;}],&#10;      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=UncommittedChanges[paths=[?? Foo.java]]]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=NewAttempt[instruction=criterion 2 means the new API]],&#10;      AttemptStarted[unit=DEV-1, attempt=2, base=master, branch=dev-1-slug],&#10;      HumanDecisionRequested[unit=DEV-1, decision=BlockedSubTask[reason=which API?]],&#10;      HumanDecisionAnswered[unit=DEV-1, answer=Abort[]]]" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: 
+
+expected: 
+  [RunStarted[epic=DEV-0, config=RunConfig[base=master, pullRequests=false, maxFixRounds=5, resumeFixes=3, maxGateFixes=2, finalReview=true, permissionMode=auto, budgetUsd=15.0, gate=./mvnw test -Dskip.npm && ./mvnw checkstyle:check, implementModel=sonnet, reviewModel=opus, reReviewModel=sonnet, escalateModel=opus, finalModel=opus], subTasks=[SubTask[key=DEV-1, requirements=DEV-1.txt]]],
+      AttemptStarted[unit=DEV-1, attempt=1, base=master, branch=dev-1-slug],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c0, branch=dev-1, uncommitted=[], recovery=false],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=PhaseError[phase=IMPLEMENT, error=error_during_execution, output=DEV-1-implement.json, costUsd=0.0]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=Interrupted[], costUsd=0.0]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=GaveUp[reason=FooIT hangs the JVM, output=DEV-1-implement-recovery.json], costUsd=0.0]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=Erred[error=error_max_turns, output=DEV-1-implement-recovery.json], costUsd=0.0]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c0, branch=dev-1, uncommitted=[], recovery=true],
+      PhaseCompleted[unit=DEV-1, phase=IMPLEMENT, model=opus, sessionId=s1, costUsd=1.0, commits=0, output={"status":"done","summary":"done"}],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=committed it by hand?]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=committed it by hand]],
+      GateRan[unit=DEV-1, passed=false, log=gate-0.log],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=GateStillRed[log=gate-0.log]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=GATE_FIX, commit=c1, branch=dev-1, uncommitted=[], recovery=false],
+      PhaseCompleted[unit=DEV-1, phase=GATE_FIX, model=sonnet, sessionId=s1, costUsd=1.0, commits=1, output={"status":"done","summary":"done"}],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=UncommittedChanges[paths=[?? Foo.java]]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=NewAttempt[instruction=criterion 2 means the new API]],
+      AttemptStarted[unit=DEV-1, attempt=2, base=master, branch=dev-1-slug],
+      HumanDecisionRequested[unit=DEV-1, decision=BlockedSubTask[reason=which API?]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Abort[]]]
+ but was: 
+  [RunStarted[epic=DEV-0, config=RunConfig[base=master, pullRequests=false, maxFixRounds=5, resumeFixes=3, maxGateFixes=2, finalReview=true, permissionMode=auto, budgetUsd=15.0, gate=./mvnw test -Dskip.npm && ./mvnw checkstyle:check, implementModel=sonnet, reviewModel=opus, reReviewModel=sonnet, escalateModel=opus, finalModel=opus], subTasks=[SubTask[key=DEV-1, requirements=DEV-1.txt]]],
+      AttemptStarted[unit=DEV-1, attempt=1, base=master, branch=dev-1-slug],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c0, branch=dev-1, uncommitted=[], recovery=false],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=PhaseError[phase=IMPLEMENT, error=error_during_execution, output=DEV-1-implement.json, costUsd=0.0]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=Interrupted[], costUsd=0.0]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=GaveUp[reason=FooIT hangs the JVM, output=DEV-1-implement-recovery.json], costUsd=0.0]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c1, branch=dev-1, uncommitted=[], recovery=true],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=RecoveryFailed[phase=IMPLEMENT, commit=c0, how=Erred[error=error_max_turns, output=DEV-1-implement-recovery.json], costUsd=0.0]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=IMPLEMENT, commit=c0, branch=dev-1, uncommitted=[], recovery=true],
+      PhaseCompleted[unit=DEV-1, phase=IMPLEMENT, model=opus, sessionId=s1, costUsd=1.0, commits=0, output={"status":"done","summary":"done"}],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=NothingCommitted[]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=committed it by hand]],
+      GateRan[unit=DEV-1, passed=false, log=gate-0.log],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=GateStillRed[log=gate-0.log]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Continue[instruction=null]],
+      PhaseStarted[unit=DEV-1, phase=GATE_FIX, commit=c1, branch=dev-1, uncommitted=[], recovery=false],
+      PhaseCompleted[unit=DEV-1, phase=GATE_FIX, model=sonnet, sessionId=s1, costUsd=1.0, commits=1, output={"status":"done","summary":"done"}],
+      HumanDecisionRequested[unit=DEV-1, decision=FailedUnit[cause=UncommittedChanges[paths=[?? Foo.java]]]],
+      HumanDecisionAnswered[unit=DEV-1, answer=NewAttempt[instruction=criterion 2 means the new API]],
+      AttemptStarted[unit=DEV-1, attempt=2, base=master, branch=dev-1-slug],
+      HumanDecisionRequested[unit=DEV-1, decision=BlockedSubTask[reason=which API?]],
+      HumanDecisionAnswered[unit=DEV-1, answer=Abort[]]]
+	at io.github.example.epicloop.core.RunLogTest.everyFailureCauseAndAnswerIsReadBackAsWritten(RunLogTest.java:107)
+]]></failure>
+  </testcase>
+  <testcase name="anUnknownEventTypeFailsWithItsLineNumber" classname="io.github.example.epicloop.core.RunLogTest" time="0.006"/>
+  <testcase name="aRecoveryAndItsFailureReadFromTheirJson" classname="io.github.example.epicloop.core.RunLogTest" time="0.002"/>
+  <testcase name="aBatchIsAppendedWholeOrNotAtAll" classname="io.github.example.epicloop.core.RunLogTest" time="0.007"/>
+  <testcase name="aPhaseCompletedWithoutItsCommitsFailsToRead" classname="io.github.example.epicloop.core.RunLogTest" time="0.002"/>
+  <testcase name="aMissingOrDuplicatedLineFailsWithItsLineNumber" classname="io.github.example.epicloop.core.RunLogTest" time="0.002"/>
+  <testcase name="appendingAfterReopeningContinuesTheSequence" classname="io.github.example.epicloop.core.RunLogTest" time="0.003"/>
+  <testcase name="aFailedUnitAndItsAnswerReadFromTheirJson" classname="io.github.example.epicloop.core.RunLogTest" time="0.002"/>
+  <testcase name="aMissingFileIsAnEmptyLog" classname="io.github.example.epicloop.core.RunLogTest" time="0.0"/>
+  <testcase name="aReadOnlyPhaseThatChangedGitReadsFromItsJson" classname="io.github.example.epicloop.core.RunLogTest" time="0.003"/>
+  <testcase name="aPhaseStartedWithoutItsRecoveryFlagFailsToRead" classname="io.github.example.epicloop.core.RunLogTest" time="0.001"/>
+  <testcase name="anUnknownFieldOfAKnownEventIsIgnored" classname="io.github.example.epicloop.core.RunLogTest" time="0.001"/>
+  <testcase name="anEventThatCannotFollowIsNotWritten" classname="io.github.example.epicloop.core.RunLogTest" time="0.001"/>
+  <testcase name="aLogWhoseEventsCannotFollowEachOtherFailsWithTheLineNumber" classname="io.github.example.epicloop.core.RunLogTest" time="0.002"/>
+  <testcase name="aLogWrittenUnderOtherRecordingRulesStillReads" classname="io.github.example.epicloop.core.RunLogTest" time="0.007"/>
+  <testcase name="aPhasesOutputIsAppendedExactlyAndInOneBatchRightAfterItsCompletion" classname="io.github.example.epicloop.core.RunLogTest" time="0.004"/>
+  <testcase name="aLogWrittenAndReadBackFoldsToTheSameState" classname="io.github.example.epicloop.core.RunLogTest" time="0.009"/>
+  <testcase name="aCompletionWhoseOutputCannotBeRecordedIsNotAppended" classname="io.github.example.epicloop.core.RunLogTest" time="0.001"/>
+</testsuite>
