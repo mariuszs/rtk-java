@@ -1,0 +1,664 @@
+[INFO] Scanning for projects...
+[WARNING] Not using credentials of server 'central' for repository https://repo1.maven.org/maven2: the origins declared for this id are [https://repo.maven.apache.org]. Add 'https://repo1.maven.org' to <repositoryOrigins> of that server in settings if these credentials belong there, or set maven.repository.credentialScope=id to restore legacy id-only credential matching.
+[INFO] Loaded 24012 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy.txt)
+[INFO] Loaded 24019 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] Loaded 24019 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] 
+[INFO] -------------< io.github.example.epicloop:epic-loop-core >-------------
+[INFO] Building Epic loop core 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- compiler:3.16.0:testCompile (default-cli) @ epic-loop-core ---
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
+[INFO] Recompiling the module because of added or removed source files.
+[INFO] Compiling 9 source files with javac [debug release 25] to target/test-classes
+[INFO] Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[342,58] redundant cast to io.github.example.epicloop.core.UnitLoop.Step.Append
+[WARNING] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[410,57] redundant cast to io.github.example.epicloop.core.UnitLoop.Step.Append
+[WARNING] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[428,56] redundant cast to io.github.example.epicloop.core.UnitLoop.Step.Append
+[WARNING] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[517,57] redundant cast to io.github.example.epicloop.core.UnitLoop.Step.Append
+[WARNING] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[541,54] redundant cast to io.github.example.epicloop.core.UnitLoop.Step.Append
+[WARNING] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[590,61] redundant cast to io.github.example.epicloop.core.UnitLoop.Step.Append
+[INFO] 6 warnings 
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[3,40] cannot access io.github.example.epicloop.core.RunEvent
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunEvent.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunEvent.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[25,48] cannot access io.github.example.epicloop.core.Phase
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/Phase.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/Phase.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[31,16] cannot find symbol
+  symbol:   class PhaseStarted
+  location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[36,16] cannot find symbol
+  symbol:   class PhaseStarted
+  location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[48,16] cannot access io.github.example.epicloop.core.RunConfig
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunConfig.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunConfig.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[78,31] cannot access io.github.example.epicloop.core.RunState
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunState.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunState.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[6,40] cannot access io.github.example.epicloop.core.PendingDecision
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/PendingDecision.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/PendingDecision.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[17,40] cannot access io.github.example.epicloop.core.HumanAnswer
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/HumanAnswer.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/HumanAnswer.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[31,40] cannot access io.github.example.epicloop.core.UnitFailure
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/UnitFailure.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/UnitFailure.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[42,22] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[44,22] cannot find symbol
+  symbol:   class PhaseError
+  location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[47,22] cannot find symbol
+  symbol:   class GateStillRed
+  location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[49,22] cannot find symbol
+  symbol:   class UncommittedChanges
+  location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[65,16] cannot find symbol
+  symbol:   class HumanDecisionAnswered
+  location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[27,22] cannot access io.github.example.epicloop.core.SubTask
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/SubTask.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/SubTask.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[33,22] cannot find symbol
+  symbol:   class RunStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[35,22] cannot access io.github.example.epicloop.core.Finding
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/Finding.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/Finding.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[67,64] cannot access io.github.example.epicloop.core.Decision
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/Decision.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/Decision.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FixLoopTest.java:[28,22] cannot find symbol
+  symbol:   class RunStarted
+  location: class io.github.example.epicloop.core.FixLoopTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunLogTest.java:[241,9] cannot access io.github.example.epicloop.core.RunLog
+  bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunLog.class
+    unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunLog.class
+    Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunLogTest.java:[301,16] cannot find symbol
+  symbol:   class HumanDecisionRequested
+  location: class io.github.example.epicloop.core.RunLogTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[53,22] cannot find symbol
+  symbol:   class RunStarted
+  location: class io.github.example.epicloop.core.UnitLoopTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[379,63] package RecoveryFailed does not exist
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[379,16] cannot find symbol
+  symbol:   class RecoveryFailed
+  location: class io.github.example.epicloop.core.UnitLoopTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[26,64] cannot find symbol
+  symbol:   class PhaseCompleted
+  location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[32,28] cannot find symbol
+  symbol:   class PhaseStarted
+  location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[37,28] cannot find symbol
+  symbol:   class PhaseStarted
+  location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[33,47] cannot find symbol
+  symbol:   class RunStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[52,42] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[54,37] cannot find symbol
+  symbol:   class GateRan
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[55,37] cannot find symbol
+  symbol:   class FindingsOpened
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[55,76] cannot find symbol
+  symbol:   class UnitFinished
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[74,45] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[75,53] cannot find symbol
+  symbol:   class RulingsRecorded
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[100,45] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[111,61] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[114,61] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[122,42] cannot find symbol
+  symbol:   class FindingsAdjudicated
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[124,45] cannot find symbol
+  symbol:   class UnitFinished
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[125,45] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[126,53] cannot find symbol
+  symbol:   class RulingsRecorded
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[127,53] cannot find symbol
+  symbol:   class FindingsAdjudicated
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[130,53] cannot find symbol
+  symbol:   class RulingsRecorded
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[131,53] cannot find symbol
+  symbol:   class HumanDecisionRequested
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[132,69] cannot find symbol
+  symbol:   class StoppedFindings
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[133,53] cannot find symbol
+  symbol:   class HumanDecisionAnswered
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[134,53] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[149,45] cannot find symbol
+  symbol:   class RulingsRecorded
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[158,64] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[159,37] cannot find symbol
+  symbol:   class HumanDecisionRequested
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[159,77] cannot find symbol
+  symbol:   class BlockedSubTask
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[160,37] cannot find symbol
+  symbol:   class HumanDecisionAnswered
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[163,59] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[166,59] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[173,66] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[174,37] cannot find symbol
+  symbol:   class RulingsRecorded
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[175,37] cannot find symbol
+  symbol:   class HumanDecisionRequested
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[175,69] cannot find symbol
+  symbol:   class BlockedSubTask
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[177,49] cannot find symbol
+  symbol:   class HumanDecisionAnswered
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[188,66] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[189,35] cannot find symbol
+  symbol:   class StoppedFindings
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[191,49] cannot find symbol
+  symbol:   class HumanDecisionRequested
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[191,81] cannot find symbol
+  symbol:   class BlockedSubTask
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[192,53] cannot find symbol
+  symbol:   class HumanDecisionRequested
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[196,70] cannot find symbol
+  symbol:   class BlockedSubTask
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[199,49] cannot find symbol
+  symbol:   class StoppedFindings
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[206,66] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[207,37] cannot find symbol
+  symbol:   class HumanDecisionRequested
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[207,69] cannot find symbol
+  symbol:   class BlockedSubTask
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[213,61] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[214,86] cannot find symbol
+  symbol:   class RunFinished
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[217,44] cannot find symbol
+  symbol:   class HumanDecisionAnswered
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[224,70] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[225,82] cannot find symbol
+  symbol:   class GateRan
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[226,81] cannot find symbol
+  symbol:   class GateRan
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[227,77] cannot find symbol
+  symbol:   class FindingsOpened
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[242,64] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[243,37] cannot find symbol
+  symbol:   class FindingsOpened
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[244,37] cannot find symbol
+  symbol:   class FindingsDeferred
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[244,78] cannot find symbol
+  symbol:   class FindingsOpened
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[245,37] cannot find symbol
+  symbol:   class FindingsDeferred
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[256,64] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[257,37] cannot find symbol
+  symbol:   class FindingsAdjudicated
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[270,66] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[273,61] cannot find symbol
+  symbol:   class FindingsOpened
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[275,50] cannot find symbol
+  symbol:   class FindingsOpened
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[277,62] cannot find symbol
+  symbol:   class FindingsOpened
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[284,45] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[288,44] cannot find symbol
+  symbol:   class FindingsAdjudicated
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[295,64] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[296,37] cannot find symbol
+  symbol:   class FindingsOpened
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[297,37] cannot find symbol
+  symbol:   class FindingsAdjudicated
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[314,70] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[315,82] cannot find symbol
+  symbol:   class HumanDecisionRequested
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[315,114] cannot find symbol
+  symbol:   class BlockedSubTask
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[316,37] cannot find symbol
+  symbol:   class HumanDecisionAnswered
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[317,37] cannot find symbol
+  symbol:   class AttemptStarted
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[329,84] cannot find symbol
+  symbol:   class GateRan
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[332,84] cannot find symbol
+  symbol:   class GateRan
+  location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[332,59] cannot find symbol
+  symbol:   class RunFinished
+  location: class io.github.example.epicloop.core.RunStateTest
+[INFO] 100 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[ERROR] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.299 s
+[INFO] Finished at: 2026-10-07T16:33:47+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.16.0:testCompile (default-cli) on project epic-loop-core: Compilation failure: Compilation failure: 
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[3,40] cannot access io.github.example.epicloop.core.RunEvent
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunEvent.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunEvent.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[25,48] cannot access io.github.example.epicloop.core.Phase
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/Phase.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/Phase.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[31,16] cannot find symbol
+[ERROR]   symbol:   class PhaseStarted
+[ERROR]   location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[36,16] cannot find symbol
+[ERROR]   symbol:   class PhaseStarted
+[ERROR]   location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[48,16] cannot access io.github.example.epicloop.core.RunConfig
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunConfig.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunConfig.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[78,31] cannot access io.github.example.epicloop.core.RunState
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunState.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunState.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[6,40] cannot access io.github.example.epicloop.core.PendingDecision
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/PendingDecision.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/PendingDecision.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[17,40] cannot access io.github.example.epicloop.core.HumanAnswer
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/HumanAnswer.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/HumanAnswer.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[31,40] cannot access io.github.example.epicloop.core.UnitFailure
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/UnitFailure.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/UnitFailure.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[42,22] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[44,22] cannot find symbol
+[ERROR]   symbol:   class PhaseError
+[ERROR]   location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[47,22] cannot find symbol
+[ERROR]   symbol:   class GateStillRed
+[ERROR]   location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[49,22] cannot find symbol
+[ERROR]   symbol:   class UncommittedChanges
+[ERROR]   location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FailedUnitTest.java:[65,16] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionAnswered
+[ERROR]   location: class io.github.example.epicloop.core.FailedUnitTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[27,22] cannot access io.github.example.epicloop.core.SubTask
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/SubTask.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/SubTask.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[33,22] cannot find symbol
+[ERROR]   symbol:   class RunStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[35,22] cannot access io.github.example.epicloop.core.Finding
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/Finding.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/Finding.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[67,64] cannot access io.github.example.epicloop.core.Decision
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/Decision.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/Decision.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/FixLoopTest.java:[28,22] cannot find symbol
+[ERROR]   symbol:   class RunStarted
+[ERROR]   location: class io.github.example.epicloop.core.FixLoopTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunLogTest.java:[241,9] cannot access io.github.example.epicloop.core.RunLog
+[ERROR]   bad class file: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunLog.class
+[ERROR]     unable to access file: java.nio.file.NoSuchFileException: /home/user/project/core/target/classes/io/github/example/epicloop/core/RunLog.class
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the classpath.
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunLogTest.java:[301,16] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionRequested
+[ERROR]   location: class io.github.example.epicloop.core.RunLogTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[53,22] cannot find symbol
+[ERROR]   symbol:   class RunStarted
+[ERROR]   location: class io.github.example.epicloop.core.UnitLoopTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[379,63] package RecoveryFailed does not exist
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/UnitLoopTest.java:[379,16] cannot find symbol
+[ERROR]   symbol:   class RecoveryFailed
+[ERROR]   location: class io.github.example.epicloop.core.UnitLoopTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[26,64] cannot find symbol
+[ERROR]   symbol:   class PhaseCompleted
+[ERROR]   location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[32,28] cannot find symbol
+[ERROR]   symbol:   class PhaseStarted
+[ERROR]   location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/Events.java:[37,28] cannot find symbol
+[ERROR]   symbol:   class PhaseStarted
+[ERROR]   location: class io.github.example.epicloop.core.Events
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[33,47] cannot find symbol
+[ERROR]   symbol:   class RunStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[52,42] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[54,37] cannot find symbol
+[ERROR]   symbol:   class GateRan
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[55,37] cannot find symbol
+[ERROR]   symbol:   class FindingsOpened
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[55,76] cannot find symbol
+[ERROR]   symbol:   class UnitFinished
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[74,45] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[75,53] cannot find symbol
+[ERROR]   symbol:   class RulingsRecorded
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[100,45] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[111,61] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[114,61] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[122,42] cannot find symbol
+[ERROR]   symbol:   class FindingsAdjudicated
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[124,45] cannot find symbol
+[ERROR]   symbol:   class UnitFinished
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[125,45] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[126,53] cannot find symbol
+[ERROR]   symbol:   class RulingsRecorded
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[127,53] cannot find symbol
+[ERROR]   symbol:   class FindingsAdjudicated
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[130,53] cannot find symbol
+[ERROR]   symbol:   class RulingsRecorded
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[131,53] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionRequested
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[132,69] cannot find symbol
+[ERROR]   symbol:   class StoppedFindings
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[133,53] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionAnswered
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[134,53] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[149,45] cannot find symbol
+[ERROR]   symbol:   class RulingsRecorded
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[158,64] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[159,37] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionRequested
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[159,77] cannot find symbol
+[ERROR]   symbol:   class BlockedSubTask
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[160,37] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionAnswered
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[163,59] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[166,59] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[173,66] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[174,37] cannot find symbol
+[ERROR]   symbol:   class RulingsRecorded
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[175,37] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionRequested
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[175,69] cannot find symbol
+[ERROR]   symbol:   class BlockedSubTask
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[177,49] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionAnswered
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[188,66] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[189,35] cannot find symbol
+[ERROR]   symbol:   class StoppedFindings
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[191,49] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionRequested
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[191,81] cannot find symbol
+[ERROR]   symbol:   class BlockedSubTask
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[192,53] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionRequested
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[196,70] cannot find symbol
+[ERROR]   symbol:   class BlockedSubTask
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[199,49] cannot find symbol
+[ERROR]   symbol:   class StoppedFindings
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[206,66] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[207,37] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionRequested
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[207,69] cannot find symbol
+[ERROR]   symbol:   class BlockedSubTask
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[213,61] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[214,86] cannot find symbol
+[ERROR]   symbol:   class RunFinished
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[217,44] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionAnswered
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[224,70] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[225,82] cannot find symbol
+[ERROR]   symbol:   class GateRan
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[226,81] cannot find symbol
+[ERROR]   symbol:   class GateRan
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[227,77] cannot find symbol
+[ERROR]   symbol:   class FindingsOpened
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[242,64] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[243,37] cannot find symbol
+[ERROR]   symbol:   class FindingsOpened
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[244,37] cannot find symbol
+[ERROR]   symbol:   class FindingsDeferred
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[244,78] cannot find symbol
+[ERROR]   symbol:   class FindingsOpened
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[245,37] cannot find symbol
+[ERROR]   symbol:   class FindingsDeferred
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[256,64] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[257,37] cannot find symbol
+[ERROR]   symbol:   class FindingsAdjudicated
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[270,66] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[273,61] cannot find symbol
+[ERROR]   symbol:   class FindingsOpened
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[275,50] cannot find symbol
+[ERROR]   symbol:   class FindingsOpened
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[277,62] cannot find symbol
+[ERROR]   symbol:   class FindingsOpened
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[284,45] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[288,44] cannot find symbol
+[ERROR]   symbol:   class FindingsAdjudicated
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[295,64] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[296,37] cannot find symbol
+[ERROR]   symbol:   class FindingsOpened
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[297,37] cannot find symbol
+[ERROR]   symbol:   class FindingsAdjudicated
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[314,70] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[315,82] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionRequested
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[315,114] cannot find symbol
+[ERROR]   symbol:   class BlockedSubTask
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[316,37] cannot find symbol
+[ERROR]   symbol:   class HumanDecisionAnswered
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[317,37] cannot find symbol
+[ERROR]   symbol:   class AttemptStarted
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[329,84] cannot find symbol
+[ERROR]   symbol:   class GateRan
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[332,84] cannot find symbol
+[ERROR]   symbol:   class GateRan
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[332,59] cannot find symbol
+[ERROR]   symbol:   class RunFinished
+[ERROR]   location: class io.github.example.epicloop.core.RunStateTest
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

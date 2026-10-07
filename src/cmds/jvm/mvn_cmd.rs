@@ -3251,8 +3251,8 @@ fn filter_mvn_compile(output: &str) -> String {
 
     cap_compile_lines(
         &clean,
-        group_repeated_compile_errors(collapse_lombok_cascade(collapse_overload_candidates(
-            result,
+        group_repeated_compile_errors(collapse_lombok_cascade(collapse_bad_class_files(
+            collapse_overload_candidates(result),
         ))),
     )
 }
@@ -3426,6 +3426,116 @@ const MISSING_SYMBOL: &str = "cannot find symbol";
 /// cannot match; with `required: no arguments` it is a missing
 /// `@RequiredArgsConstructor`/`@AllArgsConstructor`.
 const CONSTRUCTOR_MISMATCH: &str = " cannot be applied to given types;";
+
+/// Collapse javac's `bad class file` errors to the first one per reason.
+///
+/// When class files vanish from `target/classes` while javac reads them — a
+/// second build or an IDE cleaning the same directory — every reference to
+/// every missing class becomes a four-line `cannot access X` / `bad class
+/// file: <path>` / `unable to access file: …NoSuchFileException` / `Please
+/// remove …` block. Two renders of 2026-10-06 were ~28k chars of it, and the
+/// host cut both to 10k. There is one cause and nothing to fix per class, so
+/// the first block stays verbatim and the rest are counted, grouped by the
+/// reason with its path removed (`class file has wrong version 69.0, should be
+/// 65.0` is another reason, and its own line).
+///
+/// The `cannot find symbol` errors behind them go the same way: a nested type
+/// of a class javac could not read is unresolvable too, and none of those
+/// errors says anything until the build runs on intact classes.
+fn collapse_bad_class_files(result: String) -> String {
+    static PATH_TOKEN_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r":?\s*/\S*").unwrap());
+    let lines: Vec<&str> = result.lines().collect();
+    let is_body = |line: &str| !line.is_empty() && !line.starts_with('[');
+
+    // (first line, end, file, key) per error block that can be folded.
+    let mut blocks: Vec<(usize, usize, &str, String)> = Vec::new();
+    let mut has_bad_class = false;
+    let mut i = 0;
+    while i < lines.len() {
+        let Some(location) = COMPILE_ERROR_LOCATION_RE.captures(lines[i]) else {
+            i += 1;
+            continue;
+        };
+        let file = location.get(1).map_or("", |m| m.as_str());
+        let mut end = i + 1;
+        while lines.get(end).is_some_and(|l| is_body(l)) {
+            end += 1;
+        }
+        let body = &lines[i + 1..end];
+        let reason = body
+            .iter()
+            .position(|l| l.trim_start().starts_with("bad class file:"))
+            .and_then(|at| body.get(at + 1))
+            .map(|l| PATH_TOKEN_RE.replace_all(l.trim(), "").into_owned());
+        if let Some(reason) = reason {
+            has_bad_class = true;
+            blocks.push((
+                i,
+                end,
+                file,
+                format!("cannot access: bad class file, {reason}"),
+            ));
+        } else if lines[i][location.get(0).map_or(0, |m| m.end())..].contains(MISSING_SYMBOL) {
+            blocks.push((i, end, file, MISSING_SYMBOL.to_string()));
+        }
+        i = end;
+    }
+    if !has_bad_class {
+        return result;
+    }
+
+    // Per key: the first block's end, then the dropped count and files.
+    let mut order: Vec<&str> = Vec::new();
+    let mut first_end: HashMap<&str, usize> = HashMap::new();
+    let mut dropped: HashMap<&str, (usize, HashSet<&str>)> = HashMap::new();
+    let mut drop_ranges: Vec<(usize, usize)> = Vec::new();
+    for (start, end, file, key) in &blocks {
+        let key = key.as_str();
+        if first_end.contains_key(key) {
+            let entry = dropped.entry(key).or_default();
+            entry.0 += 1;
+            entry.1.insert(file);
+            drop_ranges.push((*start, *end));
+        } else {
+            first_end.insert(key, *end);
+            order.push(key);
+        }
+    }
+    if drop_ranges.is_empty() {
+        return result;
+    }
+
+    let mut elision_at: HashMap<usize, Vec<String>> = HashMap::new();
+    for key in &order {
+        if let Some((count, files)) = dropped.get(key) {
+            elision_at.entry(first_end[key]).or_default().push(format!(
+                "[ERROR]   ... +{count} more {key} (in {} files)",
+                files.len()
+            ));
+        }
+    }
+    let mut out: Vec<String> = Vec::with_capacity(lines.len());
+    let mut ranges = drop_ranges.iter().peekable();
+    for (idx, line) in lines.iter().enumerate() {
+        if let Some(elisions) = elision_at.get(&idx) {
+            out.extend(elisions.iter().cloned());
+        }
+        while ranges.peek().is_some_and(|&&(_, end)| end <= idx) {
+            ranges.next();
+        }
+        if ranges
+            .peek()
+            .is_some_and(|&&(start, end)| (start..end).contains(&idx))
+        {
+            continue;
+        }
+        out.push((*line).to_string());
+    }
+    if let Some(elisions) = elision_at.get(&lines.len()) {
+        out.extend(elisions.iter().cloned());
+    }
+    out.join("\n")
+}
 
 /// Occurrences of one missing member kept verbatim inside a cascade.
 const MAX_CASCADE_REPEATS: usize = 3;
@@ -4754,6 +4864,9 @@ mod tests {
             ("mvn_compile_map_liquibase_jooq", include_str!("../../../tests/fixtures/mvn_compile_map_liquibase_jooq.txt"), filter_mvn_compile, 85.0),
             // 271k raw, Liquibase inside testcontainers-jooq-codegen: 22 changeset
             // records used to pass as error-ish on keywords in file names.
+            // 11 classes gone from target/classes mid-build: 4-line `bad class
+            // file` blocks plus the `cannot find symbol` behind them.
+            ("mvn_test_compile_bad_class_files_raw", include_str!("../../../tests/fixtures/mvn_test_compile_bad_class_files_raw.txt"), filter_mvn_compile, 95.0),
             ("mvn_test_compile_liquibase_changeset_records_raw", include_str!("../../../tests/fixtures/mvn_test_compile_liquibase_changeset_records_raw.txt"), filter_mvn_compile, 98.0),
             ("mvn_compile_pgp_multimodule", include_str!("../../../tests/fixtures/mvn_compile_pgp_multimodule.txt"), filter_mvn_compile, 85.0),
             ("mvn_compile_artifactregistry", include_str!("../../../tests/fixtures/mvn_compile_artifactregistry.txt"), filter_mvn_compile, 80.0),
@@ -5779,6 +5892,36 @@ mod tests {
         }
         assert!(output.contains("BUILD SUCCESS"), "{output}");
         assert!(output.len() < 300, "got {} chars:\n{output}", output.len());
+    }
+
+    /// Real `compiler:testCompile` with main classes gone from `target/classes`
+    /// while javac still had them listed — what a second build or an IDE
+    /// cleaning the same directory leaves. Every reference becomes a 4-line
+    /// `cannot access` / `bad class file` / `NoSuchFileException` / `Please
+    /// remove` block: two map and auth renders of 2026-10-06 were ~28k each,
+    /// the largest of the window, and Claude Code cut both to 10k.
+    #[test]
+    fn test_compile_bad_class_file_cascade_collapsed() {
+        let input =
+            include_str!("../../../tests/fixtures/mvn_test_compile_bad_class_files_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        assert_eq!(
+            output.matches("bad class file:").count(),
+            1,
+            "one block keeps the diagnosis verbatim, got:\n{output}"
+        );
+        assert!(
+            output.contains("unable to access file: java.nio.file.NoSuchFileException"),
+            "{output}"
+        );
+        assert!(
+            output.contains("more cannot access"),
+            "the rest are counted, got:\n{output}"
+        );
+        assert!(output.contains("BUILD FAILURE"), "{output}");
+        assert!(output.contains("Failed to execute goal"), "{output}");
+        assert!(output.len() < 3000, "got {} chars:\n{output}", output.len());
     }
 
     #[test]
