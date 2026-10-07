@@ -3071,6 +3071,9 @@ fn is_maven_boilerplate(line: &str) -> bool {
 /// javac `[ERROR] <path>:[<line>,<col>]` lines are deduped by (path, line, col)
 /// because Maven prints them twice on failure — inline during compilation and
 /// again in the trailing `[ERROR]` help block.
+/// javac's whole error under `-Werror`, after the file it names.
+const WERROR_ERROR: &str = ": warnings found and -Werror specified";
+
 fn filter_mvn_compile(output: &str) -> String {
     if is_untaggable_daemon_reactor(output) {
         return output.to_string();
@@ -3107,6 +3110,18 @@ fn filter_mvn_compile(output: &str) -> String {
     // reports only the missing `log` — so it is kept, message and all.
     let failed = clean.contains("BUILD FAILURE");
     let mut in_enforcer_warning = false;
+    // Under `-Werror` (`failOnWarning`) javac's only error names a file and
+    // says `warnings found and -Werror specified`: that file's warnings are
+    // the diagnosis, so they are kept with their context lines.
+    let werror_files: HashSet<&str> = clean
+        .lines()
+        .filter_map(|l| {
+            strip_maven_prefix(l.trim())
+                .strip_suffix(WERROR_ERROR)
+                .filter(|_| l.trim_start().starts_with(ERROR_TAG))
+        })
+        .collect();
+    let mut in_werror_warning = false;
     let mut result = String::with_capacity(clean.len() / 4);
 
     let push = |dst: &mut String, line: &str| {
@@ -3199,6 +3214,23 @@ fn filter_mvn_compile(output: &str) -> String {
         }
         if failed && line.starts_with(WARNING_TAG) && ENFORCER_RULE_FAILED_RE.is_match(stripped) {
             in_enforcer_warning = true;
+            push(&mut result, line);
+            continue;
+        }
+
+        if in_werror_warning {
+            if !line.is_empty() && !line.starts_with('[') {
+                push(&mut result, line);
+                continue;
+            }
+            in_werror_warning = false;
+        }
+        if line.starts_with(WARNING_TAG)
+            && strip_maven_prefix(line)
+                .split_once(":[")
+                .is_some_and(|(file, _)| werror_files.contains(file))
+        {
+            in_werror_warning = true;
             push(&mut result, line);
             continue;
         }
@@ -5922,6 +5954,39 @@ mod tests {
         assert!(output.contains("BUILD FAILURE"), "{output}");
         assert!(output.contains("Failed to execute goal"), "{output}");
         assert!(output.len() < 3000, "got {} chars:\n{output}", output.len());
+    }
+
+    /// Real `verify` with `failOnWarning`: javac's only error is `warnings found
+    /// and -Werror specified`, so the warnings are the diagnosis. A
+    /// mattimplement render of 2026-10-06 kept `[INFO] 1 warning` and the error
+    /// but not the warning, and the agent grepped the tee log for it.
+    #[test]
+    fn test_compile_werror_keeps_the_warnings_of_the_failed_file() {
+        let input = include_str!("../../../tests/fixtures/mvn_verify_werror_raw_type_raw.txt");
+        let output = filter_mvn_compile(input);
+
+        assert!(
+            output.contains("RunStateTest.java:[24,31] found raw type: java.util.List"),
+            "the warning -Werror failed on must survive, got:\n{output}"
+        );
+        assert!(
+            output.contains("missing type arguments for generic class java.util.List<E>"),
+            "with its javac context line, got:\n{output}"
+        );
+        assert!(output.contains("RunStateTest.java:[24,56]"), "{output}");
+        assert!(
+            output.contains("warnings found and -Werror specified"),
+            "{output}"
+        );
+        for (goal, rendered) in [
+            ("test", filter_mvn_test(input)),
+            ("verify", filter_mvn_verify(input)),
+        ] {
+            assert!(
+                rendered.contains("[24,31] found raw type: java.util.List"),
+                "{goal} path, got:\n{rendered}"
+            );
+        }
     }
 
     #[test]

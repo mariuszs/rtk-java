@@ -1,0 +1,55 @@
+[INFO] Scanning for projects...
+[WARNING] Not using credentials of server 'central' for repository https://repo1.maven.org/maven2: the origins declared for this id are [https://repo.maven.apache.org]. Add 'https://repo1.maven.org' to <repositoryOrigins> of that server in settings if these credentials belong there, or set maven.repository.credentialScope=id to restore legacy id-only credential matching.
+[INFO] Loaded 24012 auto-discovered prefixes for remote repository google-maven-central-copy (prefixes-google-maven-central-copy.txt)
+[INFO] Loaded 24019 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] 
+[INFO] -------------< io.github.example.epicloop:epic-loop-core >-------------
+[INFO] Building Epic loop core 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Loaded 24019 auto-discovered prefixes for remote repository central (prefixes-central.txt)
+[INFO] 
+[INFO] --- resources:3.5.0:resources (default-resources) @ epic-loop-core ---
+[INFO] skip non existing resourceDirectory /home/user/project/core/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.16.0:compile (default-compile) @ epic-loop-core ---
+[INFO] Loaded 74 auto-discovered prefixes for remote repository apache.snapshots (prefixes-apache.snapshots.txt)
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 42 source files with javac [debug release 25] to target/classes
+[INFO] 
+[INFO] --- resources:3.5.0:testResources (default-testResources) @ epic-loop-core ---
+[INFO] skip non existing resourceDirectory /home/user/project/core/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.16.0:testCompile (default-testCompile) @ epic-loop-core ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 9 source files with javac [debug release 25] to target/test-classes
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[24,31] found raw type: java.util.List
+  missing type arguments for generic class java.util.List<E>
+[WARNING] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java:[24,56] found raw type: java.util.ArrayList
+  missing type arguments for generic class java.util.ArrayList<E>
+[INFO] 2 warnings 
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java: warnings found and -Werror specified
+[INFO] 1 error
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[ERROR] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.733 s
+[INFO] Finished at: 2026-10-07T16:25:50+02:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.16.0:testCompile (default-testCompile) on project epic-loop-core: Compilation failure
+[ERROR] /home/user/project/core/src/test/java/io/github/example/epicloop/core/RunStateTest.java: warnings found and -Werror specified
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
