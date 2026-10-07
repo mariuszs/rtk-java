@@ -358,7 +358,7 @@ fn run_tests_like(
     }
 
     let started_at = std::time::SystemTime::now();
-    let cwd = std::env::current_dir().unwrap_or_else(|e| {
+    let cwd = crate::core::user_dirs::current_dir().unwrap_or_else(|e| {
         eprintln!("rtk {binary}: could not determine cwd: {e}");
         std::path::PathBuf::from(".")
     });
@@ -1179,7 +1179,7 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
     }
 
     let started_at = std::time::SystemTime::now();
-    let cwd = std::env::current_dir().unwrap_or_else(|e| {
+    let cwd = crate::core::user_dirs::current_dir().unwrap_or_else(|e| {
         eprintln!("rtk {binary}: could not determine cwd: {e}");
         std::path::PathBuf::from(".")
     });

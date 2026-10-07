@@ -72,7 +72,7 @@ impl Default for RtkRule {
 /// `core::tracking::SUBCOMMAND_ROUTERS`, or its telemetry label stops at the tool name.
 pub const RULES: &[RtkRule] = &[
     RtkRule {
-        pattern: r"^(?:git|yadm)\s+(?:-[Cc]\s+\S+\s+)*(status|log|diff|show|add|commit|checkout|push|pull|branch|fetch|stash|worktree)",
+        pattern: r"^(?:git|yadm)\s+(?:-[Cc]\s+\S+\s+)*(status|log|diff|show|add|commit|checkout|push|pull|branch|fetch|stash|worktree)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk git",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["git", "yadm"],
@@ -87,7 +87,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^gh\s+(pr|issue|run|repo|api|release)",
+        pattern: r"^gh\s+(pr|issue|run|repo|api|release)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk gh",
         rewrite_prefixes: &["gh"],
         category: "GitHub",
@@ -96,7 +96,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^glab\s+(mr|issue|ci|pipeline|api|release)",
+        pattern: r"^glab\s+(mr|issue|ci|pipeline|api|release)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk glab",
         rewrite_prefixes: &["glab"],
         category: "GitLab",
@@ -105,7 +105,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^cargo\s+(build|test|clippy|check|fmt|install)",
+        pattern: r"^cargo\s+(build|test|clippy|check|fmt|install)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk cargo",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["cargo"],
@@ -244,7 +244,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^((p?np(m|x)|p?npm\s+(exec|run|run-script)|npm\s+(rum|urn|x)|pnpm\s+dlx)\s+)?prettier",
+        pattern: r"^((p?np(m|x)|p?npm\s+(exec|run|run-script)|npm\s+(rum|urn|x)|pnpm\s+dlx)\s+)?prettier(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk prettier",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &[
@@ -269,7 +269,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^((p?np(m|x)|p?npm\s+(exec|run|run-script)|npm\s+(rum|urn|x)|pnpm\s+dlx)\s+)?next\s+build",
+        pattern: r"^((p?np(m|x)|p?npm\s+(exec|run|run-script)|npm\s+(rum|urn|x)|pnpm\s+dlx)\s+)?next\s+build(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk next",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &[
@@ -380,7 +380,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^((p?np(m|x)|p?npm\s+(exec|run|run-script)|npm\s+(rum|urn|x)|pnpm\s+dlx)\s+)?playwright",
+        pattern: r"^((p?np(m|x)|p?npm\s+(exec|run|run-script)|npm\s+(rum|urn|x)|pnpm\s+dlx)\s+)?playwright(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk playwright",
         rewrite_prefixes: &[
             "npm exec playwright",
@@ -404,7 +404,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^((p?np(m|x)|p?npm\s+(exec|run|run-script)|npm\s+(rum|urn|x)|pnpm\s+dlx)\s+)?prisma",
+        pattern: r"^((p?np(m|x)|p?npm\s+(exec|run|run-script)|npm\s+(rum|urn|x)|pnpm\s+dlx)\s+)?prisma(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk prisma",
         rewrite_prefixes: &[
             "npm exec prisma",
@@ -428,7 +428,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^docker\s+(ps|images|logs|run|exec|build|compose\s+(ps|logs|build))",
+        pattern: r"^docker\s+(ps|images|logs|run|exec|build|compose\s+(ps|logs|build))(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk docker",
         rewrite_prefixes: &["docker"],
         category: "Infra",
@@ -436,7 +436,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^kubectl\s+(get|logs|describe|apply)",
+        pattern: r"^kubectl\s+(get|logs|describe|apply)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk kubectl",
         rewrite_prefixes: &["kubectl"],
         category: "Infra",
@@ -444,7 +444,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^oc\s+(get|logs|describe|apply|status|adm)",
+        pattern: r"^oc\s+(get|logs|describe|apply|status|adm)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk oc",
         rewrite_prefixes: &["oc"],
         category: "Infra",
@@ -490,7 +490,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^ruff\s+(check|format)",
+        pattern: r"^ruff\s+(check|format)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk ruff",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["ruff"],
@@ -500,7 +500,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^sqlfluff\s+lint",
+        pattern: r"^sqlfluff\s+lint(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk sqlfluff",
         rewrite_prefixes: &["sqlfluff"],
         category: "Python",
@@ -517,7 +517,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^(pip3?|uv\s+pip)\s+(list|outdated|install|show)",
+        pattern: r"^(pip3?|uv\s+pip)\s+(list|outdated|install|show)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk pip",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["pip3", "pip", "uv pip"],
@@ -535,7 +535,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^go\s+(test|build|vet)",
+        pattern: r"^go\s+(test|build|vet)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk go",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["go"],
@@ -573,7 +573,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^(?:bundle\s+exec\s+)?(?:bin/)?(?:rake|rails)\s+test",
+        pattern: r"^(?:bundle\s+exec\s+)?(?:bin/)?(?:rake|rails)\s+test(?:[\s:]|$|[;|&()<>])",
         rtk_cmd: "rtk rake",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &[
@@ -935,7 +935,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^pio\s+run",
+        pattern: r"^pio\s+run(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk pio",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["pio"],
@@ -985,7 +985,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^quarto\s+render",
+        pattern: r"^quarto\s+render(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk quarto",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["quarto"],
@@ -1011,7 +1011,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^shopify\s+theme\s+(push|pull)",
+        pattern: r"^shopify\s+theme\s+(push|pull)(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk shopify",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["shopify"],
@@ -1046,7 +1046,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^terraform\s+plan",
+        pattern: r"^terraform\s+plan(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk terraform",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["terraform"],
@@ -1064,7 +1064,7 @@ pub const RULES: &[RtkRule] = &[
         ..RtkRule::DEFAULT
     },
     RtkRule {
-        pattern: r"^trunk\s+build",
+        pattern: r"^trunk\s+build(?:\s|$|[;|&()<>])",
         rtk_cmd: "rtk trunk",
         pipeline_safety: PipelineSafety::ProducerOnly,
         rewrite_prefixes: &["trunk"],

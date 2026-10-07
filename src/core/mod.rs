@@ -12,12 +12,17 @@ pub mod runner;
 /// Test-only: re-scores `history.db` against the truncation limit.
 #[cfg(test)]
 pub mod savings_audit;
+pub mod shell;
 pub mod stream;
 pub mod tee;
 pub mod tee_file;
 pub mod telemetry;
 pub mod telemetry_cmd;
+#[cfg(test)]
+pub mod test_isolation;
 pub mod toml_filter;
 pub mod tracking;
 pub mod truncate;
+pub mod user_dirs;
+pub mod user_env;
 pub mod utils;
