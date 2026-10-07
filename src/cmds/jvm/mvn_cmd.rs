@@ -647,8 +647,16 @@ static LOGBACK_LOG_LINE_RE: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}[.,]\d{1,9}\s+(?:TRACE|DEBUG|INFO|WARN)\b")
         .unwrap()
 });
-/// Single-quoted spans in codegen plugin chatter (echoed class names).
-static QUOTED_SPAN_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"'[^']*'").unwrap());
+/// Spans of codegen plugin chatter that name things rather than report them:
+/// quoted spans (typescript-generator's `Parsing 'com.example.RestError'`,
+/// Liquibase's `Marking ChangeSet: "…"`), path and changeset-id tokens
+/// (`db/changelog/…-failed-plugins.yaml::id::author`), and Liquibase's singular
+/// `precondition failure`/`failed`, which is how it words an `onFail='MARK_RAN'`
+/// skip. A precondition that halts the update says `Migration failed …
+/// Preconditions Failed` and still matches.
+static NAMING_SPAN_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"'[^']*'|"[^"]*"|\S*(?:/|::)\S*|(?i:\bprecondition fail(?:ure|ed)\b)"#).unwrap()
+});
 /// Failure keywords on word boundaries — `RestError` must not match.
 static SEGMENT_ERRORISH_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)\b(err|errors?|fail|failed|failures?)\b").unwrap());
@@ -3825,7 +3833,7 @@ fn is_noisy_codegen_plugin(plugin: &str) -> bool {
 /// Within a suppressed codegen/exec segment, keep only lines that indicate a
 /// failure — Maven `[ERROR]`s, npm/webpack error output, non-zero exits.
 ///
-/// Error keywords match on word boundaries, and single-quoted spans are
+/// Error keywords match on word boundaries, and `NAMING_SPAN_RE` spans are
 /// blanked first: codegen plugins echo class names verbatim (typescript-
 /// generator's `Parsing 'com.example.RestError'`), and a substring match
 /// would keep every type whose name happens to contain "Error".
@@ -3833,8 +3841,8 @@ fn is_errorish_segment_line(line: &str, stripped: &str) -> bool {
     if line.starts_with(ERROR_TAG) || TOTAL_TIME_RE.is_match(stripped) {
         return true;
     }
-    let unquoted = QUOTED_SPAN_RE.replace_all(stripped, "'…'");
-    SEGMENT_ERRORISH_RE.is_match(&unquoted)
+    let unnamed = NAMING_SPAN_RE.replace_all(stripped, "…");
+    SEGMENT_ERRORISH_RE.is_match(&unnamed)
 }
 
 /// Collapse Maven's `Unknown lifecycle phase "x"` error to its first
@@ -4744,6 +4752,9 @@ mod tests {
             // liquibase + jooq on bare stderr, npm via exec-maven-plugin: 12
             // such runs in July 2026 leaked 70k tokens each at 57%.
             ("mvn_compile_map_liquibase_jooq", include_str!("../../../tests/fixtures/mvn_compile_map_liquibase_jooq.txt"), filter_mvn_compile, 85.0),
+            // 271k raw, Liquibase inside testcontainers-jooq-codegen: 22 changeset
+            // records used to pass as error-ish on keywords in file names.
+            ("mvn_test_compile_liquibase_changeset_records_raw", include_str!("../../../tests/fixtures/mvn_test_compile_liquibase_changeset_records_raw.txt"), filter_mvn_compile, 98.0),
             ("mvn_compile_pgp_multimodule", include_str!("../../../tests/fixtures/mvn_compile_pgp_multimodule.txt"), filter_mvn_compile, 85.0),
             ("mvn_compile_artifactregistry", include_str!("../../../tests/fixtures/mvn_compile_artifactregistry.txt"), filter_mvn_compile, 80.0),
             ("mvn_clean_auth", include_str!("../../../tests/fixtures/mvn_clean_auth.txt"), filter_mvn_clean, 90.0),
@@ -5740,6 +5751,34 @@ mod tests {
                 .any(|l| l.trim_start().starts_with("WARNING: ")),
             "JUL/JVM WARNING: lines must be dropped, got:\n{output}"
         );
+    }
+
+    /// Real `mvn test-compile` from auth (`-q` stripped, as `rtk mvn` runs it).
+    /// Liquibase runs inside testcontainers-jooq-codegen, a noisy segment cut
+    /// down to error-ish lines — and 22 of its records passed as error-ish on
+    /// every auth build between 2026-10-03 and 10-06, 2.6k of a 3.5k render:
+    /// the keyword sat in a changelog file name (`…-failed-plugins.yaml`,
+    /// `…-error-page-…`) or in Liquibase's `MARK_RAN` wording.
+    #[test]
+    fn test_compile_liquibase_changeset_records_not_errorish() {
+        let input = include_str!(
+            "../../../tests/fixtures/mvn_test_compile_liquibase_changeset_records_raw.txt"
+        );
+        let output = filter_mvn_compile(input);
+
+        for chatter in [
+            "Reading resource:",
+            "Marking ChangeSet",
+            "Not precondition failed",
+            "ran successfully in",
+        ] {
+            assert!(
+                !output.contains(chatter),
+                "Liquibase `{chatter}` record must be dropped, got:\n{output}"
+            );
+        }
+        assert!(output.contains("BUILD SUCCESS"), "{output}");
+        assert!(output.len() < 300, "got {} chars:\n{output}", output.len());
     }
 
     #[test]
