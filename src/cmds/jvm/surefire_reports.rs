@@ -572,22 +572,23 @@ fn drop_jvm_runtime_noise(text: &str) -> String {
         .join("\n")
 }
 
-/// Keep the last `max_lines` lines behind a `... (N lines truncated)` marker,
-/// plus the lines [`rescued_from_cut`] pulls back out of the cut region.
-fn keep_last_lines(text: &str, max_lines: usize) -> String {
+/// Split a block into the head kept whatever happens — a `... (N lines
+/// truncated)` marker plus the lines [`rescued_from_cut`] pulls back out of
+/// the cut region — and its last `max_lines` lines. The head is empty when
+/// nothing is cut.
+fn keep_last_lines(text: &str, max_lines: usize) -> (String, String) {
     let lines: Vec<&str> = text.lines().collect();
     if lines.len() <= max_lines {
-        return text.to_string();
+        return (String::new(), text.to_string());
     }
     let dropped = lines.len() - max_lines;
     let rescued = rescued_from_cut(&lines[..dropped]);
-    let mut out = format!("... ({} lines truncated)\n", dropped - rescued.len());
+    let mut head = format!("... ({} lines truncated)\n", dropped - rescued.len());
     for line in rescued {
-        out.push_str(line);
-        out.push('\n');
+        head.push_str(line);
+        head.push('\n');
     }
-    out.push_str(&lines[dropped..].join("\n"));
-    out
+    (head, lines[dropped..].join("\n"))
 }
 
 /// Lines the tail cut must not eat. Spring MockMvc's `print()` block is ~40
@@ -597,18 +598,44 @@ fn keep_last_lines(text: &str, max_lines: usize) -> String {
 /// sits in the middle. A real 2026-09-04 run cost three raw-log reads for
 /// it. `Type = null` (printed on every request) carries nothing and stays
 /// cut.
+///
+/// The root of a chain an application logged is kept too: the deepest
+/// `Caused by:`, the one no other follows. Hibernate logs the JDBC failure
+/// behind `Unable to determine Dialect without JDBC metadata` mid-way through
+/// the block (`PSQLException: … SCRAM-based authentication, but no password
+/// was provided`), while the trace stops at the symptom and the tail is the
+/// context-failure chain the trace already prints. Three 2026-10-08/09 auth
+/// sessions read the tee log 13 times for that one line. The roots the trace
+/// does print are dropped again where the block is rendered.
 pub(crate) fn rescued_from_cut<'a>(cut: &[&'a str]) -> Vec<&'a str> {
     let mut rescued = Vec::new();
-    for pair in cut.windows(2) {
-        let (head, next) = (pair[0].trim(), pair[1].trim());
-        if head == "Resolved Exception:" && next.starts_with("Type = ") && !next.ends_with("= null")
+    let mut roots = 0usize;
+    for (i, line) in cut.iter().enumerate() {
+        let t = line.trim();
+        let next = cut.get(i + 1).map(|l| l.trim());
+        if t == "Resolved Exception:"
+            && let Some(next) = next
+            && next.starts_with("Type = ")
+            && !next.ends_with("= null")
         {
-            rescued.push(pair[0]);
-            rescued.push(pair[1]);
+            rescued.push(*line);
+            rescued.push(cut[i + 1]);
+        }
+        if t.starts_with("Caused by:")
+            && !next.is_some_and(|n| n.starts_with("Caused by:"))
+            && roots < MAX_RESCUED_ROOT_CAUSES
+            && !rescued.iter().any(|r| r.trim() == t)
+        {
+            rescued.push(*line);
+            roots += 1;
         }
     }
     rescued
 }
+
+/// Logged chain roots [`rescued_from_cut`] keeps, earliest first: the first
+/// failure an application logs is the one the rest cascade from.
+const MAX_RESCUED_ROOT_CAUSES: usize = 3;
 
 /// Collapse runs of blank lines to a single one. Spring's
 /// `CONDITIONS EVALUATION REPORT`, dumped into `system-out` on every context
@@ -633,15 +660,18 @@ fn collapse_blank_runs(text: &str) -> String {
     out
 }
 
+/// The char cut applies to the tail alone: it starts from the top, where the
+/// rescued lines sit, and would otherwise be the first thing to eat them.
 fn truncate_test_output(output: &str, max_chars: usize) -> String {
-    let output = &keep_last_lines(output, DEFAULT_PER_TEST_OUTPUT_LINES);
-    let char_count = output.chars().count();
-    if char_count <= max_chars {
-        return output.to_string();
+    let (head, tail) = keep_last_lines(output, DEFAULT_PER_TEST_OUTPUT_LINES);
+    let budget = max_chars.saturating_sub(head.chars().count());
+    let char_count = tail.chars().count();
+    if char_count <= budget {
+        return head + &tail;
     }
-    let skip = char_count - max_chars;
-    let tail: String = output.chars().skip(skip).collect();
-    format!("... ({skip} chars truncated)\n{tail}")
+    let skip = char_count - budget;
+    let tail: String = tail.chars().skip(skip).collect();
+    format!("{head}... ({skip} chars truncated)\n{tail}")
 }
 
 /// `[INFO] Running com.example.FooTest`, optionally behind mvnd `[module]`
@@ -1640,7 +1670,8 @@ WARNING: Dynamic loading of agents will be disallowed by default in a future rel
             .chain((20..40).map(|i| format!("line {i}")))
             .collect::<Vec<_>>()
             .join("\n");
-        let out = keep_last_lines(&block, 12);
+        let (head, tail) = keep_last_lines(&block, 12);
+        let out = head + &tail;
         assert!(
             !out.contains("Resolved Exception"),
             "null section promoted:\n{out}"

@@ -8910,6 +8910,47 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(out.len() < 3000, "got {} chars:\n{out}", out.len());
     }
 
+    /// Real 2026-10-08/09 auth runs (three sessions, 13 tee-log reads), reproduced
+    /// with an empty datasource password: the trace ends at Hibernate's
+    /// `Unable to determine Dialect without JDBC metadata`, a symptom. The
+    /// cause — `PSQLException: … SCRAM-based authentication, but no password
+    /// was provided` — is the root of a chain Hibernate logged mid-way through
+    /// `system-out`, and the tail window kept only the context-failure chain
+    /// that the trace already prints.
+    #[test]
+    fn captured_output_keeps_a_root_cause_the_trace_does_not_reach() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().join("target/failsafe-reports");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join("TEST-com.example.auth.security.SecurityHeadersIntegrationTest.xml"),
+            include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.auth.security.SecurityHeadersIntegrationTest.xml"
+            ),
+        )
+        .unwrap();
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "[ERROR] Tests run: 1, Failures: 0, Errors: 1, Skipped: 0\n[INFO] BUILD FAILURE",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "verify",
+        )
+        .text;
+        assert_eq!(
+            out.matches("PSQLException: The server requested SCRAM-based authentication")
+                .count(),
+            1,
+            "the logged root cause renders once:\n{out}"
+        );
+        assert!(
+            out.lines()
+                .all(|l| l.is_empty() || l.starts_with('[') || l.starts_with('(')),
+            "every body line keeps its tag:\n{out}"
+        );
+    }
+
     #[test]
     fn signature_line_normalizes_only_where_the_failure_happened() {
         let a = "Failed to load ApplicationContext for [Web@77d4ac52 testClass = com.x.LongerNamedTest, locations = [], classes = [com.x.A...";
