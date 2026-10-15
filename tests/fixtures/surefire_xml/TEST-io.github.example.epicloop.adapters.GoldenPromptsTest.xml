@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="io.github.example.epicloop.adapters.GoldenPromptsTest" time="0.803" tests="2" errors="0" skipped="0" failures="2" flakes="0">
+  <testcase name="everyPhaseSendsItsPrompt()[5]" classname="io.github.example.epicloop.adapters.GoldenPromptsTest" time="0.004">
+    <failure message="[update the fixtures with ./mvnw test -pl adapters -Dtest=GoldenPromptsTest -Dgolden.update] &#10;expected: &#10;  &quot;You are re-reviewing one fix&#10;  round of Jira sub-task DEV-101 (requirements: &lt;run&gt;/work/DEV-101.txt). A review raised the findings in &lt;run&gt;/work/DEV-101-open-0.json (JSON, each with&#10;  an id); the implementer attempted to fix them and appended a fix report to &lt;run&gt;/work/DEV-101-report.md. Treat the&#10;  report as unverified claims.&#10;  &lt;run&gt;/work/review-c2784f7..1fcbc6c.diff holds the fix commits, a stat summary and the fix diff&#10;  with 10 lines of context. Read it once; do not re-run git to rebuild it.&#10;  Your scope is that findings list and the fix diff, plus the one named risk below that reaches&#10;  outside it. Give every finding one verdict, with file:line evidence:&#10;  - addressed: all of the finding is fixed, every case, place and criterion it names. &quot;Attempted&quot;&#10;    is not addressed, and neither is a fix whose report does not show the covering tests, the&#10;    command and the output. An unverified acceptance criterion is addressed once you have confirmed&#10;    it is met, in the fix diff or in the code and the test the report points at.&#10;  - not_addressed: any part of the finding is still there. A fix that covers part of what the&#10;    finding asks (two of its three cases) is not_addressed, and its evidence names the part left.&#10;  - invalid: the implementer contested the finding in its report and the code proves it right.&#10;  The named risk: a fix that changes behaviour can leave a description of that behaviour stale: an&#10;  API operation&apos;s description, the published contract, a doc comment, a standards document of the&#10;  repository. When the fix changes behaviour, find every description of it, wherever it lives, and&#10;  read it. A description that now contradicts the code is a major finding of this round and goes to&#10;  new_findings, as do the other problems the fix itself introduced. Anything else you notice in&#10;  code the fix did not touch goes to out_of_scope: it does not block this work.&#10;  The gate (bash ../gate.sh) already passed on this HEAD: do not run the build or the test&#10;  suite. Its passing meets every criterion the gate command itself checks, such as the build&#10;  succeeding and the test suite green: such a criterion is met, never goes under unverified, and an&#10;  open finding on it is addressed. A criterion about what the gate does not show (a specific&#10;  environment, a manual check) stays yours to verify. Run a focused test only when the code raises a&#10;  specific doubt that no existing run answers. Do not edit files and do not change the working&#10;  tree, the index or the branch.&#10;  &#10;  The run&apos;s commits are working commits: by the loop&apos;s own rule they carry the unit&apos;s key and stage&#10;  at the start of their subject, or of their body when a commit hook asked for another subject. The&#10;  repository&apos;s and the user&apos;s commit format does not apply to them: a commit&apos;s subject, body or&#10;  trailers are never a finding.&#10;  &#10;  Give every finding the axis it rests on: spec for what the ticket or the spec asked for, standards&#10;  for the repository&apos;s documented standards, correctness for a defect outside both.&quot;&#10; but was: &#10;  &quot;You are re-reviewing one fix&#10;  round of Jira sub-task DEV-101 (requirements: &lt;run&gt;/work/DEV-101.txt). A review raised the findings in &lt;run&gt;/work/DEV-101-open-0.json (JSON, each with&#10;  an id); the implementer attempted to fix them and appended a fix report to &lt;run&gt;/work/DEV-101-report.md. Treat the&#10;  report as unverified claims.&#10;  &lt;run&gt;/work/review-c2784f7..1fcbc6c.diff holds the fix commits, a stat summary and the fix diff&#10;  with 10 lines of context. Read it once; do not re-run git to rebuild it.&#10;  Your scope is that findings list and the fix diff, plus exactly one named risk below that reaches&#10;  outside it. Give every finding one verdict, with file:line evidence:&#10;  - addressed: all of the finding is fixed, every case, place and criterion it names. &quot;Attempted&quot;&#10;    is not addressed, and neither is a fix whose report does not show the covering tests, the&#10;    command and the output. An unverified acceptance criterion is addressed once you have confirmed&#10;    it is met, in the fix diff or in the code and the test the report points at.&#10;  - not_addressed: any part of the finding is still there. A fix that covers part of what the&#10;    finding asks (two of its three cases) is not_addressed, and its evidence names the part left.&#10;  - invalid: the implementer contested the finding in its report and the code proves it right.&#10;  The named risk: a fix that changes behaviour can leave a description of that behaviour stale: an&#10;  API operation&apos;s description, the published contract, a doc comment, a standards document of the&#10;  repository. When the fix changes behaviour, find every description of it, wherever it lives, and&#10;  read it. A description that now contradicts the code is a major finding of this round and goes to&#10;  new_findings, as do the other problems the fix itself introduced. Anything else you notice in&#10;  code the fix did not touch goes to out_of_scope: it does not block this work.&#10;  The gate (bash ../gate.sh) already passed on this HEAD: do not run the build or the test&#10;  suite. Its passing meets every criterion the gate command itself checks, such as the build&#10;  succeeding and the test suite green: such a criterion is met, never goes under unverified, and an&#10;  open finding on it is addressed. A criterion about what the gate does not show (a specific&#10;  environment, a manual check) stays yours to verify. Run a focused test only when the code raises a&#10;  specific doubt that no existing run answers. Do not edit files and do not change the working&#10;  tree, the index or the branch.&#10;  &#10;  The run&apos;s commits are working commits: by the loop&apos;s own rule they carry the unit&apos;s key and stage&#10;  at the start of their subject, or of their body when a commit hook asked for another subject. The&#10;  repository&apos;s and the user&apos;s commit format does not apply to them: a commit&apos;s subject, body or&#10;  trailers are never a finding.&#10;  &#10;  Give every finding the axis it rests on: spec for what the ticket or the spec asked for, standards&#10;  for the repository&apos;s documented standards, correctness for a defect outside both.&quot;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: 
+[update the fixtures with ./mvnw test -pl adapters -Dtest=GoldenPromptsTest -Dgolden.update] 
+expected: 
+  "You are re-reviewing one fix
+  round of Jira sub-task DEV-101 (requirements: <run>/work/DEV-101.txt). A review raised the findings in <run>/work/DEV-101-open-0.json (JSON, each with
+  an id); the implementer attempted to fix them and appended a fix report to <run>/work/DEV-101-report.md. Treat the
+  report as unverified claims.
+  <run>/work/review-c2784f7..1fcbc6c.diff holds the fix commits, a stat summary and the fix diff
+  with 10 lines of context. Read it once; do not re-run git to rebuild it.
+  Your scope is that findings list and the fix diff, plus the one named risk below that reaches
+  outside it. Give every finding one verdict, with file:line evidence:
+  - addressed: all of the finding is fixed, every case, place and criterion it names. "Attempted"
+    is not addressed, and neither is a fix whose report does not show the covering tests, the
+    command and the output. An unverified acceptance criterion is addressed once you have confirmed
+    it is met, in the fix diff or in the code and the test the report points at.
+  - not_addressed: any part of the finding is still there. A fix that covers part of what the
+    finding asks (two of its three cases) is not_addressed, and its evidence names the part left.
+  - invalid: the implementer contested the finding in its report and the code proves it right.
+  The named risk: a fix that changes behaviour can leave a description of that behaviour stale: an
+  API operation's description, the published contract, a doc comment, a standards document of the
+  repository. When the fix changes behaviour, find every description of it, wherever it lives, and
+  read it. A description that now contradicts the code is a major finding of this round and goes to
+  new_findings, as do the other problems the fix itself introduced. Anything else you notice in
+  code the fix did not touch goes to out_of_scope: it does not block this work.
+  The gate (bash ../gate.sh) already passed on this HEAD: do not run the build or the test
+  suite. Its passing meets every criterion the gate command itself checks, such as the build
+  succeeding and the test suite green: such a criterion is met, never goes under unverified, and an
+  open finding on it is addressed. A criterion about what the gate does not show (a specific
+  environment, a manual check) stays yours to verify. Run a focused test only when the code raises a
+  specific doubt that no existing run answers. Do not edit files and do not change the working
+  tree, the index or the branch.
+  
+  The run's commits are working commits: by the loop's own rule they carry the unit's key and stage
+  at the start of their subject, or of their body when a commit hook asked for another subject. The
+  repository's and the user's commit format does not apply to them: a commit's subject, body or
+  trailers are never a finding.
+  
+  Give every finding the axis it rests on: spec for what the ticket or the spec asked for, standards
+  for the repository's documented standards, correctness for a defect outside both."
+ but was: 
+  "You are re-reviewing one fix
+  round of Jira sub-task DEV-101 (requirements: <run>/work/DEV-101.txt). A review raised the findings in <run>/work/DEV-101-open-0.json (JSON, each with
+  an id); the implementer attempted to fix them and appended a fix report to <run>/work/DEV-101-report.md. Treat the
+  report as unverified claims.
+  <run>/work/review-c2784f7..1fcbc6c.diff holds the fix commits, a stat summary and the fix diff
+  with 10 lines of context. Read it once; do not re-run git to rebuild it.
+  Your scope is that findings list and the fix diff, plus exactly one named risk below that reaches
+  outside it. Give every finding one verdict, with file:line evidence:
+  - addressed: all of the finding is fixed, every case, place and criterion it names. "Attempted"
+    is not addressed, and neither is a fix whose report does not show the covering tests, the
+    command and the output. An unverified acceptance criterion is addressed once you have confirmed
+    it is met, in the fix diff or in the code and the test the report points at.
+  - not_addressed: any part of the finding is still there. A fix that covers part of what the
+    finding asks (two of its three cases) is not_addressed, and its evidence names the part left.
+  - invalid: the implementer contested the finding in its report and the code proves it right.
+  The named risk: a fix that changes behaviour can leave a description of that behaviour stale: an
+  API operation's description, the published contract, a doc comment, a standards document of the
+  repository. When the fix changes behaviour, find every description of it, wherever it lives, and
+  read it. A description that now contradicts the code is a major finding of this round and goes to
+  new_findings, as do the other problems the fix itself introduced. Anything else you notice in
+  code the fix did not touch goes to out_of_scope: it does not block this work.
+  The gate (bash ../gate.sh) already passed on this HEAD: do not run the build or the test
+  suite. Its passing meets every criterion the gate command itself checks, such as the build
+  succeeding and the test suite green: such a criterion is met, never goes under unverified, and an
+  open finding on it is addressed. A criterion about what the gate does not show (a specific
+  environment, a manual check) stays yours to verify. Run a focused test only when the code raises a
+  specific doubt that no existing run answers. Do not edit files and do not change the working
+  tree, the index or the branch.
+  
+  The run's commits are working commits: by the loop's own rule they carry the unit's key and stage
+  at the start of their subject, or of their body when a commit hook asked for another subject. The
+  repository's and the user's commit format does not apply to them: a commit's subject, body or
+  trailers are never a finding.
+  
+  Give every finding the axis it rests on: spec for what the ticket or the spec asked for, standards
+  for the repository's documented standards, correctness for a defect outside both."
+	at io.github.example.epicloop.adapters.GoldenPromptsTest.lambda$everyPhaseSendsItsPrompt$0(GoldenPromptsTest.java:74)
+	at io.github.example.epicloop.adapters.GoldenPromptsTest.lambda$calls$2(GoldenPromptsTest.java:153)
+]]></failure>
+  </testcase>
+  <testcase name="everyPhaseSendsItsPrompt()[7]" classname="io.github.example.epicloop.adapters.GoldenPromptsTest" time="0.001">
+    <failure message="[update the fixtures with ./mvnw test -pl adapters -Dtest=GoldenPromptsTest -Dgolden.update] &#10;expected: &#10;  &quot;You are re-reviewing one fix&#10;  round of Jira sub-task DEV-101 (requirements: &lt;run&gt;/work/DEV-101.txt). A review raised the findings in &lt;run&gt;/work/DEV-101-open-1.json (JSON, each with&#10;  an id); the implementer attempted to fix them and appended a fix report to &lt;run&gt;/work/DEV-101-report.md. Treat the&#10;  report as unverified claims.&#10;  The implementer committed nothing this round; whatever it contested or showed&#10;  as already met is in the report.&#10;  Your scope is that findings list and the fix diff, plus the one named risk below that reaches&#10;  outside it. Give every finding one verdict, with file:line evidence:&#10;  - addressed: all of the finding is fixed, every case, place and criterion it names. &quot;Attempted&quot;&#10;    is not addressed, and neither is a fix whose report does not show the covering tests, the&#10;    command and the output. An unverified acceptance criterion is addressed once you have confirmed&#10;    it is met, in the fix diff or in the code and the test the report points at.&#10;  - not_addressed: any part of the finding is still there. A fix that covers part of what the&#10;    finding asks (two of its three cases) is not_addressed, and its evidence names the part left.&#10;  - invalid: the implementer contested the finding in its report and the code proves it right.&#10;  The named risk: a fix that changes behaviour can leave a description of that behaviour stale: an&#10;  API operation&apos;s description, the published contract, a doc comment, a standards document of the&#10;  repository. When the fix changes behaviour, find every description of it, wherever it lives, and&#10;  read it. A description that now contradicts the code is a major finding of this round and goes to&#10;  new_findings, as do the other problems the fix itself introduced. Anything else you notice in&#10;  code the fix did not touch goes to out_of_scope: it does not block this work.&#10;  The gate (bash ../gate.sh) already passed on this HEAD: do not run the build or the test&#10;  suite. Its passing meets every criterion the gate command itself checks, such as the build&#10;  succeeding and the test suite green: such a criterion is met, never goes under unverified, and an&#10;  open finding on it is addressed. A criterion about what the gate does not show (a specific&#10;  environment, a manual check) stays yours to verify. Run a focused test only when the code raises a&#10;  specific doubt that no existing run answers. Do not edit files and do not change the working&#10;  tree, the index or the branch.&#10;  &#10;  The run&apos;s commits are working commits: by the loop&apos;s own rule they carry the unit&apos;s key and stage&#10;  at the start of their subject, or of their body when a commit hook asked for another subject. The&#10;  repository&apos;s and the user&apos;s commit format does not apply to them: a commit&apos;s subject, body or&#10;  trailers are never a finding.&#10;  &#10;  Give every finding the axis it rests on: spec for what the ticket or the spec asked for, standards&#10;  for the repository&apos;s documented standards, correctness for a defect outside both.&quot;&#10; but was: &#10;  &quot;You are re-reviewing one fix&#10;  round of Jira sub-task DEV-101 (requirements: &lt;run&gt;/work/DEV-101.txt). A review raised the findings in &lt;run&gt;/work/DEV-101-open-1.json (JSON, each with&#10;  an id); the implementer attempted to fix them and appended a fix report to &lt;run&gt;/work/DEV-101-report.md. Treat the&#10;  report as unverified claims.&#10;  The implementer committed nothing this round; whatever it contested or showed&#10;  as already met is in the report.&#10;  Your scope is that findings list and the fix diff, plus exactly one named risk below that reaches&#10;  outside it. Give every finding one verdict, with file:line evidence:&#10;  - addressed: all of the finding is fixed, every case, place and criterion it names. &quot;Attempted&quot;&#10;    is not addressed, and neither is a fix whose report does not show the covering tests, the&#10;    command and the output. An unverified acceptance criterion is addressed once you have confirmed&#10;    it is met, in the fix diff or in the code and the test the report points at.&#10;  - not_addressed: any part of the finding is still there. A fix that covers part of what the&#10;    finding asks (two of its three cases) is not_addressed, and its evidence names the part left.&#10;  - invalid: the implementer contested the finding in its report and the code proves it right.&#10;  The named risk: a fix that changes behaviour can leave a description of that behaviour stale: an&#10;  API operation&apos;s description, the published contract, a doc comment, a standards document of the&#10;  repository. When the fix changes behaviour, find every description of it, wherever it lives, and&#10;  read it. A description that now contradicts the code is a major finding of this round and goes to&#10;  new_findings, as do the other problems the fix itself introduced. Anything else you notice in&#10;  code the fix did not touch goes to out_of_scope: it does not block this work.&#10;  The gate (bash ../gate.sh) already passed on this HEAD: do not run the build or the test&#10;  suite. Its passing meets every criterion the gate command itself checks, such as the build&#10;  succeeding and the test suite green: such a criterion is met, never goes under unverified, and an&#10;  open finding on it is addressed. A criterion about what the gate does not show (a specific&#10;  environment, a manual check) stays yours to verify. Run a focused test only when the code raises a&#10;  specific doubt that no existing run answers. Do not edit files and do not change the working&#10;  tree, the index or the branch.&#10;  &#10;  The run&apos;s commits are working commits: by the loop&apos;s own rule they carry the unit&apos;s key and stage&#10;  at the start of their subject, or of their body when a commit hook asked for another subject. The&#10;  repository&apos;s and the user&apos;s commit format does not apply to them: a commit&apos;s subject, body or&#10;  trailers are never a finding.&#10;  &#10;  Give every finding the axis it rests on: spec for what the ticket or the spec asked for, standards&#10;  for the repository&apos;s documented standards, correctness for a defect outside both.&quot;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: 
+[update the fixtures with ./mvnw test -pl adapters -Dtest=GoldenPromptsTest -Dgolden.update] 
+expected: 
+  "You are re-reviewing one fix
+  round of Jira sub-task DEV-101 (requirements: <run>/work/DEV-101.txt). A review raised the findings in <run>/work/DEV-101-open-1.json (JSON, each with
+  an id); the implementer attempted to fix them and appended a fix report to <run>/work/DEV-101-report.md. Treat the
+  report as unverified claims.
+  The implementer committed nothing this round; whatever it contested or showed
+  as already met is in the report.
+  Your scope is that findings list and the fix diff, plus the one named risk below that reaches
+  outside it. Give every finding one verdict, with file:line evidence:
+  - addressed: all of the finding is fixed, every case, place and criterion it names. "Attempted"
+    is not addressed, and neither is a fix whose report does not show the covering tests, the
+    command and the output. An unverified acceptance criterion is addressed once you have confirmed
+    it is met, in the fix diff or in the code and the test the report points at.
+  - not_addressed: any part of the finding is still there. A fix that covers part of what the
+    finding asks (two of its three cases) is not_addressed, and its evidence names the part left.
+  - invalid: the implementer contested the finding in its report and the code proves it right.
+  The named risk: a fix that changes behaviour can leave a description of that behaviour stale: an
+  API operation's description, the published contract, a doc comment, a standards document of the
+  repository. When the fix changes behaviour, find every description of it, wherever it lives, and
+  read it. A description that now contradicts the code is a major finding of this round and goes to
+  new_findings, as do the other problems the fix itself introduced. Anything else you notice in
+  code the fix did not touch goes to out_of_scope: it does not block this work.
+  The gate (bash ../gate.sh) already passed on this HEAD: do not run the build or the test
+  suite. Its passing meets every criterion the gate command itself checks, such as the build
+  succeeding and the test suite green: such a criterion is met, never goes under unverified, and an
+  open finding on it is addressed. A criterion about what the gate does not show (a specific
+  environment, a manual check) stays yours to verify. Run a focused test only when the code raises a
+  specific doubt that no existing run answers. Do not edit files and do not change the working
+  tree, the index or the branch.
+  
+  The run's commits are working commits: by the loop's own rule they carry the unit's key and stage
+  at the start of their subject, or of their body when a commit hook asked for another subject. The
+  repository's and the user's commit format does not apply to them: a commit's subject, body or
+  trailers are never a finding.
+  
+  Give every finding the axis it rests on: spec for what the ticket or the spec asked for, standards
+  for the repository's documented standards, correctness for a defect outside both."
+ but was: 
+  "You are re-reviewing one fix
+  round of Jira sub-task DEV-101 (requirements: <run>/work/DEV-101.txt). A review raised the findings in <run>/work/DEV-101-open-1.json (JSON, each with
+  an id); the implementer attempted to fix them and appended a fix report to <run>/work/DEV-101-report.md. Treat the
+  report as unverified claims.
+  The implementer committed nothing this round; whatever it contested or showed
+  as already met is in the report.
+  Your scope is that findings list and the fix diff, plus exactly one named risk below that reaches
+  outside it. Give every finding one verdict, with file:line evidence:
+  - addressed: all of the finding is fixed, every case, place and criterion it names. "Attempted"
+    is not addressed, and neither is a fix whose report does not show the covering tests, the
+    command and the output. An unverified acceptance criterion is addressed once you have confirmed
+    it is met, in the fix diff or in the code and the test the report points at.
+  - not_addressed: any part of the finding is still there. A fix that covers part of what the
+    finding asks (two of its three cases) is not_addressed, and its evidence names the part left.
+  - invalid: the implementer contested the finding in its report and the code proves it right.
+  The named risk: a fix that changes behaviour can leave a description of that behaviour stale: an
+  API operation's description, the published contract, a doc comment, a standards document of the
+  repository. When the fix changes behaviour, find every description of it, wherever it lives, and
+  read it. A description that now contradicts the code is a major finding of this round and goes to
+  new_findings, as do the other problems the fix itself introduced. Anything else you notice in
+  code the fix did not touch goes to out_of_scope: it does not block this work.
+  The gate (bash ../gate.sh) already passed on this HEAD: do not run the build or the test
+  suite. Its passing meets every criterion the gate command itself checks, such as the build
+  succeeding and the test suite green: such a criterion is met, never goes under unverified, and an
+  open finding on it is addressed. A criterion about what the gate does not show (a specific
+  environment, a manual check) stays yours to verify. Run a focused test only when the code raises a
+  specific doubt that no existing run answers. Do not edit files and do not change the working
+  tree, the index or the branch.
+  
+  The run's commits are working commits: by the loop's own rule they carry the unit's key and stage
+  at the start of their subject, or of their body when a commit hook asked for another subject. The
+  repository's and the user's commit format does not apply to them: a commit's subject, body or
+  trailers are never a finding.
+  
+  Give every finding the axis it rests on: spec for what the ticket or the spec asked for, standards
+  for the repository's documented standards, correctness for a defect outside both."
+	at io.github.example.epicloop.adapters.GoldenPromptsTest.lambda$everyPhaseSendsItsPrompt$0(GoldenPromptsTest.java:74)
+	at io.github.example.epicloop.adapters.GoldenPromptsTest.lambda$calls$2(GoldenPromptsTest.java:153)
+]]></failure>
+  </testcase>
+</testsuite>

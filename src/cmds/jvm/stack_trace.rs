@@ -4,6 +4,9 @@
 //! chains), classifies frames as application or framework by package prefix,
 //! collapses framework noise, and preserves root-cause frames.
 
+use regex::Regex;
+use std::sync::LazyLock;
+
 const MAX_HEADER_LENGTH: usize = 200;
 /// See `truncate_root_header`.
 const MAX_ROOT_HEADER_LENGTH: usize = 600;
@@ -106,16 +109,23 @@ fn without_trailing_blank_lines(mut header: String) -> String {
     header
 }
 
+/// A frame (`at org.Foo.bar(Foo.java:12)`, `at java.base/java.lang.Thread…`)
+/// or the counter that closes a run of them (`... 12 more`, `... 3 framework
+/// frames omitted`). Only the shape counts, not the `at ` / `... ` prefix:
+/// a message is prose, and prose has lines that open with those words. A
+/// golden-file assertion broke on `  at the start of their subject, …`
+/// (2026-10-10 mattimplement): the header ended there, the rest of the
+/// message was counted as frames, and the label's copy no longer matched it.
+static FRAME_LINE_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(?:at [\w$./<>-]+\(|\.\.\. \d+ )").unwrap());
+
 /// A line that belongs to the frame section of a trace rather than to the
 /// exception message above it. The `... (N lines elided)` marker that
 /// `truncate_lines` leaves inside a capped message shares the frames' `... `
 /// prefix but stands for message lines — read as a frame, it ended the
 /// message block early and the tail below it rendered twice.
 pub(crate) fn is_frame_like(line: &str) -> bool {
-    let t = line.trim_start();
-    t.starts_with("at ")
-        || (t.starts_with("... ") && !is_message_elision(t))
-        || is_structural_line(line)
+    FRAME_LINE_RE.is_match(line.trim_start()) || is_structural_line(line)
 }
 
 /// The marker `truncate_lines` puts in place of a capped message's middle,

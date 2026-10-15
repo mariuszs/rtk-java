@@ -8873,6 +8873,43 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
         assert!(out.len() < 3000, "got {} chars:\n{out}", out.len());
     }
 
+    /// Real 2026-10-10 mattimplement run (`GoldenPromptsTest`, reproduced on
+    /// the same suite): a 75-line golden-file assertion whose two sides differ
+    /// in one line. The label renders it as that one line per side, then the
+    /// trace header printed ~20 lines of the same message again — ~1.4k chars
+    /// per failure, most of a 10k render of six failures. The header ended at
+    /// a prose line opening with `at `, read as a frame, so the label's copy
+    /// of the message never matched it.
+    #[test]
+    fn render_failure_block_prints_a_long_message_once() {
+        let result = surefire_reports::parse_content(
+            include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-io.github.example.epicloop.adapters.GoldenPromptsTest.xml"
+            ),
+            &pkgs("io.github.example.epicloop"),
+        )
+        .expect("real surefire report parses");
+        let mut out = String::new();
+        super::render_failure_block(&mut out, &result.failures);
+        // Both failures differ from their golden file in the same line, so
+        // the second renders as a reference to the first.
+        assert_eq!(
+            out.matches("[update the fixtures with").count(),
+            1,
+            "the message renders once:\n{out}"
+        );
+        assert!(out.contains("... same failure as"), "{out}");
+        assert!(
+            out.contains("plus exactly one named risk below"),
+            "the differing line survives:\n{out}"
+        );
+        assert!(
+            out.contains("GoldenPromptsTest.java:74)"),
+            "the test's own frame survives:\n{out}"
+        );
+        assert!(out.len() < 3000, "got {} chars:\n{out}", out.len());
+    }
+
     #[test]
     fn signature_line_normalizes_only_where_the_failure_happened() {
         let a = "Failed to load ApplicationContext for [Web@77d4ac52 testClass = com.x.LongerNamedTest, locations = [], classes = [com.x.A...";
