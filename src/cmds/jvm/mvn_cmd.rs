@@ -8,7 +8,11 @@ use crate::cmds::jvm::stack_trace;
 use crate::cmds::jvm::surefire_reports::{
     self, FailureKind, ReportScope, SurefireResult, TestFailure, TestSummary,
 };
+use crate::core::arg_tokenizer::{
+    Dialect, Token, TokenKind, ValueSpec, before_dashdash, tokenize_grammar,
+};
 use crate::core::runner;
+use crate::core::shell::display_args;
 use crate::core::tracking;
 use crate::core::utils::{exit_code_from_status, resolved_command, strip_ansi, truncate};
 use anyhow::{Context, Result};
@@ -371,7 +375,7 @@ fn run_tests_like(
     runner::run_filtered(
         cmd,
         &tool_name,
-        &args.join(" "),
+        &display_args(args),
         move |raw: &str| {
             // Thread `app_packages` into the stdout parser so its framework
             // frame filtering matches the XML enrichment's behavior — keeps
@@ -461,7 +465,7 @@ fn run_simple_goal(
     runner::run_filtered(
         cmd,
         &tool_name,
-        &args.join(" "),
+        &display_args(args),
         filter,
         runner::RunOptions::with_tee(&tee_label),
     )
@@ -543,56 +547,63 @@ const MAVEN_PHASES: &[&str] = &[
     "site-deploy",
 ];
 
-/// Maven options that consume the FOLLOWING token as their value, so that
-/// token must never be treated as a goal (`-pl core`, `-rf :module`).
-const VALUE_TAKING_OPTS: &[&str] = &[
-    "-pl",
-    "--projects",
-    "-P",
-    "--activate-profiles",
-    "-f",
-    "--file",
-    "-T",
-    "--threads",
-    "-rf",
-    "--resume-from",
-    "-s",
-    "--settings",
-    "-gs",
-    "--global-settings",
-    "-l",
-    "--log-file",
-    "-b",
-    "--builder",
-    "-t",
-    "--toolchains",
-];
+/// Maven reads its options with Apache commons-cli: `-pl`, `-am`, `-rf` are
+/// whole option names, never short-option clusters.
+const MVN_DIALECT: Dialect = Dialect::CommonsCli;
+
+/// Maven options whose value may be the FOLLOWING argument, so that argument
+/// is never read as a goal (`-pl core`, `-rf :module`, `-T 1C`).
+fn mvn_takes_value(_kind: TokenKind, name: &str) -> Option<ValueSpec> {
+    matches!(
+        name,
+        "b" | "builder"
+            | "color"
+            | "D"
+            | "define"
+            | "emp"
+            | "encrypt-master-password"
+            | "ep"
+            | "encrypt-password"
+            | "f"
+            | "file"
+            | "gs"
+            | "global-settings"
+            | "gt"
+            | "global-toolchains"
+            | "l"
+            | "log-file"
+            | "P"
+            | "activate-profiles"
+            | "pl"
+            | "projects"
+            | "rf"
+            | "resume-from"
+            | "s"
+            | "settings"
+            | "t"
+            | "toolchains"
+            | "T"
+            | "threads"
+    )
+    .then(ValueSpec::value)
+}
+
+fn mvn_tokens(args: &[String]) -> Vec<Token<'_>> {
+    tokenize_grammar(args, &mvn_takes_value, MVN_DIALECT)
+}
 
 /// Extract the goal/phase tokens (in order) from a raw mvn arg vector.
-/// A token is a goal iff it (1) is not a flag, (2) is not the value of a
-/// preceding value-taking option, and (3) is a known lifecycle phase or has
+/// A token is a goal iff it (1) is a free positional — not a flag, not the
+/// value of a value-taking option — and (2) is a known lifecycle phase or has
 /// the `plugin:goal` form (contains ':').
 fn parse_goals(args: &[String]) -> Vec<String> {
-    let mut goals = Vec::new();
-    let mut skip_next = false;
-    for arg in args {
-        if skip_next {
-            skip_next = false;
-            continue;
-        }
-        if arg.starts_with('-') {
-            // `-pl core` style: the value is a separate token. `-pl=core` and
-            // `-Dk=v` keep the value attached, so only bare opts skip-next.
-            if VALUE_TAKING_OPTS.contains(&arg.as_str()) {
-                skip_next = true;
-            }
-            continue;
-        }
-        if MAVEN_PHASES.contains(&arg.as_str()) || arg.contains(':') {
-            goals.push(arg.clone());
-        }
-    }
-    goals
+    mvn_tokens(args)
+        .iter()
+        .filter(|t| t.is_free_positional())
+        .map(|t| t.text)
+        .filter(|g| MAVEN_PHASES.contains(g) || g.contains(':'))
+        .map(String::from)
+        .collect()
 }
 
 /// Phases that actually execute surefire/failsafe (everything from `test`
@@ -1163,9 +1174,21 @@ fn filter_mvn_multi(raw: &str, goals_header: &str) -> String {
 /// Remove `-q` / `--quiet` so RTK receives full output and does the
 /// compression itself (multi-goal "smart quiet").
 fn strip_quiet_flags(args: &[String]) -> Vec<String> {
+    let tokens = mvn_tokens(args);
+    let quiet: HashSet<usize> = before_dashdash(&tokens)
+        .iter()
+        .filter(|t| matches!(t.kind, TokenKind::Short | TokenKind::Long))
+        .filter(|t| matches!(t.text, "q" | "quiet"))
+        .map(|t| t.source_index)
+        .collect();
+    without_indices(args, &quiet)
+}
+
+fn without_indices(args: &[String], drop: &HashSet<usize>) -> Vec<String> {
     args.iter()
-        .filter(|a| a.as_str() != "-q" && a.as_str() != "--quiet")
-        .cloned()
+        .enumerate()
+        .filter(|(i, _)| !drop.contains(i))
+        .map(|(_, a)| a.clone())
         .collect()
 }
 
@@ -1207,7 +1230,7 @@ fn run_multi_goal(binary: MvnBinary, args: &[String], verbose: u8) -> Result<i32
     runner::run_filtered(
         cmd,
         &tool_name,
-        &run_args.join(" "),
+        &display_args(&run_args),
         move |raw: &str| {
             if multi_goal_needs_raw(raw) {
                 return raw.to_string();
@@ -1289,19 +1312,13 @@ fn filtered_goal_args(str_args: &[String], goal: &str) -> Vec<String> {
 /// Drop the first occurrence of the matched goal token, keeping every flag —
 /// `-q` included. The `run_*` helpers prepend their own canonical goal name.
 fn drop_first_goal(str_args: &[String], goal: &str) -> Vec<String> {
-    let mut removed = false;
-    str_args
+    let first: HashSet<usize> = mvn_tokens(str_args)
         .iter()
-        .filter(|a| {
-            if !removed && a.as_str() == goal {
-                removed = true;
-                false
-            } else {
-                true
-            }
-        })
-        .cloned()
-        .collect()
+        .find(|t| t.is_free_positional() && t.text == goal)
+        .map(|t| t.source_index)
+        .into_iter()
+        .collect();
+    without_indices(str_args, &first)
 }
 
 pub fn dispatch(binary: MvnBinary, args: &[OsString], verbose: u8) -> Result<i32> {

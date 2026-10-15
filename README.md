@@ -132,7 +132,7 @@ rtk mvn clean verify             # multi-goal chain: per-segment filters
 rtk mvn clean test-compile checkstyle:check
 rtk mvn spring-boot:run          # unknown / long-running goal → streaming passthrough
 rtk mvnd test                    # Maven Daemon, same filters, tracked separately
-rtk proxy mvn test               # bypass: full raw output
+rtk bypass mvn test               # bypass: full raw output
 ```
 
 `mvn`, `./mvnw` and `mvnw.cmd` are auto-detected; `rtk mvnd` always calls the daemon
@@ -171,7 +171,7 @@ so instead of printing a cheerful summary:
 
 ```
 mvn test: 0 tests executed — surefire detected no tests.
-Check pom.xml (surefire plugin configuration) or run: rtk proxy mvn test
+Check pom.xml (surefire plugin configuration) or run: rtk bypass mvn test
 ```
 
 ### Noise the compile filter removes
@@ -360,7 +360,7 @@ rtk summary <cmd> [args...]     # Direct argv execution + heuristic summary
 rtk run <cmd> [args...]         # Raw direct execution (no filtering/tracking)
 rtk run -c '<script>'           # Shell string via sh (cmd on Windows)
 rtk run --shell fish -c '<script>' # Explicit shell for shell-specific syntax
-rtk proxy <command>             # Raw passthrough + tracking
+rtk bypass <command>            # Raw passthrough + tracking (`rtk proxy` alias)
 ```
 
 `rtk run`, `rtk err`, `rtk test`, and `rtk summary` preserve positional
@@ -403,7 +403,6 @@ rtk session                     # Show RTK adoption across recent sessions
 ## Global Flags
 
 ```bash
--u, --ultra-compact    # ASCII icons, inline format (extra token savings)
 -v, --verbose          # Increase verbosity (-v, -vv, -vvv)
 ```
 
@@ -456,7 +455,7 @@ rtk init --show             # Verify installation
 
 After install, **restart Claude Code**.
 
-By default `RTK.md` says nothing about RTK itself. Set `[awareness] level = "high"` in `config.toml` to let the agent know `rtk gain` / `rtk proxy`, or `"full"` for an agent without hook support (or not yet supported by RTK) so it prefixes `rtk` itself — see [Configuration](docs/guide/getting-started/configuration.md#awareness-level).
+By default `RTK.md` says nothing about RTK itself. Set `[awareness] level = "high"` in `config.toml` to let the agent know `rtk gain` / `rtk bypass`, or `"full"` for an agent without hook support (or not yet supported by RTK) so it prefixes `rtk` itself — see [Configuration](docs/guide/getting-started/configuration.md#awareness-level).
 
 ## Windows
 

@@ -62,7 +62,7 @@ If the summary says `no tests run` but surefire reports are empty or
 absent, rtk emits a diagnostic instead of the silent summary:
 
 ```
-mvn test: 0 tests executed — surefire detected no tests. Check pom.xml (surefire plugin configuration) or run: rtk proxy mvn test
+mvn test: 0 tests executed — surefire detected no tests. Check pom.xml (surefire plugin configuration) or run: rtk bypass mvn test
 ```
 
 ### Bypass
@@ -70,5 +70,5 @@ mvn test: 0 tests executed — surefire detected no tests. Check pom.xml (surefi
 For the rare cases where you need the full raw Maven output:
 
 ```bash
-rtk proxy mvn test
+rtk bypass mvn test
 ```
