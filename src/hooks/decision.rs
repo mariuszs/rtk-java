@@ -337,13 +337,13 @@ pub(crate) fn decide_for_agent_at(
     cwd: Option<&str>,
 ) -> HookDecision {
     let (mut excluded, transparent_prefixes) = crate::core::config::hook_rewrite_params();
-    if cwd.is_some_and(in_claude_worktree) {
+    let in_worktree = cwd.is_some_and(in_claude_worktree);
+    if in_worktree {
         excluded.push("git".to_string());
     }
     // Fork keep: the read-only guard of `decide_in_session` applies on the hook
     // path too, wherever either signal says the session is isolated.
-    let isolated =
-        cwd.is_some_and(in_claude_worktree) || super::worktree_guard::session_is_isolated();
+    let isolated = in_worktree || super::worktree_guard::session_is_isolated();
     suppress_identity(
         cmd,
         decide_in_session(

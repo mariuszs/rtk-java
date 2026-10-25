@@ -15,9 +15,9 @@
 //! filter.
 
 use regex::Regex;
-use std::path::Path;
 use std::sync::LazyLock;
 
+use super::decision::in_claude_worktree;
 use crate::discover::registry::{
     ExcludePattern, compile_exclude_patterns, normalize_transparent_prefixes,
     rewrite_command_precompiled,
@@ -35,15 +35,12 @@ static LOOP_RE: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 /// Whether the hook runs in a session isolated in a Claude Code worktree.
+///
+/// The path shape is upstream's [`in_claude_worktree`] (#3864); this only
+/// supplies the process's own directory where no hook payload reports one.
 pub(crate) fn session_is_isolated() -> bool {
-    crate::core::user_dirs::working_dir().is_some_and(|dir| in_worktree(&dir))
-}
-
-fn in_worktree(dir: &Path) -> bool {
-    let names: Vec<_> = dir.components().map(|c| c.as_os_str()).collect();
-    names
-        .windows(2)
-        .any(|pair| pair[0] == ".claude" && pair[1] == "worktrees")
+    crate::core::user_dirs::working_dir()
+        .is_some_and(|dir| dir.to_str().is_some_and(in_claude_worktree))
 }
 
 /// [`crate::discover::registry::rewrite_command`] for an isolated session:
@@ -55,6 +52,11 @@ pub(crate) fn rewrite_command(
     transparent_prefixes: &[String],
 ) -> Option<String> {
     let mut compiled = compile_exclude_patterns(excluded);
+    // Upstream leaves `git` plain only when a hook payload's cwd is a managed
+    // worktree (#3864). The isolation refuses `rtk git` just the same when this
+    // process's directory is the only signal (`rtk rewrite`, `rtk hook check`,
+    // a payload without `cwd`), so every isolated rewrite keeps it plain.
+    compiled.extend(compile_exclude_patterns(&["git".to_string()]));
     compiled.push(ExcludePattern::WorktreeGuard {
         in_loop: LOOP_RE.is_match(cmd),
     });
@@ -251,17 +253,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn worktree_is_a_dot_claude_worktrees_directory() {
-        assert!(in_worktree(Path::new("/home/u/repo/.claude/worktrees/x")));
-        assert!(in_worktree(Path::new(
-            "/home/u/repo/.claude/worktrees/x/src/main"
-        )));
-        assert!(!in_worktree(Path::new("/home/u/repo")));
-        assert!(!in_worktree(Path::new("/home/u/worktrees/x")));
-        assert!(!in_worktree(Path::new("/home/u/repo/.claude")));
-    }
-
-    #[test]
     fn glob_that_could_expand_to_git_stays_plain() {
         assert!(keep_plain("ls -la docs/diagrams/*", false));
         assert!(keep_plain("wc -l docs/diagrams/*", false));
@@ -334,6 +325,11 @@ mod tests {
             Some("rtk mvn test -Dtest=$T")
         );
         assert_eq!(rewrite_command("ls src/*", &none, &none), None);
+        assert_eq!(rewrite_command("git status", &none, &none), None);
+        assert_eq!(
+            rewrite_command("git status && cargo build", &none, &none).as_deref(),
+            Some("git status && rtk cargo build")
+        );
         assert_eq!(
             rewrite_command("for f in a b; do grep -n x $f; done", &none, &none),
             None
