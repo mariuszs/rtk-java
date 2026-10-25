@@ -343,15 +343,31 @@ mod tests {
     #[test]
     fn only_an_isolated_session_keeps_the_segment_plain() {
         use crate::hooks::decision::{HookDecision, decide_in_session};
-        use crate::hooks::permissions::PermissionVerdict;
+        use crate::hooks::permissions::{DenyRules, PermissionVerdict};
 
         let none: [String; 0] = [];
         assert_eq!(
-            decide_in_session("ls src/*", PermissionVerdict::Default, &none, &none, true),
+            decide_in_session(
+                "ls src/*",
+                PermissionVerdict::Default,
+                &none,
+                &none,
+                DenyRules::Unattested,
+                |_| None,
+                true,
+            ),
             HookDecision::Defer
         );
         assert_eq!(
-            decide_in_session("ls src/*", PermissionVerdict::Default, &none, &none, false),
+            decide_in_session(
+                "ls src/*",
+                PermissionVerdict::Default,
+                &none,
+                &none,
+                DenyRules::Unattested,
+                |_| None,
+                false,
+            ),
             HookDecision::AskRewrite("rtk ls src/*".into())
         );
     }

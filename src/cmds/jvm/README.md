@@ -72,3 +72,7 @@ For the rare cases where you need the full raw Maven output:
 ```bash
 rtk bypass mvn test
 ```
+
+### Integrity-check whitelist
+
+`Commands::Aws`, `Commands::Psql`, `Commands::Wc`, `Commands::Mypy`, `Commands::Gradlew`, `Commands::Mvn`, and `Commands::Mvnd` are included in `is_operational_command` in `src/lib.rs` because hook rewrites invoke them as RTK subcommands. The whitelist is intentionally opt-in: a newly added rewritten command must be listed or it will not receive the runtime SHA-256 hook-integrity check.
