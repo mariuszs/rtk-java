@@ -302,9 +302,44 @@ fn is_application_frame(frame: &str, app_packages: &[String]) -> bool {
     let Some(after_at) = trimmed.strip_prefix("at ") else {
         return false;
     };
-    app_packages
-        .iter()
-        .any(|pkg| after_at.starts_with(pkg.as_str()))
+    is_app_target(after_at, app_packages)
+}
+
+/// Whether the text after a frame's `at ` names a method of `app_packages`.
+/// Shared by every path that sorts frames by package, so they agree.
+///
+/// Java 9's `StackTraceElement.toString()` may put a class-loader name and a
+/// module before the class (`app//com.example.Foo…`,
+/// `com.example.app@1.0/com.example.Foo…`); matched raw, such a frame read
+/// as framework and collapsed. A lambda proxy frame
+/// (`Foo$$Lambda/0x….accept(Unknown Source)`) is never app: it is the frame
+/// `StackWalker` hides by default, and the line it stands for is already in
+/// the `lambda$…$0(Foo.java:12)` frame beside it.
+pub(crate) fn is_app_target(after_at: &str, app_packages: &[String]) -> bool {
+    let target = without_module_prefix(after_at);
+    let class = target.split_once('(').map_or(target, |(class, _)| class);
+    !class.contains("$$Lambda")
+        && app_packages
+            .iter()
+            .any(|pkg| target.starts_with(pkg.as_str()))
+}
+
+/// Drop the `loader/` and `module[@version]/` segments a frame may open with.
+/// A hidden class's own slash (`Foo$$Lambda/0x…`, Java 8's
+/// `Foo$$Lambda$12/1234`) is part of the class name, not a segment: the text
+/// before it has a `$`, the text after it a digit.
+fn without_module_prefix(after_at: &str) -> &str {
+    let mut rest = after_at;
+    for _ in 0..2 {
+        let Some((segment, tail)) = rest.split_once('/') else {
+            break;
+        };
+        if segment.contains(['$', '(']) || tail.starts_with(|c: char| c.is_ascii_digit()) {
+            break;
+        }
+        rest = tail;
+    }
+    rest
 }
 
 /// Structural lines must always be preserved even while collapsing framework
@@ -752,6 +787,66 @@ mod tests {
     fn is_app_frame_rejects_empty_or_whitespace() {
         assert!(!is_application_frame("", &pkgs("com.example")));
         assert!(!is_application_frame("   ", &pkgs("com.example")));
+    }
+
+    #[test]
+    fn is_app_frame_sees_past_module_and_loader_prefixes() {
+        let app = pkgs("com.example");
+        for frame in [
+            "\tat com.example.app/com.example.A.foo(A.java:1)",
+            "\tat com.example.app@1.0/com.example.A.foo(A.java:1)",
+            "\tat app//com.example.A.foo(A.java:1)",
+            "\tat loader/com.example.app@1.0/com.example.A.foo(A.java:1)",
+        ] {
+            assert!(is_application_frame(frame, &app), "{frame}");
+        }
+        assert!(!is_application_frame(
+            "\tat java.base/java.lang.Thread.run(Thread.java:1583)",
+            &app
+        ));
+        assert!(!is_application_frame(
+            "\tat org.example.lib/org.example.Lib.run(Lib.java:1)",
+            &app
+        ));
+    }
+
+    #[test]
+    fn is_app_frame_rejects_lambda_proxy_frames() {
+        let app = pkgs("com.example");
+        for frame in [
+            "\tat com.example.FooTest$$Lambda/0x00000000383fd400.accept(Unknown Source)",
+            "\tat com.example.FooTest$$Lambda$2721/0x00007f1ef9246b70.accept(Unknown Source)",
+            "\tat com.example.FooTest$$Lambda$12/1234567890.accept(Unknown Source)",
+            "\tat com.example.app/com.example.FooTest$$Lambda/0x00000000383fd400.run(Unknown Source)",
+        ] {
+            assert!(!is_application_frame(frame, &app), "{frame}");
+        }
+        // The synthetic method the proxy calls carries the line: kept.
+        assert!(is_application_frame(
+            "\tat com.example.FooTest.lambda$deleteRow$0(FooTest.java:110)",
+            &app
+        ));
+    }
+
+    #[test]
+    fn lambda_proxy_frame_joins_the_framework_run() {
+        // Shape of a real auth trace (2026-10-08, TeamFacadeConcurrentDeleteTeamTest).
+        let trace = "java.lang.IllegalStateException: boom
+\tat com.example.TeamTest.lambda$deleteRow$0(TeamTest.java:110)
+\tat com.example.TeamTest$$Lambda/0x00000000383fd400.accept(Unknown Source)
+\tat org.springframework.transaction.support.TransactionTemplate.execute(TransactionTemplate.java:140)
+\tat com.example.TeamTest.deleteRow(TeamTest.java:110)";
+        let out = process(trace, &pkgs("com.example"), 0).expect("non-empty");
+        assert!(!out.contains("$$Lambda"), "{out}");
+        assert!(out.contains("... 2 framework frames omitted"), "{out}");
+        assert!(
+            out.contains("lambda$deleteRow$0(TeamTest.java:110)"),
+            "{out}"
+        );
+        assert!(
+            out.contains("TeamTest.deleteRow(TeamTest.java:110)"),
+            "{out}"
+        );
     }
 
     #[test]

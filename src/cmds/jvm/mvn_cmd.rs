@@ -2958,9 +2958,7 @@ fn is_framework_frame_ext(line: &str, app_packages: &[String]) -> bool {
     let Some(after_at) = line.strip_prefix("at ") else {
         return false;
     };
-    !app_packages
-        .iter()
-        .any(|pkg| after_at.starts_with(pkg.as_str()))
+    !stack_trace::is_app_target(after_at, app_packages)
 }
 
 /// Strip the package prefix from an exception header, mirroring the XML
