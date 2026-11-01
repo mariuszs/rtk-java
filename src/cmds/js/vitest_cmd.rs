@@ -3,6 +3,7 @@
 use anyhow::{Context, Result};
 use regex::Regex;
 use serde::Deserialize;
+use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
 use crate::core::stream::exec_capture;
@@ -34,6 +35,12 @@ struct VitestTestFile {
     name: String,
     #[serde(rename = "assertionResults")]
     assertion_results: Vec<VitestTest>,
+    #[serde(default)]
+    status: String,
+    /// Why the file failed as a whole (an import that does not resolve, a
+    /// throw at module scope): no test ran, so no assertion carries it.
+    #[serde(default)]
+    message: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -65,11 +72,16 @@ impl OutputParser for VitestParser {
         match json_result {
             Ok(json) => {
                 let failures = extract_failures_from_json(&json);
+                let failed_files = json
+                    .test_results
+                    .iter()
+                    .filter(|file| file_level_failure(file).is_some())
+                    .count();
 
                 let result = TestResult {
                     total: json.num_total_tests,
                     passed: json.num_passed_tests,
-                    failed: json.num_failed_tests,
+                    failed: json.num_failed_tests + failed_files,
                     skipped: json.num_pending_tests,
                     duration_ms: None,
                     failures,
@@ -98,6 +110,9 @@ fn extract_failures_from_json(json: &VitestJsonOutput) -> Vec<TestFailure> {
     let mut failures = Vec::new();
 
     for file in &json.test_results {
+        if let Some(failure) = file_level_failure(file) {
+            failures.push(failure);
+        }
         for test in &file.assertion_results {
             if test.status == "failed" {
                 let error_message = test.failure_messages.join("\n");
@@ -112,6 +127,22 @@ fn extract_failures_from_json(json: &VitestJsonOutput) -> Vec<TestFailure> {
     }
 
     failures
+}
+
+/// A file that failed without a failing test: its error is in `message` alone,
+/// and `numFailedTests` does not count it. A file whose tests failed is left to
+/// them (Jest repeats every assertion failure in `message`).
+fn file_level_failure(file: &VitestTestFile) -> Option<TestFailure> {
+    let has_failed_test = file.assertion_results.iter().any(|t| t.status == "failed");
+    if file.status != "failed" || has_failed_test || file.message.trim().is_empty() {
+        return None;
+    }
+    Some(TestFailure {
+        test_name: file.name.clone(),
+        file_path: file.name.clone(),
+        error_message: file.message.clone(),
+        stack_trace: None,
+    })
 }
 
 /// Tier 2: Extract test statistics using regex (degraded mode)
@@ -199,7 +230,16 @@ fn extract_failures_regex(output: &str) -> Vec<TestFailure> {
 }
 
 pub fn run_vitest(args: &[String], verbose: u8) -> Result<i32> {
-    run_framework_test(vitest_invocation(args), verbose)
+    // Vitest 5 no longer prints the JSON reporter to stdout: it writes
+    // `.vitest/json/output.json` and prints only "JSON report written to …".
+    // Name the file ourselves (older Vitest honours `--outputFile.json` too) so
+    // the report is read from a known place and nothing lands in the project.
+    // Without a temp dir the run still works, parsed from stdout as before.
+    let report_dir = tempfile::tempdir().ok();
+    let report = report_dir
+        .as_ref()
+        .map(|dir| dir.path().join("report.json"));
+    run_framework_test(vitest_invocation(args, report.as_deref()), verbose)
 }
 
 pub fn run_jest(args: &[String], verbose: u8) -> Result<i32> {
@@ -212,14 +252,23 @@ struct TestInvocation {
     framework: &'static str,
     args: Vec<String>,
     passthrough: bool,
+    /// Where the JSON report is written, when it is not on stdout.
+    report_file: Option<PathBuf>,
 }
 
-fn vitest_invocation(args: &[String]) -> TestInvocation {
-    let passthrough = has_explicit_vitest_reporter(args);
+fn vitest_invocation(args: &[String], report: Option<&Path>) -> TestInvocation {
+    // A user-chosen `--outputFile` sends the report where they asked, so there
+    // is nothing for rtk to parse: show their run as it is.
+    let passthrough = has_explicit_vitest_reporter(args) || has_vitest_output_file(args);
     let mut effective = vec!["run".to_string()];
+    let mut report_file = None;
 
     if !passthrough {
         effective.push("--reporter=json".to_string());
+        if let Some(path) = report {
+            effective.push(format!("--outputFile.json={}", path.display()));
+            report_file = Some(path.to_path_buf());
+        }
     }
 
     for arg in args {
@@ -233,6 +282,7 @@ fn vitest_invocation(args: &[String]) -> TestInvocation {
         framework: "vitest",
         args: effective,
         passthrough,
+        report_file,
     }
 }
 
@@ -252,6 +302,7 @@ fn jest_invocation(args: &[String]) -> TestInvocation {
         framework: "jest",
         args: effective,
         passthrough: false,
+        report_file: None,
     }
 }
 
@@ -270,23 +321,28 @@ fn run_framework_test(invocation: TestInvocation, verbose: u8) -> Result<i32> {
 
     let result = exec_capture(&mut cmd).context(format!("Failed to run {}", framework))?;
     let combined = result.combined();
+    let report = invocation
+        .report_file
+        .as_deref()
+        .and_then(|path| std::fs::read_to_string(path).ok());
 
     let filtered = format_test_output(
         framework,
-        &result.stdout,
+        report_or_stdout(report.as_deref(), &result.stdout),
         &combined,
         invocation.passthrough,
         verbose,
     );
     let tee_label = format!("{}_run", framework);
+    let raw = raw_with_report(&combined, report.as_deref());
 
-    let rendered = render_test_output(&filtered, &combined, &tee_label, result.exit_code);
-    let shown = crate::core::runner::emit_guarded(&rendered, None, &combined);
+    let rendered = render_test_output(&filtered, &raw, &tee_label, result.exit_code);
+    let shown = crate::core::runner::emit_guarded(&rendered, None, &raw);
 
     timer.track(
         format!("{} run", framework).as_str(),
         format!("rtk {} run", framework).as_str(),
-        &combined,
+        &raw,
         &shown,
     );
 
@@ -322,13 +378,36 @@ fn has_explicit_vitest_reporter(args: &[String]) -> bool {
         .any(|arg| arg == "--reporter" || arg.starts_with("--reporter="))
 }
 
+fn has_vitest_output_file(args: &[String]) -> bool {
+    args.iter().any(|arg| arg.starts_with("--outputFile"))
+}
+
+/// The JSON to parse: the report file when the run wrote one, else stdout
+/// (a run that died before reporting leaves the file absent or empty).
+fn report_or_stdout<'a>(report: Option<&'a str>, stdout: &'a str) -> &'a str {
+    report
+        .filter(|json| !json.trim().is_empty())
+        .unwrap_or(stdout)
+}
+
+/// The run's raw output with the report it wrote to a file: what the guard,
+/// the tee and tracking measure against. Without the report, the never-worse
+/// guard would compare a failure summary with the one-line "JSON report
+/// written to …" notice and print the notice instead.
+fn raw_with_report(combined: &str, report: Option<&str>) -> String {
+    match report.filter(|json| !json.trim().is_empty()) {
+        Some(json) => format!("{combined}{json}\n"),
+        None => combined.to_string(),
+    }
+}
+
 fn should_skip_vitest_arg(arg: &str) -> bool {
     arg == "run" || arg.starts_with("--json") || arg.starts_with("--watch")
 }
 
 fn format_test_output(
     framework: &str,
-    stdout: &str,
+    json: &str,
     combined: &str,
     passthrough_requested: bool,
     verbose: u8,
@@ -337,7 +416,7 @@ fn format_test_output(
         return format_passthrough_output(combined);
     }
 
-    let parse_result = VitestParser::parse(stdout);
+    let parse_result = VitestParser::parse(json);
     let mode = FormatMode::from_verbosity(verbose);
     match parse_result {
         ParseResult::Full(data) => {
@@ -354,7 +433,9 @@ fn format_test_output(
         }
         ParseResult::Passthrough(_) => {
             emit_passthrough_warning(framework, "All parsing tiers failed");
-            format_passthrough_output(stdout)
+            // stderr carries why the run produced no report (import or config
+            // error); stdout alone would show only Vitest's banner.
+            format_passthrough_output(combined)
         }
     }
 }
@@ -421,7 +502,7 @@ mod tests {
 
     #[test]
     fn test_vitest_invocation_runs_vitest() {
-        let invocation = vitest_invocation(&args(&["src/a.test.ts"]));
+        let invocation = vitest_invocation(&args(&["src/a.test.ts"]), None);
 
         assert_eq!(invocation.framework, "vitest");
     }
@@ -562,8 +643,108 @@ Scope: all 6 workspace projects
     }
 
     #[test]
+    fn test_vitest_json_report_goes_to_the_file_rtk_reads() {
+        let report = Path::new("/tmp/rtk-vitest/report.json");
+        let invocation = vitest_invocation(&args(&["src/a.test.ts"]), Some(report));
+
+        assert!(!invocation.passthrough);
+        assert_eq!(
+            invocation.args,
+            args(&[
+                "run",
+                "--reporter=json",
+                "--outputFile.json=/tmp/rtk-vitest/report.json",
+                "src/a.test.ts",
+            ])
+        );
+        assert_eq!(invocation.report_file.as_deref(), Some(report));
+    }
+
+    #[test]
+    fn test_vitest_user_output_file_keeps_their_reporter_output() {
+        let invocation = vitest_invocation(
+            &args(&["--outputFile=out.json", "src/a.test.ts"]),
+            Some(Path::new("/tmp/rtk-vitest/report.json")),
+        );
+
+        assert!(invocation.passthrough);
+        assert_eq!(
+            invocation.args,
+            args(&["run", "--outputFile=out.json", "src/a.test.ts"])
+        );
+        assert_eq!(invocation.report_file, None);
+    }
+
+    #[test]
+    fn test_vitest_parses_report_file_not_the_written_to_notice() {
+        // Vitest 5 sends the JSON report to a file; stdout carries only this notice.
+        let stdout = "JSON report written to /tmp/rtk-vitest/report.json\n";
+        let report = r#"{"numTotalTests":2,"numPassedTests":1,"numFailedTests":1,"numPendingTests":0,"testResults":[{"name":"/p/src/a.test.ts","assertionResults":[{"fullName":"a passes","status":"passed","failureMessages":[]},{"fullName":"a fails","status":"failed","failureMessages":["AssertionError: expected 1 to be 2"]}]}]}"#;
+
+        let json = report_or_stdout(Some(report), stdout);
+        let filtered = format_test_output("vitest", json, stdout, false, 0);
+
+        assert!(
+            filtered.text.contains("PASS (1) FAIL (1)"),
+            "{}",
+            filtered.text
+        );
+        assert!(filtered.text.contains("expected 1 to be 2"));
+    }
+
+    #[test]
+    fn test_vitest_file_that_fails_to_import_reports_its_error() {
+        // Vitest 5.0.5: broken.test.ts imports a module that does not exist,
+        // fail.test.ts has one failing assertion.
+        let report = r#"{"numTotalTestSuites":2,"numPassedTestSuites":0,"numFailedTestSuites":2,"numPendingTestSuites":0,"numTotalTests":1,"numPassedTests":0,"numFailedTests":1,"numPendingTests":0,"numTodoTests":0,"success":false,"testResults":[{"assertionResults":[],"startTime":1793529349127,"endTime":1793529349127,"status":"failed","message":"Cannot find module './missing' imported from /home/user/proj/broken.test.ts","name":"/home/user/proj/broken.test.ts"},{"assertionResults":[{"ancestorTitles":[],"fullName":"adds","status":"failed","title":"adds","failureMessages":["AssertionError: expected 2 to be 3 // Object.is equality"]}],"startTime":1793529349127,"endTime":1793529349127,"status":"failed","message":"","name":"/home/user/proj/fail.test.ts"}]}"#;
+
+        let filtered = format_test_output("vitest", report, "", false, 0);
+
+        assert!(filtered.text.contains("FAIL (2)"), "{}", filtered.text);
+        assert!(
+            filtered.text.contains("Cannot find module './missing'"),
+            "{}",
+            filtered.text
+        );
+        assert!(filtered.text.contains("expected 2 to be 3"));
+    }
+
+    #[test]
+    fn test_vitest_raw_output_includes_the_report_file() {
+        let notice = "JSON report written to /tmp/rtk-vitest/report.json\n";
+        let report = r#"{"numTotalTests":1}"#;
+
+        let raw = raw_with_report(notice, Some(report));
+
+        assert!(raw.starts_with(notice));
+        assert!(raw.contains(report));
+        assert_eq!(raw_with_report(notice, None), notice);
+    }
+
+    #[test]
+    fn test_vitest_missing_report_falls_back_to_stdout() {
+        assert_eq!(report_or_stdout(None, "{}"), "{}");
+        assert_eq!(report_or_stdout(Some("  \n"), "{}"), "{}");
+    }
+
+    #[test]
+    fn test_vitest_unparsable_run_shows_stderr_too() {
+        // A run that dies before reporting (bad import, config error) explains
+        // itself on stderr; the passthrough must not drop it.
+        let combined = "Error: Failed to load url ./missing (resolved id: ./missing)\n";
+
+        let filtered = format_test_output("vitest", "", combined, false, 0);
+
+        assert!(
+            filtered.text.contains("Failed to load url"),
+            "{}",
+            filtered.text
+        );
+    }
+
+    #[test]
     fn test_vitest_effective_args_inject_json_reporter_by_default() {
-        let effective = vitest_invocation(&args(&["run", "constants.test.ts", "--watch"]));
+        let effective = vitest_invocation(&args(&["run", "constants.test.ts", "--watch"]), None);
 
         assert!(!effective.passthrough);
         assert_eq!(
@@ -574,7 +755,8 @@ Scope: all 6 workspace projects
 
     #[test]
     fn test_vitest_effective_args_preserve_explicit_reporter_equals() {
-        let effective = vitest_invocation(&args(&["constants.test.ts", "--reporter=verbose"]));
+        let effective =
+            vitest_invocation(&args(&["constants.test.ts", "--reporter=verbose"]), None);
 
         assert!(effective.passthrough);
         assert_eq!(
@@ -585,12 +767,10 @@ Scope: all 6 workspace projects
 
     #[test]
     fn test_vitest_effective_args_preserve_explicit_reporter_value() {
-        let effective = vitest_invocation(&args(&[
-            "run",
-            "constants.test.ts",
-            "--reporter",
-            "verbose",
-        ]));
+        let effective = vitest_invocation(
+            &args(&["run", "constants.test.ts", "--reporter", "verbose"]),
+            None,
+        );
 
         assert!(effective.passthrough);
         assert_eq!(
