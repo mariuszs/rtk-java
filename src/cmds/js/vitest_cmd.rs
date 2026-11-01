@@ -115,7 +115,12 @@ fn extract_failures_from_json(json: &VitestJsonOutput) -> Vec<TestFailure> {
         }
         for test in &file.assertion_results {
             if test.status == "failed" {
-                let error_message = test.failure_messages.join("\n");
+                let error_message = test
+                    .failure_messages
+                    .iter()
+                    .map(|message| drop_framework_frames(message))
+                    .collect::<Vec<_>>()
+                    .join("\n");
                 failures.push(TestFailure {
                     test_name: test.full_name.clone(),
                     file_path: file.name.clone(),
@@ -127,6 +132,40 @@ fn extract_failures_from_json(json: &VitestJsonOutput) -> Vec<TestFailure> {
     }
 
     failures
+}
+
+/// A failure message without the frames of the test runner and libraries:
+/// every `at …` line in `node_modules`, Node internals or `<anonymous>`.
+/// Frames in the project's own code stay; they say where the test failed.
+/// When the message has none (an error thrown inside a library), its first
+/// frame stays so the failure still names a location.
+fn drop_framework_frames(message: &str) -> String {
+    let is_frame = |line: &str| line.trim_start().starts_with("at ");
+    let is_framework = |line: &str| {
+        line.contains("/node_modules/")
+            || line.contains("\\node_modules\\")
+            || line.contains("node:internal")
+            || line.contains("(<anonymous>)")
+    };
+    let has_project_frame = message
+        .lines()
+        .any(|line| is_frame(line) && !is_framework(line));
+
+    let mut kept_framework_frame = false;
+    message
+        .lines()
+        .filter(|line| {
+            if !is_frame(line) || !is_framework(line) {
+                return true;
+            }
+            if has_project_frame || kept_framework_frame {
+                return false;
+            }
+            kept_framework_frame = true;
+            true
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// A file that failed without a failing test: its error is in `message` alone,
@@ -707,6 +746,52 @@ Scope: all 6 workspace projects
             filtered.text
         );
         assert!(filtered.text.contains("expected 2 to be 3"));
+    }
+
+    // Vitest 5.0.5, one failing `expect(1 + 1).toBe(3)`.
+    const ASSERTION_WITH_FRAMES: &str = "AssertionError: expected 2 to be 3 // Object.is equality\n    at /home/user/proj/fail.test.ts:2:32\n    at file:///home/user/app/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:1632:35\n    at file:///home/user/app/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:2801:26\n    at file:///home/user/app/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3338:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///home/user/app/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3333:10)\n    at file:///home/user/app/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3318:20\n    at new Promise (<anonymous>)\n    at runWithTimeout (file:///home/user/app/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3276:10)\n    at file:///home/user/app/node_modules/vitest/dist/chunks/run.BPv-BBRv.js:3904:64";
+
+    #[test]
+    fn test_failure_keeps_test_frames_and_drops_runner_frames() {
+        assert_eq!(
+            drop_framework_frames(ASSERTION_WITH_FRAMES),
+            "AssertionError: expected 2 to be 3 // Object.is equality\n    at /home/user/proj/fail.test.ts:2:32"
+        );
+    }
+
+    #[test]
+    fn test_failure_with_only_framework_frames_keeps_the_first() {
+        let message = "TestingLibraryElementError: Unable to find an element with the text: Save\n    at Object.getElementError (/home/user/app/node_modules/@testing-library/dom/dist/config.js:37:19)\n    at /home/user/app/node_modules/@testing-library/dom/dist/query-helpers.js:76:38\n    at node:internal/process/task_queues:95:5";
+
+        assert_eq!(
+            drop_framework_frames(message),
+            "TestingLibraryElementError: Unable to find an element with the text: Save\n    at Object.getElementError (/home/user/app/node_modules/@testing-library/dom/dist/config.js:37:19)"
+        );
+    }
+
+    #[test]
+    fn test_failure_message_lines_that_are_not_frames_stay() {
+        let message = "Error: boom\n  - Expected\n  + Received\n    at helper (/home/user/proj/src/helper.ts:4:9)\n    at /home/user/proj/src/a.test.ts:9:3";
+
+        assert_eq!(drop_framework_frames(message), message);
+    }
+
+    #[test]
+    fn test_vitest_rendered_failure_drops_runner_frames() {
+        let report = format!(
+            r#"{{"numTotalTests":1,"numPassedTests":0,"numFailedTests":1,"numPendingTests":0,"testResults":[{{"name":"/home/user/proj/fail.test.ts","status":"failed","message":"","assertionResults":[{{"fullName":"adds","status":"failed","failureMessages":[{}]}}]}}]}}"#,
+            serde_json::to_string(ASSERTION_WITH_FRAMES).expect("json string")
+        );
+
+        let filtered = format_test_output("vitest", &report, "", false, 0);
+
+        assert!(
+            filtered.text.contains("fail.test.ts:2:32"),
+            "{}",
+            filtered.text
+        );
+        assert!(!filtered.text.contains("node_modules"), "{}", filtered.text);
+        assert!(!filtered.text.contains("<anonymous>"), "{}", filtered.text);
     }
 
     #[test]
