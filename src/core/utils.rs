@@ -434,11 +434,23 @@ pub fn exec_runner(runner: Option<&str>, missing: MissingTool) -> &str {
 /// user who types `bunx tsc` must not get `pnpm` because a lockfile is present.
 /// Detection applies only when nothing was named, as with a bare `rtk tsc`.
 ///
-/// A tool already on PATH is run directly only when no runner was named.
+/// When no runner was named, the project's own `node_modules/.bin` copy runs
+/// first, then a tool already on PATH.
 pub fn tool_exec(runner: Option<&str>, tool: &str, missing: MissingTool) -> Command {
     // Only when nothing was named: `bunx tsc` must resolve the project's tsc,
     // not a global one that happens to be on PATH. Both bunx and npx prefer
     // node_modules/.bin before fetching, so naming one is a real choice.
+    //
+    // Fork deviation (upstream v1.1.0 goes straight to PATH): the hook rewrites
+    // `npx tsc` / `pnpm exec tsc` to a runner-less `rtk tsc`, so a global
+    // TypeScript on PATH replaced the project's — najemnik 2026-11-01 got
+    // 7.0.2 instead of its pinned 5.9.3 and chased an error that was not in
+    // the project. Look where npx would look before PATH.
+    if runner.is_none()
+        && let Some(local) = project_node_bin(tool)
+    {
+        return Command::new(local);
+    }
     if runner.is_none() && tool_exists(tool) {
         resolved_command(tool)
     } else {
@@ -706,6 +718,17 @@ pub fn join_or_ok(lines: &[&str]) -> String {
     } else {
         lines.join("\n")
     }
+}
+
+/// The project's own copy of `tool`: `node_modules/.bin/<tool>` in the nearest
+/// directory at or above the working directory that has one, which is where
+/// npx and `pnpm exec` look first (PATHEXT-aware, so `tsc.cmd` on Windows).
+pub fn project_node_bin(tool: &str) -> Option<PathBuf> {
+    let start = user_dirs::working_dir()?;
+    user_dirs::ancestors(&start).find_map(|dir| {
+        let bin = dir.join("node_modules").join(".bin");
+        which::which_in(tool, Some(&bin), dir).ok()
+    })
 }
 
 /// Check if a tool exists on PATH (PATHEXT-aware on Windows).
@@ -1820,6 +1843,36 @@ mod tests {
         let dir = tempfile::tempdir().expect("tempdir");
         std::fs::write(dir.path().join("bun.lockb"), "").expect("write lockfile");
         assert_eq!(detect_package_manager_in(dir.path()), "bun");
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn test_tool_exec_prefers_the_project_bin_over_path() {
+        use std::os::unix::fs::PermissionsExt;
+        // The hook rewrites `npx tsc` to `rtk tsc`, so the runner arrives as
+        // None. npx runs the project's own copy, and so must rtk, from a
+        // subdirectory too (hoisted workspaces keep `.bin` at the root).
+        let tmp = test_isolation::tempdir();
+        let bin = tmp.path().join("node_modules").join(".bin");
+        std::fs::create_dir_all(&bin).expect("create .bin");
+        let local = bin.join("tsc");
+        std::fs::write(&local, "#!/bin/sh\n").expect("write tsc");
+        std::fs::set_permissions(&local, std::fs::Permissions::from_mode(0o755))
+            .expect("chmod tsc");
+        let sub = tmp.path().join("packages").join("app");
+        std::fs::create_dir_all(&sub).expect("create subdir");
+
+        let _entered = test_isolation::enter(&sub);
+        for missing in [MissingTool::Fetch, MissingTool::Fail] {
+            let cmd = tool_exec(None, "tsc", missing);
+            assert_eq!(
+                std::fs::canonicalize(cmd.get_program()).ok(),
+                std::fs::canonicalize(&local).ok()
+            );
+        }
+        // A runner the user named still resolves it itself.
+        let named = tool_exec(Some("pnpm"), "tsc", MissingTool::Fetch);
+        assert_ne!(std::path::Path::new(named.get_program()), local.as_path());
     }
 
     #[test]

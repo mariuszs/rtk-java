@@ -4,7 +4,7 @@ use crate::core::runner;
 use crate::core::shell::display_args;
 use crate::core::stream::{BlockHandler, BlockStreamFilter};
 use crate::core::truncate::{CAP_WARNINGS, reduced};
-use crate::core::utils::{MissingTool, exec_runner, strip_ansi, tool_exec, tool_exists, truncate};
+use crate::core::utils::{MissingTool, strip_ansi, tool_exec, truncate};
 use anyhow::Result;
 use regex::Regex;
 use std::borrow::Cow;
@@ -80,8 +80,6 @@ fn clean_line(line: &str) -> Cow<'_, str> {
 /// `runner` is the package runner the user named (`bunx tsc`, `npx tsc`), or
 /// None for a bare `rtk tsc` where nothing was specified and detection applies.
 pub fn run(runner: Option<&str>, args: &[String], verbose: u8) -> Result<i32> {
-    let tsc_exists = tool_exists("tsc");
-
     // Fetch, not Fail: `npx tsc` fetched before this routing existed, and
     // rtk filters output rather than changing what a command does.
     let mut cmd = tool_exec(runner, "tsc", MissingTool::Fetch);
@@ -91,12 +89,14 @@ pub fn run(runner: Option<&str>, args: &[String], verbose: u8) -> Result<i32> {
     }
 
     if verbose > 0 {
-        let via = if tsc_exists {
-            "tsc".to_string()
-        } else {
-            format!("{} tsc", exec_runner(runner, MissingTool::Fetch))
-        };
-        eprintln!("Running: {} {}", via, args.join(" "));
+        // The program actually chosen: the project's node_modules/.bin copy,
+        // one on PATH, or a runner.
+        let argv: Vec<_> = cmd.get_args().map(|a| a.to_string_lossy()).collect();
+        eprintln!(
+            "Running: {} {}",
+            cmd.get_program().to_string_lossy(),
+            argv.join(" ")
+        );
     }
 
     runner::run_streamed(
