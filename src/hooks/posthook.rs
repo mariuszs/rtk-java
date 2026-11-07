@@ -970,6 +970,8 @@ fn rebuild(event: &Value, tool_name: &str, composed: &str) -> Option<(Value, boo
             Some((response, false))
         }
         "Write" | "Edit" | "MultiEdit" | "NotebookEdit" => None,
+        // Fork: a bare-string MCP result goes back as a bare string.
+        _ if response.is_string() => Some((json!(composed), false)),
         _ => {
             let obj = response.as_object_mut()?;
             if obj.get("result").and_then(Value::as_str).is_some() {
@@ -986,11 +988,16 @@ fn rebuild(event: &Value, tool_name: &str, composed: &str) -> Option<(Value, boo
     }
 }
 
-/// The text an MCP tool returned, for the two shapes RTK can put back
-/// unambiguously: a `result` string, or a `content` array whose every block is
-/// text. Anything else — an image, an embedded resource, a mixed array —
+/// The text an MCP tool returned, for the shapes RTK can put back
+/// unambiguously: a bare string, a `result` string, or a `content` array whose
+/// every block is text. Anything else — an image, an embedded resource, a mixed array —
 /// returns `None`, and the output passes through untouched.
 fn mcp_text(response: &Value) -> Option<String> {
+    // Fork: claude.ai connectors (Atlassian Rovo, captured 2026-11-07) hand
+    // the hook a bare string; without this every such result passed through.
+    if let Some(text) = response.as_str() {
+        return Some(text.to_string());
+    }
     if let Some(text) = response.get("result").and_then(Value::as_str) {
         return Some(text.to_string());
     }
@@ -1292,6 +1299,13 @@ mod tests {
                 "mcp__linear__list",
                 serde_json::json!({"content": [{"type": "text", "text": noisy.clone()}]}),
                 "/hookSpecificOutput/updatedToolOutput/content/0/text",
+            ),
+            // claude.ai connectors (Atlassian Rovo, captured 2026-11-07) send
+            // the result as a bare string.
+            (
+                "mcp__claude_ai_Atlassian_Rovo__getJiraIssue",
+                serde_json::json!(noisy.clone()),
+                "/hookSpecificOutput/updatedToolOutput",
             ),
         ] {
             let event = mcp_event(tool, response);
