@@ -20,6 +20,8 @@ pub mod names {
     pub const CACHE_ALIGN: &str = "cache-align";
     pub const SHAPE: &str = "shape";
     pub const RLE: &str = "rle";
+    // Fork-only method — not present upstream.
+    pub const ATLASSIAN_SLIM: &str = "atlassian-slim";
     pub const RETIRE_POINTER: &str = "retire-pointer";
     pub const RTK_AWARENESS: &str = "rtk-awareness";
     pub const TERSE_OUTPUT: &str = "terse-output";
@@ -53,6 +55,8 @@ pub static METHODS: &[&(dyn Method + 'static)] = &[
     &crate::methods::STRIP_LINE_NUMBERS,
     &crate::methods::SHAPE,
     &crate::methods::RLE,
+    // Fork-only method — not present upstream.
+    &crate::methods::ATLASSIAN_SLIM,
 ];
 
 fn registered() -> &'static Mutex<Vec<&'static (dyn Method + 'static)>> {

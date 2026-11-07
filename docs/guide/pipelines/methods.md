@@ -32,6 +32,7 @@ handle, and a method marked terminal (`toon`) is only accepted last.
 | `truncate` | yes | recall | no — needs recall | structural line cap (not in any shipped chain) |
 | `shape` | yes | recall | no — needs recall | normalize → classify layout → per-shape render |
 | `rle` | yes | `rtk recall` (hook site) | no — needs recall | run-length collapse of adjacent identical lines |
+| `atlassian-slim` | yes | `rtk recall` (hook site) | no — needs recall | Atlassian/Rovo JSON: drop `self`, `iconUrl`, `avatarUrls`, `expand` and the `context` envelope (fork-only) |
 
 Every lossless method is idempotent, so a block reaching both a hook rule and
 a proxy rule is never damaged; every lossy method marks its output, and the

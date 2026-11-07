@@ -1,4 +1,6 @@
 pub mod ansi;
+// Fork-only method — not present upstream.
+pub mod atlassian_slim;
 pub mod base64_elide;
 pub mod cap;
 pub mod dedup;
@@ -18,6 +20,7 @@ use crate::block::ContentFormat;
 use crate::method::Method;
 
 pub static ANSI: ansi::Ansi = ansi::Ansi;
+pub static ATLASSIAN_SLIM: atlassian_slim::AtlassianSlim = atlassian_slim::AtlassianSlim;
 pub static BASE64_ELIDE: base64_elide::Base64Elide = base64_elide::Base64Elide;
 pub static TOON: toon::Toon = toon::Toon;
 pub static MINIFY_JSON: minify_json::MinifyJson = minify_json::MinifyJson;
