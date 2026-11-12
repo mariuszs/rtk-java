@@ -629,6 +629,13 @@ upstream community and its [Discord](https://discord.gg/RySmvNF5kF) live.
 
 Apache License 2.0 - see [LICENSE](LICENSE) for details.
 
+## RTK Pro
+
+Your company is looking to take control back on your AI fleet ?
+RTK Pro provides the control layer for costs, security and governances for all agents.
+
+Check it out : [RTK Pro](https://pro.rtk-ai.app).
+
 ## Disclaimer
 
 See [DISCLAIMER.md](DISCLAIMER.md).

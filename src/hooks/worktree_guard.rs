@@ -338,7 +338,7 @@ mod tests {
 
     #[test]
     fn only_an_isolated_session_keeps_the_segment_plain() {
-        use crate::hooks::decision::{HookDecision, decide_in_session};
+        use crate::hooks::decision::{AskOwner, HookDecision, decide_in_session};
         use crate::hooks::permissions::{DenyRules, PermissionVerdict};
 
         let none: [String; 0] = [];
@@ -364,7 +364,7 @@ mod tests {
                 |_| None,
                 false,
             ),
-            HookDecision::AskRewrite("rtk ls src/*".into())
+            HookDecision::AskRewrite("rtk ls src/*".into(), AskOwner::Host)
         );
     }
 }
