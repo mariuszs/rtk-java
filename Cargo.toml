@@ -112,7 +112,6 @@ mimalloc = { version = "0.1", features = ["no_thp"] }
 toml = "0.8"
 
 [dev-dependencies]
-filetime = "0.2"
 insta = "1"
 # Safe, closure-scoped env mutation for tests. std::env::set_var is unsafe
 # in edition 2024 and has no safe std replacement; temp-env restores the

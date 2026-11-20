@@ -238,11 +238,7 @@ fn is_mvn_startup_noise(line: &str) -> bool {
     }
 
     // os-maven-plugin detection output: `[INFO] os.detected.name: linux` etc.
-    if t.starts_with("[INFO] os.detected") {
-        return true;
-    }
-
-    false
+    t.starts_with("[INFO] os.detected")
 }
 
 /// Which Maven binary to invoke. `Mvn` auto-detects the `mvnw` wrapper and
@@ -4425,7 +4421,7 @@ fn filter_mvn_checkstyle(output: &str) -> String {
             format!("[INFO]   ... +{repeats} identical line{plural} omitted"),
         ));
     }
-    markers.sort_by(|a, b| b.0.cmp(&a.0));
+    markers.sort_by_key(|m| std::cmp::Reverse(m.0));
     for (idx, marker) in markers {
         result.insert(idx, marker);
     }
@@ -10831,7 +10827,7 @@ mod truncation_audit {
             };
             rows.push((name, goal, raw.len(), filtered.len()));
         }
-        rows.sort_by(|a, b| b.2.cmp(&a.2));
+        rows.sort_by_key(|r| std::cmp::Reverse(r.2));
 
         // OLD%    — the inflated baseline: full raw output, uncapped.
         // HONEST% — what the agent's bill actually changes by: both sides

@@ -856,7 +856,10 @@ mod tests {
         let dst = tmp.path().join(fixture_name);
         std::fs::copy(&src, &dst).expect("copy fixture");
         if let Some(mtime) = mtime {
-            filetime::set_file_mtime(&dst, filetime::FileTime::from_system_time(mtime))
+            std::fs::File::options()
+                .write(true)
+                .open(&dst)
+                .and_then(|f| f.set_modified(mtime))
                 .expect("set mtime");
         }
         dst
