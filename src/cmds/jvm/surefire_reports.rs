@@ -3,8 +3,8 @@
 //! Uses quick-xml streaming parser. Time-gated by `started_at` to skip stale
 //! reports from previous runs.
 
+use crate::cmds::dotnet::dotnet_trx::{push_content, xml_reader};
 use crate::cmds::jvm::stack_trace;
-use quick_xml::Reader;
 use quick_xml::events::{BytesStart, Event};
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
@@ -80,16 +80,14 @@ pub struct SurefireResult {
     pub files_malformed: usize,
 }
 
-fn local_name(name: &[u8]) -> &[u8] {
-    name.rsplit(|b| *b == b':').next().unwrap_or(name)
-}
-
-fn extract_attr(reader: &Reader<&[u8]>, start: &BytesStart<'_>, key: &[u8]) -> Option<String> {
+fn extract_attr(start: &BytesStart<'_>, key: &str) -> Option<String> {
     for attr in start.attributes().flatten() {
-        if local_name(attr.key.as_ref()) != key {
+        if attr.key.local_name().as_ref() != key {
             continue;
         }
-        if let Ok(value) = attr.decode_and_unescape_value(reader.decoder()) {
+        // Normalization turns a literal newline into a space; Surefire writes
+        // the newlines of a multi-line message as `&#10;`, which survive.
+        if let Ok(value) = attr.normalized_value(quick_xml::XmlVersion::Implicit1_0) {
             return Some(value.into_owned());
         }
     }
@@ -109,8 +107,8 @@ fn is_java_class_name(name: &str) -> bool {
     name.split('.').all(is_identifier)
 }
 
-fn parse_u32_attr(reader: &Reader<&[u8]>, start: &BytesStart<'_>, key: &[u8]) -> u32 {
-    extract_attr(reader, start, key)
+fn parse_u32_attr(start: &BytesStart<'_>, key: &str) -> u32 {
+    extract_attr(start, key)
         .and_then(|v| v.parse::<u32>().ok())
         .unwrap_or(0)
 }
@@ -128,8 +126,7 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
         SystemErr,
     }
 
-    let mut reader = Reader::from_str(xml);
-    reader.config_mut().trim_text(false);
+    let mut reader = xml_reader(xml);
     // `<failure …/>` carries no trace body and would otherwise fire only
     // `Event::Empty`, never the `End` that records the failure.
     reader.config_mut().expand_empty_elements = true;
@@ -153,97 +150,85 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
     loop {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(e)) | Ok(Event::Empty(e)) => {
-                match local_name(e.name().as_ref()) {
-                    b"testsuite" => {
+                match e.local_name().as_ref() {
+                    "testsuite" => {
                         saw_testsuite = true;
                         let file_summary = TestSummary {
-                            run: parse_u32_attr(&reader, &e, b"tests"),
-                            failures: parse_u32_attr(&reader, &e, b"failures"),
-                            errors: parse_u32_attr(&reader, &e, b"errors"),
-                            skipped: parse_u32_attr(&reader, &e, b"skipped"),
+                            run: parse_u32_attr(&e, "tests"),
+                            failures: parse_u32_attr(&e, "failures"),
+                            errors: parse_u32_attr(&e, "errors"),
+                            skipped: parse_u32_attr(&e, "skipped"),
                         };
-                        suite_class = extract_attr(&reader, &e, b"name");
+                        suite_class = extract_attr(&e, "name");
                         result.suites.push(SuiteStat {
                             class_name: suite_class.clone().unwrap_or_default(),
                             tests: file_summary.run,
                             skipped: file_summary.skipped,
-                            time_secs: extract_attr(&reader, &e, b"time")
+                            time_secs: extract_attr(&e, "time")
                                 .and_then(|v| v.parse::<f64>().ok())
                                 .unwrap_or(0.0),
                             module: None,
                         });
                         result.summary.add(&file_summary);
                     }
-                    b"testcase" => {
+                    "testcase" => {
                         // `@Nested` + `@DisplayName` puts the display name in
                         // `classname`; the suite's FQCN is what stdout prints.
-                        current_class = extract_attr(&reader, &e, b"classname")
+                        current_class = extract_attr(&e, "classname")
                             .filter(|c| is_java_class_name(c))
                             .or_else(|| suite_class.clone());
-                        current_method = extract_attr(&reader, &e, b"name");
+                        current_method = extract_attr(&e, "name");
                         current_has_failure = false;
                     }
-                    b"failure" | b"error" => {
-                        let kind = if local_name(e.name().as_ref()) == b"failure" {
+                    "failure" | "error" => {
+                        let kind = if e.local_name().as_ref() == "failure" {
                             FailureKind::Failure
                         } else {
                             FailureKind::Error
                         };
-                        pending_message = extract_attr(&reader, &e, b"message");
-                        pending_type = extract_attr(&reader, &e, b"type");
+                        pending_message = extract_attr(&e, "message");
+                        pending_type = extract_attr(&e, "type");
                         pending_kind = Some(kind);
                         stack_buf.clear();
                         capture = Some(CaptureField::StackTrace);
                         current_has_failure = true;
                     }
-                    b"system-out" if current_has_failure => {
+                    "system-out" if current_has_failure => {
                         stdout_buf.clear();
                         capture = Some(CaptureField::SystemOut);
                     }
-                    b"system-err" if current_has_failure => {
+                    "system-err" if current_has_failure => {
                         stderr_buf.clear();
                         capture = Some(CaptureField::SystemErr);
                     }
-                    b"skipped" => {
+                    "skipped" => {
                         result.skipped_tests.push(SkippedTest {
                             class: current_class.clone().unwrap_or_default(),
                             method: current_method.clone().unwrap_or_default(),
-                            reason: extract_attr(&reader, &e, b"message").filter(|s| !s.is_empty()),
+                            reason: extract_attr(&e, "message").filter(|s| !s.is_empty()),
                         });
                     }
                     _ => {}
                 }
             }
-            Ok(Event::Text(t)) => {
-                if let Some(field) = capture
-                    && let Ok(text) = t.unescape()
-                {
-                    match field {
-                        CaptureField::StackTrace => stack_buf.push_str(&text),
-                        CaptureField::SystemOut => stdout_buf.push_str(&text),
-                        CaptureField::SystemErr => stderr_buf.push_str(&text),
-                    }
-                }
-            }
-            // Surefire wraps a stack trace in `<![CDATA[…]]>` whenever it
-            // contains characters that would otherwise need escaping — which
-            // is most real traces (generics, `<init>`, `&`). quick-xml reports
-            // those as `CData`, never as `Text`, so without this arm every
-            // CDATA-wrapped report silently loses its trace and the failure is
-            // rendered from the `message` attribute alone.
-            Ok(Event::CData(t)) => {
+            // quick-xml 0.42 splits text around every reference (`&lt;`,
+            // `&#27;`) into `GeneralRef` events of its own. Surefire also wraps
+            // most real traces in `<![CDATA[…]]>` (generics, `<init>`, `&`);
+            // without the `CData` arm those reports lose their trace and the
+            // failure is rendered from the `message` attribute alone.
+            Ok(event @ (Event::Text(_) | Event::CData(_) | Event::GeneralRef(_))) => {
                 if let Some(field) = capture {
-                    let text = String::from_utf8_lossy(&t);
-                    match field {
-                        CaptureField::StackTrace => stack_buf.push_str(&text),
-                        CaptureField::SystemOut => stdout_buf.push_str(&text),
-                        CaptureField::SystemErr => stderr_buf.push_str(&text),
-                    }
+                    let buf = match field {
+                        CaptureField::StackTrace => &mut stack_buf,
+                        CaptureField::SystemOut => &mut stdout_buf,
+                        CaptureField::SystemErr => &mut stderr_buf,
+                    };
+                    push_content(&event, buf);
                 }
             }
             Ok(Event::End(e)) => {
-                match local_name(e.name().as_ref()) {
-                    b"failure" | b"error" => {
+                match e.local_name().as_ref() {
+                    "failure" | "error" => {
                         let processed = stack_trace::process(
                             stack_buf.trim(),
                             app_packages,
@@ -266,10 +251,10 @@ pub(crate) fn parse_content(xml: &str, app_packages: &[String]) -> Option<Surefi
                         });
                         capture = None;
                     }
-                    b"system-out" | b"system-err" => {
+                    "system-out" | "system-err" => {
                         capture = None;
                     }
-                    b"testcase" => {
+                    "testcase" => {
                         let combined = combine_test_output(
                             &stdout_buf,
                             &stderr_buf,
@@ -1065,6 +1050,34 @@ mod tests {
             trace.lines().count() <= DEFAULT_STACK_TRACE_LINES,
             "framework collapsing must keep the trace short, got {} lines",
             trace.lines().count()
+        );
+    }
+
+    #[test]
+    fn parse_content_resolves_references_in_escaped_trace_text() {
+        // quick-xml 0.42 hands every reference in element text over as its own
+        // `GeneralRef` event; a parser that reads only `Text` keeps the pieces
+        // between them and loses `<init>`. A bare `&` is ill-formed and 0.42
+        // rejects it, which would discard the whole report.
+        let xml = r#"<testsuite name="com.example.FooTest" tests="1" failures="1">
+<testcase classname="com.example.FooTest" name="breaks">
+<failure message="boom" type="java.lang.IllegalStateException">java.lang.IllegalStateException: a &amp; b &lt;x&gt; R&D
+	at com.example.Foo.&lt;init&gt;(Foo.java:7)
+</failure>
+</testcase>
+</testsuite>"#;
+        let result = parse_content(xml, &["com.example".to_string()]).expect("parses");
+        let trace = result.failures[0]
+            .stack_trace
+            .as_deref()
+            .expect("escaped trace must be captured");
+        assert!(
+            trace.contains("a & b <x> R&D"),
+            "references resolved, bare & kept, got:\n{trace}"
+        );
+        assert!(
+            trace.contains("com.example.Foo.<init>(Foo.java:7)"),
+            "got:\n{trace}"
         );
     }
 

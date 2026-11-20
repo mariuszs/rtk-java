@@ -6,7 +6,7 @@
 //!    common package prefix (e.g. `src/main/java/com/example/app/` → `com.example.app`),
 //!    in `cwd` and in each depth-1 reactor module (a child dir with a `pom.xml`).
 
-use quick_xml::Reader;
+use crate::cmds::dotnet::dotnet_trx::{push_content, xml_reader};
 use quick_xml::events::Event;
 use std::path::Path;
 
@@ -89,8 +89,7 @@ fn detect_from_pom(cwd: &Path) -> Option<String> {
 }
 
 pub(crate) fn extract_groupid(xml: &str) -> Option<String> {
-    let mut reader = Reader::from_str(xml);
-    reader.config_mut().trim_text(true);
+    let mut reader = xml_reader(xml);
     let mut buf = Vec::new();
 
     // Tag stack tracked as simple Vec<String> of local names.
@@ -98,34 +97,36 @@ pub(crate) fn extract_groupid(xml: &str) -> Option<String> {
     let mut top_level_groupid: Option<String> = None;
     let mut parent_groupid: Option<String> = None;
     let mut capturing = false;
+    let mut text = String::new();
 
     loop {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(e)) => {
-                let name = std::str::from_utf8(e.name().as_ref())
-                    .ok()
-                    .and_then(|s| s.rsplit(':').next())
-                    .unwrap_or("")
-                    .to_string();
-                stack.push(name);
+                stack.push(e.local_name().as_ref().to_string());
 
                 if is_top_level_groupid(&stack) || is_parent_groupid(&stack) {
                     capturing = true;
                 }
             }
-            Ok(Event::Text(t)) => {
-                if capturing && let Ok(text) = t.unescape() {
-                    let text = text.trim();
-                    if !text.is_empty() {
-                        if is_top_level_groupid(&stack) && top_level_groupid.is_none() {
-                            top_level_groupid = Some(text.to_string());
-                        } else if is_parent_groupid(&stack) && parent_groupid.is_none() {
-                            parent_groupid = Some(text.to_string());
-                        }
-                    }
+            // quick-xml 0.42 hands a reference (`&amp;`) over as its own
+            // event, so the value is gathered until the element closes.
+            Ok(event @ (Event::Text(_) | Event::CData(_) | Event::GeneralRef(_))) => {
+                if capturing {
+                    push_content(&event, &mut text);
                 }
             }
             Ok(Event::End(_)) => {
+                if capturing {
+                    let value = text.trim();
+                    if !value.is_empty() {
+                        if is_top_level_groupid(&stack) && top_level_groupid.is_none() {
+                            top_level_groupid = Some(value.to_string());
+                        } else if is_parent_groupid(&stack) && parent_groupid.is_none() {
+                            parent_groupid = Some(value.to_string());
+                        }
+                    }
+                    text.clear();
+                }
                 stack.pop();
                 capturing = false;
                 if top_level_groupid.is_some() {
