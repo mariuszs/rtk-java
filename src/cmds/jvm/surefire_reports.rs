@@ -420,11 +420,35 @@ const CAPTURED_BOOTSTRAP_NOISE: &[&str] = &[
 /// sender is the only stable signal. Matched on the shaded package in both
 /// spellings that appear in practice — logback's abbreviation (`i.m.s.r.`)
 /// and Spring Boot's (`i.m.s.reactor.`) — plus the unabbreviated form.
+///
+/// Newer Micrometer reports the same unreachable collector from the registry
+/// itself (`StatsdMeterRegistry : Failed to send metrics … Is the StatsD
+/// server running?`) and logs the exception as a trace of its own under the
+/// record: 11.6k chars over 31 renders of 2026-11-12..20, hand-filtered by an
+/// agent with `grep -v 'StatsD\|PortUnreachable'`. The trace's header is not
+/// a log record, so [`clean_captured`] drops it as part of the noise record.
 const CAPTURED_METRICS_EXPORT_NOISE: &[&str] = &[
     "i.m.s.r.netty",
     "i.m.s.reactor.netty",
     "io.micrometer.shaded",
+    "i.micrometer.statsd.StatsdMeterRegistry",
+    "io.micrometer.statsd.StatsdMeterRegistry",
 ];
+
+/// The header of a trace logged under a record: `java.net.FooException: …`
+/// or `Caused by: …`. Frames are already covered by [`CAPTURED_FRAME_RE`].
+static CAPTURED_TRACE_HEADER_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\s*(?:Caused by: )?[\w$]+(?:\.[\w$]+)+(?:Exception|Error)(?::|$)").unwrap()
+});
+
+/// Logback's own status messages (`13:47:27,382 |-WARN in
+/// ch.qos.logback.core.model.processor.AppenderModelHandler - Appender named
+/// [FILE] not referenced`), printed to stderr when the test JVM configures
+/// logging: 5.7k chars over 35 renders of 2026-11-12..20, never a test's
+/// diagnosis. `|-ERROR` stays — a broken logging config can be the cause.
+static CAPTURED_LOGBACK_STATUS_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^\s*\d{2}:\d{2}:\d{2},\d{3} \|-(?:INFO|WARN) in ch\.qos\.logback\.").unwrap()
+});
 
 /// A stack frame, or the frame-elision counter that closes a segment, as it
 /// appears *inside* captured output. When a context fails to load, the logged
@@ -496,6 +520,10 @@ fn clean_captured(text: &str) -> String {
     let lines: Vec<&str> = text.lines().collect();
     let mut kept: Vec<&str> = Vec::new();
     let mut skip_next_jul_body = false;
+    // Set by a dropped metrics-noise record, so the trace it logged under
+    // itself goes with it; any line that is neither a frame nor a trace
+    // header ends the record.
+    let mut in_noise_trace = false;
     for (i, line) in lines.iter().copied().enumerate() {
         // A java.util.logging record is two lines: a `Mon DD, YYYY h:mm:ss AM
         // <logger> <method>` header and the message under a bare level. The
@@ -513,6 +541,7 @@ fn clean_captured(text: &str) -> String {
                 .is_some_and(|next| CAPTURED_JUL_LOW_LEVEL_RE.is_match(next))
         {
             skip_next_jul_body = true;
+            in_noise_trace = false;
             continue;
         }
         if line.trim() == CONDITIONS_REPORT_BANNER {
@@ -526,14 +555,27 @@ fn clean_captured(text: &str) -> String {
             // Startup finished here: everything collected so far was getting
             // the application up, marker line included.
             kept.clear();
+            in_noise_trace = false;
             continue;
         }
+        if in_noise_trace && CAPTURED_TRACE_HEADER_RE.is_match(line) {
+            // The exception a noise sender logged under its own record.
+            continue;
+        }
+        if CAPTURED_METRICS_EXPORT_NOISE
+            .iter()
+            .any(|p| line.contains(p))
+        {
+            in_noise_trace = true;
+            continue;
+        }
+        if CAPTURED_FRAME_RE.is_match(line) {
+            continue;
+        }
+        in_noise_trace = false;
         if CAPTURED_DEBUG_LINE_RE.is_match(line)
-            || CAPTURED_FRAME_RE.is_match(line)
+            || CAPTURED_LOGBACK_STATUS_RE.is_match(line)
             || CAPTURED_BOOTSTRAP_NOISE.iter().any(|p| line.contains(p))
-            || CAPTURED_METRICS_EXPORT_NOISE
-                .iter()
-                .any(|p| line.contains(p))
         {
             continue;
         }
@@ -1295,6 +1337,66 @@ Unconditional classes:
             out.contains("Found 0 users") && out.contains("Using encryptor"),
             "application log lines lost:\n{out}"
         );
+    }
+
+    /// Newer Micrometer reports the unreachable collector from the registry
+    /// itself, not from the shaded netty channel, and logs the exception as
+    /// its own trace under the WARN. Real `<system-out>`/`<system-err>` tail
+    /// of a skiller integration test (2026-11-18): the sender line plus the
+    /// bare `java.net.PortUnreachableException` header were 11.6k chars over
+    /// 31 renders of 2026-11-12..20, and an agent hand-filtered them with
+    /// `grep -v 'StatsD\|PortUnreachable'`. Logback's own `|-WARN in
+    /// ch.qos.logback…` status line about an unused appender (5.7k over 35
+    /// renders) is configuration chatter, never a test's diagnosis.
+    #[test]
+    fn captured_output_drops_statsd_registry_and_logback_status_noise() {
+        let stdout = "\
+2026-11-18 12:47:28.292 INFO  [main           ] d.s.c.CompanyActivityStopIntegrationTest : Started CompanyActivityStopIntegrationTest in 0.919 seconds (process running for 42.263)
+2026-11-18 12:47:28.308 WARN  [udp-epoll-6    ] i.micrometer.statsd.StatsdMeterRegistry  : Failed to send metrics to localhost/127.0.0.1:8125. Is the StatsD server running? Note that subsequent logs will be logged at debug level.
+java.net.PortUnreachableException: recvAddress(..) failed with error(-111): Connection refused
+	at io.micrometer.shaded.io.netty.channel.epoll.EpollDatagramChannel.translateForConnected(EpollDatagramChannel.java:669)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+Caused by: io.micrometer.shaded.io.netty.channel.unix.Errors$NativeIoException: recvAddress(..) failed with error(-111): Connection refused
+2026-11-18 12:47:28.325 INFO  [main           ] c.e.s.companypurge.CompanyPurgeService   : Company purge f57bfbe4-28ec-4eba-82a8-1b9c42a232fe of company 49b2f65c-fa86-446c-9388-9f962f8a5462 requested by 5a000000-0000-4000-8000-00000000ad01
+";
+        let stderr = "13:47:27,382 |-WARN in ch.qos.logback.core.model.processor.AppenderModelHandler - Appender named [FILE] not referenced. Skipping further processing.\n";
+        let out = super::combine_test_output(stdout, stderr, 2000).expect("captured output");
+        assert!(
+            !out.contains("StatsdMeterRegistry") && !out.contains("PortUnreachableException"),
+            "statsd registry noise survived:\n{out}"
+        );
+        assert!(
+            !out.contains("AppenderModelHandler") && !out.contains("[STDERR]"),
+            "logback status noise survived:\n{out}"
+        );
+        assert!(
+            out.contains("Company purge f57bfbe4"),
+            "application log line lost:\n{out}"
+        );
+    }
+
+    /// An application exception logged under its own record is the diagnosis
+    /// and keeps its header, and a logback `|-ERROR` (a broken config) is
+    /// kept too — only the noise senders' traces and the low status levels go.
+    #[test]
+    fn captured_output_keeps_application_exception_and_logback_error() {
+        let stdout = "\
+2026-11-18 12:47:28.308 WARN  [udp-epoll-6    ] i.micrometer.statsd.StatsdMeterRegistry  : Failed to send metrics to localhost/127.0.0.1:8125. Is the StatsD server running? Note that subsequent logs will be logged at debug level.
+java.net.PortUnreachableException: recvAddress(..) failed with error(-111): Connection refused
+2026-11-18 12:47:28.325 ERROR [main           ] c.e.s.companypurge.CompanyPurgeRunner    : Company purge failed
+java.lang.IllegalStateException: billing step refused the purge
+";
+        let stderr = "13:47:27,382 |-ERROR in ch.qos.logback.core.joran.action.AppenderAction - Could not create an Appender of type [x.Missing].\n";
+        let out = super::combine_test_output(stdout, stderr, 2000).expect("captured output");
+        assert!(
+            out.contains("IllegalStateException: billing step refused the purge"),
+            "application exception header lost:\n{out}"
+        );
+        assert!(
+            out.contains("|-ERROR in ch.qos.logback"),
+            "logback ERROR status lost:\n{out}"
+        );
+        assert!(!out.contains("PortUnreachableException"), "{out}");
     }
 
     #[test]
