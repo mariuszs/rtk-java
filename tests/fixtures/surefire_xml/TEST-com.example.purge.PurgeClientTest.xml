@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" version="3.0.2" name="com.example.purge.PurgeClientTest" time="0.039" tests="2" errors="0" skipped="0" failures="2" flakes="0">
+  <testcase name="should_map_io_error_to_unavailable" classname="com.example.purge.PurgeClientTest" time="0.027">
+    <failure message="&#10;Expecting actual throwable to be an instance of:&#10;  java.lang.IllegalStateException&#10;but was:&#10;  java.lang.UnsupportedOperationException&#10;	at com.example.purge.PurgeClient.preview(PurgeClient.java:5)&#10;	at com.example.purge.PurgeClientTest.lambda$should_map_io_error_to_unavailable$0(PurgeClientTest.java:12)&#10;	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:66)&#10;	...(85 remaining lines not displayed - this can be changed with Assertions.setMaxStackTraceElementsDisplayed)" type="java.lang.AssertionError"><![CDATA[java.lang.AssertionError: 
+
+Expecting actual throwable to be an instance of:
+  java.lang.IllegalStateException
+but was:
+  java.lang.UnsupportedOperationException
+	at com.example.purge.PurgeClient.preview(PurgeClient.java:5)
+	at com.example.purge.PurgeClientTest.lambda$should_map_io_error_to_unavailable$0(PurgeClientTest.java:12)
+	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:66)
+	...(85 remaining lines not displayed - this can be changed with Assertions.setMaxStackTraceElementsDisplayed)
+	at com.example.purge.PurgeClientTest.should_map_io_error_to_unavailable(PurgeClientTest.java:12)
+]]></failure>
+  </testcase>
+  <testcase name="should_report_a_start_without_an_answer_as_unavailable" classname="com.example.purge.PurgeClientTest" time="0.003">
+    <failure message="&#10;Expecting actual throwable to be an instance of:&#10;  java.lang.IllegalStateException&#10;but was:&#10;  java.lang.UnsupportedOperationException&#10;	at com.example.purge.PurgeClient.start(PurgeClient.java:9)&#10;	at com.example.purge.PurgeClientTest.lambda$should_report_a_start_without_an_answer_as_unavailable$0(PurgeClientTest.java:17)&#10;	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:66)&#10;	...(85 remaining lines not displayed - this can be changed with Assertions.setMaxStackTraceElementsDisplayed)" type="java.lang.AssertionError"><![CDATA[java.lang.AssertionError: 
+
+Expecting actual throwable to be an instance of:
+  java.lang.IllegalStateException
+but was:
+  java.lang.UnsupportedOperationException
+	at com.example.purge.PurgeClient.start(PurgeClient.java:9)
+	at com.example.purge.PurgeClientTest.lambda$should_report_a_start_without_an_answer_as_unavailable$0(PurgeClientTest.java:17)
+	at org.assertj.core.api.ThrowableAssert.catchThrowable(ThrowableAssert.java:66)
+	...(85 remaining lines not displayed - this can be changed with Assertions.setMaxStackTraceElementsDisplayed)
+	at com.example.purge.PurgeClientTest.should_report_a_start_without_an_answer_as_unavailable(PurgeClientTest.java:17)
+]]></failure>
+  </testcase>
+</testsuite>

@@ -1996,7 +1996,11 @@ fn render_failure_block_capped(
                 // A multi-line message tags every line, as the stdout path
                 // does: agents grep the render by its level prefix.
                 if let Some(kind_label) = failure_kind_label(f) {
+                    let frames_in_trace = label_frames_repeat_trace(&kind_label, f);
                     for line in kind_label.lines() {
+                        if frames_in_trace && is_label_frame_line(line) {
+                            continue;
+                        }
                         writeln!(out, "[ERROR]     {line}").ok();
                     }
                 }
@@ -2045,6 +2049,39 @@ fn render_failure_body(out: &mut String, f: &TestFailure) {
 /// Render one failure's diagnostic body: enriched stack trace, then the
 /// captured-output block — with `captured_cap`, only its last lines behind one
 /// `... (N lines truncated)` marker.
+/// AssertJ's note for the frames it cut from a message
+/// (`...(85 remaining lines not displayed - this can be changed with
+/// Assertions.setMaxStackTraceElementsDisplayed)`).
+static ASSERTJ_REMAINING_FRAMES_RE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^\s*\.\.\.\(\d+ remaining lines not displayed").unwrap());
+
+/// A frame line, or AssertJ's cut-frames note, inside a failure message.
+fn is_label_frame_line(line: &str) -> bool {
+    let t = line.trim_start();
+    t.starts_with("at ") && stack_trace::is_frame_like(t) || ASSERTJ_REMAINING_FRAMES_RE.is_match(t)
+}
+
+/// True when the frames a failure message carries are rendered again by the
+/// trace below it. AssertJ's `isInstanceOf` / `hasMessage…` print the actual
+/// exception's top frames into the message, and surefire writes that message
+/// into the trace too, so the compactor renders the same throw site a second
+/// time (23.3k chars over 23 real renders of 2026-11-12..20). Judged on the
+/// message's first frame — the throw site — so a message whose frames say
+/// something the trace does not keeps them.
+fn label_frames_repeat_trace(label: &str, f: &TestFailure) -> bool {
+    let Some(trace) = f.stack_trace.as_deref() else {
+        return false;
+    };
+    let Some(first) = label
+        .lines()
+        .map(str::trim)
+        .find(|l| l.starts_with("at ") && stack_trace::is_frame_like(l))
+    else {
+        return false;
+    };
+    trace.lines().any(|l| l.trim() == first)
+}
+
 fn render_failure_body_capped(out: &mut String, f: &TestFailure, captured_cap: Option<usize>) {
     // Cause headers already printed as the trace. When a Spring context fails
     // the framework *logs* the same chain into `<system-out>`, so the report
@@ -7586,6 +7623,61 @@ WARNING: Mutating final fields will be blocked in a future release unless final 
             "{}",
             out.text
         );
+    }
+
+    /// AssertJ's `isInstanceOf` puts the actual exception's top frames and a
+    /// `...(N remaining lines not displayed …)` note into the *message*.
+    /// Surefire writes that message into the trace too, so the frames
+    /// rendered twice: once under the label, once (compacted) as the trace.
+    /// 23.3k chars over 23 real renders of 2026-11-12..20, mostly TDD RED runs
+    /// against `UnsupportedOperationException` stubs. Fixture: real report of
+    /// that shape (installed render 2449 chars).
+    #[test]
+    fn enrich_failure_does_not_repeat_assertj_message_frames() {
+        let tmp = tempfile::tempdir().unwrap();
+        let dir = tmp.path().join("target/surefire-reports");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join("TEST-com.example.purge.PurgeClientTest.xml"),
+            include_str!(
+                "../../../tests/fixtures/surefire_xml/TEST-com.example.purge.PurgeClientTest.xml"
+            ),
+        )
+        .unwrap();
+        let since = std::time::SystemTime::now() - std::time::Duration::from_secs(60);
+        let out = super::enrich_with_reports(
+            "[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0\n[INFO] BUILD FAILURE",
+            tmp.path(),
+            since,
+            &pkgs("com.example"),
+            "test",
+        );
+        let text = &out.text;
+        // The throw site still lands once per test, as part of the trace.
+        assert_eq!(
+            text.matches("PurgeClient.preview(PurgeClient.java:5)")
+                .count(),
+            1,
+            "{text}"
+        );
+        assert_eq!(
+            text.matches("PurgeClient.start(PurgeClient.java:9)")
+                .count(),
+            1,
+            "{text}"
+        );
+        assert!(
+            !text.contains("setMaxStackTraceElementsDisplayed"),
+            "{text}"
+        );
+        // The message itself — what was expected and what was thrown — stays.
+        assert!(
+            text.contains(
+                "[ERROR]     but was:\n[ERROR]       java.lang.UnsupportedOperationException\n"
+            ),
+            "{text}"
+        );
+        assert_eq!(text.matches("<<< FAILURE!").count(), 2, "{text}");
     }
 
     /// Real auth runs (09-29, 09-30): 7 and 8 failures, each with ~1.5k of
